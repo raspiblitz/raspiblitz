@@ -25,14 +25,14 @@ print_info() { echo -e "${YELLOW}[INFO]${NC} $1"; }
 print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-get_api_headers() {
+# Populates global CURL_FLAGS array
+set_api_flags() {
     local url="$1"
-    local headers=("-H" "Content-Type: application/json")
+    CURL_FLAGS=("-H" "Content-Type: application/json")
     if [[ "$url" == *"dev2.tunnelsats.com"* ]] && [ -n "$cfClientId" ] && [ -n "$cfClientSecret" ]; then
-        headers+=("-H" "CF-Access-Client-Id: $cfClientId")
-        headers+=("-H" "CF-Access-Client-Secret: $cfClientSecret")
+        CURL_FLAGS+=("-H" "CF-Access-Client-Id: $cfClientId")
+        CURL_FLAGS+=("-H" "CF-Access-Client-Secret: $cfClientSecret")
     fi
-    echo "${headers[@]}"
 }
 
 check_dependencies() {
@@ -52,9 +52,9 @@ check_dependencies() {
 
 # Fetch available servers from API
 get_servers() {
-    local headers=($(get_api_headers "$API_BASE"))
+    set_api_flags "$API_BASE"
     local response
-    response=$(curl -s "${headers[@]}" "${API_BASE}/setup/servers")
+    response=$(curl -s "${CURL_FLAGS[@]}" "${API_BASE}/setup/servers")
     
     if [ -z "$response" ] || [[ "$response" == *"Access Denied"* ]]; then
         print_error "Failed to fetch servers from API (Check tokens/URL)."
@@ -69,11 +69,11 @@ create_order() {
     local server_id="$1"
     print_info "Creating order for $server_id..."
     
-    local headers=($(get_api_headers "$API_BASE"))
+    set_api_flags "$API_BASE"
     local payload="{\"id\":\"$server_id\"}"
     
     local response
-    response=$(curl -s "${headers[@]}" -X POST -d "$payload" "${API_BASE}/setup/order")
+    response=$(curl -s "${CURL_FLAGS[@]}" -X POST -d "$payload" "${API_BASE}/setup/order")
     
     if echo "$response" | jq -e '.error' > /dev/null; then
         local msg=$(echo "$response" | jq -r '.message')
@@ -105,11 +105,11 @@ pay_invoice() {
 poll_order() {
     local order_id="$1"
     print_info "Waiting for payment confirmation and configuration..."
-    local headers=($(get_api_headers "$API_BASE"))
+    set_api_flags "$API_BASE"
     
     while true; do
         local response
-        response=$(curl -s "${headers[@]}" "${API_BASE}/setup/order?id=${order_id}")
+        response=$(curl -s "${CURL_FLAGS[@]}" "${API_BASE}/setup/order?id=${order_id}")
         
         local status=$(echo "$response" | jq -r '.status')
         if [ "$status" == "paid" ] || [ "$status" == "successful" ]; then
@@ -217,11 +217,11 @@ renew_subscription() {
     [ -z "$duration" ] && return 0
     
     print_info "Requesting renewal for $duration months..."
-    local headers=($(get_api_headers "$API_BASE"))
+    set_api_flags "$API_BASE"
     local payload="{\"pubkey\":\"$pubkey\", \"months\":$duration}"
     
     local order_json
-    order_json=$(curl -s "${headers[@]}" -X POST -d "$payload" "${API_BASE}/setup/renew")
+    order_json=$(curl -s "${CURL_FLAGS[@]}" -X POST -d "$payload" "${API_BASE}/setup/renew")
     
     if echo "$order_json" | jq -e '.error' > /dev/null; then
         local msg=$(echo "$order_json" | jq -r '.message')
@@ -251,10 +251,10 @@ check_status() {
     fi
     
     print_info "Checking status for: ${pubkey:0:10}..."
-    local headers=($(get_api_headers "$API_BASE"))
+    set_api_flags "$API_BASE"
     
     local response
-    response=$(curl -s "${headers[@]}" "${API_BASE}/status?pubkey=${pubkey}")
+    response=$(curl -s "${CURL_FLAGS[@]}" "${API_BASE}/status?pubkey=${pubkey}")
     
     if echo "$response" | jq -e '.error' > /dev/null; then
         local msg=$(echo "$response" | jq -r '.message')
