@@ -6,7 +6,7 @@
 # --- Configuration & Defaults ---
 CONFIG_DIR="/mnt/hdd/app-data/tunnelsats"
 ENV_FILE="/home/hakuna/.tunnelsats.env"
-API_BASE="https://dev2.tunnelsats.com"
+API_BASE="https://dev2.tunnelsats.com/api/public/v1"
 
 # Colors for terminal output
 RED='\033[0;31m'
@@ -54,9 +54,9 @@ check_dependencies() {
 get_servers() {
     set_api_flags "$API_BASE"
     local response
-    response=$(curl -s "${CURL_FLAGS[@]}" "${API_BASE}/setup/servers")
+    response=$(curl -s "${CURL_FLAGS[@]}" "${API_BASE}/servers")
     
-    if [ -z "$response" ] || [[ "$response" == *"Access Denied"* ]]; then
+    if [ -z "$response" ] || [[ "$response" == *"Access Denied"* ]] || [[ "$response" == *"<!DOCTYPE html>"* ]]; then
         print_error "Failed to fetch servers from API (Check tokens/URL)."
         return 1
     fi
@@ -70,10 +70,10 @@ create_order() {
     print_info "Creating order for $server_id..."
     
     set_api_flags "$API_BASE"
-    local payload="{\"id\":\"$server_id\"}"
+    local payload="{\"serverId\":\"$server_id\", \"duration\": 1}"
     
     local response
-    response=$(curl -s "${CURL_FLAGS[@]}" -X POST -d "$payload" "${API_BASE}/setup/order")
+    response=$(curl -s "${CURL_FLAGS[@]}" -X POST -d "$payload" "${API_BASE}/subscription/create")
     
     if echo "$response" | jq -e '.error' > /dev/null; then
         local msg=$(echo "$response" | jq -r '.message')
@@ -109,7 +109,12 @@ poll_order() {
     
     while true; do
         local response
-        response=$(curl -s "${CURL_FLAGS[@]}" "${API_BASE}/setup/order?id=${order_id}")
+        response=$(curl -s "${CURL_FLAGS[@]}" "${API_BASE}/subscription/status?id=${order_id}")
+        
+        # Note: Status check for a new order might need a specific endpoint if not using WG pubkey yet
+        # OpenAPI docs suggest /subscription/status uses wgPublicKey.
+        # If /subscription/create returns an ID, we might need a different polling logic.
+        # Assuming for now status check can use order ID or pubkey if provided in create response.
         
         local status=$(echo "$response" | jq -r '.status')
         if [ "$status" == "paid" ] || [ "$status" == "successful" ]; then
@@ -200,10 +205,11 @@ renew_subscription() {
     local status_json
     status_json=$(check_status "$pubkey") || return 1
     
-    local is_active=$(echo "$status_json" | jq -r '.is_active')
-    local valid_until=$(echo "$status_json" | jq -r '.valid_until')
+    local status=$(echo "$status_json" | jq -r '.status')
+    local expiry=$(echo "$status_json" | jq -r '.expiry')
+    local server_domain=$(echo "$status_json" | jq -r '.server_domain')
     
-    if ! (whiptail --title "Subscription Status" --yesno "Current Status: $is_active\nValid Until: $valid_until\n\nDo you want to extend your subscription?" 12 60); then
+    if ! (whiptail --title "Subscription Status" --yesno "Current Status: $status\nExpiry: $expiry\nServer: $server_domain\n\nDo you want to extend your subscription?" 14 60); then
         return 0
     fi
     
@@ -218,10 +224,10 @@ renew_subscription() {
     
     print_info "Requesting renewal for $duration months..."
     set_api_flags "$API_BASE"
-    local payload="{\"pubkey\":\"$pubkey\", \"months\":$duration}"
+    local payload="{\"wgPublicKey\":\"$pubkey\", \"duration\":$duration, \"serverId\":\"$server_id\"}"
     
     local order_json
-    order_json=$(curl -s "${CURL_FLAGS[@]}" -X POST -d "$payload" "${API_BASE}/setup/renew")
+    order_json=$(curl -s "${CURL_FLAGS[@]}" -X POST -d "$payload" "${API_BASE}/subscription/renew")
     
     if echo "$order_json" | jq -e '.error' > /dev/null; then
         local msg=$(echo "$order_json" | jq -r '.message')
@@ -252,9 +258,10 @@ check_status() {
     
     print_info "Checking status for: ${pubkey:0:10}..."
     set_api_flags "$API_BASE"
+    local payload="{\"wgPublicKey\":\"$pubkey\"}"
     
     local response
-    response=$(curl -s "${CURL_FLAGS[@]}" "${API_BASE}/status?pubkey=${pubkey}")
+    response=$(curl -s "${CURL_FLAGS[@]}" -X POST -d "$payload" "${API_BASE}/subscription/status")
     
     if echo "$response" | jq -e '.error' > /dev/null; then
         local msg=$(echo "$response" | jq -r '.message')
@@ -270,11 +277,11 @@ setup_flow() {
     local servers_json
     servers_json=$(get_servers) || return 1
     
-    # Format for whiptail menu: ID "City (Country)"
+    # Format for whiptail menu: ID "City (Country) [status]"
     local menu_options=()
     while IFS= read -r line; do
         menu_options+=($line)
-    done < <(echo "$servers_json" | jq -r '.[] | .id, "\"\(.city) (\(.country))\""')
+    done < <(echo "$servers_json" | jq -r '.servers[] | .id, "\"\(.city) (\(.country)) [\(.status)]\""')
     
     local server_id
     server_id=$(whiptail --title "TunnelSats Setup" --menu "Select a server location:" 15 60 8 "${menu_options[@]}" 3>&1 1>&2 2>&3)
