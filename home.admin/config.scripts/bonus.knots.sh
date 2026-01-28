@@ -12,18 +12,20 @@ APPID="knots" # one-word lower-case no-specials
 
 # clean human readable version - will be displayed in UI
 # just numbers only separated by dots (2 or 0.1 or 1.3.4 or 3.4.5.2)
-VERSION="29.2.2"
+VERSION="29.2.4"
 
-FILEMASTER="29.x"
-FILEMASTERTAG="29.2.knots20251110"
+# https://github.com/dathonohm/bitcoin/releases/download/v29.2.knots20251110%2Bbip110-v0.1rc3/bitcoin-29.2.knots20251110+bip110-v0.1rc3-arm-linux-gnueabihf.tar.gz
+# https://github.com/dathonohm/bitcoin/releases/download/v29.2.knots20251110%2Bbip110-v0.1/bitcoin-29.2.knots20251110+bip110-v0.1-arm-linux-gnueabihf.tar.gz
+FILEMASTER="v29.2.knots20251110%2Bbip110-v0.1"
+FILEMASTERTAG="29.2.knots20251110+bip110-v0.1"
 
 # the git repo to get the source code from for install
-GITHUB_REPO="https://github.com/bitcoinknots/bitcoin"
+GITHUB_REPO="https://github.com/dathonohm/bitcoin"
 
 # the github tag of the version of the source code to install
 # can also be a commit hash
 # if empty it will use the latest source version
-GITHUB_TAG="v29.2.knots20251110"
+GITHUB_TAG="v29.2.knots20251110+bip110-v0.1"
 
 # the github signature to verify the author
 # leave GITHUB_SIGN_AUTHOR empty to skip verifying
@@ -142,12 +144,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # other install scripts to see how that implement code download & verify.
   echo "# download the tarball & verify"
   mkdir /home/${APPID}/${APPID}
-  sudo -u ${APPID} wget "https://bitcoinknots.org/files/${FILEMASTER}/${FILEMASTERTAG}/bitcoin-${FILEMASTERTAG}-${bitcoinOSversion}.tar.gz" -P /home/${APPID}/${APPID}
-  sudo -u ${APPID} wget "https://bitcoinknots.org/files/${FILEMASTER}/${FILEMASTERTAG}/SHA256SUMS" -P /home/${APPID}/${APPID}
-  sudo -u ${APPID} wget "https://bitcoinknots.org/files/${FILEMASTER}/${FILEMASTERTAG}/SHA256SUMS.asc" -P /home/${APPID}/${APPID}
+  sudo -u ${APPID} wget "${GITHUB_REPO}/releases/download/${FILEMASTER}/bitcoin-${FILEMASTERTAG}-${bitcoinOSversion}.tar.gz" -P /home/${APPID}/${APPID}
+  sudo -u ${APPID} wget "${GITHUB_REPO}/releases/download/${FILEMASTER}/SHA256SUMS" -P /home/${APPID}/${APPID}
+  sudo -u ${APPID} wget "${GITHUB_REPO}/releases/download/${FILEMASTER}/SHA256SUMS.asc" -P /home/${APPID}/${APPID}
   
   echo "# Receive signer keys"
-  curl -s "https://api.github.com/repos/bitcoinknots/guix.sigs/contents/builder-keys" |
+  curl -s "https://api.github.com/repos/dathonohm/guix.sigs/contents/builder-keys" |
     jq -r '.[].download_url' | while read url; do curl -s "$url" | sudo -u ${APPID} gpg --import; done
   
   echo "Verify bin"
