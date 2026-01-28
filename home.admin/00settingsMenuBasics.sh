@@ -19,6 +19,7 @@ if [ ${#blitzapi} -eq 0 ]; then blitzapi="off"; fi
 if [ ${#tailscale} -eq 0 ]; then tailscale="off"; fi
 if [ ${#telegraf} -eq 0 ]; then telegraf="off"; fi
 if [ ${#knots} -eq 0 ]; then knots="off"; fi
+if [ ${#arbitraryDataRestriction} -eq 0 ]; then arbitraryDataRestriction="off"; fi
 
 # detect if LND auto-unlock is active
 source <(/home/admin/config.scripts/lnd.autounlock.sh status)
@@ -144,6 +145,7 @@ if [ "${clNode}" == "on" ]; then
 fi
 
 OPTIONS+=(k 'Bitcoin Knots (experimental)' ${knots})
+OPTIONS+=(d 'Restrict Arbitrary Data (BIP 110)' ${arbitraryDataRestriction})
 
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
 HEIGHT=$((CHOICE_HEIGHT+6))
@@ -488,6 +490,32 @@ if [ "${knots}" != "${choice}" ]; then
   fi
 else
   echo "Bitcoin Knots setting unchanged"
+fi
+
+# Arbitrary Data Restriction process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "d")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${arbitraryDataRestriction}" != "${choice}" ]; then
+  echo "Bitcoin Arbitrary Data Restriction settings changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/bitcoin.arbitrarydata.sh ${choice}
+  errorOnChange=$?
+  if [ ${errorOnChange} -eq 0 ]; then
+    l1="Arbitrary Data Restriction is now OFF"
+    l2="Bitcoin Core will allow larger data in transactions."
+    l3="A restart of bitcoind is required."
+    if [ "${choice}" = "on" ]; then
+      l1="Arbitrary Data Restriction is now ON"
+      l2="Bitcoin Core will limit OP_RETURN to 83 bytes"
+      l3="and disable bare multisig. Restart required."
+    fi
+    dialog --title 'Setting Changed' --msgbox "\n${l1}\n${l2}\n${l3}\n" 11 55
+    needsReboot=1
+  else
+    echo "# ERROR: Failed to change Arbitrary Data Restriction setting"
+  fi
+else
+  echo "Bitcoin Arbitrary Data Restriction setting unchanged"
 fi
 
 # parallel testnet process choice
