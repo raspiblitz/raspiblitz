@@ -116,6 +116,15 @@ You have no active or inactive subscriptions.
             name = "LETSENCRYPT {0}".format(sub['id'])
             choices.append(("{0}".format(lookup_index), "{0} ({1})".format(name.ljust(30), active_state)))
 
+    # list tunnelsats subscriptions
+    if 'subscriptions_tunnelsats' in subs:
+        for sub in subs['subscriptions_tunnelsats']:
+            lookup_index += 1
+            lookup[str(lookup_index)] = sub
+            active_state = "active" if sub['active'] else "in-active"
+            name = f"TunnelSats VPN ({sub['server_id']})"
+            choices.append(("{0}".format(lookup_index), "{0} ({1})".format(name.ljust(30), active_state)))
+
     # show menu with options
     d = Dialog(dialog="dialog", autowidgetsize=True)
     d.set_background_title("RaspiBlitz Subscriptions")
@@ -189,6 +198,19 @@ The following additional information is available:
            description=selected_sub['description'],
            service=selected_sub['name']
            )
+    elif selected_sub['type'] == "tunnelsats-v1":
+        text = f'''
+This is a TunnelSats VPN subscription bought on {selected_sub['time_created']}.
+
+Server Location: {selected_sub['server_id']}
+Description: {selected_sub['description']}
+
+The state of the subscription is: {"ACTIVE" if selected_sub['active'] else "NOT ACTIVE"}
+
+For live status and renewals, please go to:
+MAIN MENU > SUBSCRIPTIONS > + TunnelSats VPN
+(Detailed Python-based renewal management is coming soon)
+'''
     else:
         text = "no text?! FIXME"
 
@@ -213,6 +235,12 @@ The following additional information is available:
         elif selected_sub['type'] == "ip2tor-v1":
             cmd = "python /home/admin/config.scripts/blitz.subscriptions.ip2tor.py subscription-cancel {0}".format(
                 selected_sub['id'])
+            print("# running: {0}".format(cmd))
+            os.system(cmd)
+            time.sleep(2)
+        elif selected_sub['type'] == "tunnelsats-v1":
+            script_path = os.path.join(os.path.dirname(__file__), "blitz.subscriptions.tunnelsats.py")
+            cmd = f"python3 {script_path} subscription-cancel {selected_sub['id']}"
             print("# running: {0}".format(cmd))
             os.system(cmd)
             time.sleep(2)
