@@ -242,14 +242,14 @@ PersistentKeepalive = 25
 API_BASE = "https://dev2.tunnelsats.com/api/public/v1"
 
 def get_api_headers():
-    headers = {"Content-Type": "application/json"}
+    h = {"Content-Type": "application/json"}
     # Check for sensitive tokens in environment or file
     cf_id = os.environ.get("cfClientId")
     cf_secret = os.environ.get("cfClientSecret")
     if cf_id and cf_secret:
-        headers["CF-Access-Client-Id"] = cf_id
-        headers["CF-Access-Client-Secret"] = cf_secret
-    return headers
+        h["CF-Access-Client-Id"] = cf_id
+        h["CF-Access-Client-Secret"] = cf_secret
+    return h
 
 def get_servers():
     try:
