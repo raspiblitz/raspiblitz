@@ -14,11 +14,10 @@ import toml
 # add blitzpy to path (relative for dev environments)
 import os
 script_dir = os.path.dirname(os.path.abspath(__file__))
-blitzpy_path = os.path.abspath(os.path.join(script_dir, '..', 'BlitzPy'))
-if os.path.exists(blitzpy_path):
-    sys.path.append(blitzpy_path)
-else:
-    sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+# prioritize local BlitzPy if it exists (for repo testing)
+local_blitzpy = os.path.abspath(os.path.join(script_dir, '..', 'BlitzPy'))
+if os.path.exists(local_blitzpy):
+    sys.path.insert(0, local_blitzpy)
 
 from blitzpy import RaspiBlitzConfig
 from dialog import Dialog
@@ -29,8 +28,13 @@ SERVICE_LND_GRPC_API = "LND-GRPC-API"
 SERVICE_LNBITS = "LNBITS"
 SERVICE_BTCPAY = "BTCPAY"
 
-# load config 
-cfg = RaspiBlitzConfig()
+# load config
+# explicitly set path because some blitzpy versions have wrong default
+# TODO: need reviewer feedback whether absolute paths are acceptable
+cfg_path = "/mnt/hdd/app-data/raspiblitz.conf"
+if not os.path.exists(cfg_path):
+    cfg_path = "/mnt/hdd/raspiblitz.conf"
+cfg = RaspiBlitzConfig(abs_path=cfg_path)
 cfg.reload()
 
 # basic values

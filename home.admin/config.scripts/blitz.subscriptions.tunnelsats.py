@@ -13,11 +13,10 @@ import toml
 
 # add blitzpy to path (relative for dev environments)
 script_dir = os.path.dirname(os.path.abspath(__file__))
-blitzpy_path = os.path.abspath(os.path.join(script_dir, '..', 'BlitzPy'))
-if os.path.exists(blitzpy_path):
-    sys.path.append(blitzpy_path)
-else:
-    sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+# prioritize local BlitzPy if it exists (for repo testing)
+local_blitzpy = os.path.abspath(os.path.join(script_dir, '..', 'BlitzPy'))
+if os.path.exists(local_blitzpy):
+    sys.path.insert(0, local_blitzpy)
 
 from blitzpy import RaspiBlitzConfig
 from blitzpy.exceptions import BlitzError
@@ -40,7 +39,11 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
 
 SUBSCRIPTIONS_FILE = "/mnt/hdd/app-data/subscriptions/subscriptions.toml"
 
-cfg = RaspiBlitzConfig()
+# explicitly set path because some blitzpy versions have wrong default
+cfg_path = "/mnt/hdd/app-data/raspiblitz.conf"
+if not os.path.exists(cfg_path):
+    cfg_path = "/mnt/hdd/raspiblitz.conf"
+cfg = RaspiBlitzConfig(abs_path=cfg_path)
 cfg.reload()
 
 session = requests.session()
