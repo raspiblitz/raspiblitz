@@ -502,12 +502,12 @@ if [ "${arbitraryDataRestriction}" != "${choice}" ]; then
   errorOnChange=$?
   if [ ${errorOnChange} -eq 0 ]; then
     l1="Arbitrary Data Restriction is now OFF"
-    l2="Bitcoin Core will allow larger data in transactions."
-    l3="A restart of bitcoind is required."
+    l2="Bitcoin will allow larger data in transactions."
+    l3="System will reboot to apply the changes."
     if [ "${choice}" = "on" ]; then
       l1="Arbitrary Data Restriction is now ON"
-      l2="Bitcoin Core will limit OP_RETURN to 83 bytes"
-      l3="and disable bare multisig. Restart required."
+      l2="Bitcoin will limit OP_RETURN to 83 bytes"
+      l3="and disable bare multisig. Reboot required."
     fi
     dialog --title 'Setting Changed' --msgbox "\n${l1}\n${l2}\n${l3}\n" 11 55
     needsReboot=1

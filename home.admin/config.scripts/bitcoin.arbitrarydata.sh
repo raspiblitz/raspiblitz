@@ -64,21 +64,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
   
-  # Add or update datacarriersize setting
-  if grep -q "^datacarriersize=" ${BITCOIN_CONF}; then
-    sudo sed -i "s/^datacarriersize=.*/datacarriersize=83/g" ${BITCOIN_CONF}
-  else
-    echo "" | sudo tee -a ${BITCOIN_CONF}
-    echo "# BIP 110 aligned: Restrict arbitrary data in transactions" | sudo tee -a ${BITCOIN_CONF}
-    echo "datacarriersize=83" | sudo tee -a ${BITCOIN_CONF}
-  fi
+  # Clean up any existing settings first to avoid conflicts
+  sudo sed -i "/^datacarriersize=/d" ${BITCOIN_CONF}
+  sudo sed -i "/^permitbaremultisig=/d" ${BITCOIN_CONF}
+  sudo sed -i "/^# BIP 110 aligned: Restrict arbitrary data in transactions/d" ${BITCOIN_CONF}
   
-  # Add or update permitbaremultisig setting
-  if grep -q "^permitbaremultisig=" ${BITCOIN_CONF}; then
-    sudo sed -i "s/^permitbaremultisig=.*/permitbaremultisig=0/g" ${BITCOIN_CONF}
-  else
-    echo "permitbaremultisig=0" | sudo tee -a ${BITCOIN_CONF}
-  fi
+  # Add the new settings
+  echo "" | sudo tee -a ${BITCOIN_CONF}
+  echo "# BIP 110 aligned: Restrict arbitrary data in transactions" | sudo tee -a ${BITCOIN_CONF}
+  echo "datacarriersize=83" | sudo tee -a ${BITCOIN_CONF}
+  echo "permitbaremultisig=0" | sudo tee -a ${BITCOIN_CONF}
   
   # Store setting in raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set arbitraryDataRestriction "on"
@@ -101,8 +96,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   fi
   
   # Remove or comment out the settings
-  sudo sed -i "/^datacarriersize=83/d" ${BITCOIN_CONF}
-  sudo sed -i "/^permitbaremultisig=0/d" ${BITCOIN_CONF}
+  sudo sed -i "/^datacarriersize=/d" ${BITCOIN_CONF}
+  sudo sed -i "/^permitbaremultisig=/d" ${BITCOIN_CONF}
   sudo sed -i "/^# BIP 110 aligned: Restrict arbitrary data in transactions/d" ${BITCOIN_CONF}
   
   # Update setting in raspiblitz.conf
