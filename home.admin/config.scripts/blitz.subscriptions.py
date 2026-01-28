@@ -11,8 +11,16 @@ import time
 from datetime import datetime
 
 import toml
-sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
-from config import RaspiBlitzConfig
+# add blitzpy to path (relative for dev environments)
+import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+blitzpy_path = os.path.abspath(os.path.join(script_dir, '..', 'BlitzPy'))
+if os.path.exists(blitzpy_path):
+    sys.path.append(blitzpy_path)
+else:
+    sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+
+from blitzpy import RaspiBlitzConfig
 from dialog import Dialog
 
 # constants for standard services
@@ -221,6 +229,7 @@ def main():
     choices.append(("LIST", "My Subscriptions"))
     choices.append(("NEW1", "+ IP2TOR Bridge (paid)"))
     choices.append(("NEW2", "+ LetsEncrypt HTTPS Domain (free)"))
+    choices.append(("NEW3", "+ TunnelSats VPN (paid)"))
 
     d = Dialog(dialog="dialog", autowidgetsize=True)
     d.set_background_title("RaspiBlitz Subscriptions")
@@ -245,9 +254,17 @@ def main():
     ###############################
 
     if tag == "NEW2":
-        # run creating a new IP2TOR subscription
         os.system("clear")
-        cmd = "python /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py create-ssh-dialog"
+        script_path = os.path.join(os.path.dirname(__file__), "blitz.subscriptions.letsencrypt.py")
+        cmd = "python3 {0} create-ssh-dialog".format(script_path)
+        print("# running: {0}".format(cmd))
+        os.system(cmd)
+        sys.exit(0)
+
+    if tag == "NEW3":
+        os.system("clear")
+        script_path = os.path.join(os.path.dirname(__file__), "blitz.subscriptions.tunnelsats.py")
+        cmd = "python3 {0} create-ssh-dialog".format(script_path)
         print("# running: {0}".format(cmd))
         os.system(cmd)
         sys.exit(0)
