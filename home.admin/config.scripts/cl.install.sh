@@ -118,8 +118,8 @@ function downloadAndVerifySourceZip() {
   echo
 
   # Download the source zip and SHA256SUMS signature file
-  sudo -u bitcoin wget -O "lightning-${CLVERSION}.zip" \
-    "https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/lightning-${CLVERSION}.zip" || exit 1
+  sudo -u bitcoin wget -O "clightning-${CLVERSION}.zip" \
+    "https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-${CLVERSION}.zip" || exit 1
   sudo -u bitcoin wget -O "SHA256SUMS-${CLVERSION}" \
     "https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS-${CLVERSION}" || exit 1
   sudo -u bitcoin wget -O "SHA256SUMS-${CLVERSION}.asc" \
@@ -157,25 +157,25 @@ function downloadAndVerifySourceZip() {
   echo
 
   # Verify the zip file checksum
-  expectedChecksum=$(grep "lightning-${CLVERSION}.zip" "SHA256SUMS-${CLVERSION}" | awk '{print $1}')
-  actualChecksum=$(sha256sum "lightning-${CLVERSION}.zip" | awk '{print $1}')
+  expectedChecksum=$(grep "clightning-${CLVERSION}.zip" "SHA256SUMS-${CLVERSION}" | awk '{print $1}')
+  actualChecksum=$(sha256sum "clightning-${CLVERSION}.zip" | awk '{print $1}')
   if [ "${expectedChecksum}" != "${actualChecksum}" ]; then
-    echo "# ERROR --> Checksum mismatch for lightning-${CLVERSION}.zip"
+    echo "# ERROR --> Checksum mismatch for clightning-${CLVERSION}.zip"
     echo "# Expected: ${expectedChecksum}"
     echo "# Actual: ${actualChecksum}"
     exit 1
   fi
-  echo "# OK - Checksum verified for lightning-${CLVERSION}.zip"
+  echo "# OK - Checksum verified for clightning-${CLVERSION}.zip"
 
   echo
   echo "- Extracting source"
   echo
 
   # Extract and set up directory
-  sudo -u bitcoin unzip -q "lightning-${CLVERSION}.zip" || exit 1
+  sudo -u bitcoin unzip -q "clightning-${CLVERSION}.zip" || exit 1
   sudo -u bitcoin rm -rf lightning
-  sudo -u bitcoin mv "lightning-${CLVERSION}" lightning
-  sudo -u bitcoin rm -f "lightning-${CLVERSION}.zip" "SHA256SUMS-${CLVERSION}" "SHA256SUMS-${CLVERSION}.asc"
+  sudo -u bitcoin mv "clightning-${CLVERSION}" lightning
+  sudo -u bitcoin rm -f "clightning-${CLVERSION}.zip" "SHA256SUMS-${CLVERSION}" "SHA256SUMS-${CLVERSION}.asc"
 }
 
 function runTests() {

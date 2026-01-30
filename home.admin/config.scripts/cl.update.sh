@@ -85,10 +85,10 @@ if [ "${mode}" = "verified" ]; then
       echo "# clInstalledVersion = clUpdateVersion (${clUpdateVersion})"
       echo "# There is no need to update again."
     else
-      /home/admin/config.scripts/cl.install.sh update ${clUpdateVersion}
+      /home/admin/config.scripts/cl.install.sh update ${clUpdateVersion} || exit 1
     fi
   else
-    /home/admin/config.scripts/cl.install.sh on
+    /home/admin/config.scripts/cl.install.sh on || exit 1
   fi
 
   # note: install will be done the same as reckless further down
@@ -110,7 +110,7 @@ if [ "${mode}" = "reckless" ]; then
     echo "# There is no need to update again."
     clInterimsUpdateNew="${clLatestVersion}"
   else
-    /home/admin/config.scripts/cl.install.sh update ${clLatestVersion}
+    /home/admin/config.scripts/cl.install.sh update ${clLatestVersion} || exit 1
     clInterimsUpdateNew="reckless"
   fi
 fi
