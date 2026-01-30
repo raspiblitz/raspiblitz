@@ -522,7 +522,6 @@ By default a reboot is advised.
           sudo systemctl start bitcoind
           exit 0
         fi
-        sleep 8
       fi
       ;;
     CUSTOM)
@@ -551,7 +550,6 @@ By default a reboot is advised.
           exit 0
         fi
       fi
-      sleep 8
       ;;
   esac
 }
