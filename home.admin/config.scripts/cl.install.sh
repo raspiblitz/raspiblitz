@@ -91,6 +91,9 @@ function installDependencies() {
 }
 
 function buildAndInstallCLbinaries() {
+  # Optional parameter: version to pass to make (for zip builds without git)
+  local buildVersion="$1"
+
   cd /home/bitcoin/lightning || exit 1
 
   # Ensure /opt/rust has correct permissions before building
@@ -103,7 +106,12 @@ function buildAndInstallCLbinaries() {
   sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust ./configure || exit 1
   echo
   echo "########## make (using uv run)"
-  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust uv run make -j"$(nproc)" || exit 1
+  # Pass VERSION to make if provided (needed for zip builds without git history)
+  if [ -n "${buildVersion}" ]; then
+    sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust VERSION="${buildVersion}" uv run make -j"$(nproc)" || exit 1
+  else
+    sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust uv run make -j"$(nproc)" || exit 1
+  fi
   echo
   echo "########## install"
   sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make install || exit 1
@@ -242,7 +250,8 @@ if [ "$1" = "install" ]; then
 
   installDependencies
 
-  buildAndInstallCLbinaries || exit 1
+  # Pass version since zip has no git history
+  buildAndInstallCLbinaries "${CLVERSION}" || exit 1
 
   installed=$(sudo -u bitcoin lightning-cli --version)
   if [ ${#installed} -eq 0 ]; then
@@ -301,10 +310,14 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
     echo "# Deleting the old source code"
     sudo rm -rf lightning
 
+    # Track if we're building from zip (no git history) or git clone
+    buildFromZip=0
+
     if [ "$1" = "update" ] && [ $# -gt 1 ]; then
       # Update to a specific version - use zip download with signature verification
       CLVERSION=$2
       downloadAndVerifySourceZip
+      buildFromZip=1
 
     elif [ "$1" = "update" ]; then
       # Update to latest commit - use git clone (no verification)
@@ -337,13 +350,17 @@ if [ "$1" = on ] || [ "$1" = update ] || [ "$1" = testPR ]; then
 
     installDependencies
 
-    currentCLversion=$(
-      cd /home/bitcoin/lightning || exit 1
-      git describe --tags 2>/dev/null || echo "${CLVERSION}"
-    )
-    echo "# Building from source Core Lightning $currentCLversion"
-
-    buildAndInstallCLbinaries || exit 1
+    if [ "${buildFromZip}" = "1" ]; then
+      echo "# Building from source Core Lightning ${CLVERSION}"
+      buildAndInstallCLbinaries "${CLVERSION}" || exit 1
+    else
+      currentCLversion=$(
+        cd /home/bitcoin/lightning || exit 1
+        git describe --tags 2>/dev/null || echo "unknown"
+      )
+      echo "# Building from source Core Lightning $currentCLversion"
+      buildAndInstallCLbinaries || exit 1
+    fi
 
   fi
 
