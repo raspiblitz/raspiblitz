@@ -99,12 +99,31 @@ def check_status(pubkey):
         payload = {"wgPublicKey": pubkey}
         headers = get_api_headers()
         # NOTE: Using the same endpoint pattern as the bash script
-        response = session.post(f"{API_BASE}/subscription/status", headers=headers, json=payload)
+        response = session.post(f"{API_BASE}/subscription/status", headers=headers, json=payload, timeout=10)
         if response.status_code != 200:
             return None
         return response.json()
     except:
         return None
+
+def renew_subscription(pubkey, server_id, duration):
+    """Renew/extend an existing subscription."""
+    try:
+        headers = get_api_headers()
+        payload = {
+            "wgPublicKey": pubkey,
+            "duration": duration,
+            "serverId": server_id
+        }
+        response = session.post(f"{API_BASE}/subscription/renew", headers=headers, json=payload, timeout=10)
+        if response.status_code != 200:
+            response_text = response.text if hasattr(response, 'text') else str(response.content)
+            raise BlitzError(f"HTTP {response.status_code}", {"response_text": response_text})
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        raise BlitzError("Renewal Failed", {"error": str(e)}, e)
+    except Exception as e:
+        raise BlitzError("Renewal Failed", {"error": str(e)}, e)
 
 def subscriptions_list():
     try:
@@ -190,7 +209,7 @@ def save_config_and_persist(config_json, server_id):
     psk = wg_data.get("presharedKey")
 
     if not all([priv_key, address, server_pub, endpoint]):
-        raise BlitzError("Missing Key Fields", f"Config data incomplete: {json.dumps(config_json)}")
+        raise BlitzError("Missing Key Fields", {"config_data": config_json})
 
     content = f"""[Interface]
 PrivateKey = {priv_key}
@@ -238,10 +257,33 @@ PersistentKeepalive = 25
     return conf_file, subscription
 
 # API Settings
-# NOTE: Using the same dev API as the bash script for now
+# Use dev API for testing, production API when available
+# Production: https://api.tunnelsats.com/api/public/v1
+# Dev: https://dev2.tunnelsats.com/api/public/v1
 API_BASE = "https://dev2.tunnelsats.com/api/public/v1"
 
+def load_env_file():
+    """Load environment variables from .tunnelsats.env file if it exists."""
+    env_file = Path("/home/admin/raspiblitz/.tunnelsats.env")
+    if not env_file.is_file():
+        # Try alternative location
+        env_file = Path("/home/admin/.tunnelsats.env")
+    
+    if env_file.is_file():
+        try:
+            with open(env_file, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        key, value = line.split("=", 1)
+                        os.environ[key.strip()] = value.strip()
+        except Exception:
+            pass  # Silently fail if env file can't be read
+
 def get_api_headers():
+    # Load env file first (for dev API access)
+    load_env_file()
+    
     h = {"Content-Type": "application/json"}
     # Check for sensitive tokens in environment or file
     cf_id = os.environ.get("cfClientId")
@@ -253,36 +295,239 @@ def get_api_headers():
 
 def get_servers():
     try:
-        response = session.get(f"{API_BASE}/servers", headers=get_api_headers())
+        response = session.get(f"{API_BASE}/servers", headers=get_api_headers(), timeout=10)
         if response.status_code != 200:
-            raise BlitzError(f"HTTP {response.status_code}", response.text)
+            response_text = response.text if hasattr(response, 'text') else str(response.content)
+            # Truncate very long error messages to avoid dialog issues
+            if len(response_text) > 500:
+                response_text = response_text[:500] + "... (truncated)"
+            raise BlitzError(f"HTTP {response.status_code}", {"response_text": response_text})
         return response.json()
+    except BlitzError:
+        # Re-raise BlitzError as-is (already properly formatted)
+        raise
+    except requests.exceptions.RequestException as e:
+        raise BlitzError("Fetch Failed", {"error": str(e)}, e)
     except Exception as e:
-        raise BlitzError("Fetch Failed", str(e))
+        raise BlitzError("Fetch Failed", {"error": str(e)}, e)
+
+def show_status_dialog(d, subscription):
+    """Show subscription status details."""
+    server_id = subscription.get("server_id")
+    pubkey = get_local_pubkey(server_id)
+    
+    status_text = f"Subscription: {subscription.get('name', 'TunnelSats VPN')}\n"
+    status_text += f"Server: {server_id}\n"
+    status_text += f"Created: {subscription.get('time_created', 'Unknown')}\n"
+    status_text += f"Status: {'ACTIVE' if subscription.get('active') else 'INACTIVE'}\n\n"
+    
+    if pubkey:
+        status_data = check_status(pubkey)
+        if status_data:
+            status_text += f"Live Status: {status_data.get('status', 'unknown')}\n"
+            if status_data.get('expiry'):
+                status_text += f"Expires: {status_data.get('expiry')}\n"
+        else:
+            status_text += "Live Status: Unable to fetch (offline/expired?)\n"
+    else:
+        status_text += "Config file missing - cannot check live status\n"
+    
+    d.msgbox(status_text, title="Subscription Status")
+
+def handle_renew(d, subscription):
+    """Handle subscription renewal flow."""
+    server_id = subscription.get("server_id")
+    pubkey = get_local_pubkey(server_id)
+    
+    if not pubkey:
+        d.msgbox("Cannot renew: Config file missing. Please reinstall.", title="Error")
+        return
+    
+    # Show current status
+    status_data = check_status(pubkey)
+    if status_data:
+        status_msg = f"Current Status: {status_data.get('status', 'unknown')}\n"
+        if status_data.get('expiry'):
+            status_msg += f"Expires: {status_data.get('expiry')}\n\n"
+    else:
+        status_msg = "Unable to fetch current status.\n\n"
+    
+    status_msg += "Select renewal duration:"
+    
+    # Duration selection
+    choices = [
+        ("1", "1 Month"),
+        ("3", "3 Months"),
+        ("6", "6 Months"),
+        ("12", "12 Months")
+    ]
+    code, duration = d.menu(status_msg, choices=choices, width=60, height=10, title="Renew Subscription")
+    
+    if code != d.OK:
+        return
+    
+    # Create renewal order
+    d.infobox("Requesting renewal... please wait.", title="TunnelSats")
+    try:
+        order_data = renew_subscription(pubkey, server_id, int(duration))
+    except Exception as e:
+        if isinstance(e, BlitzError):
+            d.msgbox(f"Renewal failed:\n{e.short}", title="Error")
+        else:
+            d.msgbox(f"Renewal failed:\n{str(e)}", title="Error")
+        return
+    
+    invoice = order_data.get("invoice")
+    order_id = order_data.get("id")
+    
+    if not invoice:
+        d.msgbox(f"No invoice received from API.\nResponse: {json.dumps(order_data)}", title="Error")
+        return
+    
+    # Payment
+    paid = False
+    d.infobox("Attempting automatic payment via local node...", title="TunnelSats")
+    try:
+        if os.system(f"lncli payinvoice -f '{invoice}' --json") == 0:
+            paid = True
+        elif os.system(f"lightning-cli pay '{invoice}'") == 0:
+            paid = True
+    except:
+        pass
+    
+    if not paid:
+        d.msgbox(f"Automatic payment failed.\n\nPlease pay manually:\n\n{invoice}", title="Manual Payment Required")
+    
+    # Poll for confirmation
+    d.infobox("Waiting for payment confirmation...", title="TunnelSats")
+    config_json = None
+    max_attempts = 30
+    for attempt in range(max_attempts):
+        try:
+            headers = get_api_headers()
+            res = session.get(f"{API_BASE}/subscription/status?id={order_id}", headers=headers, timeout=10)
+            if res.status_code == 200:
+                status_data = res.json()
+                if status_data.get("status") in ["paid", "successful"]:
+                    config_json = status_data
+                    break
+        except:
+            pass
+        time.sleep(5)
+    
+    if config_json:
+        d.msgbox("Subscription renewed successfully!", title="Success")
+    else:
+        d.msgbox("Timeout waiting for confirmation.\nIf you paid, the renewal will activate automatically.", title="Timeout")
+
+def handle_reinstall(d, subscription):
+    """Reinstall/reconfigure the WireGuard setup."""
+    server_id = subscription.get("server_id")
+    conf_file = Path(f"/mnt/hdd/app-data/tunnelsats/tunnelsats_{server_id}.conf")
+    
+    if not conf_file.is_file():
+        d.msgbox(f"Config file not found:\n{conf_file}\n\nCannot reinstall.", title="Error")
+        return
+    
+    code = d.yesno(f"Reinstall TunnelSats with existing config?\n\nConfig: {conf_file}", 
+                   title="Reinstall", yes_label="Yes", no_label="Cancel")
+    if code != d.OK:
+        return
+    
+    # Find core script
+    core_script = Path("/home/admin/tunnelsats/scripts/tunnelsats.sh")
+    if not core_script.is_file():
+        core_script = Path("/home/hakuna/tunnelsats/scripts/tunnelsats.sh")
+    
+    if core_script.is_file():
+        d.infobox("Triggering technical installation via tunnelsats.sh...", title="TunnelSats")
+        os.system(f"sudo bash {core_script} install --config {conf_file}")
+        d.msgbox("Reinstallation complete!", title="Success")
+    else:
+        d.msgbox(f"Core script not found.\nManual installation required:\nsudo bash tunnelsats.sh install --config {conf_file}", 
+                 title="Manual Step Required")
 
 def create_ssh_dialog():
     from dialog import Dialog
     d = Dialog(dialog="dialog", autowidgetsize=True)
     d.set_background_title("TunnelSats Subscription")
     
-    # Check if a subscription already exists (limit to one for now)
-    # This logic can be refined later if needed
+    # Check if a subscription already exists
     existing_subs = []
     if Path(SUBSCRIPTIONS_FILE).is_file():
-        subs = toml.load(SUBSCRIPTIONS_FILE)
-        if "subscriptions_tunnelsats" in subs:
-            existing_subs = subs["subscriptions_tunnelsats"]
+        try:
+            os.system(f"sudo chown admin:admin {SUBSCRIPTIONS_FILE}")
+            subs = toml.load(SUBSCRIPTIONS_FILE)
+            if "subscriptions_tunnelsats" in subs:
+                existing_subs = subs["subscriptions_tunnelsats"]
+        except:
+            pass
 
+    # If subscription exists, show management menu
     if len(existing_subs) > 0:
-        d.msgbox("You already have an active TunnelSats subscription.\nMultiple subscriptions are not supported yet.", title="Info")
-        return
+        subscription = existing_subs[0]  # Use first subscription
+        
+        choices = [
+            ("STATUS", "View Subscription Status"),
+            ("RENEW", "Renew/Extend Subscription"),
+            ("REINSTALL", "Reinstall WireGuard Config"),
+            ("CANCEL", "Cancel Subscription"),
+            ("NEW", "Create New Subscription (will replace existing)")
+        ]
+        
+        code, action = d.menu(
+            f"Existing subscription found: {subscription.get('name', 'TunnelSats VPN')}\n\nSelect an action:",
+            choices=choices, width=60, height=12, title="TunnelSats Management")
+        
+        if code != d.OK:
+            return
+        
+        if action == "STATUS":
+            show_status_dialog(d, subscription)
+        elif action == "RENEW":
+            handle_renew(d, subscription)
+        elif action == "REINSTALL":
+            handle_reinstall(d, subscription)
+        elif action == "CANCEL":
+            sub_id = subscription.get("id")
+            if sub_id:
+                code = d.yesno(f"Cancel subscription: {subscription.get('name')}?\n\nThis will remove it from your subscriptions list.", 
+                              title="Cancel Subscription", yes_label="Yes, Cancel", no_label="No")
+                if code == d.OK:
+                    subscriptions_cancel(sub_id)
+                    d.msgbox("Subscription cancelled.", title="Cancelled")
+        elif action == "NEW":
+            # Continue to new subscription flow below
+            pass
+        else:
+            return
+        
+        # If not creating new, return after management action
+        if action != "NEW":
+            return
 
     # PHASE 1: Fetch Servers
     try:
         servers_data = get_servers()
         servers = servers_data.get("servers", [])
+    except BlitzError as e:
+        # Extract a clean error message
+        error_msg = e.short
+        if hasattr(e, 'details') and e.details:
+            # Add relevant details if available, but keep it short
+            if 'response_text' in e.details:
+                # Don't show full HTML error pages
+                error_msg += "\n\n(Server returned an error)"
+            elif 'error' in e.details:
+                error_msg += f"\n\n{e.details['error']}"
+        d.msgbox(f"Failed to fetch servers:\n\n{error_msg}", title="Error", width=70, height=10)
+        return
     except Exception as e:
-        d.msgbox(f"Failed to fetch servers:\n{str(e)}", title="Error")
+        error_msg = str(e)
+        # Truncate very long error messages
+        if len(error_msg) > 500:
+            error_msg = error_msg[:500] + "... (truncated)"
+        d.msgbox(f"Failed to fetch servers:\n\n{error_msg}", title="Error", width=70, height=10)
         return
 
     if not servers:
@@ -320,12 +565,16 @@ def create_ssh_dialog():
     try:
         headers = get_api_headers()
         payload = {"serverId": server_id, "duration": int(duration)}
-        response = session.post(f"{API_BASE}/subscription/create", headers=headers, json=payload)
+        response = session.post(f"{API_BASE}/subscription/create", headers=headers, json=payload, timeout=10)
         if response.status_code != 200:
-            raise BlitzError(f"HTTP {response.status_code}", response.text)
+            response_text = response.text if hasattr(response, 'text') else str(response.content)
+            raise BlitzError(f"HTTP {response.status_code}", {"response_text": response_text})
         order_data = response.json()
     except Exception as e:
-        d.msgbox(f"Failed to create order:\n{str(e)}", title="Error")
+        if isinstance(e, BlitzError):
+            d.msgbox(f"Failed to create order:\n{e.short}", title="Error")
+        else:
+            d.msgbox(f"Failed to create order:\n{str(e)}", title="Error")
         return
 
     invoice = order_data.get("invoice")
@@ -370,15 +619,23 @@ def create_ssh_dialog():
     # PHASE 6: Polling
     d.infobox("Payment detected or manual wait. Polling for configuration...", title="TunnelSats")
     config_json = None
-    for _ in range(30): # 150 seconds timeout
+    max_attempts = 30  # 150 seconds timeout (30 * 5s)
+    for attempt in range(max_attempts):
         try:
-            res = session.get(f"{API_BASE}/subscription/status?id={order_id}", headers=headers)
+            res = session.get(f"{API_BASE}/subscription/status?id={order_id}", headers=headers, timeout=10)
             if res.status_code == 200:
                 status_data = res.json()
                 if status_data.get("status") in ["paid", "successful"]:
                     config_json = status_data
                     break
-        except:
+        except requests.exceptions.Timeout:
+            # Continue polling on timeout
+            pass
+        except requests.exceptions.RequestException:
+            # Continue polling on network errors
+            pass
+        except Exception:
+            # Continue polling on other errors
             pass
         time.sleep(5)
 
@@ -398,8 +655,27 @@ def create_ssh_dialog():
     if Path("/tmp/tunnelsats_qr.txt").is_file():
         with open("/tmp/tunnelsats_qr.txt", "r") as f:
             qr_text = f.read()
-
-    d.msgbox(f"Success! TunnelSats subscription is active.\n\nConfiguration saved to:\n{conf_file}\n\nCRITICAL: Please save your config backup now!\n\n{qr_text}", title="Success / Backup")
+    
+    # Show config content
+    config_content = ""
+    try:
+        with open(conf_file, "r") as f:
+            config_content = f.read()
+    except:
+        pass
+    
+    backup_msg = f"Success! TunnelSats subscription is active.\n\nConfiguration saved to:\n{conf_file}\n\nCRITICAL: Please save your config backup now!\n\n"
+    if qr_text:
+        backup_msg += f"QR Code:\n{qr_text}\n\n"
+    if config_content:
+        backup_msg += f"Config Content:\n{config_content}\n\n"
+    backup_msg += "Have you saved the config backup?"
+    
+    # Force user acknowledgement
+    code = d.yesno(backup_msg, title="Success / Backup Required", yes_label="Yes, I saved it", no_label="Show again")
+    if code != d.OK:
+        # Show again if user didn't confirm
+        d.msgbox(backup_msg, title="Backup Required - Please Save Now")
     
     # PHASE 8: Handoff to core script
     # Look for the core script in standard locations

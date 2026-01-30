@@ -199,17 +199,46 @@ The following additional information is available:
            service=selected_sub['name']
            )
     elif selected_sub['type'] == "tunnelsats-v1":
+        # Try to get live status
+        server_id = selected_sub.get('server_id')
+        live_status = "Unknown"
+        expiry = "Unknown"
+        
+        # Import helper function from tunnelsats module
+        try:
+            script_path = os.path.join(os.path.dirname(__file__), "blitz.subscriptions.tunnelsats.py")
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("tunnelsats_module", script_path)
+            tunnelsats_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(tunnelsats_module)
+            
+            pubkey = tunnelsats_module.get_local_pubkey(server_id)
+            if pubkey:
+                status_data = tunnelsats_module.check_status(pubkey)
+                if status_data:
+                    live_status = status_data.get('status', 'unknown')
+                    expiry = status_data.get('expiry', 'unknown')
+        except:
+            pass
+        
         text = f'''
 This is a TunnelSats VPN subscription bought on {selected_sub['time_created']}.
 
-Server Location: {selected_sub['server_id']}
+Server Location: {server_id}
 Description: {selected_sub['description']}
 
-The state of the subscription is: {"ACTIVE" if selected_sub['active'] else "NOT ACTIVE"}
+Subscription State: {"ACTIVE" if selected_sub['active'] else "NOT ACTIVE"}
+Live Status: {live_status}
+Expiry: {expiry}
 
-For live status and renewals, please go to:
+For renewals, status checks, and management, go to:
 MAIN MENU > SUBSCRIPTIONS > + TunnelSats VPN
-(Detailed Python-based renewal management is coming soon)
+
+This will open the TunnelSats Management Menu where you can:
+- View detailed status
+- Renew/extend your subscription
+- Reinstall WireGuard configuration
+- Cancel subscription
 '''
     else:
         text = "no text?! FIXME"
