@@ -123,7 +123,7 @@ if [ "${mode}" = "verified" ] || [ "${mode}" = "reckless" ]; then
 
   echo "# OK Core Lightning is installed"
   echo "# NOTE: RaspiBlitz may need to reboot now"
-  exit 1
+  exit 0
 
 else
 
