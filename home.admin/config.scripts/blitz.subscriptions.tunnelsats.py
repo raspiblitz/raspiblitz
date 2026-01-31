@@ -459,6 +459,56 @@ def subscriptions_cancel(s_id):
     
     print(json.dumps(subs, indent=2))
 
+# Helper functions for file operations
+def safe_write_file(path, data, mode=0o644):
+    """Try to write file as user, fallback to sudo if permission denied."""
+    path = str(path)
+    current_uid = os.getuid()
+    current_gid = os.getgid()
+    try:
+        # Try normal write
+        with open(path, "w") as f:
+            f.write(data)
+        os.chmod(path, mode)
+        log.debug(f"Successfully wrote {path} as user (UID={current_uid}, GID={current_gid})")
+        return True
+    except Exception as e:
+        log.debug(f"Permission denied for {path} as user (UID={current_uid}, GID={current_gid}): {e}. Trying via sudo.")
+        temp_path = f"/tmp/tunnelsats_write_{os.getpid()}"
+        try:
+            # Write to a temp file we definitely have access to
+            with open(temp_path, "w") as f:
+                f.write(data)
+            
+            # Move and set permissions via sudo
+            ret = os.system(f"sudo mv {temp_path} {shlex.quote(path)}")
+            if ret != 0:
+                log.error(f"Failed to move {temp_path} to {path} (return code: {ret})")
+                return False
+            os.system(f"sudo chmod {oct(mode)} {shlex.quote(path)}")
+            os.system(f"sudo chown admin:admin {shlex.quote(path)}")
+            log.debug(f"Successfully wrote {path} via sudo as user (UID={current_uid}, GID={current_gid})")
+            return True
+        except Exception as e2:
+            log.error(f"Failed to write {path} even with sudo: {e2}")
+            return False
+
+def ensure_dir(path):
+    """Ensure directory exists, try as user then sudo."""
+    path = str(path)
+    current_uid = os.getuid()
+    if os.path.exists(path):
+        return True
+    try:
+        os.makedirs(path, exist_ok=True)
+        log.debug(f"Successfully created directory {path} as user (UID={current_uid})")
+        return True
+    except Exception as e:
+        log.debug(f"Could not create directory {path} as user UID={current_uid} ({e}), trying sudo")
+        os.system(f"sudo mkdir -p {path}")
+        os.system(f"sudo chown admin:admin {path}")
+        return os.path.exists(path)
+
 def save_config_and_persist(config_json, server_id):
     # Config files are stored in: /mnt/hdd/app-data/tunnelsats/tunnelsats_{server_id}.conf
     log.info(f"Saving config for server_id={server_id}")
@@ -547,55 +597,6 @@ Endpoint = {endpoint}
 AllowedIPs = 0.0.0.0/0, ::/0
 PersistentKeepalive = 25
 """
-    def safe_write_file(path, data, mode=0o644):
-        """Try to write file as user, fallback to sudo if permission denied."""
-        path = str(path)
-        current_uid = os.getuid()
-        current_gid = os.getgid()
-        try:
-            # Try normal write
-            with open(path, "w") as f:
-                f.write(data)
-            os.chmod(path, mode)
-            log.debug(f"Successfully wrote {path} as user (UID={current_uid}, GID={current_gid})")
-            return True
-        except Exception as e:
-            log.debug(f"Permission denied for {path} as user (UID={current_uid}, GID={current_gid}): {e}. Trying via sudo.")
-            temp_path = f"/tmp/tunnelsats_write_{os.getpid()}"
-            try:
-                # Write to a temp file we definitely have access to
-                with open(temp_path, "w") as f:
-                    f.write(data)
-                
-                # Move and set permissions via sudo
-                perm_str = format(mode, 'o')
-                os.system(f"sudo mv {temp_path} {path}")
-                os.system(f"sudo chown admin:admin {path}")
-                os.system(f"sudo chmod {perm_str} {path}")
-                
-                if os.path.exists(path):
-                    log.debug(f"Successfully wrote {path} via sudo fallback")
-                    return True
-                return False
-            except Exception as e2:
-                log.error(f"Failed to write {path} even with sudo: {e2}")
-                return False
-
-    def ensure_dir(path):
-        """Ensure directory exists, try as user then sudo."""
-        path = str(path)
-        current_uid = os.getuid()
-        if os.path.exists(path):
-            return True
-        try:
-            os.makedirs(path, exist_ok=True)
-            log.debug(f"Successfully created directory {path} as user (UID={current_uid})")
-            return True
-        except Exception as e:
-            log.debug(f"Could not create directory {path} as user UID={current_uid} ({e}), trying sudo")
-            os.system(f"sudo mkdir -p {path}")
-            os.system(f"sudo chown admin:admin {path}")
-            return os.path.exists(path)
 
 
     # Ensure directories exist
