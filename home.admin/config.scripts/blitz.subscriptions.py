@@ -10,14 +10,21 @@ import sys
 import time
 from datetime import datetime
 
-import toml
-# add blitzpy to path (relative for dev environments)
 import os
+import sys
+
+# Set up paths before importing dependencies that might be in BlitzPy
 script_dir = os.path.dirname(os.path.abspath(__file__))
-# prioritize local BlitzPy if it exists (for repo testing)
 local_blitzpy = os.path.abspath(os.path.join(script_dir, '..', 'BlitzPy'))
 if os.path.exists(local_blitzpy):
     sys.path.insert(0, local_blitzpy)
+
+try:
+    import toml
+except ImportError:
+    # try to load from the raspiblitz python modules path if not in local BlitzPy
+    sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+    import toml
 
 from blitzpy import RaspiBlitzConfig
 from dialog import Dialog
@@ -60,6 +67,68 @@ def seconds_left(date_obj):
 
 
 #######################
+# STATUS FUNCTIONS
+#######################
+
+def get_short_status():
+    """Return a short string like '(1 Active)' for the main menu."""
+    active_count = 0
+    try:
+        if not os.path.isfile(SUBSCRIPTIONS_FILE): return ""
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+        
+        for key in ['subscriptions_ip2tor', 'subscriptions_letsencrypt', 'subscriptions_tunnelsats']:
+            if key in subs:
+                for sub in subs[key]:
+                    if sub.get('active'): active_count += 1
+                    
+        if active_count > 0:
+            return f"({active_count} Active)"
+    except:
+        pass
+    return ""
+
+def show_overall_status():
+    """Show a simple message box with all active subscriptions."""
+    d = Dialog(dialog="dialog", autowidgetsize=True)
+    d.set_background_title("RaspiBlitz Subscriptions")
+    
+    status_text = "CURRENT ACTIVE SUBSCRIPTIONS:\n\n"
+    found = False
+    
+    try:
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+        
+        # TunnelSats
+        if 'subscriptions_tunnelsats' in subs:
+            for sub in subs['subscriptions_tunnelsats']:
+                if sub.get('active'):
+                    status_text += f"• TunnelSats VPN: {sub.get('server_id')} (Active)\n"
+                    found = True
+                    
+        # IP2TOR
+        if 'subscriptions_ip2tor' in subs:
+            for sub in subs['subscriptions_ip2tor']:
+                if sub.get('active'):
+                    status_text += f"• IP2TOR Bridge: {sub.get('name')} (Active)\n"
+                    found = True
+                    
+        # LetsEncrypt
+        if 'subscriptions_letsencrypt' in subs:
+            for sub in subs['subscriptions_letsencrypt']:
+                if sub.get('active'):
+                    status_text += f"• LetsEncrypt: {sub.get('id')} (Active)\n"
+                    found = True
+                    
+    except Exception as e:
+        status_text += f"Error loading status: {e}\n"
+        
+    if not found:
+        status_text = "No active subscriptions found."
+        
+    d.msgbox(status_text, title="Overall Status", width=60, height=15)
+
+#######################
 # SSH MENU FUNCTIONS
 #######################
 
@@ -73,6 +142,8 @@ def my_subscriptions():
             count_subscriptions += len(subs['subscriptions_ip2tor'])
         if 'subscriptions_letsencrypt' in subs:
             count_subscriptions += len(subs['subscriptions_letsencrypt'])
+        if 'subscriptions_tunnelsats' in subs:
+            count_subscriptions += len(subs['subscriptions_tunnelsats'])
     except Exception as e:
         print(f"warning: {e}")
 
@@ -231,14 +302,9 @@ Subscription State: {"ACTIVE" if selected_sub['active'] else "NOT ACTIVE"}
 Live Status: {live_status}
 Expiry: {expiry}
 
-For renewals, status checks, and management, go to:
-MAIN MENU > SUBSCRIPTIONS > + TunnelSats VPN
-
-This will open the TunnelSats Management Menu where you can:
-- View detailed status
-- Renew/extend your subscription
-- Reinstall WireGuard configuration
-- Cancel subscription
+--- MANAGEMENT ---
+Go to: MAIN MENU > SUBSCRIBE > + TunnelSats VPN
+This will open the dedicated TunnelSats menu.
 '''
     else:
         text = "no text?! FIXME"
@@ -282,11 +348,16 @@ This will open the TunnelSats Management Menu where you can:
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "short-status":
+        print(get_short_status())
+        sys.exit(0)
+
     #######################
     # SSH MENU
     #######################
 
     choices = list()
+    choices.append(("STATUS", "Overall Status"))
     choices.append(("LIST", "My Subscriptions"))
     choices.append(("NEW1", "+ IP2TOR Bridge (paid)"))
     choices.append(("NEW2", "+ LetsEncrypt HTTPS Domain (free)"))
@@ -306,8 +377,14 @@ def main():
     # MANAGE SUBSCRIPTIONS
     #######################
 
+    if tag == "STATUS":
+        show_overall_status()
+        main()
+        sys.exit(0)
+
     if tag == "LIST":
         my_subscriptions()
+        main()
         sys.exit(0)
 
     ###############################

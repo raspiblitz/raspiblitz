@@ -197,7 +197,8 @@ OPTIONS+=(SETTINGS "Node Settings & Options")
 OPTIONS+=(SERVICES "Additional Apps & Services")
 OPTIONS+=(SYSTEM "Monitoring & Configuration")
 OPTIONS+=(CONNECT "Connect Apps & Show Credentials")
-OPTIONS+=(SUBSCRIBE "Manage Subscriptions")
+sub_status=$(python3 /home/admin/config.scripts/blitz.subscriptions.py short-status)
+OPTIONS+=(SUBSCRIBE "Manage Subscriptions ${sub_status}")
 OPTIONS+=(PASSWORD "Change Passwords")
 
 if [ "${touchscreen}" == "1" ]; then
