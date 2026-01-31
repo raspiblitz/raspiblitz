@@ -254,31 +254,33 @@ def claim_subscription(order_id):
         return None
 
 def _check_status_endpoint(order_id):
-    """Internal helper to check status endpoint with both POST and GET fallback."""
-    headers = get_api_headers()
-    # Try POST first (as HTTP 405 suggests GET might not be allowed)
-    payload = {"id": order_id}
-    log.debug(f"Status check payload: {payload}")
-    response = session.post(f"{API_BASE}/subscription/status", headers=headers, json=payload, timeout=10)
-    log.debug(f"POST status check response: status={response.status_code}")
+    """Internal helper to check status endpoint using GET for order IDs.
     
-    if response.status_code == 200:
-        return response.json()
-    elif response.status_code == 405:
-        # POST not allowed, try GET as fallback
-        log.debug("POST not allowed, trying GET with query parameter")
+    API Behavior:
+    - GET /subscription/status?id=<order_id> : Check order/payment status
+    - POST /subscription/status with {"wgPublicKey": ...} : Check existing subscription status
+    
+    This function is specifically for checking ORDER status (payment confirmation),
+    so it uses GET with query parameter.
+    """
+    headers = get_api_headers()
+    
+    # API requires GET with query param for checking Order ID
+    log.debug(f"Checking status via GET for order_id={order_id}")
+    try:
         response = session.get(f"{API_BASE}/subscription/status?id={order_id}", headers=headers, timeout=10)
         log.debug(f"GET status check response: status={response.status_code}")
+        
         if response.status_code == 200:
             return response.json()
-        else:
-            response_text = response.text if hasattr(response, 'text') else str(response.content)
-            log.warning(f"GET status check failed: HTTP {response.status_code}, response={response_text[:500]}")
-    else:
+        
         response_text = response.text if hasattr(response, 'text') else str(response.content)
-        log.warning(f"POST status check failed: HTTP {response.status_code}, response={response_text[:500]}")
-    
+        log.warning(f"GET status check failed: HTTP {response.status_code}, response={response_text[:500]}")
+    except Exception as e:
+        log.exception(f"Exception during status check: {e}")
+        
     return None
+
 
 def check_payment_status(order_id):
     """Check if payment was made and return config if ready."""
@@ -646,8 +648,8 @@ def handle_renew(d, subscription):
         return
     
     invoice = order_data.get("invoice")
-    # Try different possible field names for order_id
-    order_id = order_data.get('id') or order_data.get('orderId') or order_data.get('order_id') or order_data.get('orderID')
+    # Try different possible field names for order_id - prioritize orderId (dev2 API standard)
+    order_id = order_data.get('orderId') or order_data.get('id') or order_data.get('order_id') or order_data.get('orderID')
     
     # Validate order_id
     if not order_id:
@@ -661,6 +663,42 @@ def handle_renew(d, subscription):
     
     # Payment
     paid = False
+    
+    # Pre-flight: Decode and log invoice details before attempting payment
+    d.infobox("Preparing payment...", title="TunnelSats")
+    try:
+        # Try LND decode first
+        log.info(f"Decoding invoice: {invoice[:30]}...")
+        decode_proc = subprocess.run(
+            ["lncli", "decodepayreq", invoice, "--json"],
+            capture_output=True, text=True, timeout=5
+        )
+        if decode_proc.returncode == 0:
+            decoded = json.loads(decode_proc.stdout)
+            amount_sats = decoded.get('num_satoshis', decoded.get('num_msat', 0))
+            if isinstance(amount_sats, str):
+                amount_sats = int(amount_sats)
+            log.info(f"INTENDING TO PAY: {amount_sats} sats to {decoded.get('destination', 'unknown')}")
+        else:
+            # Try CLN decode as fallback
+            decode_proc = subprocess.run(
+                ["lightning-cli", "decode", invoice],
+                capture_output=True, text=True, timeout=5
+            )
+            if decode_proc.returncode == 0:
+                decoded = json.loads(decode_proc.stdout)
+                # CLN uses amount_msat
+                amount_msat = decoded.get('amount_msat', 0)
+                if isinstance(amount_msat, str) and amount_msat.endswith('msat'):
+                    amount_msat = int(amount_msat[:-4])
+                elif isinstance(amount_msat, str):
+                    amount_msat = int(amount_msat)
+                log.info(f"INTENDING TO PAY: {int(amount_msat/1000)} sats to {decoded.get('payee', 'unknown')}")
+            else:
+                log.warning(f"Could not decode invoice for pre-flight logging")
+    except Exception as e:
+        log.warning(f"Could not decode invoice for logging: {e}")
+    
     d.infobox("Attempting automatic payment via local node...", title="TunnelSats")
     
     # Try LND first
@@ -976,8 +1014,8 @@ def create_ssh_dialog():
             raise BlitzError(f"HTTP {response.status_code}", {"response_text": response_text})
         order_data = response.json()
         log.debug(f"Full order creation response: {json.dumps(order_data, indent=2)}")
-        # Try different possible field names for order_id
-        order_id = order_data.get('id') or order_data.get('orderId') or order_data.get('order_id') or order_data.get('orderID')
+        # Try different possible field names for order_id - prioritize orderId (dev2 API standard)
+        order_id = order_data.get('orderId') or order_data.get('id') or order_data.get('order_id') or order_data.get('orderID')
         log.info(f"Order created successfully: order_id={order_id}, invoice_length={len(order_data.get('invoice', ''))}, response_keys={list(order_data.keys())}")
     except Exception as e:
         log.exception(f"Exception during order creation: {e}")
@@ -988,8 +1026,8 @@ def create_ssh_dialog():
         return
 
     invoice = order_data.get("invoice")
-    # Try different possible field names for order_id
-    order_id = order_data.get('id') or order_data.get('orderId') or order_data.get('order_id') or order_data.get('orderID')
+    # Try different possible field names for order_id - prioritize orderId (dev2 API standard)
+    order_id = order_data.get('orderId') or order_data.get('id') or order_data.get('order_id') or order_data.get('orderID')
     
     # Validate order_id
     if not order_id:
@@ -1003,6 +1041,42 @@ def create_ssh_dialog():
 
     # PHASE 5: Payment
     paid = False
+    
+    # Pre-flight: Decode and log invoice details before attempting payment
+    d.infobox("Preparing payment...", title="TunnelSats")
+    try:
+        # Try LND decode first
+        log.info(f"Decoding invoice: {invoice[:30]}...")
+        decode_proc = subprocess.run(
+            ["lncli", "decodepayreq", invoice, "--json"],
+            capture_output=True, text=True, timeout=5
+        )
+        if decode_proc.returncode == 0:
+            decoded = json.loads(decode_proc.stdout)
+            amount_sats = decoded.get('num_satoshis', decoded.get('num_msat', 0))
+            if isinstance(amount_sats, str):
+                amount_sats = int(amount_sats)
+            log.info(f"INTENDING TO PAY: {amount_sats} sats to {decoded.get('destination', 'unknown')}")
+        else:
+            # Try CLN decode as fallback
+            decode_proc = subprocess.run(
+                ["lightning-cli", "decode", invoice],
+                capture_output=True, text=True, timeout=5
+            )
+            if decode_proc.returncode == 0:
+                decoded = json.loads(decode_proc.stdout)
+                # CLN uses amount_msat
+                amount_msat = decoded.get('amount_msat', 0)
+                if isinstance(amount_msat, str) and amount_msat.endswith('msat'):
+                    amount_msat = int(amount_msat[:-4])
+                elif isinstance(amount_msat, str):
+                    amount_msat = int(amount_msat)
+                log.info(f"INTENDING TO PAY: {int(amount_msat/1000)} sats to {decoded.get('payee', 'unknown')}")
+            else:
+                log.warning(f"Could not decode invoice for pre-flight logging")
+    except Exception as e:
+        log.warning(f"Could not decode invoice for logging: {e}")
+    
     d.infobox("Attempting automatic payment via local node...", title="TunnelSats")
     
     # Try LND first
