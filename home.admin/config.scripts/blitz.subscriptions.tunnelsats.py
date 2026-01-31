@@ -31,7 +31,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == "-h" or sys.argv[1] == "help":
     print("# blitz.subscriptions.tunnelsats.py create-ssh-dialog")
     print("# blitz.subscriptions.tunnelsats.py subscriptions-list")
     print("# blitz.subscriptions.tunnelsats.py subscription-cancel <id>")
-    print("# blitz.subscriptions.tunnelsats.py check-payment <order_id>")
+    print("# blitz.subscriptions.tunnelsats.py check-payment <payment_hash>")
     print("#")
     print("# Debug logging: Set TUNNELSATS_DEBUG=1 or DEBUG=1 to enable verbose logging")
     print("# Logs are saved to: /home/admin/raspiblitz/logs/tunnelsats.log")
@@ -62,54 +62,51 @@ session = requests.session()
 #####################
 
 def setup_debug_logging():
-    """Setup debug logging to /home/admin/raspiblitz/logs/tunnelsats.log if debug is enabled."""
-    # Check for debug level via environment variable or config
-    # Note: RaspiBlitzConfig uses attribute access, not dict-like .get()
+    """Setup logging to /home/admin/raspiblitz/logs/tunnelsats.log."""
     cfg_debug = getattr(cfg, "tunnelsats_debug", "") if cfg else ""
-    debug_enabled = (
+    debug_requested = (
         os.environ.get("TUNNELSATS_DEBUG", "").lower() in ("1", "true", "yes", "on") or
         os.environ.get("DEBUG", "").lower() in ("1", "true", "yes", "on") or
         str(cfg_debug).lower() in ("1", "true", "yes", "on")
     )
 
-    
-    if not debug_enabled:
-        # Return a no-op logger
-        return logging.getLogger("tunnelsats")
-    
-    # Create logs directory if it doesn't exist
-    log_dir = Path("/home/admin/raspiblitz/logs")
-    log_dir.mkdir(parents=True, exist_ok=True)
-    log_file = log_dir / "tunnelsats.log"
-    
-    # Setup logger
     logger = logging.getLogger("tunnelsats")
-    logger.setLevel(logging.DEBUG)
-    
-    # Remove existing handlers to avoid duplicates
+    logger.propagate = False # Avoid double logging
     logger.handlers.clear()
     
-    # Create file handler
-    file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
-    file_handler.setLevel(logging.DEBUG)
+    # Always set to at least INFO, DEBUG if requested
+    level = logging.DEBUG if debug_requested else logging.INFO
+    logger.setLevel(level)
     
-    # Create formatter with detailed information
-    formatter = logging.Formatter(
-        '%(asctime)s [%(levelname)8s] %(name)s.%(funcName)s:%(lineno)d - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    file_handler.setFormatter(formatter)
-    
-    logger.addHandler(file_handler)
-    
-    # Also log to stderr for immediate visibility
+    log_dir = Path("/home/admin/raspiblitz/logs")
+    try:
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_file = log_dir / "tunnelsats.log"
+        
+        file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
+        file_handler.setLevel(level)
+        
+        formatter = logging.Formatter(
+            '%(asctime)s [%(levelname)s] %(name)s:%(lineno)d - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    except Exception as e:
+        # Fallback to stderr only if file writing fails
+        print(f"Warning: Could not setup log file: {e}", file=sys.stderr)
+
+    # Always log to stderr (console) as well
     console_handler = logging.StreamHandler(sys.stderr)
-    console_handler.setLevel(logging.DEBUG)
-    console_handler.setFormatter(formatter)
+    console_handler.setLevel(level)
+    console_handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
     logger.addHandler(console_handler)
     
-    logger.debug(f"Debug logging enabled. Logging to: {log_file}")
+    if debug_requested:
+        logger.debug("Verbose debug logging enabled")
+        
     return logger
+
 
 # Initialize logger
 log = setup_debug_logging()
@@ -224,54 +221,62 @@ def show_invoice_in_terminal(invoice, order_id, invoice_file):
     except:
         pass
 
-def claim_subscription(order_id):
+def claim_subscription(payment_hash, order_id=None):
     """Claim/activate subscription after payment confirmation.
     
     POST /api/public/v1/subscription/claim
-    Payload: {"id": order_id}
+    Payload: {"orderId": order_id, "paymentHash": payment_hash}
     """
-    if not order_id or order_id == "None":
-        log.error(f"Cannot claim subscription: invalid order_id={order_id}")
+    if not payment_hash or payment_hash == "None":
+        log.error(f"Cannot claim subscription: invalid payment_hash={payment_hash}")
         return None
         
-    log.debug(f"Claiming subscription for order_id={order_id}")
+    log.info(f"Attempting to claim subscription for payment_hash={payment_hash[:8]}..., order_id={order_id}")
     try:
         headers = get_api_headers()
-        payload = {"id": order_id}
+        # API requires identification. Best to send both if available.
+        payload = {"paymentHash": payment_hash}
+        if order_id:
+            payload["orderId"] = order_id
+        
         log.debug(f"Claim request: POST {API_BASE}/subscription/claim, payload={payload}")
         response = session.post(f"{API_BASE}/subscription/claim", headers=headers, json=payload, timeout=30)
-        log.debug(f"Claim response: status={response.status_code}, headers={dict(response.headers)}")
+        
+        log.debug(f"Claim response status: {response.status_code}")
         if response.status_code == 200:
             config_data = response.json()
-            log.debug(f"Claim successful, received config with keys: {list(config_data.keys())}")
-            log.debug(f"Full claim response: {json.dumps(config_data, indent=2)}")
+            # If server generates keys, they are in config_data (Easy Mode)
+            log.debug(f"Claim successful, received data with keys: {list(config_data.keys())}")
             return config_data
         else:
             response_text = response.text if hasattr(response, 'text') else str(response.content)
-            log.error(f"Claim failed: HTTP {response.status_code}, response={response_text[:500]}")
-            eprint(f"Claim failed: HTTP {response.status_code} - {response_text[:200]}")
+            log.error(f"Claim failed with HTTP {response.status_code}: {response_text[:500]}")
+            # Log exact response for debugging
+            log.debug(f"Full claim error response: {response_text}")
             return None
     except Exception as e:
         log.exception(f"Exception while claiming subscription: {e}")
-        eprint(f"Error claiming subscription: {e}")
         return None
 
-def _check_status_endpoint(order_id):
-    """Internal helper to check status endpoint using GET for order IDs.
+
+
+def _check_status_endpoint(payment_hash):
+    """Internal helper to check payment status using GET with paymentHash path parameter.
     
-    API Behavior:
-    - GET /subscription/status?id=<order_id> : Check order/payment status
-    - POST /subscription/status with {"wgPublicKey": ...} : Check existing subscription status
+    API Behavior (from OpenAPI spec):
+    - GET /api/public/v1/subscription/{paymentHash} : Check payment status / heal
     
-    This function is specifically for checking ORDER status (payment confirmation),
-    so it uses GET with query parameter.
+    This function checks if payment was confirmed. The paymentHash comes from
+    the order creation response.
     """
     headers = get_api_headers()
     
-    # API requires GET with query param for checking Order ID
-    log.debug(f"Checking status via GET for order_id={order_id}")
+    # API uses paymentHash as path parameter, NOT query parameter
+    url = f"{API_BASE}/subscription/{payment_hash}"
+    log.debug(f"Checking status via GET for payment_hash={payment_hash}")
+    log.debug(f"Status check URL: {url}")
     try:
-        response = session.get(f"{API_BASE}/subscription/status?id={order_id}", headers=headers, timeout=10)
+        response = session.get(url, headers=headers, timeout=10)
         log.debug(f"GET status check response: status={response.status_code}")
         
         if response.status_code == 200:
@@ -285,11 +290,16 @@ def _check_status_endpoint(order_id):
     return None
 
 
-def check_payment_status(order_id):
-    """Check if payment was made and return config if ready."""
-    log.debug(f"Checking payment status for order_id={order_id}")
+def check_payment_status(payment_hash, order_id=None):
+    """Check if payment was made and return config if ready.
+    
+    Args:
+        payment_hash: The paymentHash from order creation (used for status check)
+        order_id: The orderId from order creation (used for claim, optional - falls back to payment_hash)
+    """
+    log.debug(f"Checking payment status for payment_hash={payment_hash}, order_id={order_id}")
     try:
-        status_data = _check_status_endpoint(order_id)
+        status_data = _check_status_endpoint(payment_hash)
         if not status_data:
             return None
             
@@ -299,10 +309,13 @@ def check_payment_status(order_id):
         if status in ["paid", "successful"]:
             log.info(f"Payment confirmed (status={status}), attempting to claim subscription")
             # Payment confirmed, now claim it to get the config
-            config_data = claim_subscription(order_id)
+            config_data = claim_subscription(payment_hash, order_id)
             if config_data:
-                log.info("Subscription claimed successfully")
-                return config_data
+                log.info("Subscription claimed successfully, merging with status data")
+                # Merge status_data into config_data to preserve metadata like serverId
+                merged_data = status_data.copy()
+                merged_data.update(config_data)
+                return merged_data
             # If claim fails, return status data anyway (might already be claimed)
             log.warning("Claim failed but payment confirmed, returning status data")
             return status_data
@@ -313,6 +326,7 @@ def check_payment_status(order_id):
         log.exception(f"Exception while checking payment status: {e}")
         eprint(f"Error checking payment status: {e}")
         return None
+
 
 def get_local_pubkey(server_id=None):
     # Find config file
@@ -448,30 +462,78 @@ def subscriptions_cancel(s_id):
 def save_config_and_persist(config_json, server_id):
     # Config files are stored in: /mnt/hdd/app-data/tunnelsats/tunnelsats_{server_id}.conf
     log.info(f"Saving config for server_id={server_id}")
-    conf_dir = Path(CONFIG_DIR)
-    conf_dir.mkdir(parents=True, exist_ok=True)
-    conf_file = conf_dir / f"tunnelsats_{server_id}.conf"
+    conf_file = Path(CONFIG_DIR) / f"tunnelsats_{server_id}.conf"
     log.debug(f"Config file path: {conf_file}")
+
     
     # Extract data from API response
-    # NOTE: Adjusting keys based on the structure observed in the bash script
-    wg_data = config_json.get("wireguard", {})
-    server_data = config_json.get("server", {})
-    log.debug(f"Config JSON keys: wireguard={list(wg_data.keys())}, server={list(server_data.keys())}")
+    # Extract data from API response
+    # Support multiple formats: 'wireguard', 'peer', 'interface', or 'config' for client config info
+    # Support 'server' or 'server_info' for server connection info
+    wg_data = config_json.get("wireguard") or config_json.get("peer") or config_json.get("interface") or config_json.get("config") or {}
+    server_data = config_json.get("server") or config_json.get("server_info") or {}
     
-    priv_key = wg_data.get("privateKey")
-    address = wg_data.get("address")
-    dns = wg_data.get("dns")
-    server_pub = server_data.get("publicKey")
-    endpoint = server_data.get("endpoint")
-    psk = wg_data.get("presharedKey")
+    # If config_json itself has the keys (flat structure)
+    if not wg_data or "privateKey" not in wg_data:
+        if isinstance(config_json, dict) and ("privateKey" in config_json or "private_key" in config_json):
+            wg_data = config_json
+            
+    # Handle the case where 'config' might be a string (full .conf content)
+    if isinstance(wg_data, str):
+        log.debug("wg_data is a string, attempting to parse as inline config")
+        # Extract fields using regex
+        priv_match = re.search(r"PrivateKey\s*=\s*(\S+)", wg_data, re.IGNORECASE)
+        addr_match = re.search(r"Address\s*=\s*(\S+)", wg_data, re.IGNORECASE)
+        pub_match = re.search(r"PublicKey\s*=\s*(\S+)", wg_data, re.IGNORECASE)
+        psk_match = re.search(r"PresharedKey\s*=\s*(\S+)", wg_data, re.IGNORECASE)
+        dns_match = re.search(r"DNS\s*=\s*(\S+)", wg_data, re.IGNORECASE)
+        end_match = re.search(r"Endpoint\s*=\s*(\S+)", wg_data, re.IGNORECASE)
+        
+        priv_key = priv_match.group(1) if priv_match else None
+        address = addr_match.group(1) if addr_match else None
+        server_pub = pub_match.group(1) if pub_match else None
+        psk = psk_match.group(1) if psk_match else None
+        dns = dns_match.group(1) if dns_match else "1.1.1.1"
+        endpoint = end_match.group(1) if end_match else None
+    else:
+        # Support various field name variations (camelCase, snake_case, PascalCase)
+        priv_key = wg_data.get("privateKey") or wg_data.get("private_key") or wg_data.get("PrivateKey")
+        address = wg_data.get("address") or wg_data.get("Address")
+        dns = wg_data.get("dns") or wg_data.get("DNS") or "1.1.1.1"
+        server_pub = server_data.get("publicKey") or server_data.get("public_key") or server_data.get("PublicKey") or wg_data.get("publicKey")
+        endpoint = server_data.get("endpoint") or server_data.get("Endpoint") or server_data.get("domain") or wg_data.get("endpoint")
+        psk = wg_data.get("presharedKey") or wg_data.get("preshared_key") or wg_data.get("PresharedKey")
     
-    log.debug(f"Extracted config fields: address={address}, dns={dns}, endpoint={endpoint}, has_priv_key={bool(priv_key)}, has_server_pub={bool(server_pub)}, has_psk={bool(psk)}")
+    # Final fallbacks from server_data if not found in wg_data (dict or string)
+    if not server_pub:
+        server_pub = server_data.get("publicKey") or server_data.get("public_key") or server_data.get("PublicKey")
+    if not endpoint:
+        endpoint = server_data.get("endpoint") or server_data.get("Endpoint") or server_data.get("domain")
+    
+    log.debug(f"Extracted fields: address={address}, dns={dns}, endpoint={endpoint}, has_priv_key={bool(priv_key)}, has_pub_key={bool(server_pub)}")
+
 
     if not all([priv_key, address, server_pub, endpoint]):
-        missing = [k for k, v in [("privateKey", priv_key), ("address", address), ("publicKey", server_pub), ("endpoint", endpoint)] if not v]
+        missing = []
+        if not priv_key: missing.append("privateKey")
+        if not address: missing.append("address")
+        if not server_pub: missing.append("publicKey")
+        if not endpoint: missing.append("endpoint")
+        
         log.error(f"Missing required config fields: {missing}")
-        raise BlitzError("Missing Key Fields", {"config_data": config_json})
+        # Identify if we are in the 'isProvisioned' state without keys
+        if config_json.get("isProvisioned") and not priv_key:
+            log.warning("Subscription is marked as provisioned but no private key was returned. This usually happens when the 'claim' endpoint fails or is called multiple times.")
+            
+        # MANDATORY DIAGNOSTIC: Print to stderr so user sees it even without file logs
+        eprint("\n--- DIAGNOSTIC DATA ---")
+        eprint(f"Missing: {missing}")
+        eprint(f"Full Response: {json.dumps(config_json, indent=2)}")
+        eprint("--- END DIAGNOSTIC ---\n")
+        
+        raise BlitzError("Missing Key Fields", {"missing": missing, "received_keys": list(config_json.keys())})
+
+
 
     content = f"""[Interface]
 PrivateKey = {priv_key}
@@ -485,10 +547,65 @@ Endpoint = {endpoint}
 AllowedIPs = 0.0.0.0/0, ::/0
 PersistentKeepalive = 25
 """
-    with open(conf_file, "w") as f:
-        f.write(content)
+    def safe_write_file(path, data, mode=0o644):
+        """Try to write file as user, fallback to sudo if permission denied."""
+        path = str(path)
+        current_uid = os.getuid()
+        current_gid = os.getgid()
+        try:
+            # Try normal write
+            with open(path, "w") as f:
+                f.write(data)
+            os.chmod(path, mode)
+            log.debug(f"Successfully wrote {path} as user (UID={current_uid}, GID={current_gid})")
+            return True
+        except Exception as e:
+            log.debug(f"Permission denied for {path} as user (UID={current_uid}, GID={current_gid}): {e}. Trying via sudo.")
+            temp_path = f"/tmp/tunnelsats_write_{os.getpid()}"
+            try:
+                # Write to a temp file we definitely have access to
+                with open(temp_path, "w") as f:
+                    f.write(data)
+                
+                # Move and set permissions via sudo
+                perm_str = format(mode, 'o')
+                os.system(f"sudo mv {temp_path} {path}")
+                os.system(f"sudo chown admin:admin {path}")
+                os.system(f"sudo chmod {perm_str} {path}")
+                
+                if os.path.exists(path):
+                    log.debug(f"Successfully wrote {path} via sudo fallback")
+                    return True
+                return False
+            except Exception as e2:
+                log.error(f"Failed to write {path} even with sudo: {e2}")
+                return False
+
+    def ensure_dir(path):
+        """Ensure directory exists, try as user then sudo."""
+        path = str(path)
+        current_uid = os.getuid()
+        if os.path.exists(path):
+            return True
+        try:
+            os.makedirs(path, exist_ok=True)
+            log.debug(f"Successfully created directory {path} as user (UID={current_uid})")
+            return True
+        except Exception as e:
+            log.debug(f"Could not create directory {path} as user UID={current_uid} ({e}), trying sudo")
+            os.system(f"sudo mkdir -p {path}")
+            os.system(f"sudo chown admin:admin {path}")
+            return os.path.exists(path)
+
+
+    # Ensure directories exist
+    if not ensure_dir(CONFIG_DIR):
+        log.error(f"Failed to ensure directory exists: {CONFIG_DIR}")
+        raise BlitzError("Directory Creation Failed", {"path": str(CONFIG_DIR)})
     
-    os.chmod(conf_file, 0o600)
+    # Save config file
+    if not safe_write_file(conf_file, content, mode=0o600):
+        raise BlitzError("Write Failed", {"path": str(conf_file)})
     
     # Store in subscriptions.toml
     subscription = {
@@ -502,27 +619,158 @@ PersistentKeepalive = 25
     }
     
     # Load and update subscriptions
-    os.system(f"sudo chown admin:admin {SUBSCRIPTIONS_FILE}")
+    subs_dir = os.path.dirname(SUBSCRIPTIONS_FILE)
+    ensure_dir(subs_dir)
+    
+    # Ensure file exists before loading
+    if not os.path.exists(SUBSCRIPTIONS_FILE):
+        safe_write_file(SUBSCRIPTIONS_FILE, "")
+
+    subs = {}
     if Path(SUBSCRIPTIONS_FILE).is_file():
-        subs = toml.load(SUBSCRIPTIONS_FILE)
-    else:
-        subs = {}
+        try:
+            # Try reading as current user
+            subs = toml.load(SUBSCRIPTIONS_FILE)
+        except PermissionError:
+            # Try reading via sudo/cat
+            try:
+                toml_content = subprocess.check_output(["sudo", "cat", SUBSCRIPTIONS_FILE]).decode()
+                subs = toml.loads(toml_content)
+            except:
+                subs = {}
+        except:
+            subs = {}
     
     if "subscriptions_tunnelsats" not in subs:
         subs["subscriptions_tunnelsats"] = []
     
-    subs["subscriptions_tunnelsats"].append(subscription)
+    # Check if subscription already exists and update it, or add new one
+    exists = False
+    for i, s in enumerate(subs["subscriptions_tunnelsats"]):
+        if s.get("server_id") == server_id:
+            subs["subscriptions_tunnelsats"][i] = subscription
+            exists = True
+            break
     
-    with open(SUBSCRIPTIONS_FILE, "w") as f:
-        f.write(toml.dumps(subs))
+    if not exists:
+        subs["subscriptions_tunnelsats"].append(subscription)
     
+    if not safe_write_file(SUBSCRIPTIONS_FILE, toml.dumps(subs), mode=0o644):
+        log.error(f"Failed to persist subscription metadata to {SUBSCRIPTIONS_FILE}")
+        # Don't raise here, config is already saved
+    
+    log.info(f"Subscription persisted to {SUBSCRIPTIONS_FILE}")
     return conf_file, subscription
+
+
+def show_success_guidance(conf_file, server_id):
+    """Show detailed installation instructions after success."""
+    qr_text = ""
+    if Path("/tmp/tunnelsats_qr.txt").is_file():
+        try:
+            with open("/tmp/tunnelsats_qr.txt", "r") as f:
+                qr_text = f.read()
+        except:
+            pass
+            
+    instructions = f"""Subscription activated successfully!
+
+Your configuration has been saved to:
+{conf_file}
+
+NEXT STEPS:
+1) Exit this menu (select 'Finish' or press ESC)
+2) On the command line, run the verified installer:
+
+"""
+    
+    installer_path = Path(CONFIG_DIR) / "tunnelsats.sh"
+    if installer_path.is_file():
+        instructions += f"sudo bash {installer_path} install --config {conf_file}\n"
+    else:
+        instructions += f"wget https://raw.githubusercontent.com/Tunnelsats/tunnelsats/main/scripts/tunnelsats.sh\n"
+        instructions += f"sudo bash tunnelsats.sh install --config {conf_file}\n"
+
+    instructions += """
+--- CONFIG BACKUP (CRITICAL) ---
+Please copy/save this configuration now!
+"""
+    if qr_text:
+        instructions += f"\nQR Code:\n{qr_text}\n"
+    
+    try:
+        with open(conf_file, "r") as f:
+            instructions += f"\nFile Content:\n{f.read()}\n"
+    except:
+        pass
+
+    d.msgbox(instructions, title="Success & Next Steps", width=75, height=30)
+
+
+def ensure_installer(d):
+    """Ensure tunnelsats.sh is downloaded and verified in CONFIG_DIR."""
+    installer_path = Path(CONFIG_DIR) / "tunnelsats.sh"
+    
+    # Check if already exists
+    if installer_path.is_file():
+        log.debug(f"Installer already exists at {installer_path}")
+        return installer_path
+
+    ensure_dir(CONFIG_DIR)
+    d.infobox("Downloading and verifying TunnelSats installer...", title="Maintenance")
+    
+    # We use the pinned version from the official guide for security/verification
+    # Guide: https://tunnelsats.com/guide#step-2-install-tunnelsats-software
+    script_url = "https://raw.githubusercontent.com/Tunnelsats/tunnelsats/5050d8b2e17ebed5584483d44ce808c749f3320c/scripts/tunnelsats.sh"
+    expected_hash = "bd32dbb8362b15bdad035b4bfda1b3d348f410a50edb8e2a41997d82153a0d92"
+    
+    tmp_path = f"/tmp/tunnelsats_{os.getpid()}.sh"
+    try:
+        log.info(f"Downloading installer from {script_url}")
+        r = session.get(script_url, timeout=30)
+        r.raise_for_status()
+        with open(tmp_path, "w") as f:
+            f.write(r.text)
+            
+        # Verify hash
+        log.debug("Verifying installer checksum")
+        import hashlib
+        sha256_hash = hashlib.sha256()
+        with open(tmp_path, "rb") as f:
+            for byte_block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(byte_block)
+        
+        actual_hash = sha256_hash.hexdigest()
+        if actual_hash != expected_hash:
+            log.error(f"Checksum mismatch! Expected {expected_hash}, got {actual_hash}")
+            d.msgbox(f"Security Alert: Installer checksum mismatch!\n\nExpected: {expected_hash}\nActual: {actual_hash}\n\nAborting for safety.", title="Security Error")
+            if os.path.exists(tmp_path): os.remove(tmp_path)
+            return None
+            
+        # Move to CONFIG_DIR as admin
+        os.system(f"sudo mv {tmp_path} {installer_path}")
+        os.system(f"sudo chown admin:admin {installer_path}")
+        os.system(f"sudo chmod +x {installer_path}")
+        
+        log.info(f"Installer successfully downloaded and verified at {installer_path}")
+        return installer_path
+        
+    except Exception as e:
+        log.error(f"Failed to download installer: {e}")
+        d.msgbox(f"Failed to download installer:\n{e}", title="Error")
+        if os.path.exists(tmp_path): os.remove(tmp_path)
+        return None
+
+
+
 
 # API Settings
 # Use dev API for testing, production API when available
-# Production: https://api.tunnelsats.com/api/public/v1
+# Production: https://tunnelsats.com/api/public/v1
 # Dev: https://dev2.tunnelsats.com/api/public/v1
 API_BASE = "https://dev2.tunnelsats.com/api/public/v1"
+
+
 
 def load_env_file():
     """Load environment variables from .tunnelsats.env file if it exists."""
@@ -605,7 +853,9 @@ def show_status_dialog(d, subscription):
     else:
         status_text += "Config file missing - cannot check live status\n"
     
-    d.msgbox(status_text, title="Subscription Status")
+    # Use yesno with custom labels to provide the "LIVE" option
+    code = d.yesno(status_text, title="Subscription Status", yes_label="OK", no_label="LIVE", width=65, height=15)
+    return code
 
 def handle_renew(d, subscription):
     """Handle subscription renewal flow."""
@@ -653,16 +903,21 @@ def handle_renew(d, subscription):
     invoice = order_data.get("invoice")
     # Try different possible field names for order_id - prioritize orderId (dev2 API standard)
     order_id = order_data.get('orderId') or order_data.get('id') or order_data.get('order_id') or order_data.get('orderID')
+    # Get paymentHash - this is needed for status checks (API uses GET /subscription/{paymentHash})
+    payment_hash = order_data.get('paymentHash') or order_data.get('payment_hash')
     
-    # Validate order_id
-    if not order_id:
-        log.error(f"No order ID found in response. Response keys: {list(order_data.keys())}, Full response: {json.dumps(order_data, indent=2)}")
-        d.msgbox(f"No order ID received from API.\nResponse: {json.dumps(order_data)}", title="Error")
+    log.info(f"Renewal order details: order_id={order_id}, payment_hash={payment_hash[:20] if payment_hash else None}...")
+    
+    # Validate we have what we need - paymentHash is required for status checks
+    if not payment_hash:
+        log.error(f"No paymentHash found in renewal response. Response keys: {list(order_data.keys())}, Full response: {json.dumps(order_data, indent=2)}")
+        d.msgbox(f"No paymentHash received from API.\nResponse keys: {list(order_data.keys())}", title="Error")
         return
     
     if not invoice:
         d.msgbox(f"No invoice received from API.\nResponse: {json.dumps(order_data)}", title="Error")
         return
+
     
     # Payment
     paid = False
@@ -769,7 +1024,7 @@ def handle_renew(d, subscription):
         
         # After user returns, check if payment was made
         d.infobox("Checking if payment was made...", title="TunnelSats")
-        config_json = check_payment_status(order_id)
+        config_json = check_payment_status(payment_hash, order_id)
         
         if config_json:
             d.msgbox("Payment confirmed! Processing renewal...", title="Success")
@@ -779,10 +1034,10 @@ def handle_renew(d, subscription):
                           title="Payment Status", yes_label="Check Again", no_label="Cancel")
             if code == d.OK:
                 # Check one more time
-                config_json = check_payment_status(order_id)
+                config_json = check_payment_status(payment_hash, order_id)
                 if not config_json:
                     d.msgbox("Payment still not confirmed.\n\nYou can check later by running:\n" +
-                            f"python3 /home/admin/config.scripts/blitz.subscriptions.tunnelsats.py check-payment {order_id}",
+                            f"python3 /home/admin/config.scripts/blitz.subscriptions.tunnelsats.py check-payment {payment_hash}",
                             title="Not Confirmed", width=70, height=10)
                     return
             else:
@@ -794,16 +1049,17 @@ def handle_renew(d, subscription):
         max_attempts = 30
         for attempt in range(max_attempts):
             try:
-                status_data = _check_status_endpoint(order_id)
+                status_data = _check_status_endpoint(payment_hash)
                 if status_data:
                     status = status_data.get("status", "").lower()
                     if status in ["paid", "successful"]:
                         # Payment confirmed, now claim it to get the config
-                        config_data = claim_subscription(order_id)
-                        if config_data and ("wireguard" in config_data or "server" in config_data):
+                        config_data = claim_subscription(payment_hash, order_id)
+                        if config_data and any(k in config_data for k in ["wireguard", "server", "peer", "config", "interface"]):
                             config_json = config_data
                         else:
                             # If claim fails, use status data (might already be claimed)
+
                             config_json = status_data
                         break
             except:
@@ -822,7 +1078,6 @@ def handle_renew(d, subscription):
 def handle_reinstall(d, subscription):
     """Reinstall/reconfigure the WireGuard setup."""
     server_id = subscription.get("server_id")
-    # Config files are stored in: /mnt/hdd/app-data/tunnelsats/tunnelsats_{server_id}.conf
     conf_file = Path(CONFIG_DIR) / f"tunnelsats_{server_id}.conf"
     
     if not conf_file.is_file():
@@ -834,18 +1089,14 @@ def handle_reinstall(d, subscription):
     if code != d.OK:
         return
     
-    # Find core script
-    core_script = Path("/home/admin/tunnelsats/scripts/tunnelsats.sh")
-    if not core_script.is_file():
-        core_script = Path("/home/hakuna/tunnelsats/scripts/tunnelsats.sh")
-    
-    if core_script.is_file():
-        d.infobox("Triggering technical installation via tunnelsats.sh...", title="TunnelSats")
-        os.system(f"sudo bash {core_script} install --config {conf_file}")
-        d.msgbox("Reinstallation complete!", title="Success")
-    else:
-        d.msgbox(f"Core script not found.\nManual installation required:\nsudo bash tunnelsats.sh install --config {conf_file}", 
-                 title="Manual Step Required")
+    # Ensure installer is present
+    installer = ensure_installer(d)
+    if not installer:
+        return
+
+    d.infobox("Triggering technical installation via tunnelsats.sh...", title="TunnelSats")
+    os.system(f"sudo bash {installer} install --config {conf_file}")
+    d.msgbox("Reinstallation complete!", title="Success")
 
 def create_ssh_dialog():
     log.info("Starting TunnelSats subscription dialog")
@@ -866,10 +1117,13 @@ def create_ssh_dialog():
 
     # Check for pending order (user might have exited during payment)
     pending_order_file = Path("/tmp/tunnelsats_order_id.txt")
-    if pending_order_file.exists():
+    pending_payment_hash_file = Path("/tmp/tunnelsats_payment_hash.txt")
+    if pending_order_file.exists() and pending_payment_hash_file.exists():
         try:
             with open(pending_order_file, "r") as f:
                 pending_order_id = f.read().strip()
+            with open(pending_payment_hash_file, "r") as f:
+                pending_payment_hash = f.read().strip()
             
             code = d.yesno(
                 "A pending payment was detected.\n\n"
@@ -878,60 +1132,70 @@ def create_ssh_dialog():
             )
             if code == d.OK:
                 d.infobox("Checking payment status...", title="TunnelSats")
-                config_json = check_payment_status(pending_order_id)
+                config_json = check_payment_status(pending_payment_hash, pending_order_id)
                 if config_json:
                     d.msgbox("Payment confirmed! Processing subscription...", title="Success")
                     # Get server_id from invoice file or ask user
                     # For now, we'll need to handle this in the create flow
-                    # Remove pending order file
+                    # Remove pending order files
                     pending_order_file.unlink()
+                    pending_payment_hash_file.unlink()
                 else:
                     d.msgbox("Payment not yet confirmed.\n\nYou can check again later.", title="Not Confirmed")
         except:
             pass
 
+
     # If subscription exists, show management menu
     if len(existing_subs) > 0:
         subscription = existing_subs[0]  # Use first subscription
         
-        choices = [
-            ("STATUS", "View Subscription Status"),
-            ("RENEW", "Renew/Extend Subscription"),
-            ("REINSTALL", "Reinstall WireGuard Config"),
-            ("CANCEL", "Cancel Subscription"),
-            ("NEW", "Create New Subscription (will replace existing)")
-        ]
-        
-        code, action = d.menu(
-            f"Existing subscription found: {subscription.get('name', 'TunnelSats VPN')}\n\nSelect an action:",
-            choices=choices, width=60, height=12, title="TunnelSats Management")
-        
-        if code != d.OK:
-            return
-        
-        if action == "STATUS":
-            show_status_dialog(d, subscription)
-        elif action == "RENEW":
-            handle_renew(d, subscription)
-        elif action == "REINSTALL":
-            handle_reinstall(d, subscription)
-        elif action == "CANCEL":
-            sub_id = subscription.get("id")
-            if sub_id:
-                code = d.yesno(f"Cancel subscription: {subscription.get('name')}?\n\nThis will remove it from your subscriptions list.", 
-                              title="Cancel Subscription", yes_label="Yes, Cancel", no_label="No")
-                if code == d.OK:
-                    subscriptions_cancel(sub_id)
-                    d.msgbox("Subscription cancelled.", title="Cancelled")
-        elif action == "NEW":
-            # Continue to new subscription flow below
-            pass
-        else:
-            return
-        
-        # If not creating new, return after management action
-        if action != "NEW":
-            return
+        while True:
+            choices = [
+                ("STATUS", "View Subscription Status"),
+                ("RENEW", "Renew/Extend Subscription"),
+                ("REINSTALL", "Reinstall WireGuard Config"),
+                ("NEW", "Create New Subscription (will replace existing)")
+            ]
+            
+            code, action = d.menu(
+                f"Existing subscription found: {subscription.get('name', 'TunnelSats VPN')}\n\nSelect an action:",
+                choices=choices, width=60, height=12, title="TunnelSats Management")
+            
+            if code != d.OK:
+                return
+            
+            if action == "STATUS":
+                # Show status dialog and check for "LIVE" request
+                # d.OK is "OK", d.EXTRA or d.CANCEL (from no_label="LIVE") is "LIVE"
+                # In pythondialog, yesno returns d.OK (Yes) or d.CANCEL (No/Extra)
+                res = show_status_dialog(d, subscription)
+                if res != d.OK:
+                    # User clicked "LIVE"
+                    installer_path = Path(CONFIG_DIR) / "tunnelsats.sh"
+                    if installer_path.is_file():
+                        os.system(f"sudo bash {installer_path} status")
+                    else:
+                        d.msgbox("Installer script not found. Please reinstall to fix.", title="Error")
+            elif action == "RENEW":
+                handle_renew(d, subscription)
+            elif action == "REINSTALL":
+                handle_reinstall(d, subscription)
+            elif action == "NEW":
+                # Exit loop and continue to new subscription flow below
+                break
+            else:
+                return
+            
+            # Re-load subscriptions in case they changed (e.g. after NEW)
+            # (Though NEW breaks the loop, other actions might update it)
+            if Path(SUBSCRIPTIONS_FILE).is_file():
+                try:
+                    subs = toml.load(SUBSCRIPTIONS_FILE)
+                    if "subscriptions_tunnelsats" in subs and subs["subscriptions_tunnelsats"]:
+                        subscription = subs["subscriptions_tunnelsats"][0]
+                except:
+                    pass
 
     # PHASE 1: Fetch Servers
     try:
@@ -1031,16 +1295,21 @@ def create_ssh_dialog():
     invoice = order_data.get("invoice")
     # Try different possible field names for order_id - prioritize orderId (dev2 API standard)
     order_id = order_data.get('orderId') or order_data.get('id') or order_data.get('order_id') or order_data.get('orderID')
+    # Get paymentHash - this is needed for status checks (API uses GET /subscription/{paymentHash})
+    payment_hash = order_data.get('paymentHash') or order_data.get('payment_hash')
     
-    # Validate order_id
-    if not order_id:
-        log.error(f"No order ID found in renewal response. Response keys: {list(order_data.keys())}, Full response: {json.dumps(order_data, indent=2)}")
-        d.msgbox(f"No order ID received from API.\nResponse: {json.dumps(order_data)}", title="Error")
+    log.info(f"Order details: order_id={order_id}, payment_hash={payment_hash[:20] if payment_hash else None}...")
+    
+    # Validate we have what we need - paymentHash is required for status checks
+    if not payment_hash:
+        log.error(f"No paymentHash found in order response. Response keys: {list(order_data.keys())}, Full response: {json.dumps(order_data, indent=2)}")
+        d.msgbox(f"No paymentHash received from API.\nResponse keys: {list(order_data.keys())}", title="Error")
         return
     
     if not invoice:
         d.msgbox(f"No invoice received from API.\nResponse: {json.dumps(order_data)}", title="Error")
         return
+
 
     # PHASE 5: Payment
     paid = False
@@ -1127,10 +1396,16 @@ def create_ssh_dialog():
         with open(invoice_file, "w") as f:
             f.write(invoice)
         
-        # Save order_id for resuming
+        # Save order_id and payment_hash for resuming
         order_file = Path("/tmp/tunnelsats_order_id.txt")
         with open(order_file, "w") as f:
             f.write(str(order_id))
+        
+        # Save payment_hash - this is needed for status checks
+        payment_hash_file = Path("/tmp/tunnelsats_payment_hash.txt")
+        with open(payment_hash_file, "w") as f:
+            f.write(str(payment_hash))
+
         
         # Show log file location in dialog before exiting
         log_file = Path("/tmp/tunnelsats_payment.log")
@@ -1147,7 +1422,7 @@ def create_ssh_dialog():
         
         # After user returns, check if payment was made
         d.infobox("Checking if payment was made...", title="TunnelSats")
-        config_json = check_payment_status(order_id)
+        config_json = check_payment_status(payment_hash, order_id)
         
         if config_json:
             d.msgbox("Payment confirmed! Processing subscription...", title="Success")
@@ -1157,10 +1432,10 @@ def create_ssh_dialog():
                           title="Payment Status", yes_label="Check Again", no_label="Cancel")
             if code == d.OK:
                 # Check one more time
-                config_json = check_payment_status(order_id)
+                config_json = check_payment_status(payment_hash, order_id)
                 if not config_json:
                     d.msgbox("Payment still not confirmed.\n\nYou can check later by running:\n" +
-                            f"python3 /home/admin/config.scripts/blitz.subscriptions.tunnelsats.py check-payment {order_id}\n\n" +
+                            f"python3 /home/admin/config.scripts/blitz.subscriptions.tunnelsats.py check-payment {payment_hash}\n\n" +
                             "Or return to the menu and select 'Manage Subscription' again.",
                             title="Not Confirmed", width=70, height=12)
                     return
@@ -1173,13 +1448,14 @@ def create_ssh_dialog():
         max_attempts = 30  # 150 seconds timeout (30 * 5s)
         for attempt in range(max_attempts):
             try:
-                status_data = _check_status_endpoint(order_id)
+                status_data = _check_status_endpoint(payment_hash)
                 if status_data:
                     status = status_data.get("status", "").lower()
                     if status in ["paid", "successful"]:
                         # Payment confirmed, now claim it to get the config
-                        config_data = claim_subscription(order_id)
-                        if config_data and ("wireguard" in config_data or "server" in config_data):
+
+                        config_data = claim_subscription(payment_hash, order_id)
+                        if config_data and any(k in config_data for k in ["wireguard", "server", "peer", "config", "interface"]):
                             config_json = config_data
                         else:
                             # If claim fails, use status data (might already be claimed)
@@ -1200,77 +1476,55 @@ def create_ssh_dialog():
             d.msgbox("Timeout waiting for payment confirmation.\nIf you paid, the subscription will activate automatically.", title="Timeout")
             return
 
-    # PHASE 7: Success!
+    # PHASE 7: Success & Next Steps
     try:
         conf_file, subscription = save_config_and_persist(config_json, server_id)
+        show_success_guidance(conf_file, server_id)
     except Exception as e:
         d.msgbox(f"Failed to persist configuration:\n{str(e)}", title="Error")
         return
 
-    # User Backup Reminder (mimicking bash script)
-    qr_text = ""
-    if Path("/tmp/tunnelsats_qr.txt").is_file():
-        with open("/tmp/tunnelsats_qr.txt", "r") as f:
-            qr_text = f.read()
+def handle_check_payment(payment_hash):
+    """Handle check-payment command - check status and continue if paid.
     
-    # Show config content
-    config_content = ""
-    try:
-        with open(conf_file, "r") as f:
-            config_content = f.read()
-    except:
-        pass
-    
-    backup_msg = f"Success! TunnelSats subscription is active.\n\nConfiguration saved to:\n{conf_file}\n\nCRITICAL: Please save your config backup now!\n\n"
-    if qr_text:
-        backup_msg += f"QR Code:\n{qr_text}\n\n"
-    if config_content:
-        backup_msg += f"Config Content:\n{config_content}\n\n"
-    backup_msg += "Have you saved the config backup?"
-    
-    # Force user acknowledgement
-    code = d.yesno(backup_msg, title="Success / Backup Required", yes_label="Yes, I saved it", no_label="Show again")
-    if code != d.OK:
-        # Show again if user didn't confirm
-        d.msgbox(backup_msg, title="Backup Required - Please Save Now")
-    
-    # PHASE 8: Handoff to core script
-    # Look for the core script in standard locations
-    core_script = Path("/home/admin/tunnelsats/scripts/tunnelsats.sh")
-    if not core_script.is_file():
-        core_script = Path("/home/hakuna/tunnelsats/scripts/tunnelsats.sh")
-
-    if core_script.is_file():
-        d.infobox("Triggering technical installation via tunnelsats.sh...", title="TunnelSats")
-        # We use sudo as the bash script did
-        os.system(f"sudo bash {core_script} install --config {conf_file}")
-    else:
-        d.msgbox(f"Core script not found.\nManual installation required using:\n{conf_file}", title="Manual Step Required")
-
-def handle_check_payment(order_id):
-    """Handle check-payment command - check status and continue if paid."""
-    if not order_id or order_id == "None":
-        print("Error: Invalid order_id. Please provide a valid order ID.")
-        print("You can find it in: /tmp/tunnelsats_order_id.txt")
+    Args:
+        payment_hash: The paymentHash from order creation (used for status check)
+    """
+    if not payment_hash or payment_hash == "None":
+        print("Error: Invalid payment_hash. Please provide a valid payment hash.")
+        print("You can find it in: /tmp/tunnelsats_payment_hash.txt")
         sys.exit(1)
+    
+    # Try to get order_id from temp file (for claim)
+    order_id = None
+    order_file = Path("/tmp/tunnelsats_order_id.txt")
+    if order_file.exists():
+        try:
+            with open(order_file, "r") as f:
+                order_id = f.read().strip()
+        except:
+            pass
     
     from dialog import Dialog
     d = Dialog(dialog="dialog", autowidgetsize=True)
     d.set_background_title("TunnelSats - Check Payment")
     
     d.infobox("Checking payment status...", title="TunnelSats")
-    config_json = check_payment_status(order_id)
+    config_json = check_payment_status(payment_hash, order_id)
+
     
     if config_json:
-        # Check if config_json has wireguard config (from claim) or just status
-        has_config = "wireguard" in config_json or "server" in config_json
+        # Verify we actually have the config (keys) before proceeding
+        # The 'config_json' might just be the status response if claim failed
+        has_essential_keys = any(k in config_json for k in ["wireguard", "peer", "interface", "config", "fullConfig"])
         
-        if has_config:
+        if has_essential_keys:
             # Payment confirmed and config received - need server_id
             d.msgbox("Payment confirmed! Processing subscription...", title="Success")
             
             # Try to get server_id from saved order file or existing subscriptions
             server_id = None
+
             
             # Try to get from saved invoice file metadata or existing subscriptions
             if Path(SUBSCRIPTIONS_FILE).is_file():
@@ -1284,8 +1538,15 @@ def handle_check_payment(order_id):
                     pass
             
             # If still no server_id, try to extract from config_json
-            if not server_id and "server" in config_json:
-                server_id = config_json.get("server", {}).get("id")
+            if not server_id:
+                server_id = config_json.get("serverId") or config_json.get("server_id")
+                if not server_id and "server" in config_json:
+                    s_data = config_json.get("server", {})
+                    server_id = s_data.get("id") or s_data.get("serverId")
+                    if not server_id and "domain" in s_data:
+                        # Extract first part of domain as fallback (e.g. 'de2' from 'de2.tunnelsats.com')
+                        server_id = s_data["domain"].split(".")[0]
+
             
             if not server_id:
                 d.msgbox("Cannot determine server_id. Please use 'Manage Subscription' from the menu to complete setup.", title="Error")
@@ -1293,7 +1554,7 @@ def handle_check_payment(order_id):
             
             try:
                 conf_file, subscription = save_config_and_persist(config_json, server_id)
-                d.msgbox("Subscription activated successfully!", title="Success")
+                show_success_guidance(conf_file, server_id)
             except Exception as e:
                 d.msgbox(f"Failed to save configuration:\n{str(e)}", title="Error")
         else:
@@ -1319,7 +1580,7 @@ if __name__ == "__main__":
         subscriptions_cancel(sys.argv[2])
     elif sys.argv[1] == "check-payment":
         if len(sys.argv) < 3:
-            print("Usage: check-payment <order_id>")
+            print("Usage: check-payment <payment_hash>")
             sys.exit(1)
         handle_check_payment(sys.argv[2])
     else:
