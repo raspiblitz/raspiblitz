@@ -64,11 +64,14 @@ session = requests.session()
 def setup_debug_logging():
     """Setup debug logging to /home/admin/raspiblitz/logs/tunnelsats.log if debug is enabled."""
     # Check for debug level via environment variable or config
+    # Note: RaspiBlitzConfig uses attribute access, not dict-like .get()
+    cfg_debug = getattr(cfg, "tunnelsats_debug", "") if cfg else ""
     debug_enabled = (
         os.environ.get("TUNNELSATS_DEBUG", "").lower() in ("1", "true", "yes", "on") or
         os.environ.get("DEBUG", "").lower() in ("1", "true", "yes", "on") or
-        cfg.get("tunnelsats_debug", "").lower() in ("1", "true", "yes", "on")
+        str(cfg_debug).lower() in ("1", "true", "yes", "on")
     )
+
     
     if not debug_enabled:
         # Return a no-op logger
