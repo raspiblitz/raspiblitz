@@ -9,6 +9,8 @@
 - Update: Bitcoin Knots 29.2 (optional) [details](https://github.com/bitcoinknots/bitcoin/releases/tag/v29.2.knots20251010)
 - Update: Suez commit:8f29314 [details](https://github.com/prusnak/suez/commits/master)
 - Update: Labelbase 2.3.0 [details](https://x.com/labelbase_space)
+- Update: JoininBox v0.8.5 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.5)
+- Update: Jam v0.4.1 [details](https://github.com/joinmarket-webui/jam/releases/tag/v0.4.1)
 - Fix: Speedup data layout migration from 1.11.4 to 1.12.1 [details](https://github.com/raspiblitz/raspiblitz/issues/5194)
 
 ## What's new in Version 1.12.0 of RaspiBlitz?

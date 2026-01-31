@@ -6,14 +6,15 @@
 # https://github.com/openoms/joininbox
 
 # https://github.com/openoms/joininbox/tags
-JBTAG="v0.8.4" # installs JoinMarket v0.9.11
+JBTAG="v0.8.5" # installs JoinMarket commit https://github.com/JoinMarket-Org/joinmarket-clientserver/commit/ce32bafbb5d716bde61830f71266410249d43dbc
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "JoinMarket install script to install and switch JoinMarket on or off"
   echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh install"
   echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on|off"
-  echo "Installs JoininBox $JBTAG with JoinMarket v0.9.5"
+  echo "Installs JoininBox $JBTAG with JoinMarket commit:"
+  echo "https://github.com/JoinMarket-Org/joinmarket-clientserver/commit/ce32bafbb5d716bde61830f71266410249d43dbc"
   exit 1
 fi
 
