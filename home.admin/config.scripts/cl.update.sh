@@ -8,9 +8,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "info -> get actual state and possible actions"
   echo "verified -> only do recommended updates by RaspiBlitz team"
   echo "  binary will be checked by signature and checksum"
-  echo "reckless -> if you just want to update to the latest release"
-  echo "  published on Core Lightning GitHub releases without any"
-  echo "  testing or security checks."
+  echo "reckless -> update to the latest release from Core Lightning GitHub"
+  echo "  binary will be verified by signature and checksum, but the release"
+  echo "  may not have been tested with RaspiBlitz"
   echo
   exit 1
 fi
@@ -85,10 +85,10 @@ if [ "${mode}" = "verified" ]; then
       echo "# clInstalledVersion = clUpdateVersion (${clUpdateVersion})"
       echo "# There is no need to update again."
     else
-      /home/admin/config.scripts/cl.install.sh update ${clUpdateVersion}
+      /home/admin/config.scripts/cl.install.sh update ${clUpdateVersion} || exit 1
     fi
   else
-    /home/admin/config.scripts/cl.install.sh on
+    /home/admin/config.scripts/cl.install.sh on || exit 1
   fi
 
   # note: install will be done the same as reckless further down
@@ -97,9 +97,9 @@ if [ "${mode}" = "verified" ]; then
 fi
 
 # RECKLESS
-# this mode is just for people running test and development nodes - its not recommended
-# for production nodes. In a update/recovery scenario it will not install a fixed version
-# it will always pick the latest release from the github
+# This mode installs the latest release from GitHub with signature verification.
+# Not recommended for production nodes as the release may not have been tested with RaspiBlitz.
+# In an update/recovery scenario it will always pick the latest release from GitHub.
 if [ "${mode}" = "reckless" ]; then
 
   echo "# cl.update.sh reckless"
@@ -110,7 +110,7 @@ if [ "${mode}" = "reckless" ]; then
     echo "# There is no need to update again."
     clInterimsUpdateNew="${clLatestVersion}"
   else
-    /home/admin/config.scripts/cl.install.sh update ${clLatestVersion}
+    /home/admin/config.scripts/cl.install.sh update ${clLatestVersion} || exit 1
     clInterimsUpdateNew="reckless"
   fi
 fi
@@ -123,7 +123,7 @@ if [ "${mode}" = "verified" ] || [ "${mode}" = "reckless" ]; then
 
   echo "# OK Core Lightning is installed"
   echo "# NOTE: RaspiBlitz may need to reboot now"
-  exit 1
+  exit 0
 
 else
 
