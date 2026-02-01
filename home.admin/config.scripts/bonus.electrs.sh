@@ -513,6 +513,9 @@ WantedBy=multi-user.target
   fi
 
  # whitelist connection in bitcoind
+  # migrate old non-prefixed whitebind to network-prefixed format
+  sudo sed -i "s/^whitebind=download@127.0.0.1:8335/${btcprefix}.whitebind=download@127.0.0.1:8335/g" /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  # ensure network-prefixed whitebind exists
   if ! sudo grep -Eq "^${btcprefix}.whitebind=download@127.0.0.1:8335" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
     echo "${btcprefix}.whitebind=download@127.0.0.1:8335" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
     bitcoindRestart=yes

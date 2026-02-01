@@ -683,6 +683,9 @@ WantedBy=multi-user.target
   fi
 
   # whitelist connection in bitcoind
+  # migrate old non-prefixed whitebind to network-prefixed format
+  sudo sed -i "s/^whitebind=127.0.0.1:8336/${btcprefix}.whitebind=127.0.0.1:8336/g" /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  # ensure network-prefixed whitebind exists
   if ! sudo grep -Eq "^${btcprefix}.whitebind=127.0.0.1:8336" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
     echo "${btcprefix}.whitebind=127.0.0.1:8336" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
     bitcoindRestart=yes
