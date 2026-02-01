@@ -501,9 +501,20 @@ WantedBy=multi-user.target
     /home/admin/config.scripts/tor.onion-service.sh electrs 50002 50002 50001 50001
   fi
 
+  # determine bitcoin.conf network prefix based on chain
+  if [ "${chain}" = "main" ]; then
+    btcprefix="main"
+  elif [ "${chain}" = "test" ]; then
+    btcprefix="test"
+  elif [ "${chain}" = "sig" ]; then
+    btcprefix="signet"
+  else
+    btcprefix="main"
+  fi
+
  # whitelist connection in bitcoind
-  if ! sudo grep -Eq "^whitebind=download@127.0.0.1:8335" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
-    echo "whitebind=download@127.0.0.1:8335" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  if ! sudo grep -Eq "^${btcprefix}.whitebind=download@127.0.0.1:8335" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
+    echo "${btcprefix}.whitebind=download@127.0.0.1:8335" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
     bitcoindRestart=yes
   fi
 

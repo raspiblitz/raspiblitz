@@ -671,9 +671,20 @@ WantedBy=multi-user.target
 
   NBXplorerConfig
 
+  # determine bitcoin.conf network prefix based on chain
+  if [ "${chain}" = "main" ]; then
+    btcprefix="main"
+  elif [ "${chain}" = "test" ]; then
+    btcprefix="test"
+  elif [ "${chain}" = "sig" ]; then
+    btcprefix="signet"
+  else
+    btcprefix="main"
+  fi
+
   # whitelist connection in bitcoind
-  if ! sudo grep -Eq "^whitebind=127.0.0.1:8336" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
-    echo "whitebind=127.0.0.1:8336" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  if ! sudo grep -Eq "^${btcprefix}.whitebind=127.0.0.1:8336" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
+    echo "${btcprefix}.whitebind=127.0.0.1:8336" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
     bitcoindRestart=yes
   fi
 
