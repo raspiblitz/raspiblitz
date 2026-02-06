@@ -10,7 +10,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.LightningTipBot.sh [on|off|update|menu]"
   echo
   echo "Version to be installed by default: $BOTVERSION"
-  echo "Source: https://github.com/LightningTipBot/LightningTipBot/"
+  echo "Source: https://github.com/ChuckNorrison/LightningTipBot"
   echo 
   exit 1
 fi
@@ -26,7 +26,7 @@ if [ "$1" = "menu" ]; then
 Its a service running in the background - use to monitor:
 sudo journalctl -fu lightningtipbot\n
 For more details and further information see:
-https://github.com/LightningTipBot/LightningTipBot/blob/$BOTVERSION/README.md\n
+https://github.com/ChuckNorrison/LightningTipBot/blob/$BOTVERSION/README.md\n
 Config file: /mnt/hdd/app-data/LightningTipBot/config.yaml" 15 78
     clear
   else
@@ -56,7 +56,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # install from source
     cd /home/lightningtipbot
-    sudo -u lightningtipbot git clone https://github.com/LightningTipBot/LightningTipBot.git
+    sudo -u lightningtipbot git clone https://github.com/ChuckNorrison/LightningTipBot.git
     cd LightningTipBot
     sudo -u lightningtipbot git reset --hard $BOTVERSION
 
@@ -119,7 +119,7 @@ WantedBy=multi-user.target
 
   isInstalled=$(sudo ls /home/lightningtipbot/LightningTipBot/ 2>/dev/null | grep -c LightningTipBot)
   if [ ${isInstalled} -gt 0 ] ; then
-    echo "# Find info on how to use on https://github.com/LightningTipBot/LightningTipBot/tree/$BOTVERSION#set-up-lnbits"
+    echo "# Find info on how to use on https://github.com/ChuckNorrison/LightningTipBot/tree/$BOTVERSION#set-up-lnbits"
     echo "Please edit your config file: sudo nano /home/lightningtipbot/LightningTipBot/config.yaml"
     echo "Start the service when done: sudo systemctl start lightningtipbot"
     # setting value in raspi blitz config
