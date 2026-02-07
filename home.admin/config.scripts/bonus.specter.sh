@@ -374,6 +374,7 @@ After=${network}d.service
 ExecStart=/home/specter/.env/bin/python3 -m cryptoadvance.specter server --host 0.0.0.0 --cert=/home/specter/.specter/cert.pem --key=/home/specter/.specter/key.pem
 User=specter
 Environment=PATH=/home/specter/.specter.env/bin:/home/specter/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/sbin:/bin
+Environment=RASPIBLITZ_SPECTER_RPC_LOGIN_BITCOIN_CONF_LOCATION=/mnt/hdd/app-data/bitcoin
 Restart=always
 TimeoutSec=120
 RestartSec=30
