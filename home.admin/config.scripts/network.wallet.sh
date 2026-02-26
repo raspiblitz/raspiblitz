@@ -10,6 +10,16 @@ fi
 source /mnt/hdd/app-data/raspiblitz.conf
 source /home/admin/raspiblitz.info
 
+# determine the correct bitcoind service name based on chain
+# chain from raspiblitz.conf: main|test|sig
+if [ "${chain}" = "test" ]; then
+  bitcoind_service="tbitcoind"
+elif [ "${chain}" = "sig" ]; then
+  bitcoind_service="sbitcoind"
+else
+  bitcoind_service="bitcoind"
+fi
+
 # add disablewallet with default value (0) to bitcoin.conf if missing
 if ! grep -Eq "^disablewallet=.*" /mnt/hdd/app-data/${network}/${network}.conf; then
   echo "disablewallet=0" | sudo tee -a /mnt/hdd/app-data/${network}/${network}.conf >/dev/null
@@ -46,8 +56,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
   source <(/home/admin/_cache.sh get state)
   if [ ${state} != "recovering" ]; then
-    echo "# Restarting ${network}d"
-    sudo systemctl restart ${network}d
+    echo "# Restarting ${bitcoind_service}"
+    sudo systemctl restart ${bitcoind_service}
   fi
   exit 0
 fi
@@ -57,7 +67,7 @@ fi
 ###################
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo sed -i "s/^disablewallet=.*/disablewallet=1/g" /mnt/hdd/app-data/${network}/${network}.conf
-  sudo systemctl restart ${network}d
+  sudo systemctl restart ${bitcoind_service}
   exit 0
 fi
 

@@ -620,6 +620,11 @@ if [ "${jam}" == "on" ]; then
   OPTIONS+=(JAM "Update Jam (JoinMarket WebUI)")
 fi
 
+if [ "${joinmarketNG}" == "on" ]; then
+  OPTIONS+=(JMNG "Update JoinMarket-NG")
+  OPTIONS+=(JMNG-MAIN "Update JoinMarket-NG to main branch (unsigned/dev)")
+fi
+
 if [ "${runBehindTor}" == "on" ]; then
   OPTIONS+=(TOR "Update Tor from the Torproject repo")
 fi
@@ -687,5 +692,11 @@ case $CHOICE in
     ;;
   JAM)
     /home/admin/config.scripts/bonus.jam.sh update
+    ;;
+  JMNG)
+    /home/admin/config.scripts/bonus.joinmarket-ng.sh update
+    ;;
+  JMNG-MAIN)
+    /home/admin/config.scripts/bonus.joinmarket-ng.sh update main
     ;;
 esac

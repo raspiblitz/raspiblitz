@@ -376,6 +376,14 @@ elif [ "${abcd}" = "b" ]; then
     sudo systemctl restart joinmarket-api.service
   fi
 
+  # JoinMarket-NG
+  if [ "${joinmarketNG}" == "on" ]; then
+    echo "# changing the RPC password for JOINMARKET-NG"
+    sudo sed -i "s/^rpc_password = .*/rpc_password = \"${newPassword}\"/" /home/joinmarketng/.joinmarket-ng/config.toml
+    echo "# changing the password for the 'joinmarketng' user"
+    echo "joinmarketng:${newPassword}" | sudo chpasswd
+  fi
+
   # ThunderHub
   if [ "${thunderhub}" == "on" ]; then
     echo "# changing the password for ThunderHub"

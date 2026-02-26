@@ -16,6 +16,7 @@ if [ ${#ElectRS} -eq 0 ]; then ElectRS="off"; fi
 if [ ${#fulcrum} -eq 0 ]; then fulcrum="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
+if [ ${#joinmarketNG} -eq 0 ]; then joinmarketNG="off"; fi
 if [ ${#jam} -eq 0 ]; then jam="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 if [ ${#mempoolExplorer} -eq 0 ]; then mempoolExplorer="off"; fi
@@ -51,6 +52,7 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(aa 'BTC Mempool Space' ${mempoolExplorer})
   OPTIONS+=(ja 'BTC JoinMarket+JoininBox menu' ${joinmarket})
   OPTIONS+=(za 'BTC Jam (JoinMarket WebUI)' ${jam})
+  OPTIONS+=(jn 'BTC JoinMarket-NG (Next Gen)' ${joinmarketNG})
   OPTIONS+=(wa 'BTC Download Bitcoin Whitepaper' ${whitepaper})
   OPTIONS+=(ls 'BTC Labelbase' ${labelbase})
   OPTIONS+=(pp 'BTC Publicpool (Solo Mining)' ${publicpool})  
@@ -605,6 +607,34 @@ Then try activating Jam again in SERVICES.\n
   fi
 else
   echo "Jam not changed."
+fi
+
+# JoinMarket-NG process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "jn")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${joinmarketNG}" != "${choice}" ]; then
+  echo "JoinMarket-NG setting changed .."
+  source /mnt/hdd/app-data/raspiblitz.conf
+  if [ "${choice}" = "on" ] && [ "${runBehindTor}" = "off" ]; then
+    whiptail --title " Use Tor with JoinMarket-NG" --msgbox "\
+It is highly recommended to use Tor with JoinMarket-NG.\n
+Please activate TOR in SERVICES first.\n
+Then try activating JoinMarket-NG again in SERVICES.\n
+" 13 42
+  else
+    anychange=1
+    sudo /home/admin/config.scripts/bonus.joinmarket-ng.sh ${choice}
+    errorOnInstall=$?
+    if [ "${choice}" = "on" ]; then
+      if [ ${errorOnInstall} -eq 0 ]; then
+         sudo /home/admin/config.scripts/bonus.joinmarket-ng.sh menu
+      else
+        whiptail --title 'FAIL' --msgbox "JoinMarket-NG installation is cancelled\nTry again from the menu or install from the terminal with:\nsudo /home/admin/config.scripts/bonus.joinmarket-ng.sh on" 9 65
+      fi
+    fi
+  fi
+else
+  echo "JoinMarket-NG not changed."
 fi
 
 # Mempool process choice
