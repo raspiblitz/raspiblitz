@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/dgarage/NBXplorer/tags
-NBXplorerVersion="v2.5.26"
+NBXplorerVersion="v2.5.30"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v2.2.1"
+BTCPayVersion="v2.3.5"
 
 # check who signed the release (person that published release)
 PGPsigner="nicolasdorier"
@@ -835,66 +835,64 @@ if [ "$1" = "restore" ]; then
 fi
 
 if [ "$1" = "update" ]; then
+  ## Skip NBXplorer update for now 
+  # echo "# Update NBXplorer"
+  # cd /home/btcpay || exit 1
+  # cd NBXplorer || exit 1
+  # # prevent the git error 'detected dubious ownership in repository'
+  # git config --global --add safe.directory /home/btcpay/NBXplorer
+  # # fetch latest master
+  # if [ "$(sudo -u btcpay git fetch 2>&1 | grep -c "Please tell me who you are")" -gt 0 ]; then
+  #   sudo -u btcpay git config user.email "you@example.com"
+  #   sudo -u btcpay git config user.name "Your Name"
+  # fi
+  # sudo -u btcpay git fetch
+  # # unset $1
+  # set --
+  # UPSTREAM=${1:-'@{u}'}
+  # LOCAL=$(git rev-parse @)
+  # REMOTE=$(git rev-parse "$UPSTREAM")
 
-  # prevent the git error 'detected dubious ownership in repository'
-  git config --global --add safe.directory /home/btcpay/NBXplorer
-  git config --global --add safe.directory /home/btcpay/btcpayserver
+  # if [ $LOCAL = $REMOTE ]; then
+  #   TAG=$(git tag | sort -V | tail -1)
+  #   echo "# Up-to-date on version $TAG"
+  # else
+  #   echo "# Pulling the latest changes..."
+  #   sudo -u btcpay git pull -p
+  #   TAG=$(git tag | sort -V | tail -1)
+  #   echo "# Reset to the latest release tag: $TAG"
+  #   sudo -u btcpay git reset --hard $TAG
 
-  echo "# Update NBXplorer"
-  cd /home/btcpay || exit 1
-  cd NBXplorer || exit 1
-  # fetch latest master
-  if [ "$(sudo -u btcpay git fetch 2>&1 | grep -c "Please tell me who you are")" -gt 0 ]; then
-    sudo -u btcpay git config user.email "you@example.com"
-    sudo -u btcpay git config user.name "Your Name"
-  fi
-  sudo -u btcpay git fetch
-  # unset $1
-  set --
-  UPSTREAM=${1:-'@{u}'}
-  LOCAL=$(git rev-parse @)
-  REMOTE=$(git rev-parse "$UPSTREAM")
+  #   PGPsigner="nicolasdorier"
+  #   PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
+  #   PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
+  #   if ! sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
+  #     "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}"; then
+  #     # try with webflow
+  #     PGPsigner="web-flow"
+  #     PGPpubkeyLink="https://github.com/web-flow.gpg"
+  #     PGPpubkeyFingerprint="B5690EEEBB952194"
+  #     sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
+  #       "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  #   fi
 
-  if [ $LOCAL = $REMOTE ]; then
-    TAG=$(git tag | sort -V | tail -1)
-    echo "# Up-to-date on version $TAG"
-  else
-    echo "# Pulling the latest changes..."
-    sudo -u btcpay git pull -p
-    TAG=$(git tag | sort -V | tail -1)
-    echo "# Reset to the latest release tag: $TAG"
-    sudo -u btcpay git reset --hard $TAG
+  #   echo "# Build NBXplorer $TAG"
+  #   # from the build.sh with path
+  #   sudo systemctl stop nbxplorer
+  #   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
 
-    PGPsigner="nicolasdorier"
-    PGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-    PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
-    if ! sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}"; then
-      # try with webflow
-      PGPsigner="web-flow"
-      PGPpubkeyLink="https://github.com/web-flow.gpg"
-      PGPpubkeyFingerprint="B5690EEEBB952194"
-      sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-        "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
-    fi
+  #   # whitelist localhost in bitcoind
+  #   if ! sudo grep -Eq "^whitelist=127.0.0.1" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
+  #     echo "whitelist=127.0.0.1" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  #     echo "# Restarting bitcoind"
+  #     sudo systemctl restart bitcoind
+  #   fi
 
-    echo "# Build NBXplorer $TAG"
-    # from the build.sh with path
-    sudo systemctl stop nbxplorer
-    sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
+  #   NBXplorerConfig
 
-    # whitelist localhost in bitcoind
-    if ! sudo grep -Eq "^whitelist=127.0.0.1" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
-      echo "whitelist=127.0.0.1" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
-      echo "# Restarting bitcoind"
-      sudo systemctl restart bitcoind
-    fi
-
-    NBXplorerConfig
-
-    sudo systemctl start nbxplorer
-    echo "# Updated NBXplorer to $TAG"
-  fi
+  #   sudo systemctl start nbxplorer
+  #   echo "# Updated NBXplorer to $TAG"
+  # fi
 
   # always stop to BtcPayConfig
   sudo systemctl stop btcpayserver
@@ -907,6 +905,8 @@ if [ "$1" = "update" ]; then
   echo "# Update BTCPayServer"
   cd /home/btcpay || exit 1
   cd btcpayserver || exit 1
+  # prevent the git error 'detected dubious ownership in repository'
+  git config --global --add safe.directory /home/btcpay/btcpayserver
   # fetch latest master
   if [ "$(sudo -u btcpay git fetch 2>&1 | grep -c "Please tell me who you are")" -gt 0 ]; then
     sudo -u btcpay git config user.email "you@example.com"
