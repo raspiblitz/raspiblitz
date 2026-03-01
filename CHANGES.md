@@ -1,6 +1,6 @@
 ## What's new in Version 1.12.1 of RaspiBlitz?
 
-App updates, fixes and optimizations. 
+App updates, fixes and optimizations.
 
 - Update: Bitcoin Core v29.2 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.2.md)
 - Update: Core Lightning v25.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v25.12.1)
