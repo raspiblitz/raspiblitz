@@ -1,12 +1,14 @@
 ## What's new in Version 1.12.1 of RaspiBlitz?
 
+App updates, fixes and optimizations.
+
 - Update: Bitcoin Core v29.2 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.2.md)
 - Update: Core Lightning v25.12.1 [details](https://github.com/ElementsProject/lightning/releases/tag/v25.12.1)
 - Update: Electrum Server in Rust (electrs) v0.10.10 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#01010-jul-19-2025)
 - Update: AlbyHub v1.20.0 [details](https://github.com/getAlby/hub/releases/tag/v1.20.0)
 - Update: Specter Desktop 2.1.1 [details](https://github.com/cryptoadvance/specter-desktop/releases/tag/v2.1.1)
 - Update: Fulcrum Electrum server v2.1.0 [details](https://github.com/cculianu/Fulcrum/releases/tag/v2.1.0)
-- Update: Bitcoin Knots 29.2 (optional) [details](https://github.com/bitcoinknots/bitcoin/releases/tag/v29.2.knots20251010)
+- Update: Bitcoin Knots 29.2 (optional) [details](https://github.com/bitcoinknots/bitcoin/releases/tag/v29.2.knots20251110)
 - Update: Suez commit:8f29314 [details](https://github.com/prusnak/suez/commits/master)
 - Update: Labelbase 2.3.0 [details](https://x.com/labelbase_space)
 - Update: JoininBox v0.8.5 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.5)
