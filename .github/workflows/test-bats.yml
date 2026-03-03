@@ -10,13 +10,19 @@ on:
     branches: ["dev"]
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
+      - "home.admin/config.scripts/bonus.joinmarket-ng.sh"
+      - "home.admin/config.scripts/menu.joinmarket-ng.sh"
+      - "test/bonus.joinmarket-ng.bats"
   pull_request:
     branches: ["*"]
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
+      - "home.admin/config.scripts/bonus.joinmarket-ng.sh"
+      - "home.admin/config.scripts/menu.joinmarket-ng.sh"
+      - "test/bonus.joinmarket-ng.bats"
 
 jobs:
-  run-bats-tests:
+  run-bats-tests-postgresql:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -36,3 +42,20 @@ jobs:
         run: |
           cd test
           sudo bats ./bonus.postgresql-13.bats
+
+  run-bats-tests-joinmarket-ng:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install bats
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq bats
+
+      - name: Run JoinMarket-NG integration tests
+        run: |
+          cd test
+          sudo bats ./bonus.joinmarket-ng.bats
