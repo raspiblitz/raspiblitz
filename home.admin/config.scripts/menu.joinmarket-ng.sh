@@ -5,7 +5,7 @@
 # Runs as joinmarketng user (invoked via: sudo -u joinmarketng menu.sh)
 # Uses sudo only for specific privileged actions (maker-start/stop/status via bonus script)
 
-# Config — use explicit user home, not $HOME (which is /root when run as sudo)
+# Config -- use explicit user home, not $HOME (which is /root when run as sudo)
 USER_JM="joinmarketng"
 HOME_JM="/home/${USER_JM}"
 DATA_DIR="${HOME_JM}/.joinmarket-ng"
@@ -13,6 +13,16 @@ VENV_BIN="${HOME_JM}/venv/bin"
 CONFIG_FILE="${DATA_DIR}/config.toml"
 LOG_DIR="${DATA_DIR}/logs"
 MAKER_ENV="${DATA_DIR}/.maker.env"
+
+# Defaults for send/coinjoin parameters
+DEFAULT_AMOUNT="0"
+DEFAULT_MIXDEPTH="0"
+DEFAULT_FEE_RATE=""
+DEFAULT_DESTINATION=""
+# Counterparty default: read from config.toml, fall back to 10 (jm-taker default)
+DEFAULT_COUNTERPARTIES=$(grep '^counterparty_count[[:space:]]*=' "$CONFIG_FILE" 2>/dev/null \
+  | head -1 | sed 's/^counterparty_count[[:space:]]*=[[:space:]]*//' | tr -d '"')
+DEFAULT_COUNTERPARTIES="${DEFAULT_COUNTERPARTIES:-10}"
 
 # Ensure log directory exists
 mkdir -p "$LOG_DIR"
@@ -59,6 +69,70 @@ list_wallets() {
     find "$DATA_DIR/wallets" -maxdepth 1 -name '*.mnemonic' -type f -printf '%f\n' 2>/dev/null
 }
 
+# Helper: Prompt for a parameter using whiptail inputbox.
+# Usage: prompt_param "Title" "Prompt text" "default_value"
+# Returns the value via stdout. Returns exit code 1 if user cancelled.
+prompt_param() {
+    local title="$1"
+    local prompt="$2"
+    local default="$3"
+    local value
+    value=$(whiptail --title " $title " \
+      --inputbox "$prompt" \
+      10 68 "$default" 3>&1 1>&2 2>&3)
+    local rc=$?
+    [ $rc -ne 0 ] && return 1
+    echo "$value"
+    return 0
+}
+
+# Helper: Sanitize a numeric string -- strip leading zeros, default to fallback.
+# Usage: to_int "value" "fallback"
+# Examples: to_int "02" "0" -> "2", to_int "" "0" -> "0", to_int "abc" "0" -> "0"
+to_int() {
+    local raw="$1"
+    local fallback="${2:-0}"
+    # Remove leading zeros, then validate as integer
+    local stripped
+    stripped=$(echo "$raw" | sed 's/^0*//' | sed 's/^$/0/')
+    if [[ "$stripped" =~ ^[0-9]+$ ]]; then
+        echo "$stripped"
+    else
+        echo "$fallback"
+    fi
+}
+
+# Helper: Show a confirmation summary before executing a command.
+# Compares chosen values against defaults and marks changed ones with ">>".
+# Usage: show_summary "Title" "label1|default1|value1" "label2|default2|value2" ...
+# Returns 0 if user confirms, 1 if cancelled.
+show_summary() {
+    local title="$1"
+    shift
+    local body=""
+    local label default value marker
+
+    for entry in "$@"; do
+        IFS='|' read -r label default value <<< "$entry"
+        if [ "$value" != "$default" ]; then
+            marker=">>"
+        else
+            marker="  "
+        fi
+        # Show default in parentheses when there is one
+        if [ -n "$default" ]; then
+            body="${body}${marker} ${label}: ${value}  (default: ${default})\n"
+        else
+            body="${body}${marker} ${label}: ${value}\n"
+        fi
+    done
+
+    body="${body}\n>> = changed from default\n\nProceed?"
+
+    whiptail --title " $title " --yesno "$body" 20 70 3>&1 1>&2 2>&3
+    return $?
+}
+
 # Main Loop
 while true; do
 
@@ -78,8 +152,8 @@ while true; do
   fi
 
   CHOICE=$(whiptail --title " JoinMarket-NG Menu " --menu "Maker: $MAKER_STATUS | $WALLET_INFO" 18 64 9 \
+    "S" "Send Bitcoin" \
     "W" "Wallet Management" \
-    "T" "Taker: Run CoinJoin" \
     "M" "Maker Bot Control (${MAKER_STATUS})" \
     "C" "Edit Configuration" \
     "I" "Info / Documentation" \
@@ -92,6 +166,117 @@ while true; do
   fi
 
   case $CHOICE in
+    # ------------------------------------------------------------------
+    # SEND BITCOIN (unified: normal tx when counterparties=0, coinjoin otherwise)
+    # ------------------------------------------------------------------
+    S)
+      if [ -z "$CURRENT_WALLET" ]; then
+          whiptail --title " Error " --msgbox "No wallet configured.\nSet up a wallet first (W -> NEW or SEL)." 9 50
+          continue
+      fi
+
+      # 1. Destination address (required)
+      SEND_DEST=$(prompt_param "Destination" \
+        "Enter destination bitcoin address.\nLeave empty and press Enter for INTERNAL (next mixdepth, coinjoin only)." \
+        "$DEFAULT_DESTINATION") || continue
+      # For coinjoin with no destination, default to INTERNAL later
+
+      # 2. Amount in satoshis
+      SEND_AMOUNT=$(prompt_param "Amount" \
+        "Amount in satoshis to send.\n0 = sweep entire mixdepth (best privacy for coinjoin)." \
+        "$DEFAULT_AMOUNT") || continue
+      SEND_AMOUNT=$(to_int "${SEND_AMOUNT}" "$DEFAULT_AMOUNT")
+
+      # 3. Source mixdepth
+      SEND_MIXDEPTH=$(prompt_param "Source Mixdepth" \
+        "Source mixdepth (account) to send from." \
+        "$DEFAULT_MIXDEPTH") || continue
+      SEND_MIXDEPTH=$(to_int "${SEND_MIXDEPTH}" "$DEFAULT_MIXDEPTH")
+
+      # 4. Fee rate
+      SEND_FEE=$(prompt_param "Fee Rate" \
+        "Fee rate in sat/vB.\nLeave blank for automatic estimation (3-block target from config)." \
+        "$DEFAULT_FEE_RATE") || continue
+
+      # 5. Number of counterparties (0 = normal transaction, >0 = coinjoin)
+      SEND_CP=$(prompt_param "Counterparties" \
+        "Number of counterparties (makers) for CoinJoin.\n0 = normal transaction (no CoinJoin).\nRecommended for CoinJoin: 4-10." \
+        "$DEFAULT_COUNTERPARTIES") || continue
+      SEND_CP=$(to_int "${SEND_CP}" "$DEFAULT_COUNTERPARTIES")
+
+      # Apply INTERNAL default for coinjoin when destination is empty
+      if [ -z "$SEND_DEST" ] && [ "$SEND_CP" -gt 0 ] 2>/dev/null; then
+          SEND_DEST="INTERNAL"
+      elif [ -z "$SEND_DEST" ]; then
+          whiptail --title " Error " --msgbox "Destination address is required for normal transactions." 8 50
+          continue
+      fi
+
+      # Determine transaction type label for summary
+      if [ "$SEND_CP" -gt 0 ] 2>/dev/null; then
+          TX_TYPE="CoinJoin ($SEND_CP counterparties)"
+      else
+          TX_TYPE="Normal transaction"
+      fi
+
+      # Fee display
+      if [ -n "$SEND_FEE" ]; then
+          FEE_DISPLAY="${SEND_FEE} sat/vB"
+      else
+          FEE_DISPLAY="auto (3-block estimate)"
+      fi
+
+      # Amount display
+      if [ "$SEND_AMOUNT" = "0" ]; then
+          AMOUNT_DISPLAY="0 (sweep)"
+      else
+          AMOUNT_DISPLAY="${SEND_AMOUNT} sats"
+      fi
+
+      # Show confirmation summary
+      DEFAULT_TX_TYPE="CoinJoin ($DEFAULT_COUNTERPARTIES counterparties)"
+      show_summary "Confirm Send -- $(basename "$CURRENT_WALLET")" \
+        "Type|${DEFAULT_TX_TYPE}|${TX_TYPE}" \
+        "Destination||${SEND_DEST}" \
+        "Amount|$DEFAULT_AMOUNT (sweep)|${AMOUNT_DISPLAY}" \
+        "Source mixdepth|$DEFAULT_MIXDEPTH|${SEND_MIXDEPTH}" \
+        "Fee rate|auto (3-block estimate)|${FEE_DISPLAY}" || continue
+
+      # Execute the appropriate command
+      clear
+      if [ "$SEND_CP" -gt 0 ] 2>/dev/null; then
+          # CoinJoin via jm-taker
+          echo "=== CoinJoin Send ==="
+          echo ""
+          echo "Wallet: $(basename "$CURRENT_WALLET")"
+          echo "Counterparties: $SEND_CP"
+          echo "Press Ctrl+C to abort."
+          echo ""
+
+          TAKER_ARGS=(coinjoin -a "$SEND_AMOUNT" -m "$SEND_MIXDEPTH" -d "$SEND_DEST")
+          TAKER_ARGS+=(-n "$SEND_CP")
+          [ -n "$SEND_FEE" ] && TAKER_ARGS+=(--fee-rate "$SEND_FEE")
+
+          jm-taker "${TAKER_ARGS[@]}"
+      else
+          # Normal transaction via jm-wallet send
+          echo "=== Send Bitcoin ==="
+          echo ""
+          echo "Wallet: $(basename "$CURRENT_WALLET")"
+          echo ""
+
+          SEND_ARGS=(send -a "$SEND_AMOUNT" -m "$SEND_MIXDEPTH")
+          [ -n "$SEND_FEE" ] && SEND_ARGS+=(--fee-rate "$SEND_FEE")
+          SEND_ARGS+=("$SEND_DEST")
+
+          jm-wallet "${SEND_ARGS[@]}"
+      fi
+      pause
+      ;;
+
+    # ------------------------------------------------------------------
+    # WALLET MANAGEMENT
+    # ------------------------------------------------------------------
     W)
       # Wallet Submenu
       WCHOICE=$(whiptail --title " Wallet Management " --menu "Choose option:" 20 64 11 \
@@ -100,7 +285,6 @@ while true; do
         "VAL"      "Validate a Seed Phrase" \
         "BAL"      "View Wallet Info / Balance" \
         "HIST"     "CoinJoin History" \
-        "SEND"     "Send Bitcoin" \
         "FREEZE"   "Freeze / Unfreeze UTXOs" \
         "SEL"      "Select Active Wallet" \
         "BACK"     "Back to Main Menu" 3>&1 1>&2 2>&3)
@@ -203,7 +387,7 @@ while true; do
               echo ""
               echo "Check that a BIP39 mnemonic is valid before importing."
               echo ""
-                  jm-wallet validate
+              jm-wallet validate
               pause
               ;;
           BAL)
@@ -221,65 +405,49 @@ while true; do
               pause
               ;;
           HIST)
-              clear
-              echo "=== CoinJoin History ==="
-              echo ""
               if [ -z "$CURRENT_WALLET" ]; then
-                  echo "No wallet configured in config.toml (mnemonic_file is empty)."
+                  whiptail --title " Error " --msgbox "No wallet configured.\nSet up a wallet first (W -> NEW or SEL)." 9 50
               else
+                  # Prompt parameters with whiptail
+                  HIST_ROLE=$(prompt_param "Role Filter" \
+                    "Filter by role: maker, taker.\nLeave blank for all." \
+                    "") || continue
+
+                  HIST_LIMIT=$(prompt_param "Max Entries" \
+                    "Maximum number of entries to show.\nLeave blank for all." \
+                    "") || continue
+
+                  whiptail --title " Statistics " \
+                    --yesno "Show statistics summary?" \
+                    8 40 --defaultno 3>&1 1>&2 2>&3
+                  HIST_SHOW_STATS=$?
+
+                  # Build summary entries
+                  ROLE_DISPLAY="${HIST_ROLE:-all}"
+                  LIMIT_DISPLAY="${HIST_LIMIT:-all}"
+                  if [ $HIST_SHOW_STATS -eq 0 ]; then
+                      STATS_DISPLAY="yes"
+                  else
+                      STATS_DISPLAY="no"
+                  fi
+
+                  show_summary "Confirm History -- $(basename "$CURRENT_WALLET")" \
+                    "Role filter|all|${ROLE_DISPLAY}" \
+                    "Max entries|all|${LIMIT_DISPLAY}" \
+                    "Show statistics|no|${STATS_DISPLAY}" || continue
+
+                  clear
+                  echo "=== CoinJoin History ==="
+                  echo ""
                   echo "Active wallet: $(basename "$CURRENT_WALLET")"
-                  echo ""
-                  echo "Filter by role: maker, taker, or leave blank for all."
-                  read -p "Role filter (blank=all): " HIST_ROLE
-                  echo ""
-                  read -p "Max entries to show (blank=all): " HIST_LIMIT
                   echo ""
                   HIST_ARGS=()
                   [ -n "$HIST_ROLE" ]  && HIST_ARGS+=(-r "$HIST_ROLE")
                   [ -n "$HIST_LIMIT" ] && HIST_ARGS+=(-n "$HIST_LIMIT")
+                  [ $HIST_SHOW_STATS -eq 0 ] && HIST_ARGS+=(-s)
                   jm-wallet history "${HIST_ARGS[@]}"
-              fi
-              pause
-              ;;
-          SEND)
-              clear
-              echo "=== Send Bitcoin ==="
-              echo ""
-              if [ -z "$CURRENT_WALLET" ]; then
-                  echo "No wallet configured in config.toml (mnemonic_file is empty)."
                   pause
-              else
-                  echo "Active wallet: $(basename "$CURRENT_WALLET")"
-                  echo ""
-                  read -p "Destination address: " SEND_DEST
-                  if [ -z "$SEND_DEST" ]; then
-                      echo "No destination entered. Aborting."
-                      pause
-                  else
-                      read -p "Amount in sats (0 for sweep): " SEND_AMOUNT
-                      SEND_AMOUNT=${SEND_AMOUNT:-0}
-
-                      read -p "Source mixdepth (default 0): " SEND_DEPTH
-                      SEND_DEPTH=${SEND_DEPTH:-0}
-
-                      echo ""
-                      echo "Fee rate: leave blank for automatic 3-block estimate."
-                      read -p "Fee rate in sat/vB (blank=auto): " SEND_FEE
-
-                      echo ""
-                      SEND_ARGS=(-a "$SEND_AMOUNT" -m "$SEND_DEPTH")
-                      [ -n "$SEND_FEE" ] && SEND_ARGS+=(--fee-rate "$SEND_FEE")
-
-                      echo "Transaction preview:"
-                      echo "  To:     $SEND_DEST"
-                      echo "  Amount: $SEND_AMOUNT sats (0=sweep)"
-                      echo "  From:   mixdepth $SEND_DEPTH"
-                      [ -n "$SEND_FEE" ] && echo "  Fee:    ${SEND_FEE} sat/vB"
-                      echo ""
-                      jm-wallet send "${SEND_ARGS[@]}" "$SEND_DEST"
-                  fi
               fi
-              pause
               ;;
           FREEZE)
               clear
@@ -324,38 +492,9 @@ while true; do
       esac
       ;;
 
-    T)
-      clear
-      echo "=== Taker: Run CoinJoin ==="
-      echo ""
-      if [ -z "$CURRENT_WALLET" ]; then
-          echo "No wallet configured. Set up a wallet first."
-          pause
-          continue
-      fi
-      echo "Active wallet: $(basename "$CURRENT_WALLET")"
-      echo ""
-      echo "Amount: Enter satoshis to mix, or 0 for sweep (best privacy)."
-      read -p "Amount (0=sweep): " AMOUNT
-      AMOUNT=${AMOUNT:-0}
-
-      read -p "Source mixdepth (default 0): " MIXDEPTH
-      MIXDEPTH=${MIXDEPTH:-0}
-
-      echo ""
-      echo "Destination: INTERNAL sends to next mixdepth (recommended)."
-      echo "Or enter a bitcoin address for external destination."
-      read -p "Destination (default INTERNAL): " DEST
-      DEST=${DEST:-INTERNAL}
-
-      echo ""
-      echo "Starting CoinJoin..."
-      echo "Press Ctrl+C to abort."
-      echo ""
-      jm-taker coinjoin -a "$AMOUNT" -m "$MIXDEPTH" -d "$DEST"
-      pause
-      ;;
-
+    # ------------------------------------------------------------------
+    # MAKER BOT CONTROL
+    # ------------------------------------------------------------------
     M)
       # Maker submenu
       MCHOICE=$(whiptail --title " Maker Bot (${MAKER_STATUS}) " --menu "Choose option:" 18 64 8 \
@@ -447,33 +586,31 @@ while true; do
                         pause
                         ;;
                     CREATE)
-                        clear
                         if [ -z "$CURRENT_WALLET" ]; then
-                            echo "ERROR: No wallet configured. Set up a wallet first (W -> SEL or NEW)."
-                            pause
+                            whiptail --title " Error " --msgbox "No wallet configured.\nSet up a wallet first (W -> NEW or SEL)." 9 50
                             continue
                         fi
-                        echo "=== Generate Fidelity Bond Address ==="
-                        echo ""
-                        echo "A fidelity bond locks coins at a P2WSH address until a chosen date."
-                        echo "The longer and larger the bond, the higher your maker reputation."
-                        echo "Coins are NOT spendable until the locktime expires."
-                        echo ""
-                        # Ask for locktime month
-                        LOCKDATE=$(whiptail --title " Fidelity Bond Locktime " \
-                          --inputbox "Enter locktime as YYYY-MM (must be a future month, e.g. 2027-06):" \
-                          10 60 "" 3>&1 1>&2 2>&3)
-                        [ $? -ne 0 ] && continue
+
+                        # Locktime month (required)
+                        LOCKDATE=$(prompt_param "Fidelity Bond Locktime" \
+                          "Enter locktime as YYYY-MM (must be a future month, e.g. 2027-06).\nCoins are NOT spendable until this date." \
+                          "") || continue
                         if [ -z "$LOCKDATE" ]; then
-                            whiptail --title "Error" --msgbox "No locktime entered." 8 40
+                            whiptail --title " Error " --msgbox "No locktime entered." 8 40
                             continue
                         fi
-                        # Ask for derivation index (default 0)
-                        BOND_INDEX=$(whiptail --title " Bond Index " \
-                          --inputbox "Derivation index (0 for first bond, 1 for second, etc.):" \
-                          10 60 "0" 3>&1 1>&2 2>&3)
-                        [ $? -ne 0 ] && continue
-                        BOND_INDEX="${BOND_INDEX:-0}"
+
+                        # Derivation index (default 0)
+                        BOND_INDEX=$(prompt_param "Bond Index" \
+                          "Derivation index (0 for first bond, 1 for second, etc.)." \
+                          "0") || continue
+                        BOND_INDEX=$(to_int "${BOND_INDEX}" "0")
+
+                        # Confirmation summary
+                        show_summary "Confirm Fidelity Bond -- $(basename "$CURRENT_WALLET")" \
+                          "Locktime|<required>|${LOCKDATE}" \
+                          "Derivation index|0|${BOND_INDEX}" || continue
+
                         clear
                         echo "=== Generating Bond Address ==="
                         echo ""

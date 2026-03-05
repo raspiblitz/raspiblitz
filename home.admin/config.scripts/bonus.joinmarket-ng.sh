@@ -243,8 +243,12 @@ fi
 
 if [ "$1" = "wipe-password" ]; then
   CONFIG_FILE="/home/${USER_JM}/.joinmarket-ng/config.toml"
-  if [ -f "${CONFIG_FILE}" ]; then
-    python3 - "${CONFIG_FILE}" <<'PYEOF'
+  INJECTED_FLAG="/home/${USER_JM}/.joinmarket-ng/.password_injected"
+  # Only wipe the password if it was temporarily injected by prestart.
+  # If the user permanently stored it via store-password, leave it alone.
+  if [ -f "${INJECTED_FLAG}" ]; then
+    if [ -f "${CONFIG_FILE}" ]; then
+      python3 - "${CONFIG_FILE}" <<'PYEOF'
 import sys, re
 path = sys.argv[1]
 with open(path, "r") as fh:
@@ -253,6 +257,11 @@ content = re.sub(r"^\s*mnemonic_password\s*=.*\n?", "", content, flags=re.MULTIL
 with open(path, "w") as fh:
     fh.write(content)
 PYEOF
+    fi
+    rm -f "${INJECTED_FLAG}"
+    echo "# Injected password wiped from config.toml"
+  else
+    echo "# Password was not injected — leaving config.toml unchanged."
   fi
   exit 0
 fi

@@ -106,6 +106,31 @@ teardown_file() {
 }
 
 # ---------------------------------------------------------------------------
+# 2b. Menu script is syntactically valid bash
+# ---------------------------------------------------------------------------
+@test "menu script passes bash syntax check" {
+  run bash -n "/home/${USER_JM}/menu.sh"
+  [ "$status" -eq 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# 2c. Menu script contains expected main menu entries
+# ---------------------------------------------------------------------------
+@test "menu script has unified Send entry and no separate Taker entry" {
+  local menu="/home/${USER_JM}/menu.sh"
+  # "S" "Send Bitcoin" should be in the main menu
+  grep -q '"S".*"Send Bitcoin"' "$menu"
+  # Old "T" "Taker" entry should not exist
+  ! grep -q '"T".*"Taker' "$menu"
+  # Wallet submenu should not have a SEND entry
+  ! grep -q '"SEND".*"Send Bitcoin"' "$menu"
+  # prompt_param helper should exist
+  grep -q 'prompt_param()' "$menu"
+  # show_summary helper should exist
+  grep -q 'show_summary()' "$menu"
+}
+
+# ---------------------------------------------------------------------------
 # 3. Post-install: status should show isInstalled=1
 # ---------------------------------------------------------------------------
 @test "status after install shows isInstalled=1 and correct version" {
@@ -173,17 +198,36 @@ teardown_file() {
 }
 
 # ---------------------------------------------------------------------------
-# 6. wipe-password removes mnemonic_password from config.toml
+# 6. wipe-password only removes injected passwords, not permanently stored ones
 # ---------------------------------------------------------------------------
-@test "wipe-password removes mnemonic_password from config.toml" {
-  # Ensure it's set first (from previous test)
+@test "wipe-password preserves permanently stored mnemonic_password" {
+  # Ensure it's set first (from previous store-password test)
   grep -q '^mnemonic_password' "${CONFIG_TOML}"
+
+  # No .password_injected flag exists, so wipe-password should be a no-op
+  rm -f "/home/${USER_JM}/.joinmarket-ng/.password_injected"
+
+  run bash "${SCRIPT}" wipe-password
+  [ "$status" -eq 0 ]
+
+  # Password should still be there (permanently stored)
+  grep -q '^mnemonic_password = "hunter2"' "${CONFIG_TOML}"
+}
+
+@test "wipe-password removes injected mnemonic_password" {
+  # Ensure it's set first
+  grep -q '^mnemonic_password' "${CONFIG_TOML}"
+
+  # Create the injection flag (simulating what prestart does)
+  touch "/home/${USER_JM}/.joinmarket-ng/.password_injected"
 
   run bash "${SCRIPT}" wipe-password
   [ "$status" -eq 0 ]
 
   # Active (uncommented) line should be gone
   ! grep -q '^mnemonic_password' "${CONFIG_TOML}"
+  # Injection flag should also be removed
+  [ ! -f "/home/${USER_JM}/.joinmarket-ng/.password_injected" ]
 }
 
 # ---------------------------------------------------------------------------
