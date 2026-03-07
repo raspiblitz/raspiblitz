@@ -835,7 +835,7 @@ if [ "$1" = "restore" ]; then
 fi
 
 if [ "$1" = "update" ]; then
-  ## Skip NBXplorer update for now 
+  # Skip NBXplorer update for now
   # echo "# Update NBXplorer"
   # cd /home/btcpay || exit 1
   # cd NBXplorer || exit 1
