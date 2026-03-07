@@ -28,7 +28,7 @@ fi
 mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM (latest tested version available)
-bitcoinVersion="30.0" # example: 22.0 .. keep empty if no newer version as sd card build is available
+bitcoinVersion="30.2" # example: 22.0 .. keep empty if no newer version as sd card build is available
 
 # GATHER DATA
 # setting download directory to the current user
