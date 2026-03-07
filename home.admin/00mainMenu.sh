@@ -391,9 +391,8 @@ case $CHOICE in
                echo ""
                sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
                echo ""
-               echo "Shutting down below services for reboot - please wait ..."
                echo "If your SSH session does not close automatically:"
-               echo "  Press ENTER, then type ~. to disconnect."
+               echo "  Press Ctrl+C to disconnect."
                exit 1
 	          fi
             ;;
@@ -406,9 +405,8 @@ case $CHOICE in
                echo ""
                sudo /home/admin/config.scripts/blitz.shutdown.sh
                echo ""
-               echo "Shutting down below services for shutdown - please wait ..."
                echo "If your SSH session does not close automatically:"
-               echo "  Press ENTER, then type ~. to disconnect."
+               echo "  Press Ctrl+C to disconnect."
                exit 1
 	          fi
             ;;
