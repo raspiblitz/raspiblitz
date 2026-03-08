@@ -1,3 +1,7 @@
+## What's new in Version 1.12.2 of RaspiBlitz?
+
+- Update: BTCPayServer v2.3.5 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.3.5)
+
 ## What's new in Version 1.12.1 of RaspiBlitz?
 
 - Update: Bitcoin Core v29.2 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.2.md)
