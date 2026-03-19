@@ -8,6 +8,7 @@ APP_CODE_DIR="${APP_HOME}/am-i-exposed"
 APP_DATA_DIR="/mnt/hdd/app-data/${APPID}"
 APP_PORT="3090"
 PNPM_VERSION="10.26.1"
+MEMPOOL_TOR_HOST_FILE="/mnt/hdd/app-data/tor/mempool/hostname"
 
 GITHUB_REPO="https://github.com/Copexit/am-i-exposed.git"
 GITHUB_COMMIT="89020e33bfb31181bd7838b569500366d0047e91"
@@ -133,6 +134,8 @@ import { fileURLToPath } from "node:url";
 const PORT = Number(process.env.PORT || 3090);
 const ROOT = process.env.ROOT_DIR || "/home/amiexposed/am-i-exposed/out";
 const MEMPOOL_BASE = process.env.MEMPOOL_BASE || "http://127.0.0.1:8999";
+const MEMPOOL_ONION_RAW = (process.env.MEMPOOL_ONION || "").trim();
+const MEMPOOL_ONION = MEMPOOL_ONION_RAW.endsWith(".onion") ? MEMPOOL_ONION_RAW : null;
 
 const TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -230,7 +233,17 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  const targetPath = toMempoolPath(new URL(req.url, "http://localhost").pathname);
+  const pathname = new URL(req.url, "http://localhost").pathname;
+
+  // Compatibility endpoint used by am-i-exposed local API detection.
+  if (pathname === "/api/local-info") {
+    res.statusCode = 200;
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    res.end(JSON.stringify({ mempoolPort: "8999", mempoolOnion: MEMPOOL_ONION }));
+    return;
+  }
+
+  const targetPath = toMempoolPath(pathname);
   if (targetPath) {
     await proxy(req, res, targetPath);
     return;
@@ -250,6 +263,11 @@ EOF
   sudo chown "${APP_USER}:${APP_USER}" "${APP_CODE_DIR}/raspiblitz-server.mjs" || exit 1
 
   echo "# Creating systemd service"
+  mempoolOnion=$(sudo cat "${MEMPOOL_TOR_HOST_FILE}" 2>/dev/null | tr -d '\r\n')
+  if ! echo "${mempoolOnion}" | grep -q '\.onion$'; then
+    mempoolOnion=""
+  fi
+
   cat >/var/cache/raspiblitz/${APP_SERVICE}.service <<EOF
 [Unit]
 Description=am-i-exposed web UI
@@ -261,6 +279,7 @@ WorkingDirectory=${APP_CODE_DIR}
 Environment=PORT=${APP_PORT}
 Environment=ROOT_DIR=${APP_CODE_DIR}/out
 Environment=MEMPOOL_BASE=http://127.0.0.1:8999
+Environment=MEMPOOL_ONION=${mempoolOnion}
 ExecStart=/usr/bin/node ${APP_CODE_DIR}/raspiblitz-server.mjs
 User=${APP_USER}
 Group=${APP_USER}
@@ -318,6 +337,185 @@ if [ "$1" = "update" ]; then
   sudo -u "${APP_USER}" npx -y "pnpm@${PNPM_VERSION}" install || exit 1
   sudo -u "${APP_USER}" npx -y "pnpm@${PNPM_VERSION}" build || exit 1
 
+  echo "# Refreshing local web/proxy server"
+  cat >/var/cache/raspiblitz/${APPID}-server.mjs <<'EOF'
+import { createServer } from "node:http";
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
+import { extname, join, normalize } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const PORT = Number(process.env.PORT || 3090);
+const ROOT = process.env.ROOT_DIR || "/home/amiexposed/am-i-exposed/out";
+const MEMPOOL_BASE = process.env.MEMPOOL_BASE || "http://127.0.0.1:8999";
+const MEMPOOL_ONION_RAW = (process.env.MEMPOOL_ONION || "").trim();
+const MEMPOOL_ONION = MEMPOOL_ONION_RAW.endsWith(".onion") ? MEMPOOL_ONION_RAW : null;
+
+const TYPES = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".ico": "image/x-icon",
+  ".webp": "image/webp",
+  ".txt": "text/plain; charset=utf-8",
+  ".map": "application/json; charset=utf-8",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+};
+
+function toMempoolPath(urlPath) {
+  if (urlPath.startsWith("/api/")) return `/api/v1/${urlPath.slice(5)}`;
+  if (urlPath.startsWith("/signet/api/")) return `/api/v1/${urlPath.slice(12)}`;
+  if (urlPath.startsWith("/testnet4/api/")) return `/api/v1/${urlPath.slice(14)}`;
+  return null;
+}
+
+async function proxy(req, res, targetPath) {
+  try {
+    const targetUrl = `${MEMPOOL_BASE}${targetPath}${new URL(req.url, "http://localhost").search}`;
+    const upstream = await fetch(targetUrl, {
+      method: req.method,
+      headers: {
+        Accept: req.headers.accept || "*/*",
+        "User-Agent": "am-i-exposed-raspiblitz",
+      },
+    });
+
+    res.statusCode = upstream.status;
+    res.statusMessage = upstream.statusText;
+    for (const [k, v] of upstream.headers.entries()) {
+      if (k === "transfer-encoding") continue;
+      res.setHeader(k, v);
+    }
+
+    if (!upstream.body) {
+      res.end();
+      return;
+    }
+
+    for await (const chunk of upstream.body) {
+      res.write(chunk);
+    }
+    res.end();
+  } catch (error) {
+    res.statusCode = 502;
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    res.end(JSON.stringify({ error: "proxy_error", message: String(error) }));
+  }
+}
+
+async function serveFile(req, res) {
+  const pathname = new URL(req.url, "http://localhost").pathname;
+  const cleanPath = normalize(pathname).replace(/^\.\.(\/|\\|$)/, "");
+  const trimmedPath = cleanPath.replace(/^\/+/, "");
+  const requested = trimmedPath === "" ? "index.html" : trimmedPath;
+  const filePath = join(ROOT, requested);
+
+  try {
+    const fileStat = await stat(filePath);
+    if (fileStat.isFile()) {
+      res.statusCode = 200;
+      res.setHeader("content-type", TYPES[extname(filePath)] || "application/octet-stream");
+      createReadStream(filePath).pipe(res);
+      return;
+    }
+  } catch {
+    // Fall back to SPA index
+  }
+
+  const indexPath = join(ROOT, "index.html");
+  try {
+    await stat(indexPath);
+    res.statusCode = 200;
+    res.setHeader("content-type", "text/html; charset=utf-8");
+    createReadStream(indexPath).pipe(res);
+  } catch {
+    res.statusCode = 404;
+    res.end("not found");
+  }
+}
+
+const server = createServer(async (req, res) => {
+  if (!req.url) {
+    res.statusCode = 400;
+    res.end("bad request");
+    return;
+  }
+
+  const pathname = new URL(req.url, "http://localhost").pathname;
+
+  // Compatibility endpoint used by am-i-exposed local API detection.
+  if (pathname === "/api/local-info") {
+    res.statusCode = 200;
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    res.end(JSON.stringify({ mempoolPort: "8999", mempoolOnion: MEMPOOL_ONION }));
+    return;
+  }
+
+  const targetPath = toMempoolPath(pathname);
+  if (targetPath) {
+    await proxy(req, res, targetPath);
+    return;
+  }
+
+  await serveFile(req, res);
+});
+
+server.listen(PORT, "0.0.0.0", () => {
+  const here = fileURLToPath(new URL(".", import.meta.url));
+  console.log(`am-i-exposed server running on :${PORT}`);
+  console.log(`root=${ROOT} from ${here}`);
+});
+EOF
+
+  sudo mv /var/cache/raspiblitz/${APPID}-server.mjs "${APP_CODE_DIR}/raspiblitz-server.mjs" || exit 1
+  sudo chown "${APP_USER}:${APP_USER}" "${APP_CODE_DIR}/raspiblitz-server.mjs" || exit 1
+
+  echo "# Refreshing systemd service config"
+  mempoolOnion=$(sudo cat "${MEMPOOL_TOR_HOST_FILE}" 2>/dev/null | tr -d '\r\n')
+  if ! echo "${mempoolOnion}" | grep -q '\.onion$'; then
+    mempoolOnion=""
+  fi
+
+  cat >/var/cache/raspiblitz/${APP_SERVICE}.service <<EOF
+[Unit]
+Description=am-i-exposed web UI
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=${APP_CODE_DIR}
+Environment=PORT=${APP_PORT}
+Environment=ROOT_DIR=${APP_CODE_DIR}/out
+Environment=MEMPOOL_BASE=http://127.0.0.1:8999
+Environment=MEMPOOL_ONION=${mempoolOnion}
+ExecStart=/usr/bin/node ${APP_CODE_DIR}/raspiblitz-server.mjs
+User=${APP_USER}
+Group=${APP_USER}
+Restart=on-failure
+RestartSec=10
+TimeoutSec=120
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+ReadWritePaths=${APP_CODE_DIR} ${APP_DATA_DIR}
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  sudo mv /var/cache/raspiblitz/${APP_SERVICE}.service /etc/systemd/system/${APP_SERVICE}.service || exit 1
+  sudo chown root:root /etc/systemd/system/${APP_SERVICE}.service || exit 1
+  sudo systemctl daemon-reload || exit 1
+
   sudo systemctl restart ${APP_SERVICE} || exit 1
   echo "# OK - ${APPID} updated"
   exit 0
@@ -333,10 +531,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   sudo ufw deny ${APP_PORT}
 
-  # remove hidden service if present
-  if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/tor.onion-service.sh off ${APPID}
-  fi
+  # remove hidden service if present (always try, independent of current Tor mode)
+  /home/admin/config.scripts/tor.onion-service.sh off ${APPID} 2>/dev/null || true
+
+  # remove generated proxy/server artifacts
+  sudo rm -f "${APP_CODE_DIR}/raspiblitz-server.mjs"
+  sudo rm -f "/var/cache/raspiblitz/${APPID}-server.mjs"
+  sudo rm -rf "${APP_CODE_DIR}"
 
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "off"
 
