@@ -7,6 +7,7 @@ APP_HOME="/home/${APP_USER}"
 APP_CODE_DIR="${APP_HOME}/am-i-exposed"
 APP_DATA_DIR="/mnt/hdd/app-data/${APPID}"
 APP_PORT="3090"
+PNPM_VERSION="10.26.1"
 
 GITHUB_REPO="https://github.com/Copexit/am-i-exposed.git"
 GITHUB_COMMIT="89020e33bfb31181bd7838b569500366d0047e91"
@@ -92,10 +93,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Installing dependencies and building web UI"
   cd "${APP_CODE_DIR}" || exit 1
-  sudo corepack enable || exit 1
-  sudo corepack prepare pnpm@latest --activate || exit 1
-  sudo -u "${APP_USER}" pnpm install || exit 1
-  sudo -u "${APP_USER}" pnpm build || exit 1
+  sudo -u "${APP_USER}" npx -y "pnpm@${PNPM_VERSION}" install || exit 1
+  sudo -u "${APP_USER}" npx -y "pnpm@${PNPM_VERSION}" build || exit 1
 
   echo "# Writing local web/proxy server"
   cat >/var/cache/raspiblitz/${APPID}-server.mjs <<'EOF'
@@ -281,10 +280,8 @@ if [ "$1" = "update" ]; then
   cd "${APP_CODE_DIR}" || exit 1
   sudo -u "${APP_USER}" git fetch --tags || exit 1
   sudo -u "${APP_USER}" git reset --hard "${GITHUB_COMMIT}" || exit 1
-  sudo corepack enable || exit 1
-  sudo corepack prepare pnpm@latest --activate || exit 1
-  sudo -u "${APP_USER}" pnpm install || exit 1
-  sudo -u "${APP_USER}" pnpm build || exit 1
+  sudo -u "${APP_USER}" npx -y "pnpm@${PNPM_VERSION}" install || exit 1
+  sudo -u "${APP_USER}" npx -y "pnpm@${PNPM_VERSION}" build || exit 1
 
   sudo systemctl restart ${APP_SERVICE} || exit 1
   echo "# OK - ${APPID} updated"
