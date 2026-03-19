@@ -17,6 +17,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.am-i-exposed.sh on                -> install and enable service"
   echo "# bonus.am-i-exposed.sh off [delete-data] -> disable and remove service"
   echo "# bonus.am-i-exposed.sh update            -> update code and rebuild"
+  echo "# bonus.am-i-exposed.sh onion             -> create/refresh Tor hidden service"
+  echo "# bonus.am-i-exposed.sh onion-off         -> remove Tor hidden service"
   echo "# bonus.am-i-exposed.sh menu              -> SSH info dialog"
   exit 1
 fi
@@ -30,6 +32,7 @@ isRunning=$(sudo systemctl status ${APP_SERVICE} 2>/dev/null | grep -c 'active (
 
 if [ "${isInstalled}" = "1" ]; then
   localIP=$(hostname -I | awk '{print $1}')
+  toraddress=$(sudo cat /mnt/hdd/app-data/tor/${APPID}/hostname 2>/dev/null)
 fi
 
 if [ "$1" = "status" ]; then
@@ -43,6 +46,7 @@ if [ "$1" = "status" ]; then
   if [ "${isInstalled}" = "1" ]; then
     echo "port=${APP_PORT}"
     echo "localIP='${localIP}'"
+    echo "toraddress='${toraddress}'"
   fi
   exit 0
 fi
@@ -51,8 +55,30 @@ if [ "$1" = "menu" ]; then
   source <(/home/admin/config.scripts/bonus.am-i-exposed.sh status)
   dialogTitle=" am-i-exposed "
   dialogText="Open in your local web browser:\nhttp://${localIP}:${APP_PORT}\n"
+  if [ ${#toraddress} -gt 0 ]; then
+    dialogText="${dialogText}\nHidden Service address for Tor Browser:\n${toraddress}"
+  fi
   whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 10 60
   echo "please wait ..."
+  exit 0
+fi
+
+if [ "$1" = "onion" ]; then
+  if [ "${runBehindTor}" != "on" ]; then
+    echo "# Tor is not active. Enable Tor first in RaspiBlitz settings."
+    exit 1
+  fi
+
+  /home/admin/config.scripts/tor.onion-service.sh ${APPID} 80 ${APP_PORT} || exit 1
+  toraddress=$(sudo cat /mnt/hdd/app-data/tor/${APPID}/hostname 2>/dev/null)
+  if [ ${#toraddress} -gt 0 ]; then
+    echo "# Tor address: ${toraddress}"
+  fi
+  exit 0
+fi
+
+if [ "$1" = "onion-off" ]; then
+  /home/admin/config.scripts/tor.onion-service.sh off ${APPID} || exit 1
   exit 0
 fi
 
@@ -265,8 +291,17 @@ EOF
   sudo systemctl enable ${APP_SERVICE} || exit 1
   sudo systemctl restart ${APP_SERVICE} || exit 1
 
+  # add Tor hidden service in standard RaspiBlitz way
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/tor.onion-service.sh ${APPID} 80 ${APP_PORT} || exit 1
+    toraddress=$(sudo cat /mnt/hdd/app-data/tor/${APPID}/hostname 2>/dev/null)
+  fi
+
   echo "# OK - ${APP_SERVICE}.service installed and running"
   echo "# Open: http://$(hostname -I | awk '{print $1}'):${APP_PORT}"
+  if [ ${#toraddress} -gt 0 ]; then
+    echo "# Tor address: ${toraddress}"
+  fi
   exit 0
 fi
 
@@ -297,6 +332,11 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl daemon-reload
 
   sudo ufw deny ${APP_PORT}
+
+  # remove hidden service if present
+  if [ "${runBehindTor}" = "on" ]; then
+    /home/admin/config.scripts/tor.onion-service.sh off ${APPID}
+  fi
 
   /home/admin/config.scripts/blitz.conf.sh set ${APPID} "off"
 
