@@ -1,25 +1,26 @@
 #!/bin/bash
 
-APPID="am-i-exposed"
+APPID="amiexposed"
 APP_USER="amiexposed"
 APP_SERVICE="${APPID}"
 APP_HOME="/home/${APP_USER}"
-APP_DIR="${APP_HOME}/${APPID}"
+APP_CODE_DIR="${APP_HOME}/am-i-exposed"
 APP_DATA_DIR="/mnt/hdd/app-data/${APPID}"
 APP_PORT="3090"
 
 GITHUB_REPO="https://github.com/Copexit/am-i-exposed.git"
+GITHUB_COMMIT="89020e33bfb31181bd7838b569500366d0047e91"
 
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "# bonus.${APPID}.sh status            -> status information (key=value)"
-  echo "# bonus.${APPID}.sh on                -> install and enable service"
-  echo "# bonus.${APPID}.sh off [delete-data] -> disable and remove service"
-  echo "# bonus.${APPID}.sh update            -> update code and rebuild"
-  echo "# bonus.${APPID}.sh menu              -> SSH info dialog"
+  echo "# bonus.am-i-exposed.sh status            -> status information (key=value)"
+  echo "# bonus.am-i-exposed.sh on                -> install and enable service"
+  echo "# bonus.am-i-exposed.sh off [delete-data] -> disable and remove service"
+  echo "# bonus.am-i-exposed.sh update            -> update code and rebuild"
+  echo "# bonus.am-i-exposed.sh menu              -> SSH info dialog"
   exit 1
 fi
 
-echo "# Running: 'bonus.${APPID}.sh $*'"
+echo "# Running: 'bonus.am-i-exposed.sh $*'"
 
 source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
@@ -32,8 +33,10 @@ fi
 
 if [ "$1" = "status" ]; then
   echo "appID='${APPID}'"
+  echo "appDisplayName='am-i-exposed'"
   echo "appUser='${APP_USER}'"
   echo "githubRepo='${GITHUB_REPO}'"
+  echo "githubCommit='${GITHUB_COMMIT}'"
   echo "isInstalled=${isInstalled}"
   echo "isRunning=${isRunning}"
   if [ "${isInstalled}" = "1" ]; then
@@ -44,7 +47,7 @@ if [ "$1" = "status" ]; then
 fi
 
 if [ "$1" = "menu" ]; then
-  source <(/home/admin/config.scripts/bonus.${APPID}.sh status)
+  source <(/home/admin/config.scripts/bonus.am-i-exposed.sh status)
   dialogTitle=" am-i-exposed "
   dialogText="Open in your local web browser:\nhttp://${localIP}:${APP_PORT}\n"
   whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 10 60
@@ -75,20 +78,22 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo mkdir -p "${APP_DATA_DIR}" || exit 1
   sudo chown -R "${APP_USER}:${APP_USER}" "${APP_DATA_DIR}" || exit 1
 
-  if [ -d "${APP_DIR}" ]; then
+  if [ -d "${APP_CODE_DIR}" ]; then
     echo "# Existing app directory found, updating source"
-    cd "${APP_DIR}" || exit 1
+    cd "${APP_CODE_DIR}" || exit 1
     sudo -u "${APP_USER}" git fetch --tags || exit 1
-    sudo -u "${APP_USER}" git reset --hard origin/main || exit 1
+    sudo -u "${APP_USER}" git reset --hard "${GITHUB_COMMIT}" || exit 1
   else
     echo "# Cloning source code"
-    sudo -u "${APP_USER}" git clone "${GITHUB_REPO}" "${APP_DIR}" || exit 1
+    sudo -u "${APP_USER}" git clone "${GITHUB_REPO}" "${APP_CODE_DIR}" || exit 1
+    cd "${APP_CODE_DIR}" || exit 1
+    sudo -u "${APP_USER}" git reset --hard "${GITHUB_COMMIT}" || exit 1
   fi
 
   echo "# Installing dependencies and building web UI"
-  cd "${APP_DIR}" || exit 1
-  sudo -u "${APP_USER}" corepack enable || exit 1
-  sudo -u "${APP_USER}" corepack prepare pnpm@latest --activate || exit 1
+  cd "${APP_CODE_DIR}" || exit 1
+  sudo corepack enable || exit 1
+  sudo corepack prepare pnpm@latest --activate || exit 1
   sudo -u "${APP_USER}" pnpm install || exit 1
   sudo -u "${APP_USER}" pnpm build || exit 1
 
@@ -216,8 +221,8 @@ server.listen(PORT, "0.0.0.0", () => {
 });
 EOF
 
-  sudo mv /var/cache/raspiblitz/${APPID}-server.mjs "${APP_DIR}/raspiblitz-server.mjs" || exit 1
-  sudo chown "${APP_USER}:${APP_USER}" "${APP_DIR}/raspiblitz-server.mjs" || exit 1
+  sudo mv /var/cache/raspiblitz/${APPID}-server.mjs "${APP_CODE_DIR}/raspiblitz-server.mjs" || exit 1
+  sudo chown "${APP_USER}:${APP_USER}" "${APP_CODE_DIR}/raspiblitz-server.mjs" || exit 1
 
   echo "# Creating systemd service"
   cat >/var/cache/raspiblitz/${APP_SERVICE}.service <<EOF
@@ -227,11 +232,11 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-WorkingDirectory=${APP_DIR}
+WorkingDirectory=${APP_CODE_DIR}
 Environment=PORT=${APP_PORT}
-Environment=ROOT_DIR=${APP_DIR}/out
+Environment=ROOT_DIR=${APP_CODE_DIR}/out
 Environment=MEMPOOL_BASE=http://127.0.0.1:8999
-ExecStart=/usr/bin/node ${APP_DIR}/raspiblitz-server.mjs
+ExecStart=/usr/bin/node ${APP_CODE_DIR}/raspiblitz-server.mjs
 User=${APP_USER}
 Group=${APP_USER}
 Restart=on-failure
@@ -243,7 +248,7 @@ PrivateTmp=true
 ProtectSystem=full
 NoNewPrivileges=true
 PrivateDevices=true
-ReadWritePaths=${APP_DIR} ${APP_DATA_DIR}
+ReadWritePaths=${APP_CODE_DIR} ${APP_DATA_DIR}
 
 [Install]
 WantedBy=multi-user.target
@@ -255,7 +260,7 @@ EOF
   echo "# Updating firewall"
   sudo ufw allow ${APP_PORT} comment "${APPID} WebUI" || exit 1
 
-  /home/admin/config.scripts/blitz.conf.sh set amiExposed "on"
+  /home/admin/config.scripts/blitz.conf.sh set ${APPID} "on"
 
   sudo systemctl daemon-reload
   sudo systemctl enable ${APP_SERVICE} || exit 1
@@ -273,11 +278,11 @@ if [ "$1" = "update" ]; then
   fi
 
   echo "# Updating ${APPID}"
-  cd "${APP_DIR}" || exit 1
+  cd "${APP_CODE_DIR}" || exit 1
   sudo -u "${APP_USER}" git fetch --tags || exit 1
-  sudo -u "${APP_USER}" git reset --hard origin/main || exit 1
-  sudo -u "${APP_USER}" corepack enable || exit 1
-  sudo -u "${APP_USER}" corepack prepare pnpm@latest --activate || exit 1
+  sudo -u "${APP_USER}" git reset --hard "${GITHUB_COMMIT}" || exit 1
+  sudo corepack enable || exit 1
+  sudo corepack prepare pnpm@latest --activate || exit 1
   sudo -u "${APP_USER}" pnpm install || exit 1
   sudo -u "${APP_USER}" pnpm build || exit 1
 
@@ -296,7 +301,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   sudo ufw deny ${APP_PORT}
 
-  /home/admin/config.scripts/blitz.conf.sh set amiExposed "off"
+  /home/admin/config.scripts/blitz.conf.sh set ${APPID} "off"
 
   if [ "$(echo "$*" | grep -c 'delete-data')" -gt 0 ]; then
     echo "# delete-data specified: removing app-data directory"
