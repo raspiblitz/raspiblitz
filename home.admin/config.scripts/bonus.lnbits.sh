@@ -1039,7 +1039,7 @@ if [ "$1" = "switch" ]; then
     else
       CLCONF="/home/bitcoin/.lightning${clrpcsubdir}/config"
     fi
-    # https://github.com/rootzoll/raspiblitz/issues/3007
+    # https://github.com/raspiblitz/raspiblitz/issues/3007
     if [ "$(sudo cat ${CLCONF} | grep -c "^rpc-file-mode=0660")" -eq 0 ]; then
       echo "rpc-file-mode=0660" | sudo tee -a ${CLCONF}
     fi

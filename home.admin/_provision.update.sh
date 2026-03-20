@@ -83,8 +83,8 @@ if [ ${configExists} -eq 1 ]; then
   echo "Checking old bitcoin.conf ..." >> ${logFile}
 
   # make sure to fix bitcoind RPC port if not done in old version
-  # https://github.com/rootzoll/raspiblitz/issues/217
-  # https://github.com/rootzoll/raspiblitz/issues/950
+  # https://github.com/raspiblitz/raspiblitz/issues/217
+  # https://github.com/raspiblitz/raspiblitz/issues/950
 
   if ! grep -Eq "^rpcallowip=.*" /mnt/hdd/app-data/${network}/${network}.conf; then
     echo "fix issue #217 -> adding rpcallowip=127.0.0.1" >> ${logFile}
@@ -142,7 +142,7 @@ else
   echo "WARN: /mnt/hdd/app-data/bitcoin/bitcoin.conf not found" >> ${logFile}
 fi
 
-# delete old Tor v1 addresses from config -  see: https://github.com/rootzoll/raspiblitz/issues/3659
+# delete old Tor v1 addresses from config -  see: https://github.com/raspiblitz/raspiblitz/issues/3659
 sed -i -E "/^addnode=[a-z0-9]{8,18}\.onion/d" /mnt/hdd/app-data/${network}/${network}.conf 2>/dev/null
 
 echo "Version Code: ${codeVersion}" >> ${logFile}

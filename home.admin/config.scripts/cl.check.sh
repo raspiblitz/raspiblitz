@@ -24,12 +24,12 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 if [ "$1" == "prestart" ]; then
 
-  # make sure plugins are loaded https://github.com/rootzoll/raspiblitz/issues/2953
+  # make sure plugins are loaded https://github.com/raspiblitz/raspiblitz/issues/2953
   if [ $(grep -c "^plugin-dir=/home/bitcoin/${netprefix}cl-plugins-enabled" <${CLCONF}) -eq 0 ]; then
     echo "plugin-dir=/home/bitcoin/${netprefix}cl-plugins-enabled" | tee -a ${CLCONF}
   fi
 
-  # do not announce 127.0.0.1 https://github.com/rootzoll/raspiblitz/issues/2634
+  # do not announce 127.0.0.1 https://github.com/raspiblitz/raspiblitz/issues/2634
   if [ $(grep -c "^announce-addr=127.0.0.1" <${CLCONF}) -gt 0 ]; then
     sed -i "/^announce-addr=127.0.0.1/d" ${CLCONF}
   fi
@@ -58,7 +58,7 @@ if [ "$1" == "prestart" ]; then
     fi
   fi
 
-  # https://github.com/rootzoll/raspiblitz/issues/3007
+  # https://github.com/raspiblitz/raspiblitz/issues/3007
   # add for test networks as well if needed on mainnet
   if [ "${blitzapi}" = "on" ] ||
     [ "${LNBitsFunding}" = "${netprefix}cl" ] ||

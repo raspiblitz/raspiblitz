@@ -102,7 +102,7 @@ echo "* Adding Core Lightning ..."
 
 # *** AUTO UPDATE FALLBACK NODE LIST FROM INTERNET (only in fatpack)
 echo "*** FALLBACK NODE LIST ***"
-# see https://github.com/rootzoll/raspiblitz/issues/1888
+# see https://github.com/raspiblitz/raspiblitz/issues/1888
 sudo -u admin curl -H "Accept: application/json; indent=4" https://bitnodes.io/api/v1/snapshots/latest/ -o /home/admin/fallback.bitnodes.nodes
 # Fallback Nodes List from Bitcoin Core
 sudo -u admin curl https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/seeds/nodes_main.txt -o /home/admin/fallback.bitcoin.nodes

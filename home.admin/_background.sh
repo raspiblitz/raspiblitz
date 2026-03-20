@@ -42,7 +42,7 @@ do
 
   ####################################################
   # SKIP BACKGROUND TASK LOOP ON CERTAIN SYSTEM STATES
-  # https://github.com/rootzoll/raspiblitz/issues/160
+  # https://github.com/raspiblitz/raspiblitz/issues/160
   ####################################################
 
   if [ "${state}" == "" ] || [ "${state}" == "copysource" ] || [ "${state}" == "copytarget" ]; then
@@ -74,7 +74,7 @@ do
 
   ####################################################
   # MONITOR LOG SIZES
-  # https://github.com/rootzoll/raspiblitz/issues/2659
+  # https://github.com/raspiblitz/raspiblitz/issues/2659
   ####################################################
 
   # once a day
@@ -86,7 +86,7 @@ do
 
   ####################################################
   # RECHECK DHCP-SERVER
-  # https://github.com/rootzoll/raspiblitz/issues/160
+  # https://github.com/raspiblitz/raspiblitz/issues/160
   ####################################################
 
   # every 5 minutes

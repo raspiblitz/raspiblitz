@@ -7,7 +7,7 @@ This *Mini-Tutorial* shows the basic workflow for doing changes to the Blitz-Tou
 * A physical RaspiBlitz and SSH access to it (to verify your changes on the real screen)
 * A Computer (Mac and Windows should work)
 * The "Qt Designer" software (https://build-system.fman.io/qt-designer-download)
-* A copy of the current RaspiBlitz codebase (`git clone https://github.com/rootzoll/raspiblitz.git`)
+* A copy of the current RaspiBlitz codebase (`git clone https://github.com/raspiblitz/raspiblitz.git`)
 
 ## Scenario
 

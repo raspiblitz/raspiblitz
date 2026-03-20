@@ -66,9 +66,9 @@ The process is similar if you want to run RaspiBlitz on the bare metal.
 Tested with:
 * Debian image in VirtualBox and linux virt-manager / [cockpit-machines](https://github.com/cockpit-project/cockpit-machines)
 * Ubuntu image in VirtualBox and linux virt-manager / [cockpit-machines](https://github.com/cockpit-project/cockpit-machines)
-* Debian image in VirtualBox https://github.com/rootzoll/raspiblitz/issues/2756#issuecomment-983532237
-* TrueNAS (FreeBSD bhyve) with an Ubuntu VM: https://github.com/rootzoll/raspiblitz/issues/2104#issuecomment-917444238
-* [QEMU+UTM](https://github.com/rootzoll/raspiblitz/blob/dev/alternative.platforms/QEMU/raspiblitz-on-qemu.md)
+* Debian image in VirtualBox https://github.com/raspiblitz/raspiblitz/issues/2756#issuecomment-983532237
+* TrueNAS (FreeBSD bhyve) with an Ubuntu VM: https://github.com/raspiblitz/raspiblitz/issues/2104#issuecomment-917444238
+* [QEMU+UTM](https://github.com/raspiblitz/raspiblitz/blob/dev/alternative.platforms/QEMU/raspiblitz-on-qemu.md)
 
 ### Create the base image
 * Download and install the base OS on an at least 32GB drive
@@ -100,7 +100,7 @@ These not need installation, password: `osboxes.org`
   ```
 
 * Switch off when ready
-* Attach an other disk (can be even small if you prune or [stop bitcoind](https://github.com/rootzoll/raspiblitz/issues/1500#issuecomment-982779830) manually.
+* Attach an other disk (can be even small if you prune or [stop bitcoind](https://github.com/raspiblitz/raspiblitz/issues/1500#issuecomment-982779830) manually.
 The second virtual disk will be used as the BLOCKCHAIN drive.
 This makes that data portable and independent from the OS similar to the combination of the SDcard and separate SSD.
 
@@ -129,7 +129,7 @@ password: `1234`
 
 Follow the instructions in the terminal. Set the new password to `raspiblitz` and name the new user `admin` to keep in line with the rest of the setup.
 
-Continue with building the SDcard: https://github.com/rootzoll/raspiblitz#build-the-sd-card-image
+Continue with building the SDcard: https://github.com/raspiblitz/raspiblitz#build-the-sd-card-image
 
 ---
 
@@ -160,7 +160,7 @@ if there is an error:
 run:
 `reboot` and update as above
 
-Continue with building the SDcard: https://github.com/rootzoll/raspiblitz#build-the-sd-card-image
+Continue with building the SDcard: https://github.com/raspiblitz/raspiblitz#build-the-sd-card-image
 
 ---
 
@@ -205,7 +205,7 @@ Continue with building the SDcard: https://github.com/rootzoll/raspiblitz#build-
 
 ## Manual image release for amd64
 
-Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/FAQ.md#what-is-the-process-of-creating-a-new-sd-card-image-release
+Work notes partially based on: https://github.com/raspiblitz/raspiblitz/blob/v1.7/FAQ.md#what-is-the-process-of-creating-a-new-sd-card-image-release
 
 ### Requirements:
 * amd64 Laptop or Server connected to the internet via a LAN cable
@@ -406,7 +406,7 @@ Work notes partially based on: https://github.com/rootzoll/raspiblitz/blob/v1.7/
 
     raspiblitz-raspiblitz-amd64-vX.X.X-YEAR-MONTH-DAY image, sha256sum and signature
 
-    Find more info at: https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms
+    Find more info at: https://github.com/raspiblitz/raspiblitz/tree/dev/alternative.platforms
 
     # Import the signing pubkey:
     curl https://keybase.io/oms/pgp_keys.asc | gpg --import

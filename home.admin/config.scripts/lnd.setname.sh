@@ -61,7 +61,7 @@ setting ${lndConfFile} ${insertLine} "alias" "${newName}"
 /home/admin/config.scripts/blitz.conf.sh set hostname "${newName}"
 
 # set name in local network just if forced (not anymore by default)
-# see https://github.com/rootzoll/raspiblitz/issues/819
+# see https://github.com/raspiblitz/raspiblitz/issues/819
 if [ "$3" = "alsoNetwork" ]; then
   # OS: change hostname
   sudo raspi-config nonint do_hostname ${newName}

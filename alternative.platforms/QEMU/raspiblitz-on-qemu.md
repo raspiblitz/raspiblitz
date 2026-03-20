@@ -55,7 +55,7 @@ Documentation focused on install for macos dev environment. Do not rely on this 
 	    - review your changes, make a deep breath and use `w` to write the new partition table to disk. 
 	2. Reboot with `sudo reboot`.
 10. Make usb  filesystem  by running command  `mkfs.ext4 /dev/sda1` where `/dev/sda1` is your new disk.
-11. [Install raspiblitz via build script](https://github.com/rootzoll/raspiblitz/tree/v1.7/alternative.platforms#building-the-raspiblitz-scripts)
-12. [Configure signet](https://github.com/rootzoll/raspiblitz/issues/1500#issuecomment-982779830)
+11. [Install raspiblitz via build script](https://github.com/raspiblitz/raspiblitz/tree/v1.7/alternative.platforms#building-the-raspiblitz-scripts)
+12. [Configure signet](https://github.com/raspiblitz/raspiblitz/issues/1500#issuecomment-982779830)
 13. Reboot with `sudo reboot`.
 14. Login with `admin` user.  Default password: `raspiblitz`

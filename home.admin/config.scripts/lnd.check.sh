@@ -77,7 +77,7 @@ if [ "$1" == "prestart" ]; then
   ##### APPLICATION OPTIONS SECTION #####
 
   # remove sync-freelist=1 (use =true if you want to overrule raspiblitz)
-  # https://github.com/rootzoll/raspiblitz/issues/3251
+  # https://github.com/raspiblitz/raspiblitz/issues/3251
   sed -i "/^# Avoid slow startup time/d" ${lndConfFile}
   sed -i "/^sync-freelist=1/d" ${lndConfFile}
 
@@ -310,7 +310,7 @@ if [ "$1" == "prestart" ]; then
     setting ${lndConfFile} ${insertLine} "tor.v3" "true"
     setting ${lndConfFile} ${insertLine} "tor.active" "true"
 
-    # take care of incompatible settings https://github.com/rootzoll/raspiblitz/issues/2787#issuecomment-991245694
+    # take care of incompatible settings https://github.com/raspiblitz/raspiblitz/issues/2787#issuecomment-991245694
     if [ $(cat ${lndConfFile} | grep -c "^tor.skip-proxy-for-clearnet-targets=true") -gt 0 ] ||
       [ $(cat ${lndConfFile} | grep -c "^tor.skip-proxy-for-clearnet-targets=1") -gt 0 ]; then
       setting ${lndConfFile} ${insertLine} "tor.streamisolation" "false"

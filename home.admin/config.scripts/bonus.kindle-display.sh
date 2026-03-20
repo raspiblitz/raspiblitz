@@ -142,7 +142,7 @@ EOF
     echo "# enable kindle-display service"
     sudo systemctl enable kindle-display
 
-    # https://github.com/rootzoll/raspiblitz/issues/1375
+    # https://github.com/raspiblitz/raspiblitz/issues/1375
     if [ "${state}" == "ready" ]; then
       echo "# starting kindle-display service"
       sudo systemctl start kindle-display

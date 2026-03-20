@@ -257,5 +257,5 @@ if [ $(echo "${host}" | grep -c '192.168') -gt 0 ]; then
   echo "- Check that your WIFI devices can talk to the LAN devices on your router (deactivate IP isolation or guest mode)."
 fi
 echo "- try to refresh the TLS & macaroons: Main Menu 'EXPORT > 'RESET'"
-echo "- check issues: https://github.com/rootzoll/raspiblitz/issues"
+echo "- check issues: https://github.com/raspiblitz/raspiblitz/issues"
 echo ""

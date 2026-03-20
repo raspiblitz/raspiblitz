@@ -12,7 +12,7 @@ release()
   whiptail --title "Update Instructions" --yes-button "Not Now" --no-button "Start Update" --yesno "To update your RaspiBlitz to a new version:
 
 - Download the new SD card image to your laptop:
-  https://github.com/rootzoll/raspiblitz
+  https://github.com/raspiblitz/raspiblitz
 - Flash that SD card image to a new SD card (best)
   or override old SD card after shutdown (fallback)
 - Choose 'Start Update' below.

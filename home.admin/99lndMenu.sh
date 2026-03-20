@@ -148,7 +148,7 @@ case $CHOICE in
     $lncli_alias wallet accounts list --name default | grep --color=never .*,
     echo
     echo "EXPERIMENTAL - DONT USE FOR SERIOUS FUND RECEIVING YET"
-    echo "Report your experience to: https://github.com/rootzoll/raspiblitz/issues/2192"
+    echo "Report your experience to: https://github.com/raspiblitz/raspiblitz/issues/2192"
     echo 
     echo "Press ENTER to return to main menu."
     read key

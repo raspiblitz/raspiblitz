@@ -47,7 +47,7 @@ https://github.com/raspiblitz/raspiblitz/actions/workflows/arm64-rpi-lean-image.
 * The images are built in GitHub actions
 * To see the downloadable artifacts will need to log in to GitHub
 * Find the latest successful build of the default amd64 image:
-https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?query=workflow%3Aamd64-lean-image-build+branch%3Adev+is%3Asuccess++
+https://github.com/raspiblitz/raspiblitz/actions/workflows/amd64-lean-image.yml?query=workflow%3Aamd64-lean-image-build+branch%3Adev+is%3Asuccess++
   ```
   # unpack the artifact to the same directory
   unzip ./raspiblitz-amd64-image-*.zip
@@ -147,7 +147,7 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   ```
 
 ## Local build
-with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
+with the [Makefile](https://github.com/raspiblitz/raspiblitz/blob/dev/Makefile)
 * needs ~20 GB free space
 * tested on:
   * Ubuntu Live (jammy)
@@ -161,7 +161,7 @@ with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
   # install git and make
   apt update && apt install -y git make
   # download the repo (or your fork)
-  git clone https://github.com/rootzoll/raspiblitz
+  git clone https://github.com/raspiblitz/raspiblitz
   cd raspiblitz
   # checkout the desired branch
   git checkout dev
