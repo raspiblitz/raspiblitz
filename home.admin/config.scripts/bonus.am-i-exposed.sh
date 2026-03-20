@@ -89,6 +89,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
+  echo "# Checking required dependency: mempool"
+  source <(/home/admin/config.scripts/bonus.mempool.sh status 2>/dev/null)
+  if [ "${installed}" != "1" ] && [ "${configured}" != "1" ]; then
+    echo "# Mempool is not installed/configured. Installing now ..."
+    /home/admin/config.scripts/bonus.mempool.sh on || exit 1
+  fi
+
+  echo "# Checking local mempool API readiness (non-blocking) ..."
+  if ! curl --silent --show-error --max-time 5 http://127.0.0.1:8999/api/v1/blocks/tip/height >/dev/null; then
+    echo "# WARNING: Mempool API is not reachable yet on http://127.0.0.1:8999/api/v1/blocks/tip/height"
+    echo "# Continuing install, but am-i-exposed will only work once mempool is up."
+  fi
+
   echo "# Installing ${APPID}"
 
   /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
