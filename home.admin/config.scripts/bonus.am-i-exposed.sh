@@ -138,6 +138,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Writing local web/proxy server"
   cat >/var/cache/raspiblitz/${APPID}-server.mjs <<'EOF'
+import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
@@ -149,6 +150,12 @@ const ROOT = process.env.ROOT_DIR || "/home/amiexposed/am-i-exposed/out";
 const MEMPOOL_BASE = process.env.MEMPOOL_BASE || "http://127.0.0.1:8999";
 const MEMPOOL_ONION_RAW = (process.env.MEMPOOL_ONION || "").trim();
 const MEMPOOL_ONION = MEMPOOL_ONION_RAW.endsWith(".onion") ? MEMPOOL_ONION_RAW : null;
+const CHAINALYSIS_PROXY_BASE =
+  process.env.CHAINALYSIS_PROXY_BASE || "https://chainalysis-proxy.copexit.workers.dev";
+const TOR_SOCKS_HOST = process.env.TOR_SOCKS_HOST || "127.0.0.1";
+const TOR_SOCKS_PORT = process.env.TOR_SOCKS_PORT || "9050";
+const CHAINALYSIS_ROUTE_RE =
+  /^\/tor-proxy\/chainalysis\/address\/([13mn2][a-km-zA-HJ-NP-Z1-9]{25,34}|(bc1|tb1)[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{39,87})$/;
 
 const TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -208,6 +215,64 @@ async function proxy(req, res, targetPath) {
   }
 }
 
+async function proxyChainalysisViaTor(res, address) {
+  const upstream = `${CHAINALYSIS_PROXY_BASE}/address/${address}`;
+
+  await new Promise((resolve) => {
+    const proc = spawn("curl", [
+      "--silent",
+      "--show-error",
+      "--location",
+      "--max-time",
+      "30",
+      "--socks5-hostname",
+      `${TOR_SOCKS_HOST}:${TOR_SOCKS_PORT}`,
+      "--header",
+      "Accept: application/json",
+      upstream,
+    ]);
+
+    let stdout = "";
+    let stderr = "";
+
+    proc.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+
+    proc.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+
+    proc.on("error", (error) => {
+      res.statusCode = 502;
+      res.setHeader("content-type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ error: "tor_proxy_error", message: String(error) }));
+      resolve();
+    });
+
+    proc.on("close", (code) => {
+      if (code !== 0) {
+        res.statusCode = 502;
+        res.setHeader("content-type", "application/json; charset=utf-8");
+        res.end(
+          JSON.stringify({
+            error: "tor_proxy_upstream_failed",
+            message: stderr.trim() || `curl exited with code ${code}`,
+          }),
+        );
+        resolve();
+        return;
+      }
+
+      res.statusCode = 200;
+      res.setHeader("content-type", "application/json; charset=utf-8");
+      res.setHeader("cache-control", "no-store");
+      res.end(stdout);
+      resolve();
+    });
+  });
+}
+
 async function serveFile(req, res) {
   const pathname = new URL(req.url, "http://localhost").pathname;
   const cleanPath = normalize(pathname).replace(/^\.\.(\/|\\|$)/, "");
@@ -256,6 +321,26 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  const chainalysisMatch = pathname.match(CHAINALYSIS_ROUTE_RE);
+  if (chainalysisMatch) {
+    if (req.method !== "GET") {
+      res.statusCode = 405;
+      res.setHeader("content-type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ error: "method_not_allowed" }));
+      return;
+    }
+
+    await proxyChainalysisViaTor(res, chainalysisMatch[1]);
+    return;
+  }
+
+  if (pathname.startsWith("/tor-proxy/")) {
+    res.statusCode = 400;
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    res.end(JSON.stringify({ error: "invalid_tor_proxy_path" }));
+    return;
+  }
+
   const targetPath = toMempoolPath(pathname);
   if (targetPath) {
     await proxy(req, res, targetPath);
@@ -293,6 +378,9 @@ Environment=PORT=${APP_PORT}
 Environment=ROOT_DIR=${APP_CODE_DIR}/out
 Environment=MEMPOOL_BASE=http://127.0.0.1:8999
 Environment=MEMPOOL_ONION=${mempoolOnion}
+Environment=CHAINALYSIS_PROXY_BASE=https://chainalysis-proxy.copexit.workers.dev
+Environment=TOR_SOCKS_HOST=127.0.0.1
+Environment=TOR_SOCKS_PORT=9050
 ExecStart=/usr/bin/node ${APP_CODE_DIR}/raspiblitz-server.mjs
 User=${APP_USER}
 Group=${APP_USER}
@@ -352,6 +440,7 @@ if [ "$1" = "update" ]; then
 
   echo "# Refreshing local web/proxy server"
   cat >/var/cache/raspiblitz/${APPID}-server.mjs <<'EOF'
+import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
@@ -363,6 +452,12 @@ const ROOT = process.env.ROOT_DIR || "/home/amiexposed/am-i-exposed/out";
 const MEMPOOL_BASE = process.env.MEMPOOL_BASE || "http://127.0.0.1:8999";
 const MEMPOOL_ONION_RAW = (process.env.MEMPOOL_ONION || "").trim();
 const MEMPOOL_ONION = MEMPOOL_ONION_RAW.endsWith(".onion") ? MEMPOOL_ONION_RAW : null;
+const CHAINALYSIS_PROXY_BASE =
+  process.env.CHAINALYSIS_PROXY_BASE || "https://chainalysis-proxy.copexit.workers.dev";
+const TOR_SOCKS_HOST = process.env.TOR_SOCKS_HOST || "127.0.0.1";
+const TOR_SOCKS_PORT = process.env.TOR_SOCKS_PORT || "9050";
+const CHAINALYSIS_ROUTE_RE =
+  /^\/tor-proxy\/chainalysis\/address\/([13mn2][a-km-zA-HJ-NP-Z1-9]{25,34}|(bc1|tb1)[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{39,87})$/;
 
 const TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -422,6 +517,64 @@ async function proxy(req, res, targetPath) {
   }
 }
 
+async function proxyChainalysisViaTor(res, address) {
+  const upstream = `${CHAINALYSIS_PROXY_BASE}/address/${address}`;
+
+  await new Promise((resolve) => {
+    const proc = spawn("curl", [
+      "--silent",
+      "--show-error",
+      "--location",
+      "--max-time",
+      "30",
+      "--socks5-hostname",
+      `${TOR_SOCKS_HOST}:${TOR_SOCKS_PORT}`,
+      "--header",
+      "Accept: application/json",
+      upstream,
+    ]);
+
+    let stdout = "";
+    let stderr = "";
+
+    proc.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+
+    proc.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+
+    proc.on("error", (error) => {
+      res.statusCode = 502;
+      res.setHeader("content-type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ error: "tor_proxy_error", message: String(error) }));
+      resolve();
+    });
+
+    proc.on("close", (code) => {
+      if (code !== 0) {
+        res.statusCode = 502;
+        res.setHeader("content-type", "application/json; charset=utf-8");
+        res.end(
+          JSON.stringify({
+            error: "tor_proxy_upstream_failed",
+            message: stderr.trim() || `curl exited with code ${code}`,
+          }),
+        );
+        resolve();
+        return;
+      }
+
+      res.statusCode = 200;
+      res.setHeader("content-type", "application/json; charset=utf-8");
+      res.setHeader("cache-control", "no-store");
+      res.end(stdout);
+      resolve();
+    });
+  });
+}
+
 async function serveFile(req, res) {
   const pathname = new URL(req.url, "http://localhost").pathname;
   const cleanPath = normalize(pathname).replace(/^\.\.(\/|\\|$)/, "");
@@ -470,6 +623,26 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  const chainalysisMatch = pathname.match(CHAINALYSIS_ROUTE_RE);
+  if (chainalysisMatch) {
+    if (req.method !== "GET") {
+      res.statusCode = 405;
+      res.setHeader("content-type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ error: "method_not_allowed" }));
+      return;
+    }
+
+    await proxyChainalysisViaTor(res, chainalysisMatch[1]);
+    return;
+  }
+
+  if (pathname.startsWith("/tor-proxy/")) {
+    res.statusCode = 400;
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    res.end(JSON.stringify({ error: "invalid_tor_proxy_path" }));
+    return;
+  }
+
   const targetPath = toMempoolPath(pathname);
   if (targetPath) {
     await proxy(req, res, targetPath);
@@ -507,6 +680,9 @@ Environment=PORT=${APP_PORT}
 Environment=ROOT_DIR=${APP_CODE_DIR}/out
 Environment=MEMPOOL_BASE=http://127.0.0.1:8999
 Environment=MEMPOOL_ONION=${mempoolOnion}
+Environment=CHAINALYSIS_PROXY_BASE=https://chainalysis-proxy.copexit.workers.dev
+Environment=TOR_SOCKS_HOST=127.0.0.1
+Environment=TOR_SOCKS_PORT=9050
 ExecStart=/usr/bin/node ${APP_CODE_DIR}/raspiblitz-server.mjs
 User=${APP_USER}
 Group=${APP_USER}
