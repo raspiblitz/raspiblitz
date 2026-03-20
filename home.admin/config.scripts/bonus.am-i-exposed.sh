@@ -54,6 +54,11 @@ fi
 
 if [ "$1" = "menu" ]; then
   source <(/home/admin/config.scripts/bonus.am-i-exposed.sh status)
+  if [ "${isInstalled}" != "1" ]; then
+    whiptail --title " am-i-exposed " --msgbox "am-i-exposed is not installed." 8 50
+    echo "please wait ..."
+    exit 0
+  fi
   dialogTitle=" am-i-exposed "
   dialogText="Open in your local web browser:\nhttp://${localIP}:${APP_PORT}\n"
   if [ ${#toraddress} -gt 0 ]; then
@@ -63,6 +68,275 @@ if [ "$1" = "menu" ]; then
   echo "please wait ..."
   exit 0
 fi
+
+write_server_file() {
+  cat >/var/cache/raspiblitz/${APPID}-server.mjs <<'EOF'
+import { spawn } from "node:child_process";
+import { createServer } from "node:http";
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
+import { extname, join, normalize } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const PORT = Number(process.env.PORT || 3090);
+const ROOT = process.env.ROOT_DIR || "/home/amiexposed/am-i-exposed/out";
+const MEMPOOL_BASE = process.env.MEMPOOL_BASE || "http://127.0.0.1:8999";
+const MEMPOOL_ONION_RAW = (process.env.MEMPOOL_ONION || "").trim();
+const MEMPOOL_ONION = MEMPOOL_ONION_RAW.endsWith(".onion") ? MEMPOOL_ONION_RAW : null;
+const CHAINALYSIS_PROXY_BASE =
+  process.env.CHAINALYSIS_PROXY_BASE || "https://chainalysis-proxy.copexit.workers.dev";
+const TOR_SOCKS_HOST = process.env.TOR_SOCKS_HOST || "127.0.0.1";
+const TOR_SOCKS_PORT = process.env.TOR_SOCKS_PORT || "9050";
+const CHAINALYSIS_ROUTE_RE =
+  /^\/tor-proxy\/chainalysis\/address\/([13mn2][a-km-zA-HJ-NP-Z1-9]{25,34}|(bc1|tb1)[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{39,87})$/;
+
+const TYPES = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".ico": "image/x-icon",
+  ".webp": "image/webp",
+  ".txt": "text/plain; charset=utf-8",
+  ".map": "application/json; charset=utf-8",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+};
+
+function toMempoolPath(urlPath) {
+  if (urlPath.startsWith("/api/")) return `/api/v1/${urlPath.slice(5)}`;
+  if (urlPath.startsWith("/signet/api/")) return `/api/v1/${urlPath.slice(12)}`;
+  if (urlPath.startsWith("/testnet4/api/")) return `/api/v1/${urlPath.slice(14)}`;
+  return null;
+}
+
+async function proxy(req, res, targetPath) {
+  try {
+    const targetUrl = `${MEMPOOL_BASE}${targetPath}${new URL(req.url, "http://localhost").search}`;
+    const upstream = await fetch(targetUrl, {
+      method: req.method,
+      headers: {
+        Accept: req.headers.accept || "*/*",
+        "User-Agent": "am-i-exposed-raspiblitz",
+      },
+    });
+
+    res.statusCode = upstream.status;
+    res.statusMessage = upstream.statusText;
+    for (const [k, v] of upstream.headers.entries()) {
+      if (k === "transfer-encoding") continue;
+      res.setHeader(k, v);
+    }
+
+    if (!upstream.body) {
+      res.end();
+      return;
+    }
+
+    for await (const chunk of upstream.body) {
+      res.write(chunk);
+    }
+    res.end();
+  } catch (error) {
+    res.statusCode = 502;
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    res.end(JSON.stringify({ error: "proxy_error", message: String(error) }));
+  }
+}
+
+async function proxyChainalysisViaTor(res, address) {
+  const upstream = `${CHAINALYSIS_PROXY_BASE}/address/${address}`;
+
+  await new Promise((resolve) => {
+    const proc = spawn("curl", [
+      "--silent",
+      "--show-error",
+      "--location",
+      "--max-time",
+      "30",
+      "--socks5-hostname",
+      `${TOR_SOCKS_HOST}:${TOR_SOCKS_PORT}`,
+      "--header",
+      "Accept: application/json",
+      upstream,
+    ]);
+
+    let stdout = "";
+    let stderr = "";
+
+    proc.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+
+    proc.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+
+    proc.on("error", (error) => {
+      res.statusCode = 502;
+      res.setHeader("content-type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ error: "tor_proxy_error", message: String(error) }));
+      resolve();
+    });
+
+    proc.on("close", (code) => {
+      if (code !== 0) {
+        res.statusCode = 502;
+        res.setHeader("content-type", "application/json; charset=utf-8");
+        res.end(
+          JSON.stringify({
+            error: "tor_proxy_upstream_failed",
+            message: stderr.trim() || `curl exited with code ${code}`,
+          }),
+        );
+        resolve();
+        return;
+      }
+
+      res.statusCode = 200;
+      res.setHeader("content-type", "application/json; charset=utf-8");
+      res.setHeader("cache-control", "no-store");
+      res.end(stdout);
+      resolve();
+    });
+  });
+}
+
+async function serveFile(req, res) {
+  const pathname = new URL(req.url, "http://localhost").pathname;
+  const cleanPath = normalize(pathname).replace(/^\.\.(\/|\\|$)/, "");
+  const trimmedPath = cleanPath.replace(/^\/+/, "");
+  const requested = trimmedPath === "" ? "index.html" : trimmedPath;
+  const filePath = join(ROOT, requested);
+
+  try {
+    const fileStat = await stat(filePath);
+    if (fileStat.isFile()) {
+      res.statusCode = 200;
+      res.setHeader("content-type", TYPES[extname(filePath)] || "application/octet-stream");
+      createReadStream(filePath).pipe(res);
+      return;
+    }
+  } catch {
+    // Fall back to SPA index
+  }
+
+  const indexPath = join(ROOT, "index.html");
+  try {
+    await stat(indexPath);
+    res.statusCode = 200;
+    res.setHeader("content-type", "text/html; charset=utf-8");
+    createReadStream(indexPath).pipe(res);
+  } catch {
+    res.statusCode = 404;
+    res.end("not found");
+  }
+}
+
+const server = createServer(async (req, res) => {
+  if (!req.url) {
+    res.statusCode = 400;
+    res.end("bad request");
+    return;
+  }
+
+  const pathname = new URL(req.url, "http://localhost").pathname;
+
+  // Compatibility endpoint used by am-i-exposed local API detection.
+  if (pathname === "/api/local-info") {
+    res.statusCode = 200;
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    res.end(JSON.stringify({ mempoolPort: "8999", mempoolOnion: MEMPOOL_ONION }));
+    return;
+  }
+
+  const chainalysisMatch = pathname.match(CHAINALYSIS_ROUTE_RE);
+  if (chainalysisMatch) {
+    if (req.method !== "GET") {
+      res.statusCode = 405;
+      res.setHeader("content-type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ error: "method_not_allowed" }));
+      return;
+    }
+
+    await proxyChainalysisViaTor(res, chainalysisMatch[1]);
+    return;
+  }
+
+  if (pathname.startsWith("/tor-proxy/")) {
+    res.statusCode = 400;
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    res.end(JSON.stringify({ error: "invalid_tor_proxy_path" }));
+    return;
+  }
+
+  const targetPath = toMempoolPath(pathname);
+  if (targetPath) {
+    await proxy(req, res, targetPath);
+    return;
+  }
+
+  await serveFile(req, res);
+});
+
+server.listen(PORT, "0.0.0.0", () => {
+  const here = fileURLToPath(new URL(".", import.meta.url));
+  console.log(`am-i-exposed server running on :${PORT}`);
+  console.log(`root=${ROOT} from ${here}`);
+});
+EOF
+
+  sudo mv /var/cache/raspiblitz/${APPID}-server.mjs "${APP_CODE_DIR}/raspiblitz-server.mjs" || exit 1
+  sudo chown "${APP_USER}:${APP_USER}" "${APP_CODE_DIR}/raspiblitz-server.mjs" || exit 1
+}
+
+write_service_file() {
+  local mempoolOnion
+  mempoolOnion=$(sudo cat "${MEMPOOL_TOR_HOST_FILE}" 2>/dev/null | tr -d '\r\n')
+  if ! echo "${mempoolOnion}" | grep -q '\.onion$'; then
+    mempoolOnion=""
+  fi
+
+  cat >/var/cache/raspiblitz/${APP_SERVICE}.service <<EOF
+[Unit]
+Description=am-i-exposed web UI
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=${APP_CODE_DIR}
+Environment=PORT=${APP_PORT}
+Environment=ROOT_DIR=${APP_CODE_DIR}/out
+Environment=MEMPOOL_BASE=http://127.0.0.1:8999
+Environment=MEMPOOL_ONION=${mempoolOnion}
+Environment=CHAINALYSIS_PROXY_BASE=https://chainalysis-proxy.copexit.workers.dev
+Environment=TOR_SOCKS_HOST=127.0.0.1
+Environment=TOR_SOCKS_PORT=9050
+ExecStart=/usr/bin/node ${APP_CODE_DIR}/raspiblitz-server.mjs
+User=${APP_USER}
+Group=${APP_USER}
+Restart=on-failure
+RestartSec=10
+TimeoutSec=120
+
+# Hardening measures
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+ReadWritePaths=${APP_CODE_DIR} ${APP_DATA_DIR}
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  sudo mv /var/cache/raspiblitz/${APP_SERVICE}.service /etc/systemd/system/${APP_SERVICE}.service || exit 1
+  sudo chown root:root /etc/systemd/system/${APP_SERVICE}.service || exit 1
+}
 
 if [ "$1" = "onion" ]; then
   if [ "${runBehindTor}" != "on" ]; then
@@ -137,270 +411,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo -u "${APP_USER}" npx -y "pnpm@${PNPM_VERSION}" build || exit 1
 
   echo "# Writing local web/proxy server"
-  cat >/var/cache/raspiblitz/${APPID}-server.mjs <<'EOF'
-import { spawn } from "node:child_process";
-import { createServer } from "node:http";
-import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
-import { extname, join, normalize } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const PORT = Number(process.env.PORT || 3090);
-const ROOT = process.env.ROOT_DIR || "/home/amiexposed/am-i-exposed/out";
-const MEMPOOL_BASE = process.env.MEMPOOL_BASE || "http://127.0.0.1:8999";
-const MEMPOOL_ONION_RAW = (process.env.MEMPOOL_ONION || "").trim();
-const MEMPOOL_ONION = MEMPOOL_ONION_RAW.endsWith(".onion") ? MEMPOOL_ONION_RAW : null;
-const CHAINALYSIS_PROXY_BASE =
-  process.env.CHAINALYSIS_PROXY_BASE || "https://chainalysis-proxy.copexit.workers.dev";
-const TOR_SOCKS_HOST = process.env.TOR_SOCKS_HOST || "127.0.0.1";
-const TOR_SOCKS_PORT = process.env.TOR_SOCKS_PORT || "9050";
-const CHAINALYSIS_ROUTE_RE =
-  /^\/tor-proxy\/chainalysis\/address\/([13mn2][a-km-zA-HJ-NP-Z1-9]{25,34}|(bc1|tb1)[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{39,87})$/;
-
-const TYPES = {
-  ".html": "text/html; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".svg": "image/svg+xml",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".ico": "image/x-icon",
-  ".webp": "image/webp",
-  ".txt": "text/plain; charset=utf-8",
-  ".map": "application/json; charset=utf-8",
-  ".woff": "font/woff",
-  ".woff2": "font/woff2",
-};
-
-function toMempoolPath(urlPath) {
-  if (urlPath.startsWith("/api/")) return `/api/v1/${urlPath.slice(5)}`;
-  if (urlPath.startsWith("/signet/api/")) return `/api/v1/${urlPath.slice(12)}`;
-  if (urlPath.startsWith("/testnet4/api/")) return `/api/v1/${urlPath.slice(14)}`;
-  return null;
-}
-
-async function proxy(req, res, targetPath) {
-  try {
-    const targetUrl = `${MEMPOOL_BASE}${targetPath}${new URL(req.url, "http://localhost").search}`;
-    const upstream = await fetch(targetUrl, {
-      method: req.method,
-      headers: {
-        Accept: req.headers.accept || "*/*",
-        "User-Agent": "am-i-exposed-raspiblitz",
-      },
-    });
-
-    res.statusCode = upstream.status;
-    res.statusMessage = upstream.statusText;
-    for (const [k, v] of upstream.headers.entries()) {
-      if (k === "transfer-encoding") continue;
-      res.setHeader(k, v);
-    }
-
-    if (!upstream.body) {
-      res.end();
-      return;
-    }
-
-    for await (const chunk of upstream.body) {
-      res.write(chunk);
-    }
-    res.end();
-  } catch (error) {
-    res.statusCode = 502;
-    res.setHeader("content-type", "application/json; charset=utf-8");
-    res.end(JSON.stringify({ error: "proxy_error", message: String(error) }));
-  }
-}
-
-async function proxyChainalysisViaTor(res, address) {
-  const upstream = `${CHAINALYSIS_PROXY_BASE}/address/${address}`;
-
-  await new Promise((resolve) => {
-    const proc = spawn("curl", [
-      "--silent",
-      "--show-error",
-      "--location",
-      "--max-time",
-      "30",
-      "--socks5-hostname",
-      `${TOR_SOCKS_HOST}:${TOR_SOCKS_PORT}`,
-      "--header",
-      "Accept: application/json",
-      upstream,
-    ]);
-
-    let stdout = "";
-    let stderr = "";
-
-    proc.stdout.on("data", (chunk) => {
-      stdout += String(chunk);
-    });
-
-    proc.stderr.on("data", (chunk) => {
-      stderr += String(chunk);
-    });
-
-    proc.on("error", (error) => {
-      res.statusCode = 502;
-      res.setHeader("content-type", "application/json; charset=utf-8");
-      res.end(JSON.stringify({ error: "tor_proxy_error", message: String(error) }));
-      resolve();
-    });
-
-    proc.on("close", (code) => {
-      if (code !== 0) {
-        res.statusCode = 502;
-        res.setHeader("content-type", "application/json; charset=utf-8");
-        res.end(
-          JSON.stringify({
-            error: "tor_proxy_upstream_failed",
-            message: stderr.trim() || `curl exited with code ${code}`,
-          }),
-        );
-        resolve();
-        return;
-      }
-
-      res.statusCode = 200;
-      res.setHeader("content-type", "application/json; charset=utf-8");
-      res.setHeader("cache-control", "no-store");
-      res.end(stdout);
-      resolve();
-    });
-  });
-}
-
-async function serveFile(req, res) {
-  const pathname = new URL(req.url, "http://localhost").pathname;
-  const cleanPath = normalize(pathname).replace(/^\.\.(\/|\\|$)/, "");
-  const trimmedPath = cleanPath.replace(/^\/+/, "");
-  const requested = trimmedPath === "" ? "index.html" : trimmedPath;
-  const filePath = join(ROOT, requested);
-
-  try {
-    const fileStat = await stat(filePath);
-    if (fileStat.isFile()) {
-      res.statusCode = 200;
-      res.setHeader("content-type", TYPES[extname(filePath)] || "application/octet-stream");
-      createReadStream(filePath).pipe(res);
-      return;
-    }
-  } catch {
-    // Fall back to SPA index
-  }
-
-  const indexPath = join(ROOT, "index.html");
-  try {
-    await stat(indexPath);
-    res.statusCode = 200;
-    res.setHeader("content-type", "text/html; charset=utf-8");
-    createReadStream(indexPath).pipe(res);
-  } catch {
-    res.statusCode = 404;
-    res.end("not found");
-  }
-}
-
-const server = createServer(async (req, res) => {
-  if (!req.url) {
-    res.statusCode = 400;
-    res.end("bad request");
-    return;
-  }
-
-  const pathname = new URL(req.url, "http://localhost").pathname;
-
-  // Compatibility endpoint used by am-i-exposed local API detection.
-  if (pathname === "/api/local-info") {
-    res.statusCode = 200;
-    res.setHeader("content-type", "application/json; charset=utf-8");
-    res.end(JSON.stringify({ mempoolPort: "8999", mempoolOnion: MEMPOOL_ONION }));
-    return;
-  }
-
-  const chainalysisMatch = pathname.match(CHAINALYSIS_ROUTE_RE);
-  if (chainalysisMatch) {
-    if (req.method !== "GET") {
-      res.statusCode = 405;
-      res.setHeader("content-type", "application/json; charset=utf-8");
-      res.end(JSON.stringify({ error: "method_not_allowed" }));
-      return;
-    }
-
-    await proxyChainalysisViaTor(res, chainalysisMatch[1]);
-    return;
-  }
-
-  if (pathname.startsWith("/tor-proxy/")) {
-    res.statusCode = 400;
-    res.setHeader("content-type", "application/json; charset=utf-8");
-    res.end(JSON.stringify({ error: "invalid_tor_proxy_path" }));
-    return;
-  }
-
-  const targetPath = toMempoolPath(pathname);
-  if (targetPath) {
-    await proxy(req, res, targetPath);
-    return;
-  }
-
-  await serveFile(req, res);
-});
-
-server.listen(PORT, "0.0.0.0", () => {
-  const here = fileURLToPath(new URL(".", import.meta.url));
-  console.log(`am-i-exposed server running on :${PORT}`);
-  console.log(`root=${ROOT} from ${here}`);
-});
-EOF
-
-  sudo mv /var/cache/raspiblitz/${APPID}-server.mjs "${APP_CODE_DIR}/raspiblitz-server.mjs" || exit 1
-  sudo chown "${APP_USER}:${APP_USER}" "${APP_CODE_DIR}/raspiblitz-server.mjs" || exit 1
+  write_server_file
 
   echo "# Creating systemd service"
-  mempoolOnion=$(sudo cat "${MEMPOOL_TOR_HOST_FILE}" 2>/dev/null | tr -d '\r\n')
-  if ! echo "${mempoolOnion}" | grep -q '\.onion$'; then
-    mempoolOnion=""
-  fi
-
-  cat >/var/cache/raspiblitz/${APP_SERVICE}.service <<EOF
-[Unit]
-Description=am-i-exposed web UI
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-WorkingDirectory=${APP_CODE_DIR}
-Environment=PORT=${APP_PORT}
-Environment=ROOT_DIR=${APP_CODE_DIR}/out
-Environment=MEMPOOL_BASE=http://127.0.0.1:8999
-Environment=MEMPOOL_ONION=${mempoolOnion}
-Environment=CHAINALYSIS_PROXY_BASE=https://chainalysis-proxy.copexit.workers.dev
-Environment=TOR_SOCKS_HOST=127.0.0.1
-Environment=TOR_SOCKS_PORT=9050
-ExecStart=/usr/bin/node ${APP_CODE_DIR}/raspiblitz-server.mjs
-User=${APP_USER}
-Group=${APP_USER}
-Restart=on-failure
-RestartSec=10
-TimeoutSec=120
-
-# Hardening measures
-PrivateTmp=true
-ProtectSystem=full
-NoNewPrivileges=true
-PrivateDevices=true
-ReadWritePaths=${APP_CODE_DIR} ${APP_DATA_DIR}
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-  sudo mv /var/cache/raspiblitz/${APP_SERVICE}.service /etc/systemd/system/${APP_SERVICE}.service || exit 1
-  sudo chown root:root /etc/systemd/system/${APP_SERVICE}.service || exit 1
+  write_service_file
 
   echo "# Updating firewall"
   sudo ufw allow ${APP_PORT} comment "${APPID} WebUI" || exit 1
@@ -439,270 +453,10 @@ if [ "$1" = "update" ]; then
   sudo -u "${APP_USER}" npx -y "pnpm@${PNPM_VERSION}" build || exit 1
 
   echo "# Refreshing local web/proxy server"
-  cat >/var/cache/raspiblitz/${APPID}-server.mjs <<'EOF'
-import { spawn } from "node:child_process";
-import { createServer } from "node:http";
-import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
-import { extname, join, normalize } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const PORT = Number(process.env.PORT || 3090);
-const ROOT = process.env.ROOT_DIR || "/home/amiexposed/am-i-exposed/out";
-const MEMPOOL_BASE = process.env.MEMPOOL_BASE || "http://127.0.0.1:8999";
-const MEMPOOL_ONION_RAW = (process.env.MEMPOOL_ONION || "").trim();
-const MEMPOOL_ONION = MEMPOOL_ONION_RAW.endsWith(".onion") ? MEMPOOL_ONION_RAW : null;
-const CHAINALYSIS_PROXY_BASE =
-  process.env.CHAINALYSIS_PROXY_BASE || "https://chainalysis-proxy.copexit.workers.dev";
-const TOR_SOCKS_HOST = process.env.TOR_SOCKS_HOST || "127.0.0.1";
-const TOR_SOCKS_PORT = process.env.TOR_SOCKS_PORT || "9050";
-const CHAINALYSIS_ROUTE_RE =
-  /^\/tor-proxy\/chainalysis\/address\/([13mn2][a-km-zA-HJ-NP-Z1-9]{25,34}|(bc1|tb1)[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{39,87})$/;
-
-const TYPES = {
-  ".html": "text/html; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".svg": "image/svg+xml",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".ico": "image/x-icon",
-  ".webp": "image/webp",
-  ".txt": "text/plain; charset=utf-8",
-  ".map": "application/json; charset=utf-8",
-  ".woff": "font/woff",
-  ".woff2": "font/woff2",
-};
-
-function toMempoolPath(urlPath) {
-  if (urlPath.startsWith("/api/")) return `/api/v1/${urlPath.slice(5)}`;
-  if (urlPath.startsWith("/signet/api/")) return `/api/v1/${urlPath.slice(12)}`;
-  if (urlPath.startsWith("/testnet4/api/")) return `/api/v1/${urlPath.slice(14)}`;
-  return null;
-}
-
-async function proxy(req, res, targetPath) {
-  try {
-    const targetUrl = `${MEMPOOL_BASE}${targetPath}${new URL(req.url, "http://localhost").search}`;
-    const upstream = await fetch(targetUrl, {
-      method: req.method,
-      headers: {
-        Accept: req.headers.accept || "*/*",
-        "User-Agent": "am-i-exposed-raspiblitz",
-      },
-    });
-
-    res.statusCode = upstream.status;
-    res.statusMessage = upstream.statusText;
-    for (const [k, v] of upstream.headers.entries()) {
-      if (k === "transfer-encoding") continue;
-      res.setHeader(k, v);
-    }
-
-    if (!upstream.body) {
-      res.end();
-      return;
-    }
-
-    for await (const chunk of upstream.body) {
-      res.write(chunk);
-    }
-    res.end();
-  } catch (error) {
-    res.statusCode = 502;
-    res.setHeader("content-type", "application/json; charset=utf-8");
-    res.end(JSON.stringify({ error: "proxy_error", message: String(error) }));
-  }
-}
-
-async function proxyChainalysisViaTor(res, address) {
-  const upstream = `${CHAINALYSIS_PROXY_BASE}/address/${address}`;
-
-  await new Promise((resolve) => {
-    const proc = spawn("curl", [
-      "--silent",
-      "--show-error",
-      "--location",
-      "--max-time",
-      "30",
-      "--socks5-hostname",
-      `${TOR_SOCKS_HOST}:${TOR_SOCKS_PORT}`,
-      "--header",
-      "Accept: application/json",
-      upstream,
-    ]);
-
-    let stdout = "";
-    let stderr = "";
-
-    proc.stdout.on("data", (chunk) => {
-      stdout += String(chunk);
-    });
-
-    proc.stderr.on("data", (chunk) => {
-      stderr += String(chunk);
-    });
-
-    proc.on("error", (error) => {
-      res.statusCode = 502;
-      res.setHeader("content-type", "application/json; charset=utf-8");
-      res.end(JSON.stringify({ error: "tor_proxy_error", message: String(error) }));
-      resolve();
-    });
-
-    proc.on("close", (code) => {
-      if (code !== 0) {
-        res.statusCode = 502;
-        res.setHeader("content-type", "application/json; charset=utf-8");
-        res.end(
-          JSON.stringify({
-            error: "tor_proxy_upstream_failed",
-            message: stderr.trim() || `curl exited with code ${code}`,
-          }),
-        );
-        resolve();
-        return;
-      }
-
-      res.statusCode = 200;
-      res.setHeader("content-type", "application/json; charset=utf-8");
-      res.setHeader("cache-control", "no-store");
-      res.end(stdout);
-      resolve();
-    });
-  });
-}
-
-async function serveFile(req, res) {
-  const pathname = new URL(req.url, "http://localhost").pathname;
-  const cleanPath = normalize(pathname).replace(/^\.\.(\/|\\|$)/, "");
-  const trimmedPath = cleanPath.replace(/^\/+/, "");
-  const requested = trimmedPath === "" ? "index.html" : trimmedPath;
-  const filePath = join(ROOT, requested);
-
-  try {
-    const fileStat = await stat(filePath);
-    if (fileStat.isFile()) {
-      res.statusCode = 200;
-      res.setHeader("content-type", TYPES[extname(filePath)] || "application/octet-stream");
-      createReadStream(filePath).pipe(res);
-      return;
-    }
-  } catch {
-    // Fall back to SPA index
-  }
-
-  const indexPath = join(ROOT, "index.html");
-  try {
-    await stat(indexPath);
-    res.statusCode = 200;
-    res.setHeader("content-type", "text/html; charset=utf-8");
-    createReadStream(indexPath).pipe(res);
-  } catch {
-    res.statusCode = 404;
-    res.end("not found");
-  }
-}
-
-const server = createServer(async (req, res) => {
-  if (!req.url) {
-    res.statusCode = 400;
-    res.end("bad request");
-    return;
-  }
-
-  const pathname = new URL(req.url, "http://localhost").pathname;
-
-  // Compatibility endpoint used by am-i-exposed local API detection.
-  if (pathname === "/api/local-info") {
-    res.statusCode = 200;
-    res.setHeader("content-type", "application/json; charset=utf-8");
-    res.end(JSON.stringify({ mempoolPort: "8999", mempoolOnion: MEMPOOL_ONION }));
-    return;
-  }
-
-  const chainalysisMatch = pathname.match(CHAINALYSIS_ROUTE_RE);
-  if (chainalysisMatch) {
-    if (req.method !== "GET") {
-      res.statusCode = 405;
-      res.setHeader("content-type", "application/json; charset=utf-8");
-      res.end(JSON.stringify({ error: "method_not_allowed" }));
-      return;
-    }
-
-    await proxyChainalysisViaTor(res, chainalysisMatch[1]);
-    return;
-  }
-
-  if (pathname.startsWith("/tor-proxy/")) {
-    res.statusCode = 400;
-    res.setHeader("content-type", "application/json; charset=utf-8");
-    res.end(JSON.stringify({ error: "invalid_tor_proxy_path" }));
-    return;
-  }
-
-  const targetPath = toMempoolPath(pathname);
-  if (targetPath) {
-    await proxy(req, res, targetPath);
-    return;
-  }
-
-  await serveFile(req, res);
-});
-
-server.listen(PORT, "0.0.0.0", () => {
-  const here = fileURLToPath(new URL(".", import.meta.url));
-  console.log(`am-i-exposed server running on :${PORT}`);
-  console.log(`root=${ROOT} from ${here}`);
-});
-EOF
-
-  sudo mv /var/cache/raspiblitz/${APPID}-server.mjs "${APP_CODE_DIR}/raspiblitz-server.mjs" || exit 1
-  sudo chown "${APP_USER}:${APP_USER}" "${APP_CODE_DIR}/raspiblitz-server.mjs" || exit 1
+  write_server_file
 
   echo "# Refreshing systemd service config"
-  mempoolOnion=$(sudo cat "${MEMPOOL_TOR_HOST_FILE}" 2>/dev/null | tr -d '\r\n')
-  if ! echo "${mempoolOnion}" | grep -q '\.onion$'; then
-    mempoolOnion=""
-  fi
-
-  cat >/var/cache/raspiblitz/${APP_SERVICE}.service <<EOF
-[Unit]
-Description=am-i-exposed web UI
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-WorkingDirectory=${APP_CODE_DIR}
-Environment=PORT=${APP_PORT}
-Environment=ROOT_DIR=${APP_CODE_DIR}/out
-Environment=MEMPOOL_BASE=http://127.0.0.1:8999
-Environment=MEMPOOL_ONION=${mempoolOnion}
-Environment=CHAINALYSIS_PROXY_BASE=https://chainalysis-proxy.copexit.workers.dev
-Environment=TOR_SOCKS_HOST=127.0.0.1
-Environment=TOR_SOCKS_PORT=9050
-ExecStart=/usr/bin/node ${APP_CODE_DIR}/raspiblitz-server.mjs
-User=${APP_USER}
-Group=${APP_USER}
-Restart=on-failure
-RestartSec=10
-TimeoutSec=120
-
-# Hardening measures
-PrivateTmp=true
-ProtectSystem=full
-NoNewPrivileges=true
-PrivateDevices=true
-ReadWritePaths=${APP_CODE_DIR} ${APP_DATA_DIR}
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-  sudo mv /var/cache/raspiblitz/${APP_SERVICE}.service /etc/systemd/system/${APP_SERVICE}.service || exit 1
-  sudo chown root:root /etc/systemd/system/${APP_SERVICE}.service || exit 1
+  write_service_file
   sudo systemctl daemon-reload || exit 1
 
   sudo systemctl restart ${APP_SERVICE} || exit 1
@@ -718,7 +472,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/systemd/system/${APP_SERVICE}.service
   sudo systemctl daemon-reload
 
-  sudo ufw deny ${APP_PORT}
+  sudo ufw delete allow ${APP_PORT} 2>/dev/null || true
 
   # remove hidden service if present (always try, independent of current Tor mode)
   /home/admin/config.scripts/tor.onion-service.sh off ${APPID} 2>/dev/null || true
