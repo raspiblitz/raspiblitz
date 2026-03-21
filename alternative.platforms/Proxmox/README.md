@@ -1,4 +1,5 @@
 # Install Raspiblitz on proxmox
+2026/03/21 guide updated (SSD recommendation from 1 TB to 2TB size, added note about q35 and OVMF (UEFI) and changed mount of external USB change from virtio to scsi. 
 
 Here I want to show you how to install a new Raspiblitz on a Debian VM on Proxmox and get it running. My Raspiblitz ran very long and stable on a Raspberry Pi 4 with 8GB RAM. It would very likely continue to do so for a longer time, however my Lightning Node is growing more and more and various apps and services are built on top of my Node. So the issue of availability and backup becomes more and more important. Therefore I decided to migrate the Raspiblitz to a VM in Proxmox. So I have much more room to maneuver regarding backup and administration.
 
@@ -7,9 +8,9 @@ This guide here will help you to set up a completely new Raspiblitz with Proxmox
 ### What is needed?
 
 - Proxmox installation on an Intel NUC, laptop or server
-- at least 1TB SSD
+- at least 2TB SSD
 
-You have several options for the SSD: Either you install the 1TB SSD in the system and install your Proxmox host on it or (as I did) you have an internal SSD (in my case 500GB M2 SSD) where the host operating system is located. I connected the 1TB SSD via SATA to my Intel NUC. This is used exclusively for storing the blockchain and Lightning Node.
+You have several options for the SSD: Either you install the 2TB SSD in the system and install your Proxmox host on it or (as I did) you have an internal SSD (in my case 500GB M2 SSD) where the host operating system is located. I connected the 2TB SSD via SATA to my Intel NUC. This is used exclusively for storing the blockchain and Lightning Node.
 
 ## Create Debian VM
 
@@ -43,7 +44,9 @@ Under "Disks" you can now specify the desired size of the VM. I have set the sam
 
 ![](images/2022-09-21_20-06.png)
 
-Under "CPU" you can specify the desired number of cores. Of course, this depends on your host operating system. My Intel NUC has 4 cores, so I can provide 4 cores to the VM.
+Under "CPU" you can specify the desired number of cores. Of course, this depends on your host operating system. My Intel NUC has 4 cores, so I can provide 4 cores to the VM. 
+Be careful using q35 for the machine host, as this will give problems with the build-in audio of your host and raspiblitz not properly starting. 
+Using the more modern, UVMF (UEFI) bios, add EFI disk, EFI storage (local), format RAW, deselect pre-enroll keys will also work properly. SCSI controller: VirtIO: SCSI single.
 
 ![](images/2022-09-21_20-06_1.png)
 
@@ -100,18 +103,21 @@ The commands from the video here again to copy:
 
 ```
 ls -n /dev/disk/by-id/
-/sbin/qm set [VM-ID] -virtio2 /dev/disk/by-id/[DISK-ID]
+/sbin/qm set [VM-ID] -scsi1 /dev/disk/by-id/[DISK-ID]
 ```
+Note: For older Raspiblitz version 1.11 -virtio2 was the correct setup.
 
-It is important here that the hard disk is passed through by ID. If something changes in the dev sda order in the future, the correct hard disk is still connected to the VM.
+It is important here that the hard disk is passed through by ID. If something changes in the dev sda order in the future, the correct hard disk is still connected to the VM. In Proxmox under hardware, select your -scsi1 disk and edit it:
+Deselect: backup. 
+Select: Discard, IO thread and SSD emulation
 
 ### Variant 2: Use internal storage
 
-If you have enough space on the host operating system, you do not have to use an external hard disk. You can simply add a second hard disk to the VM under "Hardware -> Add -> Hard Disk". I would recommend at least 1TB as storage size.
+If you have enough space on the host operating system, you do not have to use an external hard disk. You can simply add a second hard disk to the VM under "Hardware -> Add -> Hard Disk". I would recommend at least 2TB as storage size.
 
 * * *
 
-Regardless of whether variant 1 or 2 was executed, the VM should now have 2 hard disks connected in the hardware overview: A smaller one (e.g. 32GB) where the operating system of Raspiblitz will be installed and run and a larger one (e.g. 1TB or more) where all the blockchain data will be stored later.
+Regardless of whether variant 1 or 2 was executed, the VM should now have 2 hard disks connected in the hardware overview: A smaller one (e.g. 32GB) where the operating system of Raspiblitz will be installed and run and a larger one (e.g. 2TB or more) where all the blockchain data will be stored later.
 
 ![](images/2022-09-21_21-04.png)
 
@@ -129,12 +135,17 @@ Now we need to download the Build SDCard Script from Rootzoll. The version can b
 
 ```
 wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.9/build_sdcard.sh
+or use latest dev version:
+wget https://raw.githubusercontent.com/rootzoll/raspiblitz/dev/build_sdcard.sh
 ```
 
 And run:
 
 ```
 sudo bash build_sdcard.sh
+
+or for example modify to use the minimal version, headless and no wifi:
+sudo bash build_sdcard.sh --fatpack 0 --wifi-region off --display headless
 ```
 
 The script now shows you information from your system. If all this is correct, start with "yes".
@@ -147,4 +158,4 @@ Now the installation takes a few minutes. Do not abort or shut down the VM here,
 sudo shutdown -r now
 ```
 
-Now you can call the IP address of your VM in the browser and perform the normal installation steps of Raspiblitz.
+Now you can call the IP address of your VM in the browser and perform the normal installation steps of Raspiblitz. Or recover your LND node and Bitcoin blockchain sync from your connected harddrive. 
