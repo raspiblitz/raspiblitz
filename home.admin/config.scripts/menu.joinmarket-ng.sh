@@ -363,10 +363,18 @@ while true; do
               WNAME=${WNAME:-imported}
               WNAME="${WNAME%.mnemonic}"
 
+              # Ask for word count
+              WORDS_CHOICE=$(whiptail --title " Import Wallet " \
+                  --menu "How many seed words does your wallet have?" 12 50 2 \
+                  "24" "24 words" \
+                  "12" "12 words" \
+                  3>&1 1>&2 2>&3) || break
+              WORDS="${WORDS_CHOICE:-24}"
+
               WALLET_PATH="$DATA_DIR/wallets/${WNAME}.mnemonic"
               mkdir -p "$DATA_DIR/wallets"
 
-              jm-wallet import --prompt-password -o "$WALLET_PATH"
+              jm-wallet import --words "$WORDS" --prompt-password -o "$WALLET_PATH"
               RESULT=$?
 
               if [ $RESULT -eq 0 ] && [ -f "$WALLET_PATH" ]; then
