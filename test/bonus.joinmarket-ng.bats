@@ -197,6 +197,58 @@ teardown_file() {
   grep -q '^mnemonic_password = "hunter2"' "${CONFIG_TOML}"
 }
 
+@test "store-password places mnemonic_password under [wallet] section (TOML-valid)" {
+  # Verify Python tomllib can read it back under wallet.mnemonic_password
+  python3 - "${CONFIG_TOML}" <<'PYEOF'
+import sys
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+import pathlib
+data = tomllib.loads(pathlib.Path(sys.argv[1]).read_text())
+pwd = data.get("wallet", {}).get("mnemonic_password")
+assert pwd == "hunter2", f"Expected 'hunter2', got {pwd!r}"
+PYEOF
+}
+
+@test "mnemonic_password at top level (not under [wallet]) is not visible to Python settings" {
+  # Write a config with mnemonic_password at top level only (not under [wallet])
+  local tmp_cfg
+  tmp_cfg=$(mktemp)
+  cat > "${tmp_cfg}" <<'EOF'
+mnemonic_password = "toplevelpwd"
+EOF
+  # Python should NOT see it under wallet.mnemonic_password
+  python3 - "${tmp_cfg}" <<'PYEOF'
+import sys
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+import pathlib
+data = tomllib.loads(pathlib.Path(sys.argv[1]).read_text())
+pwd = data.get("wallet", {}).get("mnemonic_password")
+assert pwd is None, f"Expected None, got {pwd!r}"
+PYEOF
+  rm -f "${tmp_cfg}"
+}
+
+@test "mnemonic_password under [wallet] is visible to Python settings" {
+  # CONFIG_TOML already has the key under [wallet] from store-password test
+  python3 - "${CONFIG_TOML}" <<'PYEOF'
+import sys
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+import pathlib
+data = tomllib.loads(pathlib.Path(sys.argv[1]).read_text())
+pwd = data.get("wallet", {}).get("mnemonic_password")
+assert pwd == "hunter2", f"Expected 'hunter2', got {pwd!r}"
+PYEOF
+}
+
 # ---------------------------------------------------------------------------
 # 6. wipe-password only removes injected passwords, not permanently stored ones
 # ---------------------------------------------------------------------------

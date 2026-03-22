@@ -19,9 +19,24 @@ DEFAULT_AMOUNT="0"
 DEFAULT_MIXDEPTH="0"
 DEFAULT_FEE_RATE=""
 DEFAULT_DESTINATION=""
-# Counterparty default: read from config.toml, fall back to 10 (jm-taker default)
-DEFAULT_COUNTERPARTIES=$(grep '^counterparty_count[[:space:]]*=' "$CONFIG_FILE" 2>/dev/null \
-  | head -1 | sed 's/^counterparty_count[[:space:]]*=[[:space:]]*//' | tr -d '"')
+# Counterparty default: read from config.toml [taker] section, fall back to 10 (jm-taker default)
+DEFAULT_COUNTERPARTIES=$(python3 - "$CONFIG_FILE" <<'PYEOF' 2>/dev/null
+import sys, pathlib
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib  # type: ignore[no-redef]
+path = pathlib.Path(sys.argv[1])
+if path.exists():
+    try:
+        data = tomllib.loads(path.read_text())
+        val = data.get("taker", {}).get("counterparty_count")
+        if val is not None:
+            print(int(val))
+    except Exception:
+        pass
+PYEOF
+)
 DEFAULT_COUNTERPARTIES="${DEFAULT_COUNTERPARTIES:-10}"
 
 # Ensure log directory exists

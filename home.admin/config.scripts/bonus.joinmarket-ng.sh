@@ -142,6 +142,28 @@ echo "# Running: 'bonus.${APPID}.sh $*'"
 # check & load raspiblitz config
 source /mnt/hdd/app-data/raspiblitz.conf
 
+# Helper: returns exit 0 if [wallet] mnemonic_password is set in config.toml (TOML-aware).
+# Usage: toml_has_wallet_password <config_file>
+toml_has_wallet_password() {
+  local cfg="$1"
+  python3 - "${cfg}" <<'PYEOF'
+import sys, pathlib
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib  # type: ignore[no-redef]
+path = pathlib.Path(sys.argv[1])
+if not path.exists():
+    sys.exit(1)
+try:
+    data = tomllib.loads(path.read_text())
+except Exception:
+    sys.exit(1)
+pwd = data.get("wallet", {}).get("mnemonic_password")
+sys.exit(0 if (pwd is not None and str(pwd).strip() != "") else 1)
+PYEOF
+}
+
 # determine the correct bitcoind service name based on chain
 if [ "${chain}" = "test" ]; then
   bitcoind_service="tbitcoind"
@@ -199,8 +221,8 @@ if [ "$1" = "maker-start" ]; then
   # Otherwise, prompt for it and write a temporary .maker.env for prestart.
   CONFIG_FILE="/home/${USER_JM}/.joinmarket-ng/config.toml"
   ENV_FILE="/home/${USER_JM}/.joinmarket-ng/.maker.env"
-  if grep -q "^[[:space:]]*mnemonic_password[[:space:]]*=" "${CONFIG_FILE}" 2>/dev/null; then
-    echo "# Password found in config.toml, no prompt needed."
+  if toml_has_wallet_password "${CONFIG_FILE}"; then
+    echo "# Password found in config.toml [wallet] section, no prompt needed."
   else
     read -r -s -p "Wallet encryption password (Enter to skip if unencrypted): " WALLET_PWD
     echo ""
@@ -360,8 +382,8 @@ if [ "$1" = "prestart" ]; then
   # the password permanently — if it's already in config.toml, we skip this entirely.
   ENV_FILE="/home/${USER_JM}/.joinmarket-ng/.maker.env"
   INJECTED_FLAG="/home/${USER_JM}/.joinmarket-ng/.password_injected"
-  if grep -q "^[[:space:]]*mnemonic_password[[:space:]]*=" "${CONFIG_FILE}" 2>/dev/null; then
-      echo "# PRESTART: Password already in config.toml — no injection needed."
+  if toml_has_wallet_password "${CONFIG_FILE}"; then
+      echo "# PRESTART: Password already in config.toml [wallet] section — no injection needed."
   elif [ -f "${ENV_FILE}" ]; then
       MNEMONIC_PASSWORD=$(grep '^MNEMONIC_PASSWORD=' "${ENV_FILE}" | cut -d '=' -f2-)
       # Use python3 to safely inject the password into config.toml.
