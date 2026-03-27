@@ -92,7 +92,7 @@ upload() {
     --silent \
     --fail;
   then
-    echo "File ${filepath} has been uploaded"
+    echo "uploadMsg='File ${filepath} has been uploaded'"
     echo "upload=1"
   else
     echo "err='File upload failed'"
