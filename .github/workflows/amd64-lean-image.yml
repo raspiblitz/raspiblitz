@@ -34,8 +34,9 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 12288
-          temp-reserve-mb: 12288
+          # Keep conservative reserves to avoid negative allocation sizes on runner images.
+          root-reserve-mb: 4096
+          temp-reserve-mb: 4096
 
       - uses: actions/checkout@v4
 
