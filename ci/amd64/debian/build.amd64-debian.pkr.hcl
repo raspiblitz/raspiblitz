@@ -1,7 +1,10 @@
 # images, checksums and signatures are at:
 # https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/
-variable "iso_name" { default = "debian-13.2.0-amd64-netinst.iso" }
-variable "iso_checksum" { default = "677c4d57aa034dc192b5191870141057574c1b05df2b9569c0ee08aa4e32125d" }
+# Defaults below are safe fallbacks.
+# ci/amd64/packer.build.amd64-debian.sh resolves and injects the latest point-release
+# ISO name and matching checksum at runtime to avoid point-release breakage.
+variable "iso_name" { default = "debian-13-amd64-netinst.iso" }
+variable "iso_checksum" { default = "file:https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/SHA256SUMS" }
 
 variable "pack" { default = "lean" }
 variable "github_user" { default = "raspiblitz" }
@@ -59,7 +62,7 @@ source "qemu" "debian" {
   disk_size        = var.image_size
   http_directory   = "./http"
   iso_checksum     = var.iso_checksum
-  iso_url          = "https://cdimage.debian.org/cdimage/release/current/amd64/iso-cd/${var.iso_name}"
+  iso_url          = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/${var.iso_name}"
   memory           = var.memory
   output_directory = "../builds/${local.name_template}-qemu"
   shutdown_command = "echo 'raspiblitz' | sudo /sbin/shutdown -hP now"
