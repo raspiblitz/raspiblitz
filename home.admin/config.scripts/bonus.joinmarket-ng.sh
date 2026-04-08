@@ -216,8 +216,14 @@ isInstalled=$(sudo ls /etc/systemd/system/${APPID}-maker.service 2>/dev/null | g
 isRunning=$(systemctl status ${APPID}-maker 2>/dev/null | grep -c 'active (running)')
 
 if [ "$1" = "status" ]; then
+  # Determine the actually installed version via pip; fall back to pinned tag
+  installedVersion=$(sudo -u ${USER_JM} /home/${USER_JM}/venv/bin/pip show jmcore 2>/dev/null \
+    | awk '/^Version:/{print $2}')
+  if [ -z "${installedVersion}" ]; then
+    installedVersion="${GITHUB_TAG}"
+  fi
   echo "appID='${APPID}'"
-  echo "version='${GITHUB_TAG}'"
+  echo "version='${installedVersion}'"
   echo "githubRepo='${GITHUB_REPO}'"
   echo "isInstalled=${isInstalled}"
   echo "isRunning=${isRunning}"
@@ -378,18 +384,26 @@ if [ "$1" = "prestart" ]; then
       exit 1
   fi
 
+  # Helper: escape a string for safe use in sed replacement
+  escape_sed_replacement() {
+      printf '%s' "$1" | sed -e 's/[&\\/|]/\\&/g'
+  }
+
+  RPC_USER_ESCAPED=$(escape_sed_replacement "${RPC_USER}")
+  RPC_PASSWORD_ESCAPED=$(escape_sed_replacement "${RPC_PASSWORD}")
+
   # Update RPC User
   if grep -q "^rpc_user =" "${CONFIG_FILE}"; then
-     sed -i "s/^rpc_user = .*/rpc_user = \"${RPC_USER}\"/" "${CONFIG_FILE}"
+     sed -i "s|^rpc_user =.*|rpc_user = \"${RPC_USER_ESCAPED}\"|" "${CONFIG_FILE}"
   elif grep -q "^# rpc_user =" "${CONFIG_FILE}"; then
-     sed -i "s/^# rpc_user = .*/rpc_user = \"${RPC_USER}\"/" "${CONFIG_FILE}"
+     sed -i "s|^# rpc_user =.*|rpc_user = \"${RPC_USER_ESCAPED}\"|" "${CONFIG_FILE}"
   fi
 
   # Update RPC Password
   if grep -q "^rpc_password =" "${CONFIG_FILE}"; then
-     sed -i "s/^rpc_password = .*/rpc_password = \"${RPC_PASSWORD}\"/" "${CONFIG_FILE}"
+     sed -i "s|^rpc_password =.*|rpc_password = \"${RPC_PASSWORD_ESCAPED}\"|" "${CONFIG_FILE}"
   elif grep -q "^# rpc_password =" "${CONFIG_FILE}"; then
-     sed -i "s/^# rpc_password = .*/rpc_password = \"${RPC_PASSWORD}\"/" "${CONFIG_FILE}"
+     sed -i "s|^# rpc_password =.*|rpc_password = \"${RPC_PASSWORD_ESCAPED}\"|" "${CONFIG_FILE}"
   fi
 
   echo "# PRESTART: Config updated."
@@ -583,12 +597,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
              value="\"${value}\""
          fi
 
+         # Escape sed metacharacters in the value for safe replacement
+         local sed_value
+         sed_value=$(printf '%s' "$value" | sed -e 's/[&\\/|]/\\&/g')
+
          # 1. Try to replace uncommented key (e.g. 'key = ...')
          if grep -q "^${key}[[:space:]]*=" "${file}"; then
-             sudo sed -i "s|^${key}[[:space:]]*=.*|${key} = ${value}|" "${file}"
+             sudo sed -i "s|^${key}[[:space:]]*=.*|${key} = ${sed_value}|" "${file}"
          # 2. Try to replace commented key (e.g. '# key = ...')
          elif grep -q "^#[[:space:]]*${key}[[:space:]]*=" "${file}"; then
-             sudo sed -i "s|^#[[:space:]]*${key}[[:space:]]*=.*|${key} = ${value}|" "${file}"
+             sudo sed -i "s|^#[[:space:]]*${key}[[:space:]]*=.*|${key} = ${sed_value}|" "${file}"
          else
              echo "# Warning: Could not find key '${key}' in ${file}"
          fi
@@ -668,6 +686,7 @@ EOF
 ${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh maker-start
 ${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh maker-stop
 ${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh maker-status
+${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh store-password *
 EOF
   sudo chmod 440 /etc/sudoers.d/joinmarketng-maker
 
