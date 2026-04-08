@@ -189,6 +189,11 @@ teardown_file() {
 # ---------------------------------------------------------------------------
 # 5. store-password writes mnemonic_password to config.toml
 # ---------------------------------------------------------------------------
+@test "sudoers allows store-password command" {
+  # The sudoers file should include store-password with wildcard arg
+  grep -q 'store-password' "${SUDOERS_FILE}"
+}
+
 @test "store-password sets mnemonic_password in config.toml" {
   run bash "${SCRIPT}" store-password "hunter2"
   [ "$status" -eq 0 ]
@@ -210,6 +215,29 @@ data = tomllib.loads(pathlib.Path(sys.argv[1]).read_text())
 pwd = data.get("wallet", {}).get("mnemonic_password")
 assert pwd == "hunter2", f"Expected 'hunter2', got {pwd!r}"
 PYEOF
+}
+
+@test "store-password handles special characters safely" {
+  # Test with a password containing sed metacharacters: & \ / | " $
+  run bash "${SCRIPT}" store-password 'p@ss/w0rd&with\special|"chars'
+  [ "$status" -eq 0 ]
+
+  # Verify Python can round-trip the password correctly via TOML
+  python3 - "${CONFIG_TOML}" <<'PYEOF'
+import sys
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+import pathlib
+data = tomllib.loads(pathlib.Path(sys.argv[1]).read_text())
+pwd = data.get("wallet", {}).get("mnemonic_password")
+assert pwd == 'p@ss/w0rd&with\\special|"chars', f"Got {pwd!r}"
+PYEOF
+
+  # Reset to the known value for subsequent tests
+  run bash "${SCRIPT}" store-password "hunter2"
+  [ "$status" -eq 0 ]
 }
 
 @test "mnemonic_password at top level (not under [wallet]) is not visible to Python settings" {
@@ -291,6 +319,24 @@ PYEOF
   # Check that RPC credentials from bitcoin.conf were injected
   grep -q 'testuser' "${CONFIG_TOML}"
   grep -q 'testpass' "${CONFIG_TOML}"
+}
+
+@test "prestart handles special characters in RPC credentials" {
+  # Write RPC credentials with sed metacharacters
+  cat > /mnt/hdd/app-data/bitcoin/bitcoin.conf <<'EOF'
+rpcuser=test&user
+rpcpassword=pass/word\with|special
+EOF
+  run bash "${SCRIPT}" prestart
+  # Verify credentials were written (prestart may fail on mnemonic check)
+  grep -q 'rpc_user = "test&user"' "${CONFIG_TOML}"
+  grep -q 'rpc_password = "pass/word\\with|special"' "${CONFIG_TOML}"
+
+  # Restore original test credentials
+  cat > /mnt/hdd/app-data/bitcoin/bitcoin.conf <<'EOF'
+rpcuser=testuser
+rpcpassword=testpass
+EOF
 }
 
 # ---------------------------------------------------------------------------
