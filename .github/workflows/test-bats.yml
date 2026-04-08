@@ -11,14 +11,12 @@ on:
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
       - "home.admin/config.scripts/bonus.joinmarket-ng.sh"
-      - "home.admin/config.scripts/menu.joinmarket-ng.sh"
       - "test/bonus.joinmarket-ng.bats"
   pull_request:
     branches: ["*"]
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
       - "home.admin/config.scripts/bonus.joinmarket-ng.sh"
-      - "home.admin/config.scripts/menu.joinmarket-ng.sh"
       - "test/bonus.joinmarket-ng.bats"
 
 jobs:

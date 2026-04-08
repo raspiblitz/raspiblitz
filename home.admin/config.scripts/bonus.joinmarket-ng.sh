@@ -19,6 +19,33 @@ GITHUB_TAG="0.18.0"
 GITHUB_RAW="https://raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/main"
 GITHUB_RELEASES="https://github.com/joinmarket-ng/joinmarket-ng/releases/download"
 
+# Install the JoinMarket-NG Raspiblitz TUI from the JoinMarket-NG repository.
+# Usage: install_menu_script <git-ref>
+install_menu_script() {
+  local MENU_REF="$1"
+  local MENU_DEST="/home/${USER_JM}/menu.sh"
+  local MENU_URL="https://raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/${MENU_REF}/scripts/menu.joinmarket-ng.sh"
+  local MENU_FALLBACK_URL="https://raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/main/scripts/menu.joinmarket-ng.sh"
+
+  echo "# Installing Menu Script from ${MENU_REF}..."
+  if curl -sfL "${MENU_URL}" -o "${MENU_DEST}"; then
+      sudo chown ${USER_JM}:${USER_JM} "${MENU_DEST}"
+      sudo chmod +x "${MENU_DEST}"
+      return 0
+  fi
+
+  echo "# Warning: Could not download menu script from ${MENU_URL}"
+  echo "# Trying fallback menu script from main branch..."
+  if curl -sfL "${MENU_FALLBACK_URL}" -o "${MENU_DEST}"; then
+      sudo chown ${USER_JM}:${USER_JM} "${MENU_DEST}"
+      sudo chmod +x "${MENU_DEST}"
+      return 0
+  fi
+
+  echo "# FAIL: Could not download menu script from ${MENU_URL} or ${MENU_FALLBACK_URL}"
+  return 1
+}
+
 ##########################
 # verify_release <TAG>
 # Downloads the release manifest and verifies at least one trusted GPG
@@ -618,20 +645,8 @@ StandardError=append:/home/${USER_JM}/.joinmarket-ng/logs/maker.log
 EOF
   
   # 8. Menu Script (TUI)
-  echo "# Installing Menu Script..."
-  # Look for menu script in same directory as this script
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  MENU_SRC="${SCRIPT_DIR}/menu.joinmarket-ng.sh"
-  if [ ! -f "${MENU_SRC}" ]; then
-      # Fallback to standard raspiblitz path
-      MENU_SRC="/home/admin/config.scripts/menu.joinmarket-ng.sh"
-  fi
-  if [ -f "${MENU_SRC}" ]; then
-      sudo cp "${MENU_SRC}" /home/${USER_JM}/menu.sh
-      sudo chown ${USER_JM}:${USER_JM} /home/${USER_JM}/menu.sh
-      sudo chmod +x /home/${USER_JM}/menu.sh
-  else
-      echo "# Warning: menu.joinmarket-ng.sh not found in ${SCRIPT_DIR} or /home/admin/config.scripts/"
+  if ! install_menu_script "${VERIFIED_COMMIT}"; then
+    exit 1
   fi
 
   # Add alias and PATH setup to .bashrc
@@ -758,16 +773,10 @@ if [ "$1" = "update" ]; then
       exit 1
   fi
 
-  # Update menu script
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  MENU_SRC="${SCRIPT_DIR}/menu.joinmarket-ng.sh"
-  if [ ! -f "${MENU_SRC}" ]; then
-      MENU_SRC="/home/admin/config.scripts/menu.joinmarket-ng.sh"
-  fi
-  if [ -f "${MENU_SRC}" ]; then
-      sudo cp "${MENU_SRC}" /home/${USER_JM}/menu.sh
-      sudo chown ${USER_JM}:${USER_JM} /home/${USER_JM}/menu.sh
-      sudo chmod +x /home/${USER_JM}/menu.sh
+  # Update menu script from the same verified source ref
+  MENU_REF="${VERIFIED_COMMIT:-${UPDATE_TAG}}"
+  if ! install_menu_script "${MENU_REF}"; then
+    exit 1
   fi
 
   # Only restart maker if it was running before the update (and password file still exists)
