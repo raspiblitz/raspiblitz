@@ -1003,14 +1003,28 @@ if [ "${scenario}" != "ready" ] ; then
       # put flag file into old system 
       touch /home/admin/systemcopy.flag
 
-      # disable old system boot
-      echo "# disable old system boot" >> ${logFile}
-      /home/admin/config.scripts/blitz.data.sh kill-boot ${installDevice} >> ${logFile}
-      if [ $? -eq 1 ]; then
-        echo "FAIL: blitz.data.sh kill-boot \"${installDevice}\" failed" >> ${logFile}
-        /home/admin/_cache.sh set state "error"
-        /home/admin/_cache.sh set message "blitz.data.sh kill-boot failed"
-        exit 1
+      # detect if boot device is a PiKVM virtual USB drive
+      is_pikvm=0
+      if [ -d "/sys/block/${installDevice}/device" ]; then
+          vendor=$(cat "/sys/block/${installDevice}/device/vendor" 2>/dev/null | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+          model=$(cat "/sys/block/${installDevice}/device/model" 2>/dev/null | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+          if echo "$vendor" | grep -q "pikvm"; then is_pikvm=1; fi
+          if echo "$model" | grep -q "pikvm"; then is_pikvm=1; fi
+          if echo "$model" | grep -q "file-stor"; then is_pikvm=1; fi
+      fi
+
+      if [ "${is_pikvm}" = "1" ]; then
+          echo "# PiKVM virtual media detected. Skipping kill-boot." >> ${logFile}
+      else
+          # disable old system boot
+          echo "# disable old system boot" >> ${logFile}
+          /home/admin/config.scripts/blitz.data.sh kill-boot ${installDevice} >> ${logFile}
+          if [ $? -eq 1 ]; then
+            echo "FAIL: blitz.data.sh kill-boot \"${installDevice}\" failed" >> ${logFile}
+            /home/admin/_cache.sh set state "error"
+            /home/admin/_cache.sh set message "blitz.data.sh kill-boot failed"
+            exit 1
+          fi
       fi
 
       # reboot so that new system can start
@@ -1023,7 +1037,15 @@ if [ "${scenario}" != "ready" ] ; then
       sync; echo 3 > /proc/sys/vm/drop_caches
       # wait for sync to complete
       sleep 2
-      shutdown -r now
+      if [ "${is_pikvm}" = "1" ]; then
+          echo "# PiKVM virtual media detected. Waiting for manual reboot." >> ${logFile}
+          /home/admin/_cache.sh set state "wait"
+          /home/admin/_cache.sh set message "PiKVM: Eject Virtual USB & Reboot"
+          # Wait loop to prevent automatic reboot from triggering
+          while true; do sleep 10; done
+      else
+          shutdown -r now
+      fi
       exit 0
     else
       # continue with setup
