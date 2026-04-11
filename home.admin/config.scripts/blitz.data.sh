@@ -1517,6 +1517,21 @@ if [ "$action" = "copy-system" ]; then
     chown redis:redis /mnt/disk_system/var/log/redis/redis-server.log
     chmod 644 /mnt/disk_system/var/log/redis/redis-server.log
 
+    # Randomize UUIDs and PARTUUIDs to prevent split-brain on identical clones
+    echo "# Randomizing UUIDs and PARTUUIDs to prevent collisions" >> ${logFile}
+    tune2fs -U random /dev/${actionDevicePartitionBase}2 >> ${logFile} 2>&1
+    
+    NEW_FAT_SERIAL=$(hexdump -n 4 -v -e '/1 "%02X"' /dev/urandom)
+    if [ "${computerType}" = "raspberrypi" ]; then
+        if parted -s /dev/${actionDevice} print | grep -qi "gpt"; then
+            sgdisk -G /dev/${actionDevice} >> ${logFile} 2>&1
+        else
+            echo -e "x\ni\n0x${NEW_FAT_SERIAL}\nr\nw" | fdisk /dev/${actionDevice} >> ${logFile} 2>&1
+        fi
+        partprobe /dev/${actionDevice}
+        sleep 2
+    fi
+
     # fstab link & command.txt
     echo "# Perma mount boot & system drives" >> ${logFile}
     
