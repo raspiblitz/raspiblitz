@@ -13,37 +13,35 @@ USER_JM="joinmarketng"
 # VERSION
 # Pinning a specific version/commit for stability
 GITHUB_REPO="https://github.com/joinmarket-ng/joinmarket-ng"
-GITHUB_TAG="0.18.0"
+GITHUB_TAG="0.28.1"
 
 # GPG signature verification URLs
 GITHUB_RAW="https://raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/main"
 GITHUB_RELEASES="https://github.com/joinmarket-ng/joinmarket-ng/releases/download"
 
-# Install the JoinMarket-NG Raspiblitz TUI from the JoinMarket-NG repository.
-# Usage: install_menu_script <git-ref>
-install_menu_script() {
-  local MENU_REF="$1"
-  local MENU_DEST="/home/${USER_JM}/menu.sh"
-  local MENU_URL="https://raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/${MENU_REF}/scripts/menu.joinmarket-ng.sh"
-  local MENU_FALLBACK_URL="https://raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/main/scripts/menu.joinmarket-ng.sh"
+# Compare local and release manifests by immutable git commit.
+# Raspiblitz installs Python packages from git source and does not use the
+# Docker image artifacts, so commit identity is the critical verification step.
+manifest_commit_matches() {
+  local RELEASE_MANIFEST="$1"
+  local LOCAL_MANIFEST="$2"
 
-  echo "# Installing Menu Script from ${MENU_REF}..."
-  if curl -sfL "${MENU_URL}" -o "${MENU_DEST}"; then
-      sudo chown ${USER_JM}:${USER_JM} "${MENU_DEST}"
-      sudo chmod +x "${MENU_DEST}"
-      return 0
+  local RELEASE_COMMIT
+  RELEASE_COMMIT=$(grep '^commit:' "${RELEASE_MANIFEST}" | awk '{print $2}')
+  local LOCAL_COMMIT
+  LOCAL_COMMIT=$(grep '^commit:' "${LOCAL_MANIFEST}" | awk '{print $2}')
+
+  if [ -z "${RELEASE_COMMIT}" ] || [ -z "${LOCAL_COMMIT}" ]; then
+    echo "#     Missing commit in release or local manifest."
+    return 1
   fi
 
-  echo "# Warning: Could not download menu script from ${MENU_URL}"
-  echo "# Trying fallback menu script from main branch..."
-  if curl -sfL "${MENU_FALLBACK_URL}" -o "${MENU_DEST}"; then
-      sudo chown ${USER_JM}:${USER_JM} "${MENU_DEST}"
-      sudo chmod +x "${MENU_DEST}"
-      return 0
+  if [ "${RELEASE_COMMIT}" != "${LOCAL_COMMIT}" ]; then
+    echo "#     Commit mismatch between release and local manifest."
+    return 1
   fi
 
-  echo "# FAIL: Could not download menu script from ${MENU_URL} or ${MENU_FALLBACK_URL}"
-  return 1
+  return 0
 }
 
 ##########################
@@ -117,12 +115,30 @@ verify_release() {
       continue
     fi
 
-    # Verify
+    # Verify against CI release manifest first.
     if gpg --batch --verify "${SIG}" "${MANIFEST}" 2>/dev/null; then
       echo "#   Key ${fp}: VALID signature"
       VALID_SIGS=$((VALID_SIGS + 1))
-    else
+      continue
+    fi
+
+    # Fallback for local-first workflow: signature may target <fingerprint>-manifest.txt.
+    local LOCAL_MANIFEST="${TMPDIR}/${fp}-manifest.txt"
+    if ! curl -sfL "${GITHUB_RAW}/signatures/${TAG}/${fp}-manifest.txt" -o "${LOCAL_MANIFEST}"; then
       echo "#   Key ${fp}: INVALID signature!"
+      continue
+    fi
+
+    if ! gpg --batch --verify "${SIG}" "${LOCAL_MANIFEST}" 2>/dev/null; then
+      echo "#   Key ${fp}: INVALID signature!"
+      continue
+    fi
+
+    if manifest_commit_matches "${MANIFEST}" "${LOCAL_MANIFEST}"; then
+      echo "#   Key ${fp}: VALID signature (local manifest commit matches release manifest)"
+      VALID_SIGS=$((VALID_SIGS + 1))
+    else
+      echo "#   Key ${fp}: INVALID signature! (local manifest commit does not match release manifest)"
     fi
   done
 
@@ -159,6 +175,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh on        -> install the app"
   echo "# bonus.${APPID}.sh off       -> uninstall the app"
   echo "# bonus.${APPID}.sh menu      -> SSH menu dialog"
+  echo "# bonus.${APPID}.sh verify-release [TAG] -> verify release signatures only"
   echo "# bonus.${APPID}.sh prestart  -> will be called by systemd before start"
   echo "# bonus.${APPID}.sh update [TAG] -> update to latest or specific version"
   exit 1
@@ -230,6 +247,17 @@ if [ "$1" = "status" ]; then
   exit
 fi
 
+if [ "$1" = "verify-release" ]; then
+  VERIFY_TAG="${2:-${GITHUB_TAG}}"
+  echo "# Verifying GPG signatures for release ${VERIFY_TAG}..."
+  VERIFIED_COMMIT=""
+  if ! verify_release "${VERIFY_TAG}"; then
+    echo "# FAIL - GPG signature verification failed for ${VERIFY_TAG}"
+    exit 1
+  fi
+  exit 0
+fi
+
 ##########################
 # MENU
 #########################
@@ -237,7 +265,7 @@ fi
 if [ "$1" = "menu" ]; then
   # Show the TUI menu if installed
   if [ "${isInstalled}" == "1" ]; then
-    sudo -u ${USER_JM} /home/${USER_JM}/menu.sh
+    sudo -u ${USER_JM} /home/${USER_JM}/venv/bin/jm-ng
   else
     whiptail --title " JoinMarket-NG " --msgbox "JoinMarket-NG is not installed." 10 40
   fi
@@ -663,13 +691,18 @@ StandardError=append:/home/${USER_JM}/.joinmarket-ng/logs/maker.log
 EOF
   
   # 8. Menu Script (TUI)
-  if ! install_menu_script "${VERIFIED_COMMIT}"; then
-    exit 1
+  # The TUI menu script is bundled as package data inside jmcore and launched
+  # via the 'jm-ng' console script entry point (installed in the venv by pip).
+  # No separate download or file copy is needed.
+  if [ ! -x "/home/${USER_JM}/venv/bin/jm-ng" ]; then
+    # Sanity check: jm-ng should be available after pip install jmcore.
+    # Do not execute it here: jm-ng starts an interactive whiptail menu.
+    echo "# Warning: jm-ng entry point not found in venv — TUI may not work."
   fi
 
   # Add alias and PATH setup to .bashrc
   if ! grep -q "alias jm-ng" /home/${USER_JM}/.bashrc; then
-      echo "alias jm-ng='/home/${USER_JM}/menu.sh'" | sudo -u ${USER_JM} tee -a /home/${USER_JM}/.bashrc
+      echo "alias jm-ng='/home/${USER_JM}/venv/bin/jm-ng'" | sudo -u ${USER_JM} tee -a /home/${USER_JM}/.bashrc
   fi
   if ! grep -q "source /home/${USER_JM}/venv/bin/activate" /home/${USER_JM}/.bashrc; then
       echo "source /home/${USER_JM}/venv/bin/activate" | sudo -u ${USER_JM} tee -a /home/${USER_JM}/.bashrc
@@ -698,7 +731,7 @@ EOF
 
   echo "# ${APPID} installation successful"
   echo "# To start the maker bot, configure your wallet first!"
-  echo "# Use 'sudo su - ${USER_JM}' then 'jm-ng' (or menu.sh) to access the menu."
+  echo "# Use 'sudo su - ${USER_JM}' then 'jm-ng' to access the menu."
   
   exit 0
 fi
@@ -792,11 +825,8 @@ if [ "$1" = "update" ]; then
       exit 1
   fi
 
-  # Update menu script from the same verified source ref
-  MENU_REF="${VERIFIED_COMMIT:-${UPDATE_TAG}}"
-  if ! install_menu_script "${MENU_REF}"; then
-    exit 1
-  fi
+  # Menu script is bundled in the jmcore pip package — updated automatically
+  # by the pip upgrade above. No separate download needed.
 
   # Only restart maker if it was running before the update (and password file still exists)
   if [ "${MAKER_WAS_RUNNING}" = "1" ]; then

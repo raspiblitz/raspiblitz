@@ -62,7 +62,6 @@ teardown_file() {
   rm -rf "${DATA_DIR}" 2>/dev/null || true
   rm -f "${SERVICE_FILE}" 2>/dev/null || true
   rm -f "${SUDOERS_FILE}" 2>/dev/null || true
-  rm -f /home/${USER_JM}/menu.sh 2>/dev/null || true
   # Clean up mock environment
   rm -f /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null || true
   rm -f /mnt/hdd/app-data/bitcoin/bitcoin.conf 2>/dev/null || true
@@ -76,6 +75,13 @@ teardown_file() {
   run bash "${SCRIPT}" status
   [ "$status" -eq 0 ]
   echo "$output" | grep -q "isInstalled=0"
+}
+
+@test "verify-release accepts local-first signatures" {
+  run bash "${SCRIPT}" verify-release "0.26.1"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "GPG verification passed:"
+  echo "$output" | grep -q "VALID signature (local manifest commit matches release manifest)"
 }
 
 # ---------------------------------------------------------------------------
@@ -101,23 +107,48 @@ teardown_file() {
   # Sudoers file was created
   [ -f "${SUDOERS_FILE}" ]
 
-  # Menu script was copied to user's home directory
-  [ -f "/home/${USER_JM}/menu.sh" ]
+  # jm-ng entry point was installed in the venv (menu script bundled in jmcore)
+  [ -x "/home/${USER_JM}/venv/bin/jm-ng" ]
 }
 
 # ---------------------------------------------------------------------------
-# 2b. Menu script is syntactically valid bash
+# 2b. Menu script is bundled as package data in jmcore and is valid bash
 # ---------------------------------------------------------------------------
-@test "menu script passes bash syntax check" {
-  run bash -n "/home/${USER_JM}/menu.sh"
+@test "jm-ng entry point can locate the bundled menu script" {
+  # The tui.py trampoline should find the script via importlib.resources
+  local script_path
+  script_path=$("/home/${USER_JM}/venv/bin/python" -c "
+from importlib import resources
+ref = resources.files('jmcore').joinpath('data/menu.joinmarket-ng.sh')
+print(ref)
+")
+  [ -f "$script_path" ]
+  run bash -n "$script_path"
   [ "$status" -eq 0 ]
 }
 
 # ---------------------------------------------------------------------------
-# 2c. Menu script contains expected main menu entries
+# 2c. Installer uses jm-ng from venv (no download needed)
+# ---------------------------------------------------------------------------
+@test "installer uses jm-ng entry point instead of downloading menu script" {
+  # Bonus script should reference venv/bin/jm-ng for the menu command
+  grep -q 'venv/bin/jm-ng' "${SCRIPT}"
+  # Old download functions should NOT be present
+  ! grep -q 'download_file()' "${SCRIPT}"
+  ! grep -q 'install_menu_script()' "${SCRIPT}"
+  ! grep -q 'MENU_FALLBACK_URL' "${SCRIPT}"
+}
+
+# ---------------------------------------------------------------------------
+# 2d. Menu script contains expected main menu entries
 # ---------------------------------------------------------------------------
 @test "menu script has unified Send entry and no separate Taker entry" {
-  local menu="/home/${USER_JM}/menu.sh"
+  # Locate the bundled menu script via package data
+  local menu
+  menu=$("/home/${USER_JM}/venv/bin/python" -c "
+from importlib import resources
+print(resources.files('jmcore').joinpath('data/menu.joinmarket-ng.sh'))
+")
   # "S" "Send Bitcoin" should be in the main menu
   grep -q '"S".*"Send Bitcoin"' "$menu"
   # Old "T" "Taker" entry should not exist
