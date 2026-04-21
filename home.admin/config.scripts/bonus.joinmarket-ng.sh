@@ -3,6 +3,24 @@
 # bonus.joinmarket-ng.sh
 # Installs JoinMarket-NG (Next Generation JoinMarket implementation)
 # https://github.com/joinmarket-ng/joinmarket-ng
+#
+# Data and wallet layout
+# ----------------------
+# Wallets, config, and logs are owned by the dedicated ${USER_JM} system
+# user and live under /mnt/hdd/app-data/${APPID} (symlinked into
+# /home/${USER_JM}/.joinmarket-ng). The wallets directory is mode 0700.
+#
+# This is intentional: the admin user cannot read the wallet files directly.
+# To use any command that touches the wallet (jm-wallet, jm-ng, jm-maker,
+# jm-taker, ...), switch to the joinmarketng user first. A couple of
+# equivalent options from the admin shell:
+#
+#     sudo su - ${USER_JM}          # interactive login as joinmarketng
+#     sudo -u ${USER_JM} jm-ng      # run a single command
+#
+# Only management entry points (start/stop/status of the maker service,
+# storing the wallet password, running self-update) are exposed to the
+# joinmarketng user via the /etc/sudoers.d/${USER_JM}-maker rules.
 
 # APPID
 APPID="joinmarket-ng"
@@ -734,6 +752,8 @@ EOF
   echo "# ${APPID} installation successful"
   echo "# To start the maker bot, configure your wallet first!"
   echo "# Use 'sudo su - ${USER_JM}' then 'jm-ng' to access the menu."
+  echo "# Wallet files live at /mnt/hdd/app-data/${APPID}/wallets (owned by"
+  echo "# ${USER_JM}, mode 0700). Access them via 'sudo -u ${USER_JM} ...'."
   
   exit 0
 fi
