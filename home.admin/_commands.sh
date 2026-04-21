@@ -80,7 +80,7 @@ function blitzhelp() {
   echo "  chantools    ChanTools"
   echo "  lit          Lightning Terminal"
   echo "  jm           JoinMarket"
-  echo "  jmng         JoinMarket-NG"
+  echo "  jm-ng        JoinMarket-NG"
   echo "  pyblock      PyBlock"
   echo "  ckbunker     CKbunker"
   echo
@@ -429,9 +429,9 @@ function jm() {
   fi
 }
 
-# command: jmng
+# command: jm-ng
 # open the JoinMarket-NG menu
-function jmng() {
+function jm-ng() {
   if [ $(grep -c "joinmarketNG=on" < /mnt/hdd/app-data/raspiblitz.conf) -eq 1 ]; then
     echo "# opening JoinMarket-NG menu..."
     sudo /home/admin/config.scripts/bonus.joinmarket-ng.sh menu
