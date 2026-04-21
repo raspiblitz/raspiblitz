@@ -225,6 +225,13 @@ print(resources.files('jmcore').joinpath('data/menu.joinmarket-ng.sh'))
   grep -q 'store-password' "${SUDOERS_FILE}"
 }
 
+@test "sudoers allows update command without password" {
+  # Without this rule the TUI, which runs as joinmarketng, prompts for a
+  # system password on every update and then the update aborts.
+  grep -q 'NOPASSWD:.* update$' "${SUDOERS_FILE}"
+  grep -q 'NOPASSWD:.* update \*' "${SUDOERS_FILE}"
+}
+
 @test "store-password sets mnemonic_password in config.toml" {
   run bash "${SCRIPT}" store-password "hunter2"
   [ "$status" -eq 0 ]

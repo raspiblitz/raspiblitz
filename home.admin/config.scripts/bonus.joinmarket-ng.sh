@@ -720,6 +720,8 @@ ${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh make
 ${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh maker-stop
 ${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh maker-status
 ${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh store-password *
+${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh update
+${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh update *
 EOF
   sudo chmod 440 /etc/sudoers.d/joinmarketng-maker
 
