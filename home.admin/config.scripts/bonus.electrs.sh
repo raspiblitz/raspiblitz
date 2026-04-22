@@ -307,6 +307,7 @@ if [ "$1" = "install" ]; then
     echo
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#build-dependencies
     sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain stable -y
+    sudo -u electrs /home/electrs/.cargo/bin/rustup default stable || exit 1
     sudo apt install -y clang cmake build-essential # for building 'rust-rocksdb'
 
     echo
@@ -332,47 +333,58 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# ACTIVATING ELECTRS"
 
   isInstalled=$(sudo ls /etc/systemd/system/electrs.service 2>/dev/null | grep -c 'electrs.service')
-  if [ ${isInstalled} -eq 0 ]; then
 
-    # cleanup
-    sudo rm -f /home/electrs/.electrs/config.toml
+  # cleanup runtime config before regenerating it in the on path
+  sudo rm -f /home/electrs/.electrs/config.toml
 
-    if id "electrs" &>/dev/null; then
-      echo "# user electrs exists already (codebase is installed)"
-    else
-      echo "# Installing codebase"
-      /home/admin/config.scripts/bonus.electrs.sh install
-      if [ $? -ne 0 ]; then
-        echo "Install failed .. removing again."
-        /home/admin/config.scripts/bonus.electrs.sh uninstall
-        exit 1
-      fi
+  if id "electrs" &>/dev/null; then
+    echo "# user electrs exists already (codebase is installed)"
+  else
+    echo "# Installing codebase"
+    /home/admin/config.scripts/bonus.electrs.sh install
+    if [ $? -ne 0 ]; then
+      echo "Install failed .. removing again."
+      /home/admin/config.scripts/bonus.electrs.sh uninstall
+      exit 1
     fi
+  fi
 
-    # check and create storage dir
-    if ! sudo ls /mnt/hdd/app-storage/electrs 2>/dev/null; then
-      sudo mkdir /mnt/hdd/app-storage/electrs
-      echo
-      echo "# The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
-      echo
-    fi
-    # always fix user id
-    sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
+  if [ ! -d "/mnt/hdd/app-data" ] || [ ! -d "/mnt/hdd/app-storage" ]; then
+    echo "# FAIL: /mnt/hdd app-data/app-storage not ready yet"
+    echo "# Call 'on' only after the data drive layout is mounted and prepared"
+    exit 1
+  fi
 
-    echo
-    echo "# Getting RPC credentials from the bitcoin.conf"
-    # read PASSWORD_B
-    RPC_USER=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
-    PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
-    echo "# Done"
+  if [ ! -f "/mnt/hdd/app-data/bitcoin/bitcoin.conf" ]; then
+    echo "# FAIL: missing /mnt/hdd/app-data/bitcoin/bitcoin.conf"
+    echo "# ElectRS can only be switched on after Bitcoin app-data is present"
+    exit 1
+  fi
 
+  # check and create storage dir
+  if ! sudo ls /mnt/hdd/app-storage/electrs 2>/dev/null; then
+    sudo mkdir -p /mnt/hdd/app-storage/electrs
     echo
-    echo "# Generating electrs.toml setting file with the RPC passwords"
+    echo "# The electrs database will be built in /mnt/hdd/app-storage/electrs/db. Takes ~18 hours and ~50Gb diskspace"
     echo
-    # generate setting file: https://github.com/romanz/electrs/issues/170#issuecomment-530080134
-    # https://github.com/romanz/electrs/blob/master/doc/usage.md#configuration-files-and-environment-variables
-    sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
-    echo "\
+  fi
+  # always fix user id
+  sudo chown -R electrs:electrs /mnt/hdd/app-storage/electrs
+
+  echo
+  echo "# Getting RPC credentials from the bitcoin.conf"
+  # read PASSWORD_B
+  RPC_USER=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcuser | cut -c 9-)
+  PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
+  echo "# Done"
+
+  echo
+  echo "# Generating electrs.toml setting file with the RPC passwords"
+  echo
+  # generate setting file: https://github.com/romanz/electrs/issues/170#issuecomment-530080134
+  # https://github.com/romanz/electrs/blob/master/doc/usage.md#configuration-files-and-environment-variables
+  sudo -u electrs mkdir /home/electrs/.electrs 2>/dev/null
+  echo "\
 log_filters = \"WARN\"
 jsonrpc_import = true
 index-batch-size = 10
@@ -398,6 +410,7 @@ server_banner = \"Welcome to electrs $ELECTRSVERSION - the Electrum Rust Server 
       echo "OK"
     fi
 
+  if [ ${isInstalled} -eq 0 ]; then
     echo
     echo "# Setting up the nginx.conf"
     echo
@@ -623,6 +636,7 @@ if [ "$1" = "update" ]; then
 
     echo "# Installing build dependencies"
     sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain stable -y
+    sudo -u electrs /home/electrs/.cargo/bin/rustup default stable || exit 1
     sudo apt install -y clang cmake build-essential # for building 'rust-rocksdb'
     echo
 
