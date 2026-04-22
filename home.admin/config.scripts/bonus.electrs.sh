@@ -307,6 +307,7 @@ if [ "$1" = "install" ]; then
     echo
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#build-dependencies
     sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain stable -y
+    sudo -u electrs /home/electrs/.cargo/bin/rustup default stable || exit 1
     sudo apt install -y clang cmake build-essential # for building 'rust-rocksdb'
 
     echo
@@ -623,6 +624,7 @@ if [ "$1" = "update" ]; then
 
     echo "# Installing build dependencies"
     sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain stable -y
+    sudo -u electrs /home/electrs/.cargo/bin/rustup default stable || exit 1
     sudo apt install -y clang cmake build-essential # for building 'rust-rocksdb'
     echo
 
