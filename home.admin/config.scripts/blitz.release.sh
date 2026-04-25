@@ -48,6 +48,15 @@ echo "cpu=${cpu}" >> /home/admin/raspiblitz.info
 echo "blitzapi=${blitzapi}" >> /home/admin/raspiblitz.info
 echo "displayClass=${displayClass}" >> /home/admin/raspiblitz.info
 
+# release images should not keep pipeline/testing static IP boot config
+# if a boot-partition network-config was injected for deterministic first-boot access,
+# remove it here so the released image returns to normal DHCP behavior.
+echo
+echo "removing fixed network-config for release (back to DHCP) ..."
+sudo rm ${raspi_bootdir}/network-config 2>/dev/null
+sudo rm ${raspi_bootdir}/network-config.txt 2>/dev/null
+echo "OK"
+
 # https://github.com/rootzoll/raspiblitz/issues/1371
 echo
 echo "deactivate local WIFI ..."
