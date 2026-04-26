@@ -18,6 +18,20 @@ elif [ -d /boot ]; then
 fi
 echo "# raspi_bootdir(${raspi_bootdir})"
 
+# detect if current root drive is a PiKVM virtual USB drive
+is_pikvm=0
+rootPartitionLine=$(mount | grep " / " | cut -d " " -f 1)
+rootPartition=$(basename ${rootPartitionLine})
+rootDrive=$(basename "$(readlink -f "/sys/class/block/$rootPartition/..")")
+if [ -d "/sys/block/${rootDrive}/device" ]; then
+  vendor=$(cat "/sys/block/${rootDrive}/device/vendor" 2>/dev/null | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+  model=$(cat "/sys/block/${rootDrive}/device/model" 2>/dev/null | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+  if echo "$vendor" | grep -q "pikvm"; then is_pikvm=1; fi
+  if echo "$model" | grep -q "pikvm"; then is_pikvm=1; fi
+  if echo "$model" | grep -q "file-stor"; then is_pikvm=1; fi
+fi
+echo "# rootDrive(${rootDrive}) is_pikvm(${is_pikvm})"
+
 # make sure LCD is on (default for fatpack)
 /home/admin/config.scripts/blitz.display.sh set-display lcd
 
@@ -44,13 +58,20 @@ if [ ${rootPartitionBytes} -lt 58465668608 ]; then
 
     echo "################################################"
     echo "# SD CARD GOT EXPANSION BEFORE FATPACK"
-    echo "# triggering a reboot"
-    echo "# after reboot run this script again"
+    if [ "${is_pikvm}" = "1" ]; then
+        echo "# PiKVM virtual USB detected - skipping forced reboot"
+        echo "# continuing fatpack on PiKVM-mounted writable flash media"
+    else
+        echo "# triggering a reboot"
+        echo "# after reboot run this script again"
+    fi
     echo "################################################"
 
-    # trigger reboot
-    shutdown -h -r now
-    exit 0
+    if [ "${is_pikvm}" != "1" ]; then
+        # trigger reboot
+        shutdown -h -r now
+        exit 0
+    fi
 fi
 
 apt_install() {
