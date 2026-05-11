@@ -389,16 +389,25 @@ password = sys.argv[2]
 with open(config_path, "r") as fh:
     content = fh.read()
 
+# Escape backslashes and double quotes for the TOML basic string value.
 escaped = password.replace("\\", "\\\\").replace('"', '\\"')
 new_line = 'mnemonic_password = "{}"'.format(escaped)
 
+# Use a lambda replacement so re.sub does not reinterpret backslash escapes
+# in the password value (which would un-escape the carefully escaped output).
 if re.search(r"^\s*mnemonic_password\s*=", content, re.MULTILINE):
     content = re.sub(
-        r"^\s*mnemonic_password\s*=.*$", new_line, content, flags=re.MULTILINE
+        r"^\s*mnemonic_password\s*=.*$",
+        lambda _m: new_line,
+        content,
+        flags=re.MULTILINE,
     )
 elif re.search(r"^\[wallet\]", content, re.MULTILINE):
     content = re.sub(
-        r"(^\[wallet\])", r"\1\n" + new_line, content, flags=re.MULTILINE
+        r"^\[wallet\]",
+        lambda _m: "[wallet]\n" + new_line,
+        content,
+        flags=re.MULTILINE,
     )
 else:
     content += "\n[wallet]\n" + new_line + "\n"
@@ -484,17 +493,25 @@ password = sys.argv[2]
 with open(config_path, "r") as fh:
     content = fh.read()
 
-# Escape backslashes and double quotes for TOML string value
+# Escape backslashes and double quotes for the TOML basic string value.
 escaped = password.replace("\\", "\\\\").replace('"', '\\"')
 new_line = 'mnemonic_password = "{}"'.format(escaped)
 
+# Use a lambda replacement so re.sub does not reinterpret backslash escapes
+# in the password value (which would un-escape the carefully escaped output).
 if re.search(r"^\s*mnemonic_password\s*=", content, re.MULTILINE):
     content = re.sub(
-        r"^\s*mnemonic_password\s*=.*$", new_line, content, flags=re.MULTILINE
+        r"^\s*mnemonic_password\s*=.*$",
+        lambda _m: new_line,
+        content,
+        flags=re.MULTILINE,
     )
 elif re.search(r"^\[wallet\]", content, re.MULTILINE):
     content = re.sub(
-        r"(^\[wallet\])", r"\1\n" + new_line, content, flags=re.MULTILINE
+        r"^\[wallet\]",
+        lambda _m: "[wallet]\n" + new_line,
+        content,
+        flags=re.MULTILINE,
     )
 else:
     content += "\n[wallet]\n" + new_line + "\n"
