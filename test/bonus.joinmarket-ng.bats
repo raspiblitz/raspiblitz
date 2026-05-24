@@ -44,6 +44,27 @@ fi
 STUB
   chmod +x /home/admin/config.scripts/blitz.conf.sh
 
+  # Stub network.wallet.sh -- the real script toggles 'disablewallet' in
+  # bitcoin.conf and restarts bitcoind via systemctl, neither of which is
+  # available in the bats test environment. The bonus.joinmarket-ng.sh
+  # installer just needs the call to succeed. We additionally normalize
+  # disablewallet=0 in the mock bitcoin.conf so tests can later assert
+  # the installer requested wallet support.
+  cat > /home/admin/config.scripts/network.wallet.sh <<'STUB'
+#!/bin/bash
+# Mock: ensure disablewallet=0 is recorded, no bitcoind restart.
+conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf
+if [ "$1" = "on" ]; then
+  if grep -Eq "^disablewallet=" "${conf}"; then
+    sed -i "s/^disablewallet=.*/disablewallet=0/" "${conf}"
+  else
+    echo "disablewallet=0" >> "${conf}"
+  fi
+fi
+exit 0
+STUB
+  chmod +x /home/admin/config.scripts/network.wallet.sh
+
   # Install build dependencies the script expects (apt-get update + dev packages).
   # The bonus script runs apt-get install itself, but having build-essential
   # pre-installed speeds things up. We also need gpg for GPG verification.
@@ -66,6 +87,7 @@ teardown_file() {
   rm -f /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null || true
   rm -f /mnt/hdd/app-data/bitcoin/bitcoin.conf 2>/dev/null || true
   rm -f /home/admin/config.scripts/blitz.conf.sh 2>/dev/null || true
+  rm -f /home/admin/config.scripts/network.wallet.sh 2>/dev/null || true
 }
 
 # ---------------------------------------------------------------------------
@@ -109,6 +131,24 @@ teardown_file() {
 
   # jm-ng entry point was installed in the venv (menu script bundled in jmcore)
   [ -x "/home/${USER_JM}/venv/bin/jm-ng" ]
+}
+
+# ---------------------------------------------------------------------------
+# 2a. Installer enables Bitcoin Core wallet support (regression for
+# RaspiBlitz default 'disablewallet=1', which makes every wallet RPC fail
+# with '-32601 Method not found').
+# ---------------------------------------------------------------------------
+@test "install enables Bitcoin Core wallet support" {
+  # The stubbed network.wallet.sh writes disablewallet=0 into bitcoin.conf
+  # when invoked with 'on'. After the install, the line must be present
+  # and set to 0.
+  grep -q '^disablewallet=0' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+}
+
+@test "installer calls network.wallet.sh on" {
+  # Static check that the bonus script wires the wallet-enablement step,
+  # so a future refactor doesn't silently drop it.
+  grep -q 'network.wallet.sh on' "${SCRIPT}"
 }
 
 # ---------------------------------------------------------------------------

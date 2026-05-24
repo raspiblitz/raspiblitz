@@ -547,6 +547,23 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo apt-get update
   sudo apt-get install -y build-essential libffi-dev libsodium-dev pkg-config python3-dev python3-venv git
 
+  # 1b. Ensure Bitcoin Core wallet support is enabled.
+  #
+  # RaspiBlitz defaults to 'disablewallet=1' for Bitcoin-only nodes (LND has
+  # its own wallet, so Core's wallet subsystem is off by default to save
+  # resources). When 'disablewallet=1', every wallet RPC -- including
+  # 'listwallets', 'loadwallet', 'createwallet' and 'getaddressinfo' --
+  # responds with '-32601 Method not found', which makes the JoinMarket-NG
+  # descriptor wallet backend fail with a cryptic error on first use.
+  #
+  # JoinMarket-NG's descriptor wallet backend creates a watch-only descriptor
+  # wallet inside Bitcoin Core, so wallet support MUST be enabled. We use
+  # the existing 'network.wallet.sh on' helper, which is idempotent: it
+  # rewrites 'disablewallet' to 0 in bitcoin.conf and restarts bitcoind
+  # only if the value actually changed.
+  echo "# Ensuring Bitcoin Core wallet support is enabled..."
+  sudo /home/admin/config.scripts/network.wallet.sh on
+
   # 2. Create User
   echo "# Creating user ${USER_JM}..."
   if ! id -u "${USER_JM}" > /dev/null 2>&1; then
