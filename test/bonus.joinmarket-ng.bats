@@ -151,6 +151,16 @@ teardown_file() {
   grep -q 'network.wallet.sh on' "${SCRIPT}"
 }
 
+# Regression: the template wget URL must point at the actual file location
+# inside the repo and the resulting config.toml must contain the RPC creds
+# read from bitcoin.conf. A previous version pointed at a non-existent path,
+# silently produced an empty config.toml and broke prestart.
+@test "install produces non-empty config.toml with RPC credentials" {
+  [ -s "${CONFIG_TOML}" ]
+  grep -q '^rpc_user = "testuser"' "${CONFIG_TOML}"
+  grep -q '^rpc_password = "testpass"' "${CONFIG_TOML}"
+}
+
 # ---------------------------------------------------------------------------
 # 2b. Menu script is bundled as package data in jmcore and is valid bash
 # ---------------------------------------------------------------------------

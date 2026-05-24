@@ -658,7 +658,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # (network, rpc_port, wallet settings, etc.). prestart updates RPC creds on each boot.
   if [ ! -f "${CONFIG_FILE}" ]; then
      echo "# Downloading config template (first install)..."
-     sudo wget -q https://raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/${GITHUB_TAG}/config.toml.template -O "${CONFIG_FILE}"
+     # The template ships inside jmcore in the source tree. An explicit
+     # non-empty check makes us fail loudly instead of writing an empty file
+     # (which would silently produce a broken config that prestart cannot repair).
+     TEMPLATE_URL="https://raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/${GITHUB_TAG}/jmcore/src/jmcore/data/config.toml.template"
+     if ! sudo wget -q "${TEMPLATE_URL}" -O "${CONFIG_FILE}" || [ ! -s "${CONFIG_FILE}" ]; then
+        echo "# FAIL: Could not download config template from ${TEMPLATE_URL}"
+        sudo rm -f "${CONFIG_FILE}"
+        exit 1
+     fi
 
      # Ensure file permissions
      sudo chmod 600 ${CONFIG_FILE}
