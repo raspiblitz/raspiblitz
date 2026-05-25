@@ -161,6 +161,28 @@ teardown_file() {
   grep -q '^rpc_password = "testpass"' "${CONFIG_TOML}"
 }
 
+# Systemd unit must declare a retry policy so the maker survives a slow
+# bitcoind boot (RPC unavailable for several minutes during IBD/mempool
+# rebuild) instead of going into 'failed' state after a few attempts.
+@test "maker systemd unit has retry-on-failure with no rate limit" {
+  [ -f "${SERVICE_FILE}" ]
+  grep -q '^Restart=on-failure' "${SERVICE_FILE}"
+  grep -q '^RestartSec=30' "${SERVICE_FILE}"
+  grep -q '^StartLimitIntervalSec=0' "${SERVICE_FILE}"
+  grep -q '^WantedBy=multi-user.target' "${SERVICE_FILE}"
+}
+
+# Without a permanently stored wallet password the maker cannot start
+# unattended (systemd has no TTY to prompt). The installer must leave
+# the unit disabled so the user explicitly opts in via store-password.
+@test "install leaves maker disabled when no password is stored" {
+  # systemctl is a python shim on minimal Ubuntu images, so we can't rely on
+  # the multi-user.target.wants symlink being created/removed. Instead, just
+  # assert that the installer did not unconditionally enable the unit while
+  # config.toml has no [wallet] mnemonic_password set yet.
+  ! grep -q '^mnemonic_password' "${CONFIG_TOML}"
+}
+
 # ---------------------------------------------------------------------------
 # 2b. Menu script is bundled as package data in jmcore and is valid bash
 # ---------------------------------------------------------------------------
@@ -288,6 +310,28 @@ print(resources.files('jmcore').joinpath('data/menu.joinmarket-ng.sh'))
 
   # Verify the active (uncommented) line is present
   grep -q '^mnemonic_password = "hunter2"' "${CONFIG_TOML}"
+}
+
+# Once the wallet password is permanently stored, the maker can survive a
+# reboot unattended, so store-password must request boot auto-start. This is
+# a static check on the script because the bats environment has no systemd
+# proper and 'systemctl enable' may be a no-op.
+@test "store-password block enables maker auto-start" {
+  # Extract the store-password branch and assert it enables the unit.
+  awk '/^if \[ "\$1" = "store-password" \];/,/^fi$/' "${SCRIPT}" \
+    | grep -q 'systemctl enable .*-maker.service'
+}
+
+# Symmetric guarantee: the install path must enable the unit when a
+# password is already permanently stored (reinstall case), and disable
+# it otherwise.
+@test "install block gates auto-start on stored password" {
+  awk '/# 10. Reload systemd/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
+    | grep -q 'toml_has_wallet_password'
+  awk '/# 10. Reload systemd/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
+    | grep -q 'systemctl enable'
+  awk '/# 10. Reload systemd/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
+    | grep -q 'systemctl disable'
 }
 
 @test "store-password places mnemonic_password under [wallet] section (TOML-valid)" {

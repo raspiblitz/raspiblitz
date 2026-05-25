@@ -416,6 +416,14 @@ with open(config_path, "w") as fh:
     fh.write(content)
 PYEOF
   echo "# Password stored in config.toml"
+  # Now that the wallet password is permanently stored, enable maker
+  # auto-start at boot. systemd can decrypt the wallet on its own, no
+  # interactive prompt needed.
+  if [ -f "/etc/systemd/system/${APPID}-maker.service" ]; then
+    sudo systemctl enable ${APPID}-maker.service 2>/dev/null \
+      && echo "# Maker auto-start enabled (boot)." \
+      || echo "# WARNING: Could not enable maker auto-start."
+  fi
   exit 0
 fi
 
@@ -732,8 +740,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   cat <<EOF | sudo tee /etc/systemd/system/${APPID}-maker.service
 [Unit]
 Description=JoinMarket-NG Maker Bot
-Wants=${bitcoind_service}.service
-After=${bitcoind_service}.service
+Wants=${bitcoind_service}.service tor.service
+After=${bitcoind_service}.service tor.service
 
 [Service]
 Type=simple
@@ -745,9 +753,17 @@ ExecStartPre=+/home/admin/config.scripts/bonus.${APPID}.sh prestart
 ExecStart=/bin/bash -c 'exec jm-maker start'
 ExecStopPost=+/bin/bash -c 'rm -f /home/${USER_JM}/.joinmarket-ng/.maker.env'
 ExecStopPost=+/home/admin/config.scripts/bonus.${APPID}.sh wipe-password
-Restart=no
+# Bitcoind on RaspiBlitz can take a long time to come up after boot
+# (IBD, mempool rebuild, ...). Retry forever with a 30s backoff instead
+# of letting systemd give up after a few failed attempts.
+Restart=on-failure
+RestartSec=30
+StartLimitIntervalSec=0
 StandardOutput=append:/home/${USER_JM}/.joinmarket-ng/logs/maker.log
 StandardError=append:/home/${USER_JM}/.joinmarket-ng/logs/maker.log
+
+[Install]
+WantedBy=multi-user.target
 EOF
   
   # 8. Menu Script (TUI)
@@ -785,9 +801,22 @@ ${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh upda
 EOF
   sudo chmod 440 /etc/sudoers.d/joinmarketng-maker
 
-  # 10. Enable & reload (no auto-start — service must be started manually from menu)
+  # 10. Reload systemd, and enable auto-start at boot only when a
+  # mnemonic password is already permanently stored in config.toml.
+  # Without the password the maker cannot decrypt the wallet under
+  # systemd (no TTY to prompt), so we keep the unit disabled by default
+  # and rely on the TUI 'maker-start' flow to inject a temporary
+  # password via the .maker.env file.
   sudo systemctl daemon-reload
-  
+  if toml_has_wallet_password "${CONFIG_FILE}"; then
+    echo "# Wallet password already stored — enabling maker auto-start at boot."
+    sudo systemctl enable ${APPID}-maker.service
+  else
+    echo "# No stored wallet password — leaving maker auto-start disabled."
+    echo "# Use the TUI ('Store wallet password') to enable boot auto-start."
+    sudo systemctl disable ${APPID}-maker.service 2>/dev/null || true
+  fi
+
   # Mark installed in raspiblitz config
   /home/admin/config.scripts/blitz.conf.sh set ${CONFIGKEY} "on"
 
@@ -918,6 +947,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# Stopping & disabling services..."
   sudo systemctl stop ${APPID}-maker 2>/dev/null
+  sudo systemctl disable ${APPID}-maker 2>/dev/null || true
   sudo rm -f /etc/systemd/system/${APPID}-maker.service
   sudo rm -f /etc/sudoers.d/joinmarketng-maker
   sudo systemctl daemon-reload
