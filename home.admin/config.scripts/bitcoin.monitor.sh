@@ -22,16 +22,57 @@ fi
 if [ "$1" == "mainnet" ]; then
   bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=8332"
   service_alias="bitcoind"
+  bitcoin_p2p_port="8333"
 elif [ "$1" == "testnet" ]; then
   bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=18332"
   service_alias="tbitcoind"
+  bitcoin_p2p_port="18333"
 elif [ "$1" == "signet" ]; then
   bitcoincli_alias="/usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=38332"
   service_alias="sbitcoind"
+  bitcoin_p2p_port="38333"
 else
   echo "error='not supported net'"
   exit 1
 fi
+
+bitcoin_monitor_rpc_timeout="${BITCOIN_MONITOR_RPC_TIMEOUT:-8}"
+
+bitcoin_cli() {
+  timeout "${bitcoin_monitor_rpc_timeout}" ${bitcoincli_alias} "$@"
+}
+
+get_rpc_error_short() {
+  if [ "$1" == "124" ]; then
+    echo "RPC timeout"
+  else
+    echo "RPC failed"
+  fi
+}
+
+get_rpc_error_full() {
+  if [ "$1" == "124" ]; then
+    echo "bitcoin-cli RPC call timed out after ${bitcoin_monitor_rpc_timeout} seconds"
+  else
+    echo "bitcoin-cli RPC call failed with exit code $1"
+  fi
+}
+
+get_connection_count() {
+  bitcoin_cli getconnectioncount 2>/dev/null | tr -cd '[[:digit:]]'
+}
+
+get_established_peer_count() {
+  if command -v ss >/dev/null 2>&1; then
+    ss -Htan state established "( sport = :${bitcoin_p2p_port} or dport = :${bitcoin_p2p_port} )" 2>/dev/null | wc -l | tr -cd '[[:digit:]]'
+  elif command -v netstat >/dev/null 2>&1; then
+    netstat -tan 2>/dev/null | grep -E "[.:]${bitcoin_p2p_port}[[:space:]].*ESTABLISHED|ESTABLISHED.*[.:]${bitcoin_p2p_port}[[:space:]]" | wc -l | tr -cd '[[:digit:]]'
+  fi
+}
+
+get_json_connection_count() {
+  echo "${1}" | jq -r '.connections // empty' 2>/dev/null | tr -cd '[[:digit:]]'
+}
 
 ######################################################
 # STATUS
@@ -56,23 +97,29 @@ if [ "$2" = "status" ]; then
     rm /var/cache/raspiblitz/.bitcoind-${randStr}.error 2>/dev/null
     touch /var/cache/raspiblitz/.bitcoind-${randStr}.out
     touch /var/cache/raspiblitz/.bitcoind-${randStr}.error
-    $bitcoincli_alias getnetworkinfo 1>/var/cache/raspiblitz/.bitcoind-${randStr}.out 2>/var/cache/raspiblitz/.bitcoind-${randStr}.error
+    bitcoin_cli getnetworkinfo 1>/var/cache/raspiblitz/.bitcoind-${randStr}.out 2>/var/cache/raspiblitz/.bitcoind-${randStr}.error
+    bitcoincli_exitcode="$?"
     winData=$(cat /var/cache/raspiblitz/.bitcoind-${randStr}.out 2>/dev/null)
     failData=$(cat /var/cache/raspiblitz/.bitcoind-${randStr}.error 2>/dev/null)
     rm /var/cache/raspiblitz/.bitcoind-${randStr}.out
     rm /var/cache/raspiblitz/.bitcoind-${randStr}.error
 
     # check for errors
-    if [ "${failData}" != "" ]; then
+    if [ "${failData}" != "" ] || [ "${bitcoincli_exitcode}" != "0" ]; then
       btc_ready="0"
-      btc_error_short=$(echo ${failData/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
-      btc_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
+      if [ "${failData}" != "" ]; then
+        btc_error_short=$(echo ${failData/error*:/} | sed 's/[^a-zA-Z0-9 ]//g')
+        btc_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
+      else
+        btc_error_short=$(get_rpc_error_short "${bitcoincli_exitcode}")
+        btc_error_full=$(get_rpc_error_full "${bitcoincli_exitcode}")
+      fi
       btc_ready="0"
 
     # check results if proof for online
     else
       btc_ready="1"
-      connections=$( echo "${winData}" | grep "connections\"" | tr -cd '[[:digit:]]')
+      connections=$(get_json_connection_count "${winData}")
       if [ "${connections}" != "" ] && [ "${connections}" != "0" ]; then
         btc_online="1"
       fi
@@ -99,23 +146,35 @@ if [ "$2" = "network" ]; then
 
   # get data
   btc_running=$(systemctl status $service_alias 2>/dev/null | grep -c "active (running)")
-  getnetworkinfo=$($bitcoincli_alias getnetworkinfo 2>/dev/null)
-  if [ "${getnetworkinfo}" == "" ]; then
+  getnetworkinfo=$(bitcoin_cli getnetworkinfo 2>/dev/null)
+  btc_peers=$(get_json_connection_count "${getnetworkinfo}")
+  btc_address=""
+  btc_port=""
+  btc_peers_onion="0"
+  btc_peers_i2p="0"
+
+  if [ "${getnetworkinfo}" != "" ]; then
+    getpeerinfo=$(bitcoin_cli getpeerinfo 2>/dev/null)
+    btc_address=$(echo ${getnetworkinfo} | jq -r '.localaddresses [0] .address')
+    btc_port=$(echo "${getnetworkinfo}" | jq -r '.localaddresses [0] .port')
+    if [ "${getpeerinfo}" != "" ]; then
+      btc_peers_onion=$(echo "${getpeerinfo}" | grep -c "network\": \"onion")
+      btc_peers_i2p=$(echo "${getpeerinfo}" | grep -c "network\": \"i2p")
+    fi
+  fi
+
+  if [ "${btc_peers}" == "" ]; then
+    btc_peers=$(get_connection_count)
+  fi
+
+  if [ "${btc_peers}" == "" ]; then
+    btc_peers=$(get_established_peer_count)
+  fi
+
+  if [ "${btc_peers}" == "" ]; then
     echo "error='no network data'"
     exit 1
   fi
-  getpeerinfo=$($bitcoincli_alias getpeerinfo 2>/dev/null)
-  if [ "${getpeerinfo}" == "" ]; then
-    echo "error='no peer data'"
-    exit 1
-  fi  
-
-  # parse data
-  btc_peers=$(echo "${getnetworkinfo}" | grep "connections\"" | tr -cd '[[:digit:]]')
-  btc_address=$(echo ${getnetworkinfo} | jq -r '.localaddresses [0] .address')
-  btc_port=$(echo "${getnetworkinfo}" | jq -r '.localaddresses [0] .port')
-  btc_peers_onion=$(echo "${getpeerinfo}" | grep -c "network\": \"onion")
-  btc_peers_i2p=$(echo "${getpeerinfo}" | grep -c "network\": \"i2p")
 
   # print data
   echo "btc_running='${btc_running}'"
@@ -135,7 +194,7 @@ fi
 if [ "$2" = "info" ]; then
 
   # get data
-  blockchaininfo=$($bitcoincli_alias getblockchaininfo 2>/dev/null)
+  blockchaininfo=$(bitcoin_cli getblockchaininfo 2>/dev/null)
   if [ "${blockchaininfo}" == "" ]; then
     echo "error='no data'"
     exit 1
@@ -201,7 +260,7 @@ fi
 if [ "$2" = "mempool" ]; then
 
   # get data
-  mempoolinfo=$($bitcoincli_alias getmempoolinfo 2>/dev/null)
+  mempoolinfo=$(bitcoin_cli getmempoolinfo 2>/dev/null)
   if [ "${mempoolinfo}" == "" ]; then
     echo "error='no data'"
     exit 1
