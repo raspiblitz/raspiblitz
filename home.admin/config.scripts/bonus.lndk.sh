@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/lndk-org/lndk/releases
-LNDKVERSION="v0.2.0"
+LNDKVERSION="v0.3.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -28,7 +28,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "Copy the skeleton files for login"
     sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
 
-    sudo apt-get install -y protobuf-compiler
+    sudo apt-get install -y protobuf-compiler build-essential
 
     # Install Rust for lndk, includes rustfmt
     sudo -u lndk curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
@@ -159,7 +159,7 @@ fi
 
 # Show info menu
 if [ "$1" = "menu" ]; then
-  whiptail --title " LNDK " --msgbox "Your node is now able to pay BOLT12 offers and is forwarding onion messages!
+  whiptail --title " LNDK " --msgbox "Your node is now able to create and pay BOLT12 offers and is forwarding onion messages!
 
 Use the 'lndk-cli' command to get started.
 

@@ -1,3 +1,9 @@
+## What's new in Version 1.12.2 of RaspiBlitz?
+
+App updates, fixes and optimizations.
+
+- Update: LNDK 0.3.0 (Create and pay BOLT12 offers with LND) [details](https://github.com/lndk-org/lndk/releases/tag/v0.3.0)
+
 ## What's new in Version 1.12.1 of RaspiBlitz?
 
 App updates, fixes and optimizations.
