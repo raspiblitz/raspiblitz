@@ -134,7 +134,7 @@ function importPGPKey() {
 
   sudo -u bitcoin wget -O "${keyPath}" "${keyLink}" || return 1
   echo "# Verifying ${keySigner} key fingerprint"
-  fingerprint=$(gpg --show-keys --keyid-format LONG "${keyPath}" 2>/dev/null | grep -c "${keyFingerprint}")
+  fingerprint=$(gpg --with-colons --show-keys "${keyPath}" 2>/dev/null | grep -c "^fpr:::::::::${keyFingerprint}:")
   if [ "${fingerprint}" -lt 1 ]; then
     echo "# ERROR --> ${keySigner} PGP fingerprint mismatch"
     return 1
