@@ -7,7 +7,7 @@
 APPID="albyhub" # one-word lower-case no-specials
 
 # https://github.com/getAlby/hub/releases
-VERSION="1.20.0"
+VERSION="1.23.0"
 
 # port numbers the app should run on
 # delete if not an web app
@@ -257,7 +257,7 @@ ExecStartPre=-/home/admin/config.scripts/bonus.${APPID}.sh prestart
 EnvironmentFile=${ENVFILE}
 ExecStart=/home/${APPID}/bin/${APPID}
 # Hack to ensure Alby Hub never uses more than 90% CPU
-CPUQuota=90%sudo
+CPUQuota=90%
 
 [Install]
 WantedBy=multi-user.target
