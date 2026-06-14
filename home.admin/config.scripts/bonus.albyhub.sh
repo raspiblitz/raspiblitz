@@ -21,6 +21,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh status            -> status information (key=value)"
   echo "# bonus.${APPID}.sh install           -> install the app"
   echo "# bonus.${APPID}.sh uninstall         -> uninstall the app"
+  echo "# bonus.${APPID}.sh update            -> update the app"
   echo "# bonus.${APPID}.sh on                -> activate the app"
   echo "# bonus.${APPID}.sh off [delete-data] -> deactivate the app"
   echo "# bonus.${APPID}.sh menu              -> SSH menu dialog"
@@ -139,8 +140,55 @@ The Alby Hub password is managed separate from RaspiBlitz - make sure to manage 
 "
 
   # use whiptail to show SSH dialog & exit
-  whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 15 67
-  echo "please wait ..."
+  whiptail --title "${dialogTitle}" --yes-button "OK" --no-button "OPTIONS" --yesno "${dialogText}" 15 67
+  result=$?
+  echo "option (${result}) - please wait ..."
+
+  if [ ${result} -eq 0 ]; then
+    exit 0
+  elif [ ${result} -ne 1 ]; then
+    exit 0
+  fi
+
+  OPTIONS=()
+  OPTIONS+=(UPDATE "Update Alby Hub to the latest release")
+
+  CHOICE=$(dialog --clear \
+                --title " Alby Hub - Options" \
+                --ok-label "Select" \
+                --cancel-label "Back" \
+                --menu "Choose one of the following options:" \
+                10 62 1 \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+
+  case $CHOICE in
+        UPDATE)
+            clear
+            whiptail --title " Update Alby Hub " \
+            --yes-button "Update" \
+            --no-button "Cancel" \
+            --yesno "Update Alby Hub to the latest upstream release now?" 9 62
+            if [ "$?" != "0" ]; then
+              exit 0
+            fi
+            if /home/admin/config.scripts/bonus.albyhub.sh update; then
+              echo
+              echo "OK Alby Hub update done."
+            else
+              echo
+              echo "FAIL Alby Hub update failed."
+            fi
+            echo "PRESS ENTER to continue"
+            read key
+            exit 0
+            ;;
+        *)
+            clear
+            exit 0
+            ;;
+  esac
+
   exit 0
 fi
 
@@ -348,6 +396,72 @@ server {
   echo "# OK actvation done"
 
   # needed for API/WebUI as signal that install ran thru
+  echo "result='OK'"
+  exit 0
+fi
+
+###########################################
+# UPDATE
+###########################################
+
+if [ "$1" = "update" ]; then
+
+  if [ "$(compgen -u | grep -c ${APPID})" -eq 0 ]; then
+    echo "# ${APPID} is not installed"
+    echo "error='not installed'"
+    exit 1
+  fi
+
+  version=$(curl --header "X-GitHub-Api-Version:2022-11-28" --silent "https://api.github.com/repos/getAlby/hub/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+  if [ ${#version} -eq 0 ]; then
+    echo "# Could not detect latest Alby Hub release"
+    echo "error='latest release check failed'"
+    exit 1
+  fi
+
+  tmpDir=$(mktemp -d)
+  cd ${tmpDir} || exit 1
+
+  if [ ${cpu} == "aarch64" ]; then
+    echo "# Downloading Alby Hub ${version} for aarch64"
+    sudo wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v${version}/albyhub-Server-Linux-aarch64.tar.bz2
+  else
+    echo "# Downloading Alby Hub ${version} for x86"
+    sudo wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v${version}/albyhub-Server-Linux-x86_64.tar.bz2
+  fi
+
+  sudo tar -xvf albyhub-server.tar.bz2
+  if [[ $? -ne 0 ]]; then
+    echo "# Failed to download & unpack Alby Hub"
+    echo "error='download & unpack failed'"
+    sudo rm -rf ${tmpDir}
+    exit 1
+  fi
+
+  wasRunning=$(systemctl status ${APPID} 2>/dev/null | grep -c 'active (running)')
+  if [ ${wasRunning} -eq 1 ]; then
+    echo "# Stopping ${APPID}.service"
+    sudo systemctl stop ${APPID}
+  fi
+
+  echo "# Updating Alby Hub code"
+  sudo rm -rf /home/${APPID}/bin /home/${APPID}/lib
+  sudo cp -a ${tmpDir}/bin /home/${APPID}/
+  sudo cp -a ${tmpDir}/lib /home/${APPID}/
+  sudo chmod -R 755 /home/${APPID}/bin /home/${APPID}/lib
+  sudo chown -R root:root /home/${APPID}/bin /home/${APPID}/lib
+
+  echo "/home/${APPID}/lib" | sudo tee /etc/ld.so.conf.d/${APPID}.conf
+  sudo ldconfig
+
+  sudo rm -rf ${tmpDir}
+
+  if [ ${wasRunning} -eq 1 ]; then
+    echo "# Starting ${APPID}.service"
+    sudo systemctl start ${APPID}
+  fi
+
+  echo "# ${APPID} updated to ${version}"
   echo "result='OK'"
   exit 0
 fi
