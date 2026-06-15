@@ -23,7 +23,7 @@ PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
 function DotNetInstall() {
   echo "# install .NET"
   # https://dotnet.microsoft.com/en-us/download/dotnet/10.0
-  sudo apt-get -y install libunwind8 gettext libssl1.0
+  sudo apt-get -y install libunwind8 gettext libssl-dev
   cpu=$(uname -m)
   if [ "${cpu}" = "aarch64" ]; then
     binaryVersion="arm64"
