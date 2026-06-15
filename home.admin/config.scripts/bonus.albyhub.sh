@@ -140,54 +140,7 @@ The Alby Hub password is managed separate from RaspiBlitz - make sure to manage 
 "
 
   # use whiptail to show SSH dialog & exit
-  whiptail --title "${dialogTitle}" --yes-button "OK" --no-button "OPTIONS" --yesno "${dialogText}" 15 67
-  result=$?
-  echo "option (${result}) - please wait ..."
-
-  if [ ${result} -eq 0 ]; then
-    exit 0
-  elif [ ${result} -ne 1 ]; then
-    exit 0
-  fi
-
-  OPTIONS=()
-  OPTIONS+=(UPDATE "Update Alby Hub to the latest release")
-
-  CHOICE=$(dialog --clear \
-                --title " Alby Hub - Options" \
-                --ok-label "Select" \
-                --cancel-label "Back" \
-                --menu "Choose one of the following options:" \
-                10 62 1 \
-                "${OPTIONS[@]}" \
-                2>&1 >/dev/tty)
-
-  case $CHOICE in
-        UPDATE)
-            clear
-            whiptail --title " Update Alby Hub " \
-            --yes-button "Update" \
-            --no-button "Cancel" \
-            --yesno "Update Alby Hub to the latest upstream release now?" 9 62
-            if [ "$?" != "0" ]; then
-              exit 0
-            fi
-            if /home/admin/config.scripts/bonus.albyhub.sh update; then
-              echo
-              echo "OK Alby Hub update done."
-            else
-              echo
-              echo "FAIL Alby Hub update failed."
-            fi
-            echo "PRESS ENTER to continue"
-            read key
-            exit 0
-            ;;
-        *)
-            clear
-            exit 0
-            ;;
-  esac
+  whiptail --title "${dialogTitle}" --msgbox "${dialogText}" 15 67
 
   exit 0
 fi
