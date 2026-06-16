@@ -410,36 +410,61 @@ PYEOF
 }
 
 # ---------------------------------------------------------------------------
-# 6. wipe-password only removes injected passwords, not permanently stored ones
+# 6. The temporary (declined) password is delivered via the systemd
+#    EnvironmentFile (.maker.env) and is NEVER written to config.toml.
+#    Regression: a previous version injected mnemonic_password into config.toml
+#    at prestart, leaving the secret in cleartext on disk (and reappearing
+#    after a user deleted it). The injection and the wipe-password command
+#    have been removed; only the explicit 'store-password' opt-in writes it.
 # ---------------------------------------------------------------------------
-@test "wipe-password preserves permanently stored mnemonic_password" {
-  # Ensure it's set first (from previous store-password test)
-  grep -q '^mnemonic_password' "${CONFIG_TOML}"
-
-  # No .password_injected flag exists, so wipe-password should be a no-op
-  rm -f "/home/${USER_JM}/.joinmarket-ng/.password_injected"
-
-  run bash "${SCRIPT}" wipe-password
-  [ "$status" -eq 0 ]
-
-  # Password should still be there (permanently stored)
-  grep -q '^mnemonic_password = "hunter2"' "${CONFIG_TOML}"
+@test "wipe-password command and injection flag are removed" {
+  ! grep -q 'wipe-password' "${SCRIPT}"
+  ! grep -q 'password_injected' "${SCRIPT}"
 }
 
-@test "wipe-password removes injected mnemonic_password" {
-  # Ensure it's set first
-  grep -q '^mnemonic_password' "${CONFIG_TOML}"
+@test "prestart never injects mnemonic_password into config.toml" {
+  # Extract the prestart branch and assert it does not write the password.
+  prestart_block=$(awk '/^if \[ "\$1" = "prestart" \];/,/^fi$/' "${SCRIPT}")
+  [ -n "${prestart_block}" ]
+  ! echo "${prestart_block}" | grep -q 'mnemonic_password'
+}
 
-  # Create the injection flag (simulating what prestart does)
-  touch "/home/${USER_JM}/.joinmarket-ng/.password_injected"
+@test "maker unit delivers the password via EnvironmentFile (.maker.env)" {
+  [ -f "${SERVICE_FILE}" ]
+  grep -q 'EnvironmentFile=.*\.maker\.env' "${SERVICE_FILE}"
+  # ExecStopPost must no longer call wipe-password (command removed).
+  ! grep -q 'wipe-password' "${SERVICE_FILE}"
+}
 
-  run bash "${SCRIPT}" wipe-password
+@test "maker-start reuses an existing .maker.env without prompting" {
+  makerstart_block=$(awk '/^if \[ "\$1" = "maker-start" \];/,/^fi$/' "${SCRIPT}")
+  echo "${makerstart_block}" | grep -q '\.maker\.env'
+  echo "${makerstart_block}" | grep -q 'MNEMONIC_PASSWORD='
+}
+
+@test "prestart does not write mnemonic_password when .maker.env is present" {
+  # Configure a wallet so prestart passes the wallet-present check.
+  wallet_dir="/home/${USER_JM}/.joinmarket-ng/wallets"
+  mkdir -p "${wallet_dir}"
+  echo "dummy mnemonic" > "${wallet_dir}/regtest.mnemonic"
+  chown -R "${USER_JM}:${USER_JM}" "${wallet_dir}"
+  if grep -q '^mnemonic_file' "${CONFIG_TOML}"; then
+    sed -i "s|^mnemonic_file.*|mnemonic_file = \"${wallet_dir}/regtest.mnemonic\"|" "${CONFIG_TOML}"
+  else
+    printf '\n[wallet]\nmnemonic_file = "%s"\n' "${wallet_dir}/regtest.mnemonic" >> "${CONFIG_TOML}"
+  fi
+  # Remove any permanently stored password and stage a temporary one.
+  sed -i '/^mnemonic_password/d' "${CONFIG_TOML}"
+  printf 'MNEMONIC_PASSWORD="secret"\n' > "/home/${USER_JM}/.joinmarket-ng/.maker.env"
+
+  run bash "${SCRIPT}" prestart
   [ "$status" -eq 0 ]
 
-  # Active (uncommented) line should be gone
+  # The cleartext password must NOT have been written into config.toml.
   ! grep -q '^mnemonic_password' "${CONFIG_TOML}"
-  # Injection flag should also be removed
-  [ ! -f "/home/${USER_JM}/.joinmarket-ng/.password_injected" ]
+
+  # Cleanup so later tests see a clean state.
+  rm -f "/home/${USER_JM}/.joinmarket-ng/.maker.env"
 }
 
 # ---------------------------------------------------------------------------

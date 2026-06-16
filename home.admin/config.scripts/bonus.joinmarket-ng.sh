@@ -296,19 +296,28 @@ fi
 
 if [ "$1" = "maker-start" ]; then
   # Called as root (via sudoers from menu).
-  # If mnemonic_password is already stored in config.toml, skip the prompt.
-  # Otherwise, prompt for it and write a temporary .maker.env for prestart.
+  # Password resolution order (the password is never written to config.toml
+  # unless the user explicitly opted in via 'store-password'):
+  #   1. Permanently stored in config.toml [wallet] -> nothing to do.
+  #   2. Already provided by the TUI in .maker.env -> reuse it (no prompt).
+  #   3. Otherwise prompt and write .maker.env for the systemd EnvironmentFile.
   CONFIG_FILE="/home/${USER_JM}/.joinmarket-ng/config.toml"
   ENV_FILE="/home/${USER_JM}/.joinmarket-ng/.maker.env"
   if toml_has_wallet_password "${CONFIG_FILE}"; then
     echo "# Password found in config.toml [wallet] section, no prompt needed."
+  elif [ -f "${ENV_FILE}" ] && grep -q '^MNEMONIC_PASSWORD=' "${ENV_FILE}"; then
+    echo "# Wallet password already staged in .maker.env, no prompt needed."
   else
     read -r -s -p "Wallet encryption password (Enter to skip if unencrypted): " WALLET_PWD
     echo ""
-    printf 'MNEMONIC_PASSWORD=%s\n' "${WALLET_PWD}" > "${ENV_FILE}"
+    # Write the password for the systemd EnvironmentFile using the
+    # double-quoted form so special characters survive. systemd interprets
+    # C-style escapes inside double quotes, so escape backslash and quote.
+    ESCAPED_PWD=$(printf '%s' "${WALLET_PWD}" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
+    printf 'MNEMONIC_PASSWORD="%s"\n' "${ESCAPED_PWD}" > "${ENV_FILE}"
     chmod 600 "${ENV_FILE}"
     chown "${USER_JM}:${USER_JM}" "${ENV_FILE}"
-    unset WALLET_PWD
+    unset WALLET_PWD ESCAPED_PWD
   fi
   echo "Starting ${APPID}-maker..."
   systemctl start ${APPID}-maker
@@ -334,37 +343,6 @@ fi
 if [ "$1" = "maker-status" ]; then
   systemctl status ${APPID}-maker --no-pager -l
   exit $?
-fi
-
-##########################
-# WIPE-PASSWORD
-# Called by ExecStopPost to remove mnemonic_password from config.toml
-# so the password does not persist on disk after the maker stops.
-##########################
-
-if [ "$1" = "wipe-password" ]; then
-  CONFIG_FILE="/home/${USER_JM}/.joinmarket-ng/config.toml"
-  INJECTED_FLAG="/home/${USER_JM}/.joinmarket-ng/.password_injected"
-  # Only wipe the password if it was temporarily injected by prestart.
-  # If the user permanently stored it via store-password, leave it alone.
-  if [ -f "${INJECTED_FLAG}" ]; then
-    if [ -f "${CONFIG_FILE}" ]; then
-      python3 - "${CONFIG_FILE}" <<'PYEOF'
-import sys, re
-path = sys.argv[1]
-with open(path, "r") as fh:
-    content = fh.read()
-content = re.sub(r"^\s*mnemonic_password\s*=.*\n?", "", content, flags=re.MULTILINE)
-with open(path, "w") as fh:
-    fh.write(content)
-PYEOF
-    fi
-    rm -f "${INJECTED_FLAG}"
-    echo "# Injected password wiped from config.toml"
-  else
-    echo "# Password was not injected — leaving config.toml unchanged."
-  fi
-  exit 0
 fi
 
 ##########################
@@ -481,58 +459,13 @@ if [ "$1" = "prestart" ]; then
 
   echo "# PRESTART: Wallet OK: ${MNEMONIC_FILE}"
 
-  # If a password env file exists (written by maker-start), inject mnemonic_password
-  # into config.toml temporarily. This is only used when the user chose NOT to store
-  # the password permanently — if it's already in config.toml, we skip this entirely.
-  ENV_FILE="/home/${USER_JM}/.joinmarket-ng/.maker.env"
-  INJECTED_FLAG="/home/${USER_JM}/.joinmarket-ng/.password_injected"
-  if toml_has_wallet_password "${CONFIG_FILE}"; then
-      echo "# PRESTART: Password already in config.toml [wallet] section — no injection needed."
-  elif [ -f "${ENV_FILE}" ]; then
-      MNEMONIC_PASSWORD=$(grep '^MNEMONIC_PASSWORD=' "${ENV_FILE}" | cut -d '=' -f2-)
-      # Use python3 to safely inject the password into config.toml.
-      # Direct sed is unsafe when the password contains metacharacters (|, \, &, ", $).
-      python3 - "${CONFIG_FILE}" "${MNEMONIC_PASSWORD}" <<'PYEOF'
-import sys, re
-
-config_path = sys.argv[1]
-password = sys.argv[2]
-
-with open(config_path, "r") as fh:
-    content = fh.read()
-
-# Escape backslashes and double quotes for the TOML basic string value.
-escaped = password.replace("\\", "\\\\").replace('"', '\\"')
-new_line = 'mnemonic_password = "{}"'.format(escaped)
-
-# Use a lambda replacement so re.sub does not reinterpret backslash escapes
-# in the password value (which would un-escape the carefully escaped output).
-if re.search(r"^\s*mnemonic_password\s*=", content, re.MULTILINE):
-    content = re.sub(
-        r"^\s*mnemonic_password\s*=.*$",
-        lambda _m: new_line,
-        content,
-        flags=re.MULTILINE,
-    )
-elif re.search(r"^\[wallet\]", content, re.MULTILINE):
-    content = re.sub(
-        r"^\[wallet\]",
-        lambda _m: "[wallet]\n" + new_line,
-        content,
-        flags=re.MULTILINE,
-    )
-else:
-    content += "\n[wallet]\n" + new_line + "\n"
-
-with open(config_path, "w") as fh:
-    fh.write(content)
-PYEOF
-      # Mark that we injected the password so ExecStopPost knows to wipe it
-      touch "${INJECTED_FLAG}"
-      echo "# PRESTART: Wallet password injected from ${ENV_FILE}."
-  else
-      echo "# PRESTART: No password file found — assuming unencrypted wallet."
-  fi
+  # The wallet encryption password (when the user has NOT permanently stored
+  # it in config.toml via 'store-password') is delivered to the maker process
+  # through the systemd EnvironmentFile (.maker.env -> MNEMONIC_PASSWORD; see
+  # the unit's EnvironmentFile= directive). We deliberately do NOT inject the
+  # password into config.toml: keeping it out of the config file means the
+  # secret is never left in cleartext on disk after the maker stops (including
+  # after an unclean shutdown where ExecStopPost would not run).
 
   exit 0
 fi
@@ -752,7 +685,6 @@ EnvironmentFile=-/home/${USER_JM}/.joinmarket-ng/.maker.env
 ExecStartPre=+/home/admin/config.scripts/bonus.${APPID}.sh prestart
 ExecStart=/bin/bash -c 'exec jm-maker start'
 ExecStopPost=+/bin/bash -c 'rm -f /home/${USER_JM}/.joinmarket-ng/.maker.env'
-ExecStopPost=+/home/admin/config.scripts/bonus.${APPID}.sh wipe-password
 # Bitcoind on RaspiBlitz can take a long time to come up after boot
 # (IBD, mempool rebuild, ...). Retry forever with a 30s backoff instead
 # of letting systemd give up after a few failed attempts.
