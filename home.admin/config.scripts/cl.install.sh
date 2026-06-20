@@ -2,7 +2,7 @@
 # https://lightning.readthedocs.io/
 
 # https://github.com/ElementsProject/lightning/releases
-CLVERSION="v25.12.1"
+CLVERSION="v26.06.1"
 
 # https://github.com/ElementsProject/lightning/tree/master/contrib/keys
 # rustyrussell D9200E6CD1ADB8F1
@@ -12,10 +12,15 @@ CLVERSION="v25.12.1"
 # sfarooqui (ShahanaFarooqui) B56B4453DA8C6DF7FC9BCFCBDCA40B7128DA62A8
 # amyers (endothermicdev) F3BF63F2747436AB
 # madel (Madeline Paech) A57AFC231B580804
+# ngoline (Nickolas Goline) A57656F8004F6FD68ED99C85BE277A87802A6F08
+#   release signing subkey: 4E4A142F8BD3C38A56B362ED578CAC08472545C5
 # cln (cln@blockstream.com) 616C52F99D0612B2A151B1074129A994AA7E9852
 PGPsigner="cln"
 PGPpubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPsigner}.txt"
 PGPpubkeyFingerprint="616C52F99D0612B2A151B1074129A994AA7E9852"
+PGPfallbackSigner="ngoline"
+PGPfallbackPubkeyLink="https://raw.githubusercontent.com/ElementsProject/lightning/master/contrib/keys/${PGPfallbackSigner}.txt"
+PGPfallbackPubkeyFingerprint="4E4A142F8BD3C38A56B362ED578CAC08472545C5"
 
 # help
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -117,9 +122,40 @@ function buildAndInstallCLbinaries() {
   sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust make install || exit 1
 }
 
+function importPGPKey() {
+  local keySigner="$1"
+  local keyLink="$2"
+  local keyFingerprint="$3"
+  local keyPath="/var/cache/raspiblitz/pgp_keys_${keySigner}.asc"
+  local fingerprint
+
+  echo "- Importing PGP key of ${keySigner} for verification"
+  echo
+
+  sudo -u bitcoin wget -O "${keyPath}" "${keyLink}" || return 1
+  echo "# Verifying ${keySigner} key fingerprint"
+  fingerprint=$(gpg --with-colons --show-keys "${keyPath}" 2>/dev/null | grep -c "^fpr:::::::::${keyFingerprint}:")
+  if [ "${fingerprint}" -lt 1 ]; then
+    echo "# ERROR --> ${keySigner} PGP fingerprint mismatch"
+    return 1
+  fi
+  sudo -u bitcoin gpg --import "${keyPath}" || return 1
+}
+
+function verifySHA256SUMSSignature() {
+  local verifyOutput="/tmp/cl_gpg_verify.txt"
+  local goodSignature
+
+  sudo -u bitcoin gpg --verify "SHA256SUMS-${CLVERSION}.asc" "SHA256SUMS-${CLVERSION}" 2>&1 | tee "${verifyOutput}"
+  goodSignature=$(grep -c "Good signature" "${verifyOutput}")
+  [ "${goodSignature}" -ge 1 ]
+}
+
 function downloadAndVerifySourceZip() {
   # Downloads, verifies, and extracts the CLN source zip
   # Uses CLVERSION variable for the version to download
+  local primaryKeyImported=0
+
   cd /home/bitcoin || exit 1
   echo
   echo "- Downloading Core Lightning ${CLVERSION} source release"
@@ -133,30 +169,28 @@ function downloadAndVerifySourceZip() {
   sudo -u bitcoin wget -O "SHA256SUMS-${CLVERSION}.asc" \
     "https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/SHA256SUMS-${CLVERSION}.asc" || exit 1
 
-  echo
-  echo "- Importing PGP key of ${PGPsigner} for verification"
-  echo
-
-  # Import PGP key
-  sudo -u bitcoin wget -O "/var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc" "${PGPpubkeyLink}" || exit 1
-  echo "# Verifying ${PGPsigner} key fingerprint"
-  fingerprint=$(gpg --show-keys --keyid-format LONG "/var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc" 2>/dev/null | grep -c "${PGPpubkeyFingerprint}")
-  if [ "${fingerprint}" -lt 1 ]; then
-    echo "# ERROR --> ${PGPsigner} PGP fingerprint mismatch"
-    exit 1
+  if importPGPKey "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}"; then
+    primaryKeyImported=1
+  else
+    echo "# WARNING --> ${PGPsigner} PGP key could not be imported"
   fi
-  sudo -u bitcoin gpg --import "/var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc" || exit 1
 
   echo
   echo "- Verifying SHA256SUMS signature"
   echo
 
   # Verify the signature on SHA256SUMS
-  sudo -u bitcoin gpg --verify "SHA256SUMS-${CLVERSION}.asc" "SHA256SUMS-${CLVERSION}" 2>&1 | tee /tmp/cl_gpg_verify.txt
-  goodSignature=$(grep -c "Good signature" /tmp/cl_gpg_verify.txt)
-  if [ "${goodSignature}" -lt 1 ]; then
-    echo "# ERROR --> SHA256SUMS signature verification failed"
-    exit 1
+  if [ "${primaryKeyImported}" -ne 1 ] || ! verifySHA256SUMSSignature; then
+    echo "# SHA256SUMS signature was not verified with ${PGPsigner}"
+    echo "# Trying fallback PGP key ${PGPfallbackSigner}"
+    importPGPKey "${PGPfallbackSigner}" "${PGPfallbackPubkeyLink}" "${PGPfallbackPubkeyFingerprint}" || exit 1
+    echo
+    echo "- Verifying SHA256SUMS signature with fallback key"
+    echo
+    if ! verifySHA256SUMSSignature; then
+      echo "# ERROR --> SHA256SUMS signature verification failed"
+      exit 1
+    fi
   fi
   echo "# OK - SHA256SUMS signature verified"
 
