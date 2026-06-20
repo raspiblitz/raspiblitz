@@ -115,6 +115,49 @@ Regardless of whether variant 1 or 2 was executed, the VM should now have 2 hard
 
 ![](images/2022-09-21_21-04.png)
 
+### Verify the data disk mount inside the VM
+
+RaspiBlitz services expect the large data disk to be available at `/mnt/hdd`. Before starting the RaspiBlitz setup or any services, verify that `/mnt/hdd` is really the large disk and not just an empty directory on the VM root filesystem:
+
+```bash
+lsblk -f
+mountpoint /mnt/hdd
+df -h /mnt/hdd
+```
+
+The `df` output should show the large blockchain disk mounted on `/mnt/hdd`. If your Debian/Proxmox setup mounted the disk somewhere else, for example `/mnt/disk_storage`, either mount it directly at `/mnt/hdd` or add a bind mount:
+
+```bash
+sudo mkdir -p /mnt/hdd
+sudo mount --bind /mnt/disk_storage /mnt/hdd
+mountpoint /mnt/hdd
+df -h /mnt/hdd
+```
+
+To make a bind mount persistent after reboot, add it to `/etc/fstab`:
+
+```fstab
+/mnt/disk_storage /mnt/hdd none bind 0 0
+```
+
+Then test it:
+
+```bash
+sudo mount -a
+mountpoint /mnt/hdd
+df -h /mnt/hdd
+```
+
+Do not start `bitcoind`, `electrs`, `lnd`, or `nginx` until `/mnt/hdd` points to the large data disk. If services start while `/mnt/hdd` is not mounted, files such as `/mnt/hdd/app-data/nginx/tls.cert` or `/mnt/hdd/app-storage/electrs/db` may be created on the small root filesystem instead. Those files become hidden after the real disk is mounted at `/mnt/hdd`.
+
+If that happened, stop the services first before inspecting or cleaning up anything under `/mnt/hdd`:
+
+```bash
+sudo systemctl stop electrs lnd bitcoind nginx
+```
+
+Only then inspect the root filesystem copy of `/mnt/hdd` or unmount/bind-mount paths as needed. Never unmount `/mnt/hdd` while RaspiBlitz services are running.
+
 ## Install Raspiblitz
 
 Now we are ready to install Raspiblitz via script. For this we start the Raspiblitz VM and log in as root user in the console. First of all update everything:
