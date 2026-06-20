@@ -132,9 +132,9 @@ fi
 if [ "${bos}" == "on" ]; then
   OPTIONS+=(BOS "Balance of Satoshis")
 fi
-#if [ "${lnproxy}" == "on" ]; then
-#  OPTIONS+=(LNPROXY "lnproxy server")
-#fi
+if [ "${lnproxy}" == "on" ]; then
+  OPTIONS+=(LNPROXY "lnproxy server")
+fi
 if [ "${pyblock}" == "on" ]; then
   OPTIONS+=(PYBLOCK "PyBlock")
 fi

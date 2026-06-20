@@ -1,14 +1,10 @@
 #!/bin/bash
 
-# Deactivated - see https://github.com/raspiblitz/raspiblitz/issues/4122
-# Needs comitted maintainer or will be removed in future versions
-
-# https://github.com/lnproxy/lnproxy/commits/main
-LNPROXYVERSION="c1031bbe507623f8f196ff83aa5ea504cca05143"
+# https://github.com/lnproxy/lnproxy-relay/commits/main
+LNPROXYVERSION="f5670e7dc23f"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "DEACTIVATED FOR REPAIR - see #4122"
   echo "config script to install or uninstall the lnproxy server"
   echo "bonus.lnproxy.sh [on|off|menu]"
   echo "installs the version $LNPROXYVERSION by default"
@@ -81,19 +77,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # download source code
   cd /home/lnproxy/ || exit 1
-  sudo -u lnproxy git clone https://github.com/lnproxy/lnproxy.git /home/lnproxy/lnproxy
+  sudo -u lnproxy git clone https://github.com/lnproxy/lnproxy-relay.git /home/lnproxy/lnproxy
   cd /home/lnproxy/lnproxy || exit 1
   sudo -u lnproxy git reset --hard ${LNPROXYVERSION} || exit 1
 
   # build
-  sudo -u lnproxy /usr/local/go/bin/go get lnproxy
-  if [ $? -ne 0 ]; then
-    echo "# FAIL -> go get lnproxy"
-    sudo userdel -rf lnproxy 2>/dev/null
-    exit 1
-  fi
-
-  sudo -u lnproxy /usr/local/go/bin/go build
+  # Change to the cloned directory for module-aware build
+  cd /home/lnproxy/lnproxy || exit 1
+  sudo -u lnproxy /usr/local/go/bin/go build -o lnproxy .
   if [ $? -ne 0 ]; then
     echo "# FAIL -> go build"
     sudo userdel -rf lnproxy 2>/dev/null
@@ -176,7 +167,7 @@ EOF
   echo "# The Tor Hidden Service address to share for using the API:"
   echo "${torAddress}/api"
   echo "# More info at:"
-  echo "https://github.com/lnproxy"
+  echo "https://github.com/lnproxy/lnproxy-relay"
 
   exit 0
 fi

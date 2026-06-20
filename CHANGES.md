@@ -14,6 +14,7 @@ App updates, fixes and optimizations.
 - Update: JoininBox v0.8.5 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.5)
 - Update: Jam v0.4.1 [details](https://github.com/joinmarket-webui/jam/releases/tag/v0.4.1)
 - Fix: Speedup data layout migration from 1.11.4 to 1.12.1 [details](https://github.com/raspiblitz/raspiblitz/issues/5194)
+- Fix: Re-enabled lnproxy install — repo URL, commit hash, and Go build fix [details](https://github.com/raspiblitz/raspiblitz/issues/4122)
 
 ## What's new in Version 1.12.0 of RaspiBlitz?
 
