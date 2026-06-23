@@ -34,8 +34,10 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 12288
-          temp-reserve-mb: 12288
+          # Keep conservative reserves and a smaller swap size so temp PV sizing stays positive.
+          root-reserve-mb: 4096
+          temp-reserve-mb: 2048
+          swap-size-mb: 1024
 
       - uses: actions/checkout@v4
 
