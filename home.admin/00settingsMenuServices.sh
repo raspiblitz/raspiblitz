@@ -17,6 +17,7 @@ if [ ${#fulcrum} -eq 0 ]; then fulcrum="off"; fi
 if [ ${#lndmanage} -eq 0 ]; then lndmanage="off"; fi
 if [ ${#joinmarket} -eq 0 ]; then joinmarket="off"; fi
 if [ ${#jam} -eq 0 ]; then jam="off"; fi
+if [ ${#wasabid} -eq 0 ]; then wasabid="off"; fi
 if [ ${#LNBits} -eq 0 ]; then LNBits="off"; fi
 if [ ${#mempoolExplorer} -eq 0 ]; then mempoolExplorer="off"; fi
 if [ ${#bos} -eq 0 ]; then bos="off"; fi
@@ -51,6 +52,7 @@ if [ "${network}" == "bitcoin" ]; then
   OPTIONS+=(aa 'BTC Mempool Space' ${mempoolExplorer})
   OPTIONS+=(ja 'BTC JoinMarket+JoininBox menu' ${joinmarket})
   OPTIONS+=(za 'BTC Jam (JoinMarket WebUI)' ${jam})
+  OPTIONS+=(wd 'BTC Wasabi Wallet (daemon + JSON-RPC)' ${wasabid})
   OPTIONS+=(wa 'BTC Download Bitcoin Whitepaper' ${whitepaper})
   OPTIONS+=(ls 'BTC Labelbase' ${labelbase})
   OPTIONS+=(pp 'BTC Publicpool (Solo Mining)' ${publicpool})  
@@ -605,6 +607,25 @@ Then try activating Jam again in SERVICES.\n
   fi
 else
   echo "Jam not changed."
+fi
+
+# Wasabi daemon (client wallet) process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "wd")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${wasabid}" != "${choice}" ]; then
+  echo "Wasabi daemon setting changed .."
+  anychange=1
+  sudo /home/admin/config.scripts/bonus.wasabid.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" = "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      sudo /home/admin/config.scripts/bonus.wasabid.sh menu
+    else
+      whiptail --title 'FAIL' --msgbox "Wasabi daemon installation is cancelled\nTry again from the menu or install from the terminal with:\nsudo /home/admin/config.scripts/bonus.wasabid.sh on" 9 65
+    fi
+  fi
+else
+  echo "Wasabi daemon not changed."
 fi
 
 # Mempool process choice
