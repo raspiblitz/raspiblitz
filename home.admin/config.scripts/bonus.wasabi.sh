@@ -4,6 +4,10 @@
 #
 # The coinjoin.nl coordinator-specific changes are merged upstream (master/dev) and
 # ship in the next release. Until then, pull master with: bonus.wasabi.sh update commit
+#
+# REQUIRES bitcoind with: txindex=1, blockfilterindex=1, peerblockfilters=1,
+# server=1. The 'on' step ensures these in bitcoin.conf and restarts bitcoind
+# (first-time block-filter indexing can take hours).
 
 # Pin the source to the latest official release.
 VERSION="v2.7.2"
@@ -181,6 +185,32 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # data dir
   sudo -u ${USERNAME} mkdir -p ${DATADIR}
+
+  # --- ensure bitcoind has the indexes/filters the coordinator REQUIRES ---
+  # Without these the coordinator cannot function: txindex (look up any tx) and
+  # BIP158 compact block filters served to clients (blockfilterindex +
+  # peerblockfilters), plus the RPC server.
+  echo "# ensuring required bitcoin.conf settings"
+  # txindex via the dedicated RaspiBlitz helper (handles the reindex)
+  /home/admin/config.scripts/network.txindex.sh on 1>&2
+  btcRestart=0
+  for key in server blockfilterindex peerblockfilters; do
+    if grep -Eq "^${key}=1" "${BITCOIN_CONF}"; then
+      continue
+    elif grep -Eq "^${key}=" "${BITCOIN_CONF}"; then
+      sudo sed -i "s/^${key}=.*/${key}=1/g" "${BITCOIN_CONF}"
+    else
+      echo "${key}=1" | sudo tee -a "${BITCOIN_CONF}" >/dev/null
+    fi
+    echo "# set ${key}=1 in bitcoin.conf"
+    btcRestart=1
+  done
+  if [ ${btcRestart} -eq 1 ] && systemctl is-active bitcoind | grep -q "^active"; then
+    echo "# restarting bitcoind to apply block-filter settings"
+    echo "# NOTE: first-time block-filter indexing can take hours; the coordinator"
+    echo "#       will only serve clients once it has finished."
+    sudo systemctl restart bitcoind 1>&2
+  fi
 
   # generate Config.json on first run, then patch in the bitcoind RPC details.
   # The coordinator writes a default Config.json (incl. a freshly generated
