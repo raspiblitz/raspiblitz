@@ -108,15 +108,28 @@ fi
 ###################
 if [ "$1" = "menu" ]; then
   if [ ${isActive} -eq 0 ]; then
-    echo "# *** WASABI COORDINATOR NOT INSTALLED ***"
+    whiptail --title " Wasabi Coordinator " --msgbox "\
+Wasabi coordinator is not activated.\n
+Activate it with:
+  sudo /home/admin/config.scripts/bonus.wasabi.sh on" 11 72
     exit 0
   fi
   toraddress=$(sudo cat /mnt/hdd/app-data/tor/${SERVICE}/hostname 2>/dev/null)
-  text="Wasabi (WabiSabi) coinjoin coordinator backend.\n
-Clients connect over Tor - share this onion address with them:
-${toraddress:-<creating - check again in a moment>}\n
-Config & logs: ${DATADIR}"
-  whiptail --title " Wasabi Coordinator " --msgbox "${text}" 16 70
+  if [ "$(systemctl is-active ${SERVICE} 2>/dev/null)" = "active" ]; then
+    status="running"
+  else
+    status="STOPPED - start: sudo systemctl start ${SERVICE}"
+  fi
+  whiptail --title " Wasabi Coordinator " --msgbox "\
+WabiSabi coinjoin coordinator backend.\n
+Status: ${status}\n
+To use this coordinator, in Wasabi Wallet:
+  Settings  ->  Coordinator  ->  Coordinator URI:
+  http://${toraddress:-<creating - reopen this menu shortly>}\n
+Rounds begin only after bitcoind finishes block-filter indexing
+(first run can take a while). Check with:  bitcoin-cli getindexinfo\n
+Config & data:  ${DATADIR}
+Logs:           sudo journalctl -u ${SERVICE} -f" 20 76
   exit 0
 fi
 

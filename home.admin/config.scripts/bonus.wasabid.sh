@@ -101,25 +101,49 @@ fi
 ###################
 if [ "$1" = "menu" ]; then
   if [ ${isActive} -eq 0 ]; then
-    echo "# *** WASABI DAEMON NOT INSTALLED ***"
+    whiptail --title " Wasabi Wallet Daemon " --msgbox "\
+Wasabi daemon is not activated.\n
+Enable it from the SERVICES menu, or run:
+  sudo /home/admin/config.scripts/bonus.wasabid.sh on" 11 72
     exit 0
   fi
+
+  # Live status, guarded with a timeout so the menu never hangs while the daemon
+  # is still starting. Query the loopback JSON-RPC directly (auth-less) for clean,
+  # parseable output instead of wcli's table formatting.
+  _rpc() { timeout 6 curl -s --data-binary "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"$1\",\"params\":[]}" "http://127.0.0.1:${RPC_PORT}/" 2>/dev/null; }
+  if [ "$(systemctl is-active ${SERVICE} 2>/dev/null)" = "active" ]; then
+    st=$(_rpc getstatus)
+    if echo "${st}" | jq -e '.result' >/dev/null 2>&1; then
+      tor=$(echo "${st}" | jq -r '.result.torStatus // "?"')
+      net=$(echo "${st}" | jq -r '.result.network // "?"')
+      left=$(echo "${st}" | jq -r '.result.filtersLeft // empty')
+      [ "${left}" = "0" ] && synced="yes" || synced="syncing"
+      statusLine="running | Tor: ${tor} | ${net} | synced: ${synced}"
+      cnt=$(_rpc listwallets | jq -r '.result | length' 2>/dev/null)
+      case "${cnt}" in ""|null) wallets="?";; 0) wallets="none yet (create one below)";; *) wallets="${cnt}";; esac
+    else
+      statusLine="running | RPC starting (Tor bootstrapping) - reopen shortly"
+      wallets="?"
+    fi
+  else
+    statusLine="STOPPED | start: sudo systemctl start ${SERVICE}"
+    wallets="-"
+  fi
+
   whiptail --title " Wasabi Wallet Daemon " --msgbox "\
-Headless Wasabi wallet with a local JSON-RPC interface.\n
-JSON-RPC endpoint (localhost only):
-  http://127.0.0.1:${RPC_PORT}/           (global)
-  http://127.0.0.1:${RPC_PORT}/WalletName (per wallet)\n
-Easiest interaction is the dev-maintained 'wcli' command (installed):
-  wcli getstatus                    sync / Tor / node status
+Status:  ${statusLine}
+Wallets: ${wallets}\n
+Headless Wasabi wallet, local JSON-RPC on 127.0.0.1:${RPC_PORT} (auth-less).\n
+Manage it with the 'wcli' command:
+  wcli getstatus                       sync / Tor / node status
   wcli createwallet MyWallet '\"pass\"'
   wcli -wallet=MyWallet getnewaddress \"label\" false
-  wcli -wallet=MyWallet startcoinjoin pass true true
-It auto-loads the RPC endpoint from Config.json (local RPC is auth-less).\n
-For a fuller cheat sheet (incl. raw curl):
-  sudo /home/admin/config.scripts/bonus.wasabid.sh examples\n
-Settings (RPC/network/bitcoind): ${ENV_FILE}
-Docs: https://docs.wasabiwallet.io/using-wasabi/RPC.html
-" 22 76
+  wcli -wallet=MyWallet startcoinjoin pass true true\n
+Full cheat sheet:  sudo /home/admin/config.scripts/bonus.wasabid.sh examples
+Logs:              sudo journalctl -u ${SERVICE} -f
+Settings:          ${ENV_FILE}
+Docs:              https://docs.wasabiwallet.io/using-wasabi/RPC.html" 24 78
   exit 0
 fi
 
