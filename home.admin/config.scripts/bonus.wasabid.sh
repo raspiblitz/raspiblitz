@@ -39,7 +39,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.wasabid.sh [install|uninstall]"
   echo "bonus.wasabid.sh [on|off|status|menu]"
   echo "bonus.wasabid.sh [examples]   # print wcli + curl usage cheat sheet"
-  echo "bonus.wasabid.sh [update]"
+  echo "bonus.wasabid.sh [update|update <tag>]"
   exit 1
 fi
 
@@ -400,9 +400,14 @@ if [ "$1" = "update" ]; then
     exit 1
   fi
   echo "# *** UPDATE WASABI DAEMON ***"
+  # 'update' rebuilds the pinned VERSION; 'update <tag>' targets a specific upstream
+  # release tag (e.g. v2.8.1) for operators who want a newer build before the script
+  # pin is bumped. Only build a version you trust - it compiles upstream source as-is.
+  TARGET="${2:-$VERSION}"
+  [ "${TARGET}" != "${VERSION}" ] && echo "# NOTE: building ${TARGET}, not the pinned ${VERSION}" 1>&2
   cd ${SOURCE_DIR} || exit 1
   sudo -u ${USERNAME} git fetch --tags --force 1>&2
-  sudo -u ${USERNAME} git checkout --force ${VERSION} || exit 1
+  sudo -u ${USERNAME} git checkout --force "${TARGET}" || exit 1
   # the new checkout may require a newer .NET SDK (e.g. 10.0) - ensure it
   ensure_dotnet_sdk || exit 1
   sudo -u ${USERNAME} rm -rf ${PUBLISH_DIR}
