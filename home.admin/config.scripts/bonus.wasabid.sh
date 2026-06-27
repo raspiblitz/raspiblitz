@@ -140,7 +140,8 @@ Manage it with the 'wcli' command:
   wcli createwallet MyWallet '\"pass\"'
   wcli -wallet=MyWallet getnewaddress \"label\" false
   wcli -wallet=MyWallet startcoinjoin pass true true\n
-Full cheat sheet:  sudo /home/admin/config.scripts/bonus.wasabid.sh examples
+Full cheat sheet (incl. raw curl):
+  sudo /home/admin/config.scripts/bonus.wasabid.sh examples\n
 Logs:              sudo journalctl -u ${SERVICE} -f
 Settings:          ${ENV_FILE}
 Docs:              https://docs.wasabiwallet.io/using-wasabi/RPC.html" 24 78
