@@ -272,15 +272,28 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo python3 - "${DATADIR}/Config.json" "${BITCOIN_CONF}" "${WASABI_NET}" <<'PY'
 import json, sys
 cfg_path, btc_path, wnet = sys.argv[1], sys.argv[2], sys.argv[3]
-conf = {}
-for line in open(btc_path, encoding="utf-8", errors="replace"):
-    line = line.strip()
-    if "=" in line and not line.startswith("#"):
+# bitcoin.conf is network-scoped (main.rpcport=8332, test.rpcport=18332, ...), so
+# read the value for THIS network's prefix - never collapse them (a mainnet node
+# must not pick up test.rpcport=18332).
+NETMAP = {"Main": ("main", "8332"), "TestNet": ("test", "18332"),
+          "RegTest": ("regtest", "18443"), "Signet": ("signet", "38332")}
+cprefix, default_port = NETMAP.get(wnet, ("main", "8332"))
+def conf_get(key):
+    scoped = glob = None
+    for line in open(btc_path, encoding="utf-8", errors="replace"):
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
         k, _, v = line.partition("=")
-        conf[k.strip().split(".")[-1]] = v.strip()  # drop main./test. prefixes
-user = conf.get("rpcuser", "")
-pw = conf.get("rpcpassword", "")
-port = conf.get("rpcport", "8332")
+        k, v = k.strip(), v.strip()
+        if k == f"{cprefix}.{key}":
+            scoped = v
+        elif k == key:
+            glob = v
+    return scoped if scoped is not None else glob
+user = conf_get("rpcuser") or ""
+pw = conf_get("rpcpassword") or ""
+port = conf_get("rpcport") or default_port
 with open(cfg_path, encoding="utf-8-sig") as f:
     cfg = json.load(f)
 cfg["Network"] = wnet

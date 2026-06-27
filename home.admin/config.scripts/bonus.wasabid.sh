@@ -270,16 +270,29 @@ lines = [
     f"WASABI_NETWORK={wnet}",
 ]
 # wire the client to the local bitcoind via RPC (trustless, uses the user's node)
-if os.path.exists(btc_path):
-    conf = {}
+# bitcoin.conf is network-scoped (main.rpcport=8332, test.rpcport=18332, ...), so
+# read the value for THIS network's prefix - never collapse them (a mainnet node
+# must not pick up test.rpcport=18332).
+NETMAP = {"Main": ("main", "8332"), "TestNet": ("test", "18332"),
+          "RegTest": ("regtest", "18443"), "Signet": ("signet", "38332")}
+cprefix, default_port = NETMAP.get(wnet, ("main", "8332"))
+def conf_get(key):
+    scoped = glob = None
     for line in open(btc_path, encoding="utf-8", errors="replace"):
         line = line.strip()
-        if "=" in line and not line.startswith("#"):
-            k, _, v = line.partition("=")
-            conf[k.strip().split(".")[-1]] = v.strip()  # drop main./test. prefixes
-    user = conf.get("rpcuser", "")
-    pwd = conf.get("rpcpassword", "")
-    rpcport = conf.get("rpcport", "8332")
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, _, v = line.partition("=")
+        k, v = k.strip(), v.strip()
+        if k == f"{cprefix}.{key}":
+            scoped = v
+        elif k == key:
+            glob = v
+    return scoped if scoped is not None else glob
+if os.path.exists(btc_path):
+    user = conf_get("rpcuser") or ""
+    pwd = conf_get("rpcpassword") or ""
+    rpcport = conf_get("rpcport") or default_port
     if user and pwd:
         lines += [
             "WASABI_USEBITCOINRPC=true",
