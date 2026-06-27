@@ -8,9 +8,9 @@
 # advanced-only bonus.wasabi.sh).
 #
 # The .NET SDK channel is read from the project's global.json, so this auto-installs
-# the right SDK as the project moves on (8.0 for v2.7.2, 10.0 for the next release).
+# the right SDK as the project moves on (8.0 for v2.7.2, 10.0 for v2.8.0).
 
-VERSION="v2.7.2"
+VERSION="v2.8.0"
 REPO="WalletWasabi/WalletWasabi"
 USERNAME="wasabid"
 HOME_DIR="/home/${USERNAME}"
