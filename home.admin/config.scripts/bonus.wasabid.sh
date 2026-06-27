@@ -294,10 +294,12 @@ if os.path.exists(btc_path):
     pwd = conf_get("rpcpassword") or ""
     rpcport = conf_get("rpcport") or default_port
     if user and pwd:
+        # the daemon decides "RPC configured" solely on BitcoinRpcUri being set,
+        # and that property is fed by the switch named BitcoinRpcEndPoint (there is
+        # no UseBitcoinRpc switch). A loopback URI is used directly (not via Tor).
         lines += [
-            "WASABI_USEBITCOINRPC=true",
             f"WASABI_BITCOINRPCCREDENTIALSTRING={user}:{pwd}",
-            f"WASABI_BITCOINRPCURI=http://127.0.0.1:{rpcport}",
+            f"WASABI_BITCOINRPCENDPOINT=http://127.0.0.1:{rpcport}",
         ]
 with open(env_path, "w", encoding="utf-8") as f:
     f.write("\n".join(lines) + "\n")
