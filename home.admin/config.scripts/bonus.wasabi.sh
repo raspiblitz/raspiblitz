@@ -165,6 +165,10 @@ if [ "$1" = "install" ]; then
     exit 1
   }
 
+  # dotnet publish drops the execute bit on any bundled native binaries (Tor, hwi);
+  # restore it so they can be launched at runtime (no-op if none are bundled).
+  sudo find ${PUBLISH_DIR}/BundledApps/Binaries -type f \( -name tor -o -name hwi \) -exec chmod +x {} \; 2>/dev/null
+
   echo "# OK - Wasabi coordinator user, source, .NET and publish installed"
   exit 0
 fi

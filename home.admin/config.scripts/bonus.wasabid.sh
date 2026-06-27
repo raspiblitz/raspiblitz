@@ -210,6 +210,12 @@ if [ "$1" = "install" ]; then
     exit 1
   }
 
+  # dotnet publish drops the execute bit on the bundled native binaries (Tor, hwi),
+  # so the daemon aborts at startup with "Permission denied" trying to launch Tor.
+  # Restore +x on them across whatever arch dirs were published.
+  echo "# restoring execute bit on bundled native binaries (Tor, hwi)"
+  sudo find ${PUBLISH_DIR}/BundledApps/Binaries -type f \( -name tor -o -name hwi \) -exec chmod +x {} \;
+
   echo "# OK - Wasabi daemon user, source, .NET and publish installed"
   exit 0
 fi
