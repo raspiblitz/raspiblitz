@@ -26,6 +26,9 @@ DOTNET_CHANNEL_FALLBACK="8.0"
 # local-only JSON-RPC (Wasabi default port); never exposed to the network
 RPC_PORT="37128"
 SERVICE="wasabid"
+# v2.8.0 resets hand-written Config.json keys on load, so behavioral settings are
+# passed as WASABI_* env vars (higher precedence) from this root-owned 600 file.
+ENV_FILE="/etc/${SERVICE}.env"
 
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 RASPIBLITZ_CONF=/mnt/hdd/app-data/raspiblitz.conf
@@ -107,14 +110,14 @@ JSON-RPC endpoint (localhost only):
   http://127.0.0.1:${RPC_PORT}/           (global)
   http://127.0.0.1:${RPC_PORT}/WalletName (per wallet)\n
 Easiest interaction is the dev-maintained 'wcli' command (installed):
-  wcli help                         list all methods
+  wcli getstatus                    sync / Tor / node status
   wcli createwallet MyWallet '\"pass\"'
   wcli -wallet=MyWallet getnewaddress \"label\" false
   wcli -wallet=MyWallet startcoinjoin pass true true
-It auto-loads the RPC endpoint + credentials from Config.json.\n
+It auto-loads the RPC endpoint from Config.json (local RPC is auth-less).\n
 For a fuller cheat sheet (incl. raw curl):
   sudo /home/admin/config.scripts/bonus.wasabid.sh examples\n
-RPC creds live in: ${DATADIR}/Config.json
+Settings (RPC/network/bitcoind): ${ENV_FILE}
 Docs: https://docs.wasabiwallet.io/using-wasabi/RPC.html
 " 22 76
   exit 0
@@ -129,13 +132,13 @@ if [ "$1" = "examples" ] || [ "$1" = "rpc" ]; then
     exit 1
   fi
   # The 'wcli' wrapper (installed by 'on') is the dev-maintained CLI. It reads the
-  # RPC endpoint + credentials from Config.json itself, so you never type them.
+  # RPC endpoint from Config.json itself, so you never type the port.
   cat <<EOF
 # ===== Wasabi wallet via wcli (recommended) =====
-# wcli is the dev-maintained CLI wrapper. It auto-loads the endpoint and the RPC
-# credentials from ${DATADIR}/Config.json - no need to pass a port or password.
+# wcli is the dev-maintained CLI wrapper. It auto-loads the endpoint from
+# ${DATADIR}/Config.json - no need to pass a port (local RPC is auth-less).
 #
-#   wcli help                       # authoritative list of all methods
+#   wcli getstatus                  # sync / Tor / node status
 #   wcli <method> [params...]       # global call
 #   wcli -wallet=<name> <method> ..  # call against a specific wallet
 #
@@ -162,8 +165,8 @@ wcli listwallets
 wcli -wallet=MyWallet getwalletinfo
 
 # ----- raw curl equivalent (if you prefer) -----
-# Add basic auth from Config.json: -u <JsonRpcUser>:<JsonRpcPassword>
-#   curl -s -u USER:PASS --data-binary \\
+# Local RPC is auth-less (127.0.0.1 only), so no credentials are needed:
+#   curl -s --data-binary \\
 #     '{"jsonrpc":"2.0","id":"1","method":"getnewaddress","params":["label",false]}' \\
 #     http://127.0.0.1:${RPC_PORT}/MyWallet | jq
 #
@@ -253,22 +256,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   sudo -u ${USERNAME} mkdir -p ${DATADIR}
 
-  # write Config.json on first run: local JSON-RPC + wire to the local bitcoind.
-  # The daemon fills any missing keys with its own defaults on start.
-  if [ ! -f "${DATADIR}/Config.json" ]; then
-    echo "# generating Config.json (local JSON-RPC + local bitcoind RPC)"
-    RPCPASS=$(openssl rand -hex 24)
-    sudo python3 - "${DATADIR}/Config.json" "${RPC_PORT}" "${RPCPASS}" "${WASABI_NET}" "${BITCOIN_CONF}" <<'PY'
-import json, sys, os
-path, port, pw, wnet, btc_path = sys.argv[1:6]
-cfg = {
-    "Network": wnet,
-    "UseTor": "Enabled",
-    "JsonRpcServerEnabled": True,
-    "JsonRpcUser": "wasabi",
-    "JsonRpcPassword": pw,
-    "JsonRpcServerPrefixes": [f"http://127.0.0.1:{port}/"],
-}
+  # Behavioral settings go through WASABI_* env vars, NOT Config.json: v2.8.0 runs
+  # a config migration on load that resets hand-written keys (JsonRpcServerEnabled,
+  # UseBitcoinRpc, Network, ...) back to defaults. Env vars outrank the config file
+  # and survive that rewrite. Local JSON-RPC stays auth-less (127.0.0.1 only, no
+  # firewall port) - that is upstream's own localhost RPC model.
+  echo "# writing ${ENV_FILE} (RPC enable + network + local bitcoind wiring)"
+  sudo python3 - "${ENV_FILE}" "${WASABI_NET}" "${BITCOIN_CONF}" <<'PY'
+import sys, os
+env_path, wnet, btc_path = sys.argv[1:4]
+lines = [
+    "WASABI_JSONRPCSERVERENABLED=true",
+    f"WASABI_NETWORK={wnet}",
+]
 # wire the client to the local bitcoind via RPC (trustless, uses the user's node)
 if os.path.exists(btc_path):
     conf = {}
@@ -281,13 +281,23 @@ if os.path.exists(btc_path):
     pwd = conf.get("rpcpassword", "")
     rpcport = conf.get("rpcport", "8332")
     if user and pwd:
-        cfg["UseBitcoinRpc"] = True
-        cfg["BitcoinRpcCredentialString"] = f"{user}:{pwd}"
-        cfg["BitcoinRpcUri"] = f"http://127.0.0.1:{rpcport}"
-with open(path, "w", encoding="utf-8") as f:
-    json.dump(cfg, f, indent=2)
+        lines += [
+            "WASABI_USEBITCOINRPC=true",
+            f"WASABI_BITCOINRPCCREDENTIALSTRING={user}:{pwd}",
+            f"WASABI_BITCOINRPCURI=http://127.0.0.1:{rpcport}",
+        ]
+with open(env_path, "w", encoding="utf-8") as f:
+    f.write("\n".join(lines) + "\n")
 PY
-    sudo chown -R ${USERNAME}:${USERNAME} "${HOME_DIR}/.walletwasabi"
+  sudo chown root:root "${ENV_FILE}"
+  sudo chmod 600 "${ENV_FILE}"
+
+  # The daemon writes its own Config.json (default port ${RPC_PORT}) on first run;
+  # pre-seed a minimal one so 'wcli' has an endpoint to read immediately. The daemon
+  # preserves the prefix and fills the rest; auth stays empty so wcli needs no creds.
+  if [ ! -f "${DATADIR}/Config.json" ]; then
+    echo "{\"JsonRpcServerPrefixes\": [\"http://127.0.0.1:${RPC_PORT}/\"]}" \
+      | sudo -u ${USERNAME} tee "${DATADIR}/Config.json" >/dev/null
     sudo chmod 600 "${DATADIR}/Config.json"
   fi
 
@@ -302,6 +312,7 @@ After=${BITCOIND_SERVICE}.service
 ExecStart=${DOTNET} ${PUBLISH_DIR}/${DLL} --datadir=${DATADIR}
 Environment=HOME=${HOME_DIR}
 Environment=DOTNET_ROOT=${DOTNET_DIR}
+EnvironmentFile=${ENV_FILE}
 User=${USERNAME}
 Group=${USERNAME}
 Type=simple
@@ -321,7 +332,7 @@ WantedBy=multi-user.target
   sudo systemctl enable ${SERVICE} 1>&2
 
   # install the dev-maintained 'wcli' as a system command (runs as the daemon
-  # user so it reads that user's Config.json for endpoint + credentials)
+  # user so it reads that user's Config.json for the endpoint; RPC is auth-less)
   echo "# installing the wcli command"
   printf '#!/bin/bash\nsudo -u %s HOME=%s bash %s/Contrib/CLI/wcli.sh "$@"\n' \
     "${USERNAME}" "${HOME_DIR}" "${SOURCE_DIR}" | sudo tee /usr/local/bin/wcli >/dev/null
@@ -352,6 +363,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl stop ${SERVICE} 2>/dev/null
   sudo systemctl disable ${SERVICE} 2>/dev/null
   sudo rm -f /etc/systemd/system/${SERVICE}.service
+  sudo rm -f ${ENV_FILE}
   sudo systemctl daemon-reload 2>/dev/null
 
   # remove the wcli command
@@ -385,6 +397,8 @@ if [ "$1" = "update" ]; then
   ensure_dotnet_sdk || exit 1
   sudo -u ${USERNAME} rm -rf ${PUBLISH_DIR}
   sudo -u ${USERNAME} bash -c "cd ${SOURCE_DIR} && HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ${DOTNET} publish -c Release -o ${PUBLISH_DIR} ${CSPROJ}" || exit 1
+  # publish drops the execute bit on bundled native binaries (Tor, hwi) - restore it
+  sudo find ${PUBLISH_DIR}/BundledApps/Binaries -type f \( -name tor -o -name hwi \) -exec chmod +x {} \;
   if [ ${isActive} -gt 0 ]; then
     sudo systemctl restart ${SERVICE} 1>&2
   fi
