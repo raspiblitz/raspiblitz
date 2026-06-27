@@ -6,6 +6,9 @@
 # from the command line via the wcli script or any RPC client. This is the
 # client wallet (for end users) - NOT the coinjoin coordinator (that is the
 # advanced-only bonus.wasabi.sh).
+#
+# The .NET SDK channel is read from the project's global.json, so this auto-installs
+# the right SDK as the project moves on (8.0 for v2.7.2, 10.0 for the next release).
 
 VERSION="v2.7.2"
 REPO="WalletWasabi/WalletWasabi"
@@ -13,11 +16,13 @@ USERNAME="wasabid"
 HOME_DIR="/home/${USERNAME}"
 # dedicated clone path (isolated from any manual deployment / dev tree)
 SOURCE_DIR="${HOME_DIR}/wabisabi-client"
+PUBLISH_DIR="${SOURCE_DIR}/publish"
 CSPROJ="WalletWasabi.Daemon/WalletWasabi.Daemon.csproj"
+DLL="WalletWasabi.Daemon.dll"
 DATADIR="${HOME_DIR}/.walletwasabi/client"
 DOTNET_DIR="${HOME_DIR}/.dotnet"
 DOTNET="${DOTNET_DIR}/dotnet"
-DOTNET_CHANNEL="8.0"
+DOTNET_CHANNEL_FALLBACK="8.0"
 # local-only JSON-RPC (Wasabi default port); never exposed to the network
 RPC_PORT="37128"
 SERVICE="wasabid"
@@ -38,9 +43,39 @@ fi
 source $RASPIBLITZ_INFO 2>/dev/null
 source $RASPIBLITZ_CONF 2>/dev/null
 
+# network awareness (RaspiBlitz: network=bitcoin, chain=main|test|sig|reg)
+network="${network:-bitcoin}"
+chain="${chain:-main}"
+BITCOIN_CONF="/mnt/hdd/app-data/${network}/${network}.conf"
+BITCOIND_SERVICE="${network}d"
+case "${chain}" in
+  main) WASABI_NET="Main" ;;
+  test) WASABI_NET="TestNet" ;;
+  reg)  WASABI_NET="RegTest" ;;
+  *)    WASABI_NET="Main" ;;
+esac
+
 isInstalled=$(compgen -u | grep -c "^${USERNAME}$")
 isActive=$(sudo ls /etc/systemd/system/${SERVICE}.service 2>/dev/null | grep -c "${SERVICE}.service")
 localip=$(hostname -I | awk '{print $1}')
+
+# helper: derive + ensure the .NET SDK the project's global.json asks for
+ensure_dotnet_sdk() {
+  local channel
+  channel=$(grep -oE '"version"[^"]*"[0-9]+\.[0-9]+' "${SOURCE_DIR}/global.json" 2>/dev/null \
+            | grep -oE '[0-9]+\.[0-9]+$' | head -1)
+  [ -z "${channel}" ] && channel="${DOTNET_CHANNEL_FALLBACK}"
+  echo "# project needs .NET SDK channel ${channel} (from global.json)"
+  if ! sudo -u ${USERNAME} bash -c "DOTNET_ROOT=${DOTNET_DIR} ${DOTNET} --list-sdks 2>/dev/null" \
+       | grep -q "^${channel}\."; then
+    echo "# installing .NET SDK ${channel} into ${DOTNET_DIR}"
+    sudo -u ${USERNAME} bash -c "curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh" || return 1
+    sudo -u ${USERNAME} bash /tmp/dotnet-install.sh --channel ${channel} --install-dir ${DOTNET_DIR} || return 1
+    rm -f /tmp/dotnet-install.sh
+  else
+    echo "# .NET SDK ${channel} already present"
+  fi
+}
 
 ###################
 # STATUS
@@ -50,6 +85,7 @@ if [ "$1" = "status" ]; then
   echo "version='${VERSION}'"
   echo "installed='${isActive}'"
   echo "running='${running}'"
+  echo "network='${WASABI_NET}'"
   echo "localIP='${localip}'"
   echo "rpcPort='${RPC_PORT}'"
   echo "rpcBind='127.0.0.1'"
@@ -141,26 +177,20 @@ fi
 ###################
 if [ "$1" = "install" ]; then
 
-  if [ ${isInstalled} -gt 0 ] && [ -d "${SOURCE_DIR}" ]; then
+  if [ ${isInstalled} -gt 0 ] && [ -d "${PUBLISH_DIR}" ]; then
     echo "result='already installed'"
     exit 0
   fi
 
-  echo "# *** INSTALL WASABI DAEMON (user, .NET, source) ***"
+  echo "# *** INSTALL WASABI DAEMON (user, source, .NET, publish) ***"
 
   if [ ${isInstalled} -eq 0 ]; then
     echo "# creating the ${USERNAME} user"
     sudo adduser --system --group --home ${HOME_DIR} ${USERNAME} || exit 1
   fi
 
+  sudo apt-get update
   sudo apt-get install -y git curl libicu-dev jq || exit 1
-
-  if ! sudo -u ${USERNAME} ${DOTNET} --version 2>/dev/null | grep -q .; then
-    echo "# installing .NET SDK ${DOTNET_CHANNEL} into ${DOTNET_DIR}"
-    sudo -u ${USERNAME} bash -c "curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh"
-    sudo -u ${USERNAME} bash /tmp/dotnet-install.sh --channel ${DOTNET_CHANNEL} --install-dir ${DOTNET_DIR} || exit 1
-    rm -f /tmp/dotnet-install.sh
-  fi
 
   if [ ! -d "${SOURCE_DIR}" ]; then
     echo "# cloning ${REPO} @ ${VERSION}"
@@ -170,13 +200,17 @@ if [ "$1" = "install" ]; then
   sudo -u ${USERNAME} git fetch --tags --force 1>&2
   sudo -u ${USERNAME} git checkout --force ${VERSION} || exit 1
 
-  echo "# building the daemon (this can take a while on a Pi)"
-  sudo -u ${USERNAME} bash -c "cd ${SOURCE_DIR} && HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ${DOTNET} build -c Release ${CSPROJ}" || {
-    echo "result='fail - dotnet build failed'"
+  # .NET SDK matching the project's global.json (auto-tracks the .NET 10 release)
+  ensure_dotnet_sdk || { echo "result='fail - dotnet sdk install failed'"; exit 1; }
+
+  echo "# publishing the daemon (this can take a while on a Pi)"
+  sudo -u ${USERNAME} rm -rf ${PUBLISH_DIR}
+  sudo -u ${USERNAME} bash -c "cd ${SOURCE_DIR} && HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ${DOTNET} publish -c Release -o ${PUBLISH_DIR} ${CSPROJ}" || {
+    echo "result='fail - dotnet publish failed'"
     exit 1
   }
 
-  echo "# OK - Wasabi daemon user, .NET and source installed"
+  echo "# OK - Wasabi daemon user, source, .NET and publish installed"
   exit 0
 fi
 
@@ -205,7 +239,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 0
   fi
 
-  if [ ${isInstalled} -eq 0 ] || [ ! -d "${SOURCE_DIR}" ]; then
+  if [ ${isInstalled} -eq 0 ] || [ ! -d "${PUBLISH_DIR}" ]; then
     sudo /home/admin/config.scripts/bonus.wasabid.sh install 1>&2 || exit 1
   fi
 
@@ -213,26 +247,37 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   sudo -u ${USERNAME} mkdir -p ${DATADIR}
 
-  # write Config.json with JSON-RPC enabled (local only) on first run.
+  # write Config.json on first run: local JSON-RPC + wire to the local bitcoind.
   # The daemon fills any missing keys with its own defaults on start.
   if [ ! -f "${DATADIR}/Config.json" ]; then
-    echo "# generating Config.json with a local JSON-RPC server"
+    echo "# generating Config.json (local JSON-RPC + local bitcoind RPC)"
     RPCPASS=$(openssl rand -hex 24)
-    sudo python3 - "${DATADIR}/Config.json" "${RPC_PORT}" "${RPCPASS}" <<'PY'
-import json, sys
-path, port, pw = sys.argv[1], sys.argv[2], sys.argv[3]
+    sudo python3 - "${DATADIR}/Config.json" "${RPC_PORT}" "${RPCPASS}" "${WASABI_NET}" "${BITCOIN_CONF}" <<'PY'
+import json, sys, os
+path, port, pw, wnet, btc_path = sys.argv[1:6]
 cfg = {
-    "Network": "Main",
+    "Network": wnet,
     "UseTor": "Enabled",
     "JsonRpcServerEnabled": True,
     "JsonRpcUser": "wasabi",
     "JsonRpcPassword": pw,
     "JsonRpcServerPrefixes": [f"http://127.0.0.1:{port}/"],
 }
-# NOTE (review): to fetch blocks from the local bitcoind instead of Wasabi's
-# default node, also set the RPC keys - the exact names are version-dependent
-# (e.g. BitcoinRpcUri + BitcoinRpcConnectionString). Left out so we don't ship
-# a key the daemon would silently ignore. The daemon works on defaults without it.
+# wire the client to the local bitcoind via RPC (trustless, uses the user's node)
+if os.path.exists(btc_path):
+    conf = {}
+    for line in open(btc_path, encoding="utf-8", errors="replace"):
+        line = line.strip()
+        if "=" in line and not line.startswith("#"):
+            k, _, v = line.partition("=")
+            conf[k.strip().split(".")[-1]] = v.strip()  # drop main./test. prefixes
+    user = conf.get("rpcuser", "")
+    pwd = conf.get("rpcpassword", "")
+    rpcport = conf.get("rpcport", "8332")
+    if user and pwd:
+        cfg["UseBitcoinRpc"] = True
+        cfg["BitcoinRpcCredentialString"] = f"{user}:{pwd}"
+        cfg["BitcoinRpcUri"] = f"http://127.0.0.1:{rpcport}"
 with open(path, "w", encoding="utf-8") as f:
     json.dump(cfg, f, indent=2)
 PY
@@ -244,11 +289,11 @@ PY
   echo "\
 [Unit]
 Description=Wasabi Wallet daemon (headless client + JSON-RPC)
-Wants=bitcoind.service
-After=bitcoind.service
+Wants=${BITCOIND_SERVICE}.service
+After=${BITCOIND_SERVICE}.service
 
 [Service]
-ExecStart=${DOTNET} run -c Release --project ${SOURCE_DIR}/${CSPROJ} -- --datadir=${DATADIR}
+ExecStart=${DOTNET} ${PUBLISH_DIR}/${DLL} --datadir=${DATADIR}
 Environment=HOME=${HOME_DIR}
 Environment=DOTNET_ROOT=${DOTNET_DIR}
 User=${USERNAME}
@@ -282,7 +327,7 @@ WantedBy=multi-user.target
 
   source $RASPIBLITZ_INFO 2>/dev/null
   if [ "${state}" = "ready" ]; then
-    echo "# starting ${SERVICE} (first start compiles, may take minutes)"
+    echo "# starting ${SERVICE}"
     sudo systemctl start ${SERVICE} 1>&2
   else
     echo "# enabled; start manually with: sudo systemctl start ${SERVICE}"
@@ -330,11 +375,14 @@ if [ "$1" = "update" ]; then
   else
     sudo -u ${USERNAME} git checkout --force ${VERSION} || exit 1
   fi
-  sudo -u ${USERNAME} bash -c "cd ${SOURCE_DIR} && HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ${DOTNET} build -c Release ${CSPROJ}" || exit 1
+  # the new checkout may require a newer .NET SDK (e.g. 10.0) - ensure it
+  ensure_dotnet_sdk || exit 1
+  sudo -u ${USERNAME} rm -rf ${PUBLISH_DIR}
+  sudo -u ${USERNAME} bash -c "cd ${SOURCE_DIR} && HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ${DOTNET} publish -c Release -o ${PUBLISH_DIR} ${CSPROJ}" || exit 1
   if [ ${isActive} -gt 0 ]; then
     sudo systemctl restart ${SERVICE} 1>&2
   fi
-  echo "# OK - updated and rebuilt"
+  echo "# OK - updated and re-published"
   exit 0
 fi
 

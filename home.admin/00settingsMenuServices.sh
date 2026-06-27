@@ -610,7 +610,7 @@ else
 fi
 
 # Wasabi daemon (client wallet) process choice
-choice="off"; check=$(echo "${CHOICES}" | grep -c "wd")
+choice="off"; check=$(echo "${CHOICES}" | grep -cw "wd")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${wasabid}" != "${choice}" ]; then
   echo "Wasabi daemon setting changed .."

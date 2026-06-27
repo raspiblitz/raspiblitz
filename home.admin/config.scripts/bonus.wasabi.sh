@@ -8,6 +8,9 @@
 # REQUIRES bitcoind with: txindex=1, blockfilterindex=1, peerblockfilters=1,
 # server=1. The 'on' step ensures these in bitcoin.conf and restarts bitcoind
 # (first-time block-filter indexing can take hours).
+#
+# The .NET SDK channel is read from the project's global.json, so this auto-installs
+# the right SDK as the project moves on (8.0 for v2.7.2, 10.0 for the next release).
 
 # Pin the source to the latest official release.
 VERSION="v2.7.2"
@@ -19,12 +22,14 @@ HOME_DIR="/home/${USERNAME}"
 # with uncommitted changes. A fresh path means install/update can never
 # git-reset/checkout over hand-modified source.
 SOURCE_DIR="${HOME_DIR}/wabisabi-coordinator"
+PUBLISH_DIR="${SOURCE_DIR}/publish"
 CSPROJ="WalletWasabi.Coordinator/WalletWasabi.Coordinator.csproj"
+DLL="WalletWasabi.Coordinator.dll"
 DATADIR="${HOME_DIR}/.walletwasabi/coordinator"
 DOTNET_DIR="${HOME_DIR}/.dotnet"
 DOTNET="${DOTNET_DIR}/dotnet"
-# .NET SDK channel; the project's global.json pins the exact feature band.
-DOTNET_CHANNEL="8.0"
+# fallback .NET channel if global.json cannot be read (real value derived at install)
+DOTNET_CHANNEL_FALLBACK="8.0"
 # coordinator public API port (Wasabi clients connect here); 5000 is the local-only port
 PUBLIC_PORT="37126"
 LOCAL_PORT="5000"
@@ -32,7 +37,6 @@ SERVICE="wasabicoordinator"
 
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
 RASPIBLITZ_CONF=/mnt/hdd/app-data/raspiblitz.conf
-BITCOIN_CONF=/mnt/hdd/app-data/bitcoin/bitcoin.conf
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -43,14 +47,44 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-# load raspiblitz config to know network state & Tor setting
+# load raspiblitz config to know network/chain, state & Tor setting
 source $RASPIBLITZ_INFO 2>/dev/null
 source $RASPIBLITZ_CONF 2>/dev/null
+
+# network awareness (RaspiBlitz: network=bitcoin, chain=main|test|sig|reg)
+network="${network:-bitcoin}"
+chain="${chain:-main}"
+BITCOIN_CONF="/mnt/hdd/app-data/${network}/${network}.conf"
+BITCOIND_SERVICE="${network}d"
+case "${chain}" in
+  main) WASABI_NET="Main" ;;
+  test) WASABI_NET="TestNet" ;;
+  reg)  WASABI_NET="RegTest" ;;
+  *)    WASABI_NET="Main" ;;
+esac
 
 # detect install/active state
 isInstalled=$(compgen -u | grep -c "^${USERNAME}$")
 isActive=$(sudo ls /etc/systemd/system/${SERVICE}.service 2>/dev/null | grep -c "${SERVICE}.service")
 localip=$(hostname -I | awk '{print $1}')
+
+# helper: derive + ensure the .NET SDK the project's global.json asks for
+ensure_dotnet_sdk() {
+  local channel
+  channel=$(grep -oE '"version"[^"]*"[0-9]+\.[0-9]+' "${SOURCE_DIR}/global.json" 2>/dev/null \
+            | grep -oE '[0-9]+\.[0-9]+$' | head -1)
+  [ -z "${channel}" ] && channel="${DOTNET_CHANNEL_FALLBACK}"
+  echo "# project needs .NET SDK channel ${channel} (from global.json)"
+  if ! sudo -u ${USERNAME} bash -c "DOTNET_ROOT=${DOTNET_DIR} ${DOTNET} --list-sdks 2>/dev/null" \
+       | grep -q "^${channel}\."; then
+    echo "# installing .NET SDK ${channel} into ${DOTNET_DIR}"
+    sudo -u ${USERNAME} bash -c "curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh" || return 1
+    sudo -u ${USERNAME} bash /tmp/dotnet-install.sh --channel ${channel} --install-dir ${DOTNET_DIR} || return 1
+    rm -f /tmp/dotnet-install.sh
+  else
+    echo "# .NET SDK ${channel} already present"
+  fi
+}
 
 ###################
 # STATUS
@@ -61,6 +95,7 @@ if [ "$1" = "status" ]; then
   echo "version='${VERSION}'"
   echo "installed='${isActive}'"
   echo "running='${running}'"
+  echo "network='${WASABI_NET}'"
   echo "localIP='${localip}'"
   echo "publicPort='${PUBLIC_PORT}'"
   echo "localPort='${LOCAL_PORT}'"
@@ -89,16 +124,16 @@ Config & logs: ${DATADIR}"
 fi
 
 ###################
-# INSTALL (user + .NET + source + build)
+# INSTALL (user + source + .NET + publish)
 ###################
 if [ "$1" = "install" ]; then
 
-  if [ ${isInstalled} -gt 0 ] && [ -d "${SOURCE_DIR}" ]; then
+  if [ ${isInstalled} -gt 0 ] && [ -d "${PUBLISH_DIR}" ]; then
     echo "result='already installed'"
     exit 0
   fi
 
-  echo "# *** INSTALL WASABI COORDINATOR (user, .NET, source) ***"
+  echo "# *** INSTALL WASABI COORDINATOR (user, source, .NET, publish) ***"
 
   # dedicated user
   if [ ${isInstalled} -eq 0 ]; then
@@ -107,15 +142,8 @@ if [ "$1" = "install" ]; then
   fi
 
   # build dependencies (.NET needs libicu at runtime on ARM)
+  sudo apt-get update
   sudo apt-get install -y git curl libicu-dev || exit 1
-
-  # install the .NET SDK into the user's home (per-user, RaspiBlitz style)
-  if ! sudo -u ${USERNAME} ${DOTNET} --version 2>/dev/null | grep -q .; then
-    echo "# installing .NET SDK ${DOTNET_CHANNEL} into ${DOTNET_DIR}"
-    sudo -u ${USERNAME} bash -c "curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh"
-    sudo -u ${USERNAME} bash /tmp/dotnet-install.sh --channel ${DOTNET_CHANNEL} --install-dir ${DOTNET_DIR} || exit 1
-    rm -f /tmp/dotnet-install.sh
-  fi
 
   # source code
   if [ ! -d "${SOURCE_DIR}" ]; then
@@ -126,14 +154,18 @@ if [ "$1" = "install" ]; then
   sudo -u ${USERNAME} git fetch --tags --force 1>&2
   sudo -u ${USERNAME} git checkout --force ${VERSION} || exit 1
 
-  # build the coordinator
-  echo "# building the coordinator (this can take a while on a Pi)"
-  sudo -u ${USERNAME} bash -c "cd ${SOURCE_DIR} && HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ${DOTNET} build -c Release ${CSPROJ}" || {
-    echo "result='fail - dotnet build failed'"
+  # .NET SDK matching the project's global.json (auto-tracks the .NET 10 release)
+  ensure_dotnet_sdk || { echo "result='fail - dotnet sdk install failed'"; exit 1; }
+
+  # publish a self-contained-of-framework build (no rebuild/restore at service start)
+  echo "# publishing the coordinator (this can take a while on a Pi)"
+  sudo -u ${USERNAME} rm -rf ${PUBLISH_DIR}
+  sudo -u ${USERNAME} bash -c "cd ${SOURCE_DIR} && HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ${DOTNET} publish -c Release -o ${PUBLISH_DIR} ${CSPROJ}" || {
+    echo "result='fail - dotnet publish failed'"
     exit 1
   }
 
-  echo "# OK - Wasabi coordinator user, .NET and source installed"
+  echo "# OK - Wasabi coordinator user, source, .NET and publish installed"
   exit 0
 fi
 
@@ -177,7 +209,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # make sure it is installed
-  if [ ${isInstalled} -eq 0 ] || [ ! -d "${SOURCE_DIR}" ]; then
+  if [ ${isInstalled} -eq 0 ] || [ ! -d "${PUBLISH_DIR}" ]; then
     sudo /home/admin/config.scripts/bonus.wasabi.sh install 1>&2 || exit 1
   fi
 
@@ -189,10 +221,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # --- ensure bitcoind has the indexes/filters the coordinator REQUIRES ---
   # Without these the coordinator cannot function: txindex (look up any tx) and
   # BIP158 compact block filters served to clients (blockfilterindex +
-  # peerblockfilters), plus the RPC server.
-  echo "# ensuring required bitcoin.conf settings"
-  # txindex via the dedicated RaspiBlitz helper (handles the reindex)
-  /home/admin/config.scripts/network.txindex.sh on 1>&2
+  # peerblockfilters), plus the RPC server. Edit the filter keys first, then let
+  # the txindex helper run; restart bitcoind only once.
+  echo "# ensuring required ${network}.conf settings"
   btcRestart=0
   for key in server blockfilterindex peerblockfilters; do
     if grep -Eq "^${key}=1" "${BITCOIN_CONF}"; then
@@ -202,30 +233,41 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     else
       echo "${key}=1" | sudo tee -a "${BITCOIN_CONF}" >/dev/null
     fi
-    echo "# set ${key}=1 in bitcoin.conf"
+    echo "# set ${key}=1 in ${network}.conf"
     btcRestart=1
   done
-  if [ ${btcRestart} -eq 1 ] && systemctl is-active bitcoind | grep -q "^active"; then
-    echo "# restarting bitcoind to apply block-filter settings"
+  # txindex via the dedicated helper - it restarts/reindexes itself if it changes
+  txindexBefore=$(grep -Eq "^txindex=1" "${BITCOIN_CONF}" && echo 1 || echo 0)
+  /home/admin/config.scripts/network.txindex.sh on 1>&2
+  # restart bitcoind for the filter changes only if the txindex helper did not already
+  if [ ${btcRestart} -eq 1 ] && [ "${txindexBefore}" = "1" ] && systemctl is-active ${BITCOIND_SERVICE} | grep -q "^active"; then
+    echo "# restarting ${BITCOIND_SERVICE} to apply block-filter settings"
     echo "# NOTE: first-time block-filter indexing can take hours; the coordinator"
     echo "#       will only serve clients once it has finished."
-    sudo systemctl restart bitcoind 1>&2
+    sudo systemctl restart ${BITCOIND_SERVICE} 1>&2
   fi
 
   # generate Config.json on first run, then patch in the bitcoind RPC details.
   # The coordinator writes a default Config.json (incl. a freshly generated
-  # CoordinatorExtPubKey) the first time it starts, so let it do that, then patch.
+  # CoordinatorExtPubKey) on first start. Run it (bound to localhost only),
+  # poll until the file appears, then stop it - no fragile fixed timeout.
   if [ ! -f "${DATADIR}/Config.json" ]; then
     echo "# first run: generating default Config.json ..."
-    sudo -u ${USERNAME} bash -c "cd ${SOURCE_DIR} && HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ASPNETCORE_URLS='http://127.0.0.1:${LOCAL_PORT}' timeout 40 ${DOTNET} run -c Release --project ${CSPROJ}" 1>&2 2>/dev/null
+    sudo -u ${USERNAME} bash -c "HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ASPNETCORE_URLS='http://127.0.0.1:${LOCAL_PORT}' ${DOTNET} ${PUBLISH_DIR}/${DLL}" >/dev/null 2>&1 &
+    for i in $(seq 1 90); do
+      [ -f "${DATADIR}/Config.json" ] && break
+      sleep 2
+    done
+    sudo pkill -u ${USERNAME} -f "${DLL}" 2>/dev/null
+    sleep 1
   fi
 
   # read bitcoind RPC creds from bitcoin.conf and patch Config.json (Python, stdlib)
   if [ -f "${DATADIR}/Config.json" ] && [ -f "${BITCOIN_CONF}" ]; then
     echo "# wiring coordinator to bitcoind RPC"
-    sudo python3 - "${DATADIR}/Config.json" "${BITCOIN_CONF}" <<'PY'
+    sudo python3 - "${DATADIR}/Config.json" "${BITCOIN_CONF}" "${WASABI_NET}" <<'PY'
 import json, sys
-cfg_path, btc_path = sys.argv[1], sys.argv[2]
+cfg_path, btc_path, wnet = sys.argv[1], sys.argv[2], sys.argv[3]
 conf = {}
 for line in open(btc_path, encoding="utf-8", errors="replace"):
     line = line.strip()
@@ -237,8 +279,10 @@ pw = conf.get("rpcpassword", "")
 port = conf.get("rpcport", "8332")
 with open(cfg_path, encoding="utf-8-sig") as f:
     cfg = json.load(f)
-cfg["Network"] = "Main"
-cfg["MainNetBitcoinRpcUri"] = f"http://127.0.0.1:{port}"
+cfg["Network"] = wnet
+# URI key prefix: Main->MainNet, TestNet->TestNet, RegTest->RegTest
+prefix = "MainNet" if wnet == "Main" else wnet
+cfg[f"{prefix}BitcoinRpcUri"] = f"http://127.0.0.1:{port}"
 if user and pw:
     cfg["BitcoinRpcConnectionString"] = f"{user}:{pw}"
 with open(cfg_path, "w", encoding="utf-8") as f:
@@ -251,16 +295,16 @@ PY
     echo "# WARN: could not patch Config.json automatically - set BitcoinRpcConnectionString manually" 1>&2
   fi
 
-  # systemd service (mirrors the proven manual unit; builds on first start via 'dotnet run')
+  # systemd service - runs the published DLL directly (no build/restore at start)
   echo "# installing systemd service ${SERVICE}"
   echo "\
 [Unit]
 Description=Wasabi Coordinator daemon
-Requires=bitcoind.service
-After=bitcoind.service
+Requires=${BITCOIND_SERVICE}.service
+After=${BITCOIND_SERVICE}.service
 
 [Service]
-ExecStart=${DOTNET} run -c Release --project ${SOURCE_DIR}/${CSPROJ}
+ExecStart=${DOTNET} ${PUBLISH_DIR}/${DLL}
 Environment=HOME=${HOME_DIR}
 Environment=DOTNET_ROOT=${DOTNET_DIR}
 Environment=\"ASPNETCORE_URLS=http://0.0.0.0:${PUBLIC_PORT};http://127.0.0.1:${LOCAL_PORT}\"
@@ -297,7 +341,7 @@ WantedBy=multi-user.target
   # start if the system is ready
   source $RASPIBLITZ_INFO 2>/dev/null
   if [ "${state}" = "ready" ]; then
-    echo "# starting ${SERVICE} (first start compiles, may take minutes)"
+    echo "# starting ${SERVICE}"
     sudo systemctl start ${SERVICE} 1>&2
   else
     echo "# enabled; start manually with: sudo systemctl start ${SERVICE}"
@@ -361,11 +405,14 @@ if [ "$1" = "update" ]; then
   else
     sudo -u ${USERNAME} git checkout --force ${VERSION} || exit 1
   fi
-  sudo -u ${USERNAME} bash -c "cd ${SOURCE_DIR} && HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ${DOTNET} build -c Release ${CSPROJ}" || exit 1
+  # the new checkout may require a newer .NET SDK (e.g. 10.0) - ensure it
+  ensure_dotnet_sdk || exit 1
+  sudo -u ${USERNAME} rm -rf ${PUBLISH_DIR}
+  sudo -u ${USERNAME} bash -c "cd ${SOURCE_DIR} && HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ${DOTNET} publish -c Release -o ${PUBLISH_DIR} ${CSPROJ}" || exit 1
   if [ ${isActive} -gt 0 ]; then
     sudo systemctl restart ${SERVICE} 1>&2
   fi
-  echo "# OK - updated and rebuilt"
+  echo "# OK - updated and re-published"
   exit 0
 fi
 
