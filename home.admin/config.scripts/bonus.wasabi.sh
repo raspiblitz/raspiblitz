@@ -30,9 +30,11 @@ DOTNET_DIR="${HOME_DIR}/.dotnet"
 DOTNET="${DOTNET_DIR}/dotnet"
 # fallback .NET channel if global.json cannot be read (real value derived at install)
 DOTNET_CHANNEL_FALLBACK="8.0"
-# coordinator public API port (Wasabi clients connect here); 5000 is the local-only port
+# coordinator API port. Bound to 127.0.0.1 only and reached over a Tor onion
+# service (default) - no clearnet bind, no domain or port-forwarding needed, and
+# the operator's IP stays hidden. (A single localhost endpoint; no extra local
+# port - 5000 collided with common services like LNBits.)
 PUBLIC_PORT="37126"
-LOCAL_PORT="5000"
 SERVICE="wasabicoordinator"
 
 RASPIBLITZ_INFO=/home/admin/raspiblitz.info
@@ -97,8 +99,7 @@ if [ "$1" = "status" ]; then
   echo "running='${running}'"
   echo "network='${WASABI_NET}'"
   echo "localIP='${localip}'"
-  echo "publicPort='${PUBLIC_PORT}'"
-  echo "localPort='${LOCAL_PORT}'"
+  echo "localPort='${PUBLIC_PORT}'"
   echo "toraddress='${toraddress}'"
   exit 0
 fi
@@ -113,12 +114,9 @@ if [ "$1" = "menu" ]; then
   fi
   toraddress=$(sudo cat /mnt/hdd/app-data/tor/${SERVICE}/hostname 2>/dev/null)
   text="Wasabi (WabiSabi) coinjoin coordinator backend.\n
-Clients connect to the coordinator API on:
-http://${localip}:${PUBLIC_PORT}\n
+Clients connect over Tor - share this onion address with them:
+${toraddress:-<creating - check again in a moment>}\n
 Config & logs: ${DATADIR}"
-  if [ "${runBehindTor}" = "on" ] && [ ${#toraddress} -gt 0 ]; then
-    text="${text}\n\nTor Hidden Service address:\n${toraddress}"
-  fi
   whiptail --title " Wasabi Coordinator " --msgbox "${text}" 16 70
   exit 0
 fi
@@ -257,7 +255,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # poll until the file appears, then stop it - no fragile fixed timeout.
   if [ ! -f "${DATADIR}/Config.json" ]; then
     echo "# first run: generating default Config.json ..."
-    sudo -u ${USERNAME} bash -c "HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ASPNETCORE_URLS='http://127.0.0.1:${LOCAL_PORT}' ${DOTNET} ${PUBLISH_DIR}/${DLL}" >/dev/null 2>&1 &
+    sudo -u ${USERNAME} bash -c "HOME=${HOME_DIR} DOTNET_ROOT=${DOTNET_DIR} ASPNETCORE_URLS='http://127.0.0.1:${PUBLIC_PORT}' ${DOTNET} ${PUBLISH_DIR}/${DLL}" >/dev/null 2>&1 &
     for i in $(seq 1 90); do
       [ -f "${DATADIR}/Config.json" ] && break
       sleep 2
@@ -324,7 +322,7 @@ After=${BITCOIND_SERVICE}.service
 ExecStart=${DOTNET} ${PUBLISH_DIR}/${DLL}
 Environment=HOME=${HOME_DIR}
 Environment=DOTNET_ROOT=${DOTNET_DIR}
-Environment=\"ASPNETCORE_URLS=http://0.0.0.0:${PUBLIC_PORT};http://127.0.0.1:${LOCAL_PORT}\"
+Environment=\"ASPNETCORE_URLS=http://127.0.0.1:${PUBLIC_PORT}\"
 User=${USERNAME}
 Group=${USERNAME}
 Type=simple
@@ -343,17 +341,21 @@ WantedBy=multi-user.target
   sudo systemctl daemon-reload 1>&2
   sudo systemctl enable ${SERVICE} 1>&2
 
-  # firewall: open the public coordinator port (5000 stays local-only)
-  echo "# *** updating firewall ***" 1>&2
-  sudo ufw allow from any to any port ${PUBLIC_PORT} comment 'allow Wasabi coordinator' 1>&2
+  # No clearnet firewall port: the coordinator binds 127.0.0.1 only and is reached
+  # over Tor (below). Operators who want a clearnet endpoint can add their own
+  # reverse proxy / firewall rule.
 
   # raspiblitz config flag
   /home/admin/config.scripts/blitz.conf.sh set wasabi "on" ${RASPIBLITZ_CONF} 1>&2
 
-  # Tor hidden service (maps onion:80 -> coordinator public port)
-  if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/tor.onion-service.sh ${SERVICE} 80 ${PUBLIC_PORT} 1>&2
+  # Tor onion is the default (and only) access path - publish it unconditionally.
+  # Ensure Tor is installed first (the node may not be routed through Tor), then
+  # map onion:80 -> 127.0.0.1:${PUBLIC_PORT}.
+  if ! systemctl is-active --quiet tor@default; then
+    echo "# Tor not active - installing it for the coordinator onion service" 1>&2
+    /home/admin/config.scripts/tor.install.sh install 1>&2
   fi
+  /home/admin/config.scripts/tor.onion-service.sh ${SERVICE} 80 ${PUBLIC_PORT} 1>&2
 
   # start if the system is ready
   source $RASPIBLITZ_INFO 2>/dev/null
@@ -388,13 +390,10 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/systemd/system/${SERVICE}.service
   sudo systemctl daemon-reload 2>/dev/null
 
-  # close firewall port
-  sudo ufw delete allow from any to any port ${PUBLIC_PORT} 1>&2
+  # no clearnet firewall rule was added (localhost-only bind), nothing to close
 
   # remove Tor hidden service
-  if [ "${runBehindTor}" = "on" ]; then
-    /home/admin/config.scripts/tor.onion-service.sh off ${SERVICE} 1>&2
-  fi
+  /home/admin/config.scripts/tor.onion-service.sh off ${SERVICE} 1>&2
 
   # raspiblitz config flag
   /home/admin/config.scripts/blitz.conf.sh set wasabi "off" ${RASPIBLITZ_CONF} 1>&2
