@@ -39,7 +39,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "bonus.wasabid.sh [install|uninstall]"
   echo "bonus.wasabid.sh [on|off|status|menu]"
   echo "bonus.wasabid.sh [examples]   # print wcli + curl usage cheat sheet"
-  echo "bonus.wasabid.sh [update|update commit]"
+  echo "bonus.wasabid.sh [update]"
   exit 1
 fi
 
@@ -402,12 +402,7 @@ if [ "$1" = "update" ]; then
   echo "# *** UPDATE WASABI DAEMON ***"
   cd ${SOURCE_DIR} || exit 1
   sudo -u ${USERNAME} git fetch --tags --force 1>&2
-  if [ "$2" = "commit" ]; then
-    sudo -u ${USERNAME} git checkout --force master 1>&2
-    sudo -u ${USERNAME} git pull 1>&2
-  else
-    sudo -u ${USERNAME} git checkout --force ${VERSION} || exit 1
-  fi
+  sudo -u ${USERNAME} git checkout --force ${VERSION} || exit 1
   # the new checkout may require a newer .NET SDK (e.g. 10.0) - ensure it
   ensure_dotnet_sdk || exit 1
   sudo -u ${USERNAME} rm -rf ${PUBLISH_DIR}

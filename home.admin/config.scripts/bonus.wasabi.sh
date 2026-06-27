@@ -2,8 +2,7 @@
 
 # https://github.com/WalletWasabi/WalletWasabi  (WabiSabi coinjoin coordinator backend)
 #
-# The coordinator-specific changes are merged upstream (master/dev) and ship in the
-# next release. Until then, pull master with: bonus.wasabi.sh update commit
+# The coordinator-specific changes are released upstream as of v2.8.0.
 #
 # REQUIRES bitcoind with: txindex=1, blockfilterindex=1, peerblockfilters=1,
 # server=1. The 'on' step ensures these in bitcoin.conf and restarts bitcoind
@@ -45,7 +44,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "config script to switch the Wasabi (WabiSabi) coinjoin coordinator on or off"
   echo "bonus.wasabi.sh [install|uninstall]"
   echo "bonus.wasabi.sh [on|off|status|menu]"
-  echo "bonus.wasabi.sh [update|update commit]"
+  echo "bonus.wasabi.sh [update]"
   exit 1
 fi
 
@@ -414,13 +413,7 @@ if [ "$1" = "update" ]; then
   echo "# *** UPDATE WASABI COORDINATOR ***"
   cd ${SOURCE_DIR} || exit 1
   sudo -u ${USERNAME} git fetch --tags --force 1>&2
-  if [ "$2" = "commit" ]; then
-    # track the default branch (master) - has the upstreamed changes before release
-    sudo -u ${USERNAME} git checkout --force master 1>&2
-    sudo -u ${USERNAME} git pull 1>&2
-  else
-    sudo -u ${USERNAME} git checkout --force ${VERSION} || exit 1
-  fi
+  sudo -u ${USERNAME} git checkout --force ${VERSION} || exit 1
   # the new checkout may require a newer .NET SDK (e.g. 10.0) - ensure it
   ensure_dotnet_sdk || exit 1
   sudo -u ${USERNAME} rm -rf ${PUBLISH_DIR}
