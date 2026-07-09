@@ -33,6 +33,7 @@ tor_deb_repo="tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpq
 #tor_deb_repo="https://deb.torproject.org"
 tor_deb_repo_clean="${tor_deb_repo#*tor+}"
 tor_deb_repo_pgp_fingerprint="A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89"
+tor_min_supported_version="0.4.9"
 
 ## https://github.com/keroserene/snowflake/commits/master
 snowflake_commit_hash="af6e2c30e1a6aacc6e7adf9a31df0a387891cc37"
@@ -116,6 +117,28 @@ configure_bridges_torrc(){
 " | sudo tee ${torrc_bridges}
 }
 
+require_supported_tor_version(){
+  tor_version=$(tor --version | awk 'NR==1 {print $3}' | sed 's/\.$//')
+  if [ ${#tor_version} -eq 0 ]; then
+    echo "! FAIL: Was not able to detect installed Tor version"
+    exit 1
+  fi
+  if ! dpkg --compare-versions "${tor_version}" ge "${tor_min_supported_version}"; then
+    echo "! FAIL: Installed Tor ${tor_version} is older than required ${tor_min_supported_version}"
+    echo "! INFO: Tor 0.4.8 and older are EOL and scheduled to stop working on the Tor network"
+    exit 1
+  fi
+  echo "- OK Tor ${tor_version} >= ${tor_min_supported_version}"
+}
+
+restart_tor_service(){
+  if systemctl cat tor@default.service >/dev/null 2>&1; then
+    sudo systemctl restart tor@default
+  else
+    sudo systemctl restart tor
+  fi
+}
+
 
 action=$1
 
@@ -175,6 +198,7 @@ if [ "${action}" = "install" ]; then
   sudo apt -o Dpkg::Options::="--force-confold" install -y tor
   # shellcheck disable=SC2086
   sudo apt install -y ${tor_pkgs}
+  require_supported_tor_version
 
   # make sure tor is not running after is was installed
   # should be enabled after main menu when HDD is mounted
@@ -305,13 +329,19 @@ if [ "${action}" = "update" ]; then
         sudo systemctl stop tor
         echo "# Update ..."
         sudo dpkg -i tor_*.deb
+        require_supported_tor_version
         echo "# Starting the tor.service "
-        sudo systemctl start tor
+        restart_tor_service
         echo "# Installed $(tor --version)"
       ;;
       *)
         add_tor_sources
-        sudo apt update && sudo apt install tor && sudo systemctl restart tor
+        sudo apt update || exit 1
+        sudo apt -o Dpkg::Options::="--force-confold" install -y tor || exit 1
+        # shellcheck disable=SC2086
+        sudo apt install -y ${tor_pkgs} || exit 1
+        require_supported_tor_version
+        restart_tor_service
       ;;
     esac
   echo
