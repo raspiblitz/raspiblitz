@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/btcpayserver/NBXplorer/tags
-NBXplorerVersion="v2.6.7"
+NBXplorerVersion="v2.6.10"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v2.3.9"
+BTCPayVersion="v2.4.2"
 
 # check who signed the release (person that published release)
 PGPsigner="nicolasdorier"
