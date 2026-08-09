@@ -187,6 +187,70 @@ verify_release() {
   return 0
 }
 
+##########################
+# installed_release_matches <COMMIT>
+# Returns success only when every JoinMarket-NG package managed by this script
+# records the expected immutable git commit in its PEP 610 direct_url.json.
+##########################
+installed_release_matches() {
+  local EXPECTED_COMMIT="$1"
+  local VENV_PYTHON="/home/${USER_JM}/venv/bin/python"
+
+  if [ ! -x "${VENV_PYTHON}" ]; then
+    echo "# Installed package provenance is unavailable: venv Python not found."
+    return 1
+  fi
+
+  sudo -u ${USER_JM} "${VENV_PYTHON}" - "${EXPECTED_COMMIT}" <<'PYEOF'
+import json
+import re
+import sys
+from importlib.metadata import PackageNotFoundError, distribution
+
+expected_commit = sys.argv[1].lower()
+packages = {
+    "jmcore": "jmcore",
+    "jmwallet": "jmwallet",
+    "jm-maker": "maker",
+    "jm-taker": "taker",
+}
+
+if re.fullmatch(r"[0-9a-f]{40}", expected_commit) is None:
+    print(f"# Invalid verified release commit: {expected_commit}")
+    sys.exit(1)
+
+for package, expected_subdirectory in packages.items():
+    try:
+        metadata = distribution(package)
+        direct_url_text = metadata.read_text("direct_url.json")
+        if direct_url_text is None:
+            raise ValueError("direct_url.json is missing")
+        direct_url = json.loads(direct_url_text)
+        if not isinstance(direct_url, dict):
+            raise ValueError("direct_url.json is not an object")
+        vcs_info = direct_url.get("vcs_info")
+        if not isinstance(vcs_info, dict) or vcs_info.get("vcs") != "git":
+            raise ValueError("git provenance is missing")
+        installed_commit = vcs_info.get("commit_id")
+        if not isinstance(installed_commit, str):
+            raise ValueError("git commit is missing")
+        if direct_url.get("subdirectory") != expected_subdirectory:
+            raise ValueError("source subdirectory does not match")
+    except (PackageNotFoundError, json.JSONDecodeError, OSError, UnicodeError, ValueError) as exc:
+        print(f"# Installed {package} provenance is unavailable: {exc}")
+        sys.exit(1)
+
+    if installed_commit.lower() != expected_commit:
+        print(
+            f"# Installed {package} commit {installed_commit} does not match "
+            f"release commit {expected_commit}."
+        )
+        sys.exit(1)
+
+sys.exit(0)
+PYEOF
+}
+
 # BASIC COMMANDLINE OPTIONS
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh status    -> status information (key=value)"
@@ -803,17 +867,23 @@ if [ "$1" = "update" ]; then
       | grep '^Version:' | awk '{print $2}')
     echo "# Currently installed version: ${CURRENT_TAG:-unknown}"
 
-    if [ "${CURRENT_TAG}" = "${UPDATE_TAG}" ]; then
-      echo "# Already on version ${UPDATE_TAG}, nothing to do."
-      exit 0
-    fi
-
     # Verify release signatures and get immutable commit hash
     echo "# Verifying GPG signatures for release ${UPDATE_TAG}..."
     VERIFIED_COMMIT=""
     if ! verify_release "${UPDATE_TAG}"; then
       echo "# FAIL - GPG signature verification failed for ${UPDATE_TAG}"
       exit 1
+    fi
+
+    # Development commits can have the same package version as the latest
+    # release. Only immutable source provenance can prove this release is
+    # already installed.
+    if installed_release_matches "${VERIFIED_COMMIT}"; then
+      echo "# Already on release ${UPDATE_TAG} at commit ${VERIFIED_COMMIT}, nothing to do."
+      exit 0
+    fi
+    if [ "${CURRENT_TAG}" = "${UPDATE_TAG}" ]; then
+      echo "# Package version matches, but source provenance differs; reinstalling release."
     fi
 
     # Use the verified commit SHA (immutable) instead of the mutable tag
@@ -830,24 +900,31 @@ if [ "$1" = "update" ]; then
   sudo systemctl stop ${APPID}-maker 2>/dev/null
 
   echo "# Upgrading pip packages to ${UPDATE_TAG}..."
-  # When installing from main, version strings don't change so pip skips
-  # reinstall unless forced. --no-deps avoids redundant dep reinstalls.
-  if [ "${UPDATE_TAG}" = "main" ]; then
-    PIP_INSTALL_FLAGS="--force-reinstall --no-deps"
-  else
-    PIP_INSTALL_FLAGS="--upgrade"
-  fi
-
+  # Source commits can share a package version, so force-reinstall the four
+  # managed packages first. Resolve dependencies separately to avoid forcing
+  # costly reinstalls of every third-party package.
   sudo -u ${USER_JM} bash -c "
     ${VENV_DIR}/bin/pip install --upgrade pip && \
-    ${VENV_DIR}/bin/pip install ${PIP_INSTALL_FLAGS} '${GIT_URL}#subdirectory=jmcore' && \
-    ${VENV_DIR}/bin/pip install ${PIP_INSTALL_FLAGS} '${GIT_URL}#subdirectory=jmwallet' && \
-    ${VENV_DIR}/bin/pip install ${PIP_INSTALL_FLAGS} '${GIT_URL}#subdirectory=maker' && \
-    ${VENV_DIR}/bin/pip install ${PIP_INSTALL_FLAGS} '${GIT_URL}#subdirectory=taker'
+    ${VENV_DIR}/bin/pip install --upgrade --force-reinstall --no-deps \
+      '${GIT_URL}#subdirectory=jmcore' \
+      '${GIT_URL}#subdirectory=jmwallet' \
+      '${GIT_URL}#subdirectory=maker' \
+      '${GIT_URL}#subdirectory=taker' && \
+    ${VENV_DIR}/bin/pip install --upgrade \
+      '${GIT_URL}#subdirectory=jmcore' \
+      '${GIT_URL}#subdirectory=jmwallet' \
+      '${GIT_URL}#subdirectory=maker' \
+      '${GIT_URL}#subdirectory=taker' && \
+    ${VENV_DIR}/bin/pip check
   "
   if [ $? -ne 0 ]; then
       echo "# FAIL - pip upgrade failed"
       exit 1
+  fi
+
+  if [ "${UPDATE_TAG}" != "main" ] && ! installed_release_matches "${VERIFIED_COMMIT}"; then
+    echo "# FAIL - installed packages do not match verified release commit"
+    exit 1
   fi
 
   # Menu script is bundled in the jmcore pip package — updated automatically

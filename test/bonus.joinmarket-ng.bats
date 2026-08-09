@@ -15,6 +15,7 @@
 SCRIPT="../home.admin/config.scripts/bonus.joinmarket-ng.sh"
 APPID="joinmarket-ng"
 USER_JM="joinmarketng"
+JM_VERSION="0.30.0"
 DATA_DIR="/mnt/hdd/app-data/${APPID}"
 CONFIG_TOML="${DATA_DIR}/config.toml"
 SERVICE_FILE="/etc/systemd/system/${APPID}-maker.service"
@@ -241,6 +242,83 @@ print(resources.files('jmcore').joinpath('data/menu.joinmarket-ng.sh'))
   [ "$status" -eq 0 ]
   echo "$output" | grep -q "isInstalled=1"
   echo "$output" | grep -q "version="
+}
+
+# ---------------------------------------------------------------------------
+# 3a. Updates compare immutable source commits, not package versions
+# ---------------------------------------------------------------------------
+@test "update skips an exact verified release commit" {
+  run bash "${SCRIPT}" update "${JM_VERSION}"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "Already on release ${JM_VERSION} at commit"
+}
+
+@test "update detects same-version packages from a different commit" {
+  local expected_commit
+  expected_commit=$("/home/${USER_JM}/venv/bin/python" - <<'PYEOF'
+import json
+from importlib.metadata import distribution
+
+direct_url_text = distribution("jmcore").read_text("direct_url.json")
+assert direct_url_text is not None
+print(json.loads(direct_url_text)["vcs_info"]["commit_id"])
+PYEOF
+)
+
+  # Development commits after a release keep that release's package version.
+  # Change only jmcore's recorded PEP 610 commit to reproduce that identity
+  # mismatch without downloading and rebuilding a moving main branch.
+  "/home/${USER_JM}/venv/bin/python" - <<'PYEOF'
+import json
+from importlib.metadata import distribution
+
+metadata = distribution("jmcore")
+direct_url_path = next(
+    path.locate()
+    for path in metadata.files or ()
+    if str(path).endswith(".dist-info/direct_url.json")
+)
+direct_url = json.loads(direct_url_path.read_text())
+direct_url["vcs_info"]["commit_id"] = "0" * 40
+direct_url_path.write_text(json.dumps(direct_url))
+PYEOF
+
+  # Load the production helper without executing the script's command router.
+  eval "$(awk '
+    /^installed_release_matches\(\)/ { capture=1 }
+    capture && /^# BASIC COMMANDLINE OPTIONS/ { exit }
+    capture { print }
+  ' "${SCRIPT}")"
+  run installed_release_matches "${expected_commit}"
+  local match_status="$status"
+  local match_output="$output"
+
+  # Restore the fixture before assertions so a failed test cannot poison the
+  # remaining stateful integration tests.
+  "/home/${USER_JM}/venv/bin/python" - "${expected_commit}" <<'PYEOF'
+import json
+import sys
+from importlib.metadata import distribution
+
+metadata = distribution("jmcore")
+direct_url_path = next(
+    path.locate()
+    for path in metadata.files or ()
+    if str(path).endswith(".dist-info/direct_url.json")
+)
+direct_url = json.loads(direct_url_path.read_text())
+direct_url["vcs_info"]["commit_id"] = sys.argv[1]
+direct_url_path.write_text(json.dumps(direct_url))
+PYEOF
+
+  [ "${match_status}" -eq 1 ]
+  echo "${match_output}" | grep -q "does not match release commit"
+  "/home/${USER_JM}/venv/bin/pip" show jmcore | grep -q "Version: ${JM_VERSION}"
+
+  # The mismatch path must force-install the selected source even when pip
+  # considers its package version current, then validate dependencies.
+  grep -q -- '--upgrade --force-reinstall --no-deps' "${SCRIPT}"
+  grep -q 'bin/pip check' "${SCRIPT}"
 }
 
 # ---------------------------------------------------------------------------
