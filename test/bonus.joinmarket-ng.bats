@@ -15,7 +15,7 @@
 SCRIPT="../home.admin/config.scripts/bonus.joinmarket-ng.sh"
 APPID="joinmarket-ng"
 USER_JM="joinmarketng"
-JM_VERSION="0.30.0"
+JM_VERSION="0.35.0"
 DATA_DIR="/mnt/hdd/app-data/${APPID}"
 CONFIG_TOML="${DATA_DIR}/config.toml"
 SERVICE_FILE="/etc/systemd/system/${APPID}-maker.service"
