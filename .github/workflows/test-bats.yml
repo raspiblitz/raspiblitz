@@ -10,10 +10,14 @@ on:
     branches: ["dev"]
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
+      - "home.admin/config.scripts/cl.hsmtool.sh"
+      - "test/cl.hsmtool-generatehsm.bats"
   pull_request:
     branches: ["*"]
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
+      - "home.admin/config.scripts/cl.hsmtool.sh"
+      - "test/cl.hsmtool-generatehsm.bats"
 
 jobs:
   run-bats-tests:
@@ -36,3 +40,8 @@ jobs:
         run: |
           cd test
           sudo bats ./bonus.postgresql-13.bats
+
+      - name: Run the cl.hsmtool generatehsm interface tests
+        run: |
+          cd test
+          bats ./cl.hsmtool-generatehsm.bats
