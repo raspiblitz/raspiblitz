@@ -231,8 +231,8 @@ if [ "$action" = "status" ]; then
     dataConfigFound=0
     combinedDataStorage=0
     
-    # get a list of all existing ext4 partitions of connected storage drives (sdX, nvmeX) - sorted by size (smallest first, then by name)
-    ext4Partitions=$(lsblk -b -n -l -o NAME,SIZE,FSTYPE,TYPE | grep "part" | grep "ext4" | grep -E "^(sd|nvme)" | awk '{print $1, $2}' | sort -k2,2n -k1,1)
+    # get a list of all existing ext4 partitions of connected storage drives (sdX, vdX, nvmeX) - sorted by size (smallest first, then by name)
+    ext4Partitions=$(lsblk -b -n -l -o NAME,SIZE,FSTYPE,TYPE | grep "part" | grep "ext4" | grep -E "^(sd|vd|nvme)" | awk '{print $1, $2}' | sort -k2,2n -k1,1)
     if [ ${#ext4Partitions} -eq 0 ]; then
         echo "# no ext4 partitions found"
     fi
@@ -441,7 +441,7 @@ if [ "$action" = "status" ]; then
     biggerSizeGB=""
     if [ -n "${storageDevice}" ]; then
         # get a list of all connected drives >7GB ordered by size (biggest first)
-        listOfBiggerDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|nvme)" | \
+        listOfBiggerDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|vd|nvme)" | \
         awk '{ 
         size=$2
         if(size ~ /T/) { 
@@ -485,7 +485,7 @@ if [ "$action" = "status" ]; then
         echo "# PROPOSING LAYOUT ..."
 
         # get a list of all connected drives >31GB ordered by size (biggest first)
-        listOfDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|nvme)" | \
+        listOfDevices=$(lsblk -dno NAME,SIZE | grep -E "^(sd|vd|nvme)" | \
         awk '{ 
         size=$2
         if(size ~ /T/) { 
