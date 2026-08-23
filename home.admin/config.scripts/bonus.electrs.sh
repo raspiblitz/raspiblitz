@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/romanz/electrs/releases
-ELECTRSVERSION="v0.10.10"
+ELECTRSVERSION="v0.11.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -17,6 +17,10 @@ fi
 PGPsigner="romanz"
 PGPpubkeyLink="https://github.com/${PGPsigner}.gpg"
 PGPpubkeyFingerprint="87CAE5FA46917CBB"
+
+SSHsigner="romanz"
+SSHpubkey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAZVq/3fgkildjN/MqEnhrP5550sDpFzGxMwevr5q/9w"
+SSHpubkeyFingerprint="SHA256:GifMn7F2swVKyn6MewbQHrYCs4i/bPK7gnwxhuPz/YA"
 
 source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
@@ -308,7 +312,7 @@ if [ "$1" = "install" ]; then
     # https://github.com/romanz/electrs/blob/master/doc/usage.md#build-dependencies
     sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain stable -y
     sudo -u electrs /home/electrs/.cargo/bin/rustup default stable || exit 1
-    sudo apt install -y clang cmake build-essential # for building 'rust-rocksdb'
+    sudo apt install -y clang llvm-dev libclang-dev cmake build-essential # for building 'rust-rocksdb' and bindgen/libclang
 
     echo
     echo "# Downloading and building electrs $ELECTRSVERSION. This will take ~40 minutes"
@@ -319,8 +323,13 @@ if [ "$1" = "install" ]; then
     sudo -u electrs git reset --hard $ELECTRSVERSION
 
     # verify
-    sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
-      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${ELECTRSVERSION}" || exit 1
+    if [ "$(printf "%s\n" "v0.11.1" "$ELECTRSVERSION" | sort -V | head -n1)" = "v0.11.1" ]; then
+      sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh --ssh \
+        "${SSHsigner}" "${SSHpubkey}" "${SSHpubkeyFingerprint}" "${ELECTRSVERSION}" || exit 1
+    else
+      sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
+        "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${ELECTRSVERSION}" || exit 1
+    fi
 
     # build
     sudo -u electrs /home/electrs/.cargo/bin/cargo build --locked --release || exit 1
@@ -631,13 +640,18 @@ if [ "$1" = "update" ]; then
     echo "# Reset to the latest release tag: $updateVersion"
     sudo -u electrs git reset --hard $updateVersion
 
-    sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
-      "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${updateVersion}" || exit 1
+    if [ "$(printf "%s\n" "v0.11.1" "$updateVersion" | sort -V | head -n1)" = "v0.11.1" ]; then
+      sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh --ssh \
+        "${SSHsigner}" "${SSHpubkey}" "${SSHpubkeyFingerprint}" "${updateVersion}" || exit 1
+    else
+      sudo -u electrs /home/admin/config.scripts/blitz.git-verify.sh \
+        "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" "${updateVersion}" || exit 1
+    fi
 
     echo "# Installing build dependencies"
     sudo -u electrs curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo -u electrs sh -s -- --default-toolchain stable -y
     sudo -u electrs /home/electrs/.cargo/bin/rustup default stable || exit 1
-    sudo apt install -y clang cmake build-essential # for building 'rust-rocksdb'
+    sudo apt install -y clang llvm-dev libclang-dev cmake build-essential # for building 'rust-rocksdb' and bindgen/libclang
     echo
 
     echo "# Build Electrs ..."
