@@ -12,8 +12,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "JoinMarket install script to install and switch JoinMarket on or off"
   echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh install"
   echo "sudo /home/admin/config.scripts/bonus.joinmarket.sh on|off"
-  echo "Installs JoininBox $JBTAG with JoinMarket commit:"
-  echo "https://github.com/JoinMarket-Org/joinmarket-clientserver/commit/ce32bafbb5d716bde61830f71266410249d43dbc"
+  echo "Installs JoininBox $JBTAG with JoinMarket v0.9.12:"
+  echo "https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.12"
   exit 1
 fi
 
