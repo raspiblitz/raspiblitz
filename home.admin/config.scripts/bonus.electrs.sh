@@ -111,10 +111,14 @@ if [ "$1" = "status-sync" ]; then
   if [ ${serviceRunning} -eq 1 ]; then
 
     # check if initial sync was done, by setting a file as once electrs is the first time responding on port 50001
-    electrumResponding=$(echo '{"jsonrpc":"2.0","method":"server.ping","params":[],"id":"electrs-check"}' | netcat -w 2 127.0.0.1 50001 | grep -c "result")
-    if [ ${electrumResponding} -gt 1 ]; then
+    # write response to a temp file to avoid pipe failures (os error 107) losing the response
+    electrumResponding=0
+    tmpResponse=$(mktemp)
+    echo '{"jsonrpc":"2.0","method":"server.ping","params":[],"id":"electrs-check"}' | netcat -w 2 127.0.0.1 50001 > "${tmpResponse}" 2>/dev/null
+    if grep -q "result" "${tmpResponse}" 2>/dev/null; then
       electrumResponding=1
     fi
+    rm -f "${tmpResponse}"
     echo "electrumResponding=${electrumResponding}"
 
     blockheight=0
@@ -125,6 +129,9 @@ if [ "$1" = "status-sync" ]; then
       syncedBlock=$(echo '{"id": 1, "method": "blockchain.headers.subscribe", "params": []}' | nc -w 20 -q 1 localhost 50001 | jq '.result.height')
       if [ "$syncedBlock" -eq "$syncedBlock" ] 2>/dev/null; then
         blockheight=${syncedBlock}
+
+        # if we got a valid blockheight, electrs is actually responding
+        electrumResponding=1
 
         # calculate the progress
         source <(/home/admin/_cache.sh get btc_mainnet_blocks_verified)
