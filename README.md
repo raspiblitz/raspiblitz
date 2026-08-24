@@ -12,6 +12,7 @@ RaspiBlitz is mainly targeted for learning how to run your own node decentralize
 
 - [Project Homepage: raspiblitz.org](https://raspiblitz.org)
 - [How to build & setup your own RaspiBlitz & Documentation](https://docs.raspiblitz.org/docs/setup/intro)
+- [Hardware Setup Guide & NVMe Recommendations](https://docs.raspiblitz.org/docs/setup/get-hardware)
 - [Download latest SD Card images](https://docs.raspiblitz.org/docs/setup/software-setup/download)
 - [How to get Support](https://docs.raspiblitz.org/docs/community/support)
 

@@ -40,6 +40,7 @@
 * \> 2GB DDR3 ECC RAM (8GB+ if using ZFS)
 * USB 3.0 / SATA / PCIE / NVME connectors
 * SSD - multiple disks for redundancy
+* For Raspberry Pi 5: NVMe storage via PCIe HAT is recommended — see [NVMe setup info in hw_comparison.md](hw_comparison.md#nvme-storage-recommendations)
 
 Specifications of the tested hardware: [hw_comparison.md](hw_comparison.md)
 
