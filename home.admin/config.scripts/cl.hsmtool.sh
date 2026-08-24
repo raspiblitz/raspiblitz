@@ -54,6 +54,17 @@ fi
 #############
 # Functions #
 #############
+# Builds the stdin payload for 'lightning-hsmtool generatehsm'.
+# CLN >= v25.12 expects the BIP39 mnemonic on the first stdin line and the
+# passphrase (may be empty) on the second line - there is no language
+# selection prompt and no passphrase confirmation any more.
+# $1 = seedwords (space separated)
+# $2 = seedpassword (may be empty)
+function generateHsmInput() {
+  echo "$1"
+  echo "$2"
+}
+
 function passwordToFile() {
   if [ $# -gt 0 ];then
     text="$1"
@@ -264,14 +275,9 @@ seedwords6x4='${seedwords6x4}'
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
 
   # pass to 'hsmtool generatehsm hsm_secret'
-  if [ ${#seedpassword} -eq 0 ]; then
-    (echo "0"; echo "${seedwords}"; echo) | sudo -u bitcoin lightning-hsmtool \
-     "generatehsm" $hsmSecretPath 1>&2
-  else
-    # pass to 'hsmtool generatehsm hsm_secret' - confirm seedpassword
-    (echo "0"; echo "${seedwords}"; echo "$seedpassword"; echo "$seedpassword")\
-     | sudo -u bitcoin lightning-hsmtool "generatehsm" $hsmSecretPath 1>&2
-  fi
+  # CLN >= v25.12: mnemonic on the first stdin line, passphrase on the second
+  generateHsmInput "${seedwords}" "${seedpassword}" | sudo -u bitcoin \
+   lightning-hsmtool "generatehsm" $hsmSecretPath 1>&2 || exit 1
 
   echo "# Re-init the backup plugin with the new wallet"
   /home/admin/config.scripts/cl-plugin.backup.sh on $CHAIN
