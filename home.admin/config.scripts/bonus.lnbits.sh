@@ -29,6 +29,16 @@ fi
 echo "# Running: 'bonus.lnbits.sh $*'"
 source /mnt/hdd/app-data/raspiblitz.conf
 
+if [ -z "${network}" ]; then
+  network="bitcoin"
+fi
+
+PASSWORDB=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf 2>/dev/null | grep "^rpcpassword=" | cut -c 13-)
+if [ "${PASSWORDB}" == "" ]; then
+  echo "# FAIL: Password B not available (rpcpassword missing)"
+  exit 1
+fi
+
 lnbitsDataDir="/mnt/hdd/app-data/LNBits/data"
 lnbitsConfig="${lnbitsDataDir}/.env"
 
@@ -41,13 +51,22 @@ function postgresConfig() {
   source <(/home/admin/_cache.sh get LNBitsMigrate)
   if [ "${LNBitsMigrate}" == "on" ]; then
     echo "# LNBitsMigrate=on --> Cleaning old lnbits_db & lnbits_user"
-    sudo -u postgres psql -c "drop database lnbits_db;"
-    sudo -u postgres psql -c "drop user lnbits_user;"
+    sudo -u postgres psql -c "drop database lnbits_db;" 2>/dev/null
+    sudo -u postgres psql -c "drop user lnbits_user;" 2>/dev/null
   fi
-  # create database for new installations and keep old
+  
+  # create database for new installations (ignore if exists)
   sudo -u postgres psql -c "create database lnbits_db;" 2>/dev/null
-  sudo -u postgres psql -c "create user lnbits_user with encrypted password 'raspiblitz';" 2>/dev/null
+  sudo -u postgres psql -c "create user lnbits_user with encrypted password '$PASSWORDB';" 2>/dev/null
   sudo -u postgres psql -c "grant all privileges on database lnbits_db to lnbits_user;" 2>/dev/null
+
+  # Fix ownership for existing databases (migration case)
+  echo "# Fixing ownership and permissions for existing data"
+  sudo -u postgres psql -d lnbits_db -c "REASSIGN OWNED BY postgres TO lnbits_user;" 2>/dev/null || true
+  sudo -u postgres psql -d lnbits_db -c "GRANT ALL ON SCHEMA public TO lnbits_user;" 2>/dev/null
+  sudo -u postgres psql -d lnbits_db -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO lnbits_user;" 2>/dev/null
+  sudo -u postgres psql -d lnbits_db -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO lnbits_user;" 2>/dev/null
+  sudo -u postgres psql -d lnbits_db -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO lnbits_user;" 2>/dev/null
 
   # check
   check=$(sudo -u postgres psql -c "SELECT datname FROM pg_database;" | grep lnbits_db)
@@ -823,7 +842,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # example: postgres://<user>:<password>@<host>/<database>
     sudo sed -i "/^LNBITS_DATABASE_URL=/d" $lnbitsConfig 2>/dev/null
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" $lnbitsConfig 2>/dev/null
-    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://postgres:postgres@localhost:5432/lnbits_db' >> ${lnbitsConfig}"
+    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:$PASSWORDB@localhost/lnbits_db?host=/var/run/postgresql' >> ${lnbitsConfig}"
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> ${lnbitsConfig}"
 
   else
@@ -1247,7 +1266,7 @@ if [ "$1" = "migrate" ]; then
     # example: postgres://<user>:<password>@<host>/<database>
     # add new postgres config
     sudo sed -i "/^LNBITS_DATABASE_URL=/d" $lnbitsConfig 2>/dev/null
-    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:raspiblitz@localhost:5432/lnbits_db' >> ${lnbitsConfig}"
+    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://lnbits_user:$PASSWORDB@localhost/lnbits_db?host=/var/run/postgresql' >> ${lnbitsConfig}"
 
     # clean start on new postgres db prior migration
     echo "# LNBits first start with clean PostgreSQL"
