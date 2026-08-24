@@ -34,6 +34,7 @@ if [ ${#lndk} -eq 0 ]; then lndk="off"; fi
 if [ ${#labelbase} -eq 0 ]; then labelbase="off"; fi
 if [ ${#publicpool} -eq 0 ]; then publicpool="off"; fi
 if [ ${#albyhub} -eq 0 ]; then albyhub="off"; fi
+if [ ${#boltzcli} -eq 0 ]; then boltzcli="off"; fi
 if [ "${albyhub}" == "on" ] && [ $(sudo ls /etc/systemd/system/albyhub.service 2>/dev/null | grep -c 'albyhub.service') -lt 1 ]; then albyhub="off"; fi
 
 # show select dialog
@@ -60,6 +61,7 @@ fi
 if [ "${lnd}" == "on" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(ia 'LNbits (Lightning Accounts)' ${LNBits})
   OPTIONS+=(ga 'LightningTipBot' ${lightningtipbot})
+  OPTIONS+=(bc 'Boltz Client (Submarine Swaps)' ${boltzcli})
 fi
 
 # just available for LND
@@ -703,6 +705,32 @@ if [ "${albyhub}" != "${choice}" ]; then
   fi
 else
   echo "AlbyHub setting unchanged."
+fi
+
+# Boltz Client process choice
+choice="off"; check=$(echo "${CHOICES}" | grep -c "bc")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${boltzcli}" != "${choice}" ]; then
+  echo "Boltz Client setting changed .."
+  anychange=1
+  sudo -u admin /home/admin/config.scripts/bonus.boltzcli.sh ${choice}
+  errorOnInstall=$?
+  if [ "${choice}" =  "on" ]; then
+    if [ ${errorOnInstall} -eq 0 ]; then
+      sudo systemctl start boltzcli
+      whiptail --title " Installed Boltz Client " --msgbox "\
+Boltz Client was installed.\n
+Use the new 'BOLTZ' entry in Main Menu for swap operations.\n
+" 10 50
+    else
+      l1="# FAIL on Boltz Client install #"
+      l2="Try manual install on terminal after reboot with:"
+      l3="/home/admin/config.scripts/bonus.boltzcli.sh on"
+      dialog --title 'FAIL' --msgbox "${l1}\n${l2}\n${l3}" 7 65
+    fi
+  fi
+else
+  echo "Boltz Client setting unchanged."
 fi
 
 # fints process choice  

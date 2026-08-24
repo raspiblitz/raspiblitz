@@ -749,6 +749,15 @@ else
   echo "Provisioning AlbyHub - keep default" >> ${logFile}
 fi
 
+# Boltz Client
+if [ "${boltzcli}" = "on" ]; then
+  echo "Provisioning Boltz Client - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Boltz Client"
+  sudo -u admin /home/admin/config.scripts/bonus.boltzcli.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Boltz Client - keep default" >> ${logFile}
+fi
+
 # custom install script from user
 customInstallAvailable=$(ls /mnt/hdd/app-data/custom-installs.sh 2>/dev/null | grep -c "custom-installs.sh")
 if [ ${customInstallAvailable} -gt 0 ]; then

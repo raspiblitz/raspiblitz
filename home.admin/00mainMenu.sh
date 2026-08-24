@@ -183,6 +183,9 @@ fi
 if [ "${albyhub}" == "on" ]; then
   OPTIONS+=(ALBYHUB "AlbyHub")
 fi
+if [ "${boltzcli}" == "on" ]; then
+  OPTIONS+=(BOLTZ "Boltz Client (Swaps)")
+fi
 
 # dont offer to switch to "testnet view for now" - so no wswitch back to mainnet needed
 #if [ ${chain} != "main" ]; then
@@ -360,6 +363,9 @@ case $CHOICE in
             ;;
         ALBYHUB)
             /home/admin/config.scripts/bonus.albyhub.sh menu
+            ;;
+        BOLTZ)
+            /home/admin/config.scripts/bonus.boltzcli.sh menu
             ;;
         TESTNETS)
             /home/admin/00parallelChainsMenu.sh
