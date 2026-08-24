@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 #########################################################################
-# Build your SD card image based on: 2024-03-15-raspios-bookworm-arm64.img.xz
-# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2025-05-13/
+# Build your SD card image based on:
+# https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2025-05-13/2025-05-13-raspios-bookworm-arm64.img.xz
 # SHA256: 1162c2a47c2ebda34c7ebeafc4afb71910a05b368d0721ae3736928e60ba5047
 # also change in: raspiblitz/ci/arm64-rpi/build.arm64-rpi.pkr.hcl
 # PGP fingerprint: 8738CD6B956F460C - to check signature:
