@@ -58,10 +58,12 @@ Options:
   -d, --display [lcd|hdmi|headless]        display class (default: lcd)
   -t, --tweak-boot-drive [0|1]             tweak boot drives (default: 1)
   -w, --wifi-region [off|US|GB|other]      wifi iso code (default: US) or 'off'
+  --image-build                            enable image build mode for rpi-image-gen (skips hardware operations)
 
 Notes:
   all options, long and short accept --opt=value mode also
   [0|1] can also be referenced as [false|true]
+  --image-build sets interaction=false and tweak-boot-drive=false automatically
 "
   exit 1
 }
@@ -158,6 +160,7 @@ while :; do
     -d|-d=*|--display|--display=*) get_arg display "${opt}" "${arg}";;
     -t|-t=*|--tweak-boot-drive|--tweak-boot-drive=*) get_arg tweak_boot_drive "${opt}" "${arg}";;
     -w|-w=*|--wifi-region|--wifi-region=*) get_arg wifi_region "${opt}" "${arg}";;
+    --image-build|--image-build=*) image_build="true"; shift_n=1;;
     "") break;;
     *) error_msg "Invalid option: ${opt}";;
   esac
@@ -202,6 +205,24 @@ if [ -n "${general_utils_install}" ]; then
 fi
 
 ## use default values for variables if empty
+
+# IMAGE-BUILD MODE
+# ----------------------------------------
+# When 'true' the script runs in image build mode for rpi-image-gen
+# This mode skips all hardware-dependent operations like systemctl, tune2fs, etc.
+# Can be set via --image-build flag or RB_IMAGE_BUILD environment variable
+# In image build mode, interaction and tweak_boot_drive are automatically set to false
+: "${image_build:=${RB_IMAGE_BUILD:-false}}"
+if [ "${image_build}" = "true" ] || [ "${image_build}" = "1" ]; then
+  image_build="true"
+  echo "*** IMAGE BUILD MODE ENABLED ***"
+  echo "Skipping hardware-dependent operations for rpi-image-gen compatibility"
+  # Force non-interactive mode in image build
+  : "${interaction:=false}"
+  : "${tweak_boot_drive:=false}"
+else
+  image_build="false"
+fi
 
 # INTERACTION
 # ----------------------------------------
@@ -260,7 +281,7 @@ echo "*****************************************"
 echo "For details on optional parameters - call with '--help' or check source code."
 
 # output
-for key in interaction fatpack github_user branch display tweak_boot_drive wifi_region; do
+for key in image_build interaction fatpack github_user branch display tweak_boot_drive wifi_region; do
   eval val='$'"${key}"
   [ -n "${val}" ] && printf '%s\n' "${key}=${val}"
 done
@@ -319,8 +340,12 @@ sleep 3 ## give time to cancel
 export DEBIAN_FRONTEND=noninteractive
 
 echo "*** Prevent sleep ***" # on all platforms https://wiki.debian.org/Suspend
-systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
-mkdir /etc/systemd/sleep.conf.d
+if [ "${image_build}" != "true" ]; then
+  systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+else
+  echo "Skipping systemctl mask in image build mode"
+fi
+mkdir -p /etc/systemd/sleep.conf.d
 echo "[Sleep]
 AllowSuspend=no
 AllowHibernation=no
@@ -337,7 +362,7 @@ isDebianInHosts=$(grep -c "debian" /etc/hosts)
 if [ ${isDebianInHosts} -eq 0 ]; then
   echo "# Adding debian to /etc/hosts"
   echo "127.0.1.1       debian" | tee -a /etc/hosts > /dev/null
-  if [ "${baseimage}" != "raspios_arm64" ]; then
+  if [ "${baseimage}" != "raspios_arm64" ] && [ "${image_build}" != "true" ]; then
     systemctl restart networking
   fi
 fi
@@ -352,11 +377,15 @@ sudo locale-gen
 echo -e "LANG=en_US.UTF-8\nLANGUAGE=en_US.UTF-8\nLC_ALL=en_US.UTF-8" | sudo tee /etc/default/locale > /dev/null
 
 echo "*** Setting Fallback DNS ***"
-connName=$(nmcli -g GENERAL.CONNECTION device show eth0 2>/dev/null)
-echo "current nmcli eth0 connection (${connName})"
-if [ "${connName}" != "" ]; then
-  echo "Adding DNS fallback servers ..."
-  nmcli connection modify "${connName}" ipv4.dns "208.67.222.222,208.67.220.220,1.1.1.1" ipv4.dns-priority -1 ipv4.ignore-auto-dns no
+if [ "${image_build}" != "true" ]; then
+  connName=$(nmcli -g GENERAL.CONNECTION device show eth0 2>/dev/null)
+  echo "current nmcli eth0 connection (${connName})"
+  if [ "${connName}" != "" ]; then
+    echo "Adding DNS fallback servers ..."
+    nmcli connection modify "${connName}" ipv4.dns "208.67.222.222,208.67.220.220,1.1.1.1" ipv4.dns-priority -1 ipv4.ignore-auto-dns no
+  fi
+else
+  echo "Skipping DNS configuration in image build mode"
 fi
 
 echo "*** Remove unnecessary packages ***"
@@ -499,7 +528,7 @@ if ! compgen -u pi; then
 fi
 
 # activate watchdog if ls /dev/watchdog exists - see #4534
-if [ -e /dev/watchdog ]; then
+if [ "${image_build}" != "true" ] && [ -e /dev/watchdog ]; then
   echo "Activating watchdog ..."
   if [ "${baseimage}" = "raspios_arm64" ]; then
     echo "dtparam=watchdog=on" | tee -a $raspi_configfile
@@ -508,7 +537,11 @@ if [ -e /dev/watchdog ]; then
   sed -i "s/^#RebootWatchdogSec=.*/RebootWatchdogSec=3min/g" /etc/systemd/system.conf
   sed -i "s/^#WatchdogDevice=.*/WatchdogDevice=\/dev\/watchdog/g" /etc/systemd/system.conf
 else
-  echo "No watchdog device /dev/watchdog found - keep watchdog like default"
+  if [ "${image_build}" = "true" ]; then
+    echo "Skipping watchdog activation in image build mode"
+  else
+    echo "No watchdog device /dev/watchdog found - keep watchdog like default"
+  fi
 fi
 
 # special prepare when RaspberryPi OS
@@ -518,7 +551,11 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   apt_install raspi-config
   # set WIFI country so boot does not block
   # this will undo the softblock of rfkill on RaspiOS
-  [ "${wifi_region}" != "off" ] && raspi-config nonint do_wifi_country $wifi_region
+  if [ "${wifi_region}" != "off" ] && [ "${image_build}" != "true" ]; then
+    raspi-config nonint do_wifi_country $wifi_region
+  elif [ "${image_build}" = "true" ]; then
+    echo "Skipping raspi-config wifi setup in image build mode"
+  fi
   # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
 
   if ! grep "Raspiblitz" $raspi_configfile; then
@@ -543,11 +580,15 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
   # see https://github.com/rootzoll/raspiblitz/issues/1053#issuecomment-600878695
   # use command to check last fsck check: tune2fs -l /dev/mmcblk0p2
-  if [ "${tweak_boot_drive}" == "true" ]; then
+  if [ "${tweak_boot_drive}" == "true" ] && [ "${image_build}" != "true" ]; then
     echo "* running tune2fs"
     tune2fs -c 1 /dev/mmcblk0p2
   else
-    echo "* skipping tweak_boot_drive"
+    if [ "${image_build}" = "true" ]; then
+      echo "* skipping tune2fs in image build mode"
+    else
+      echo "* skipping tweak_boot_drive"
+    fi
   fi
 
   # edit kernel parameters
@@ -582,9 +623,11 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
 fi
 
 # special prepare when Nvidia Jetson Nano
-if [ $(uname -a | grep -c 'tegra') -gt 0 ] ; then
+if [ $(uname -a | grep -c 'tegra') -gt 0 ] && [ "${image_build}" != "true" ]; then
   echo "Nvidia --> disable GUI on boot"
   systemctl set-default multi-user.target
+elif [ $(uname -a | grep -c 'tegra') -gt 0 ] && [ "${image_build}" = "true" ]; then
+  echo "Skipping systemctl set-default in image build mode for Nvidia"
 fi
 
 # remove rpi-first-boot-wizard
@@ -673,8 +716,12 @@ echo "
 " | tee ./rsyslog
 mv ./rsyslog /etc/logrotate.d/rsyslog
 chown root:root /etc/logrotate.d/rsyslog
-service logrotate restart
-service rsyslog restart
+if [ "${image_build}" != "true" ]; then
+  service logrotate restart
+  service rsyslog restart
+else
+  echo "Skipping service restart in image build mode"
+fi
 
 echo -e "\n*** ADDING MAIN USER admin ***"
 # based on https://raspibolt.org/system-configuration.html#add-users
@@ -847,13 +894,21 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian" ]; then
 
   if [ "${wifi_region}" == "off" ]; then
     echo -e "\n*** DISABLE WIFI ***"
-    systemctl disable wpa_supplicant.service
-    ifconfig wlan0 down
+    if [ "${image_build}" != "true" ]; then
+      systemctl disable wpa_supplicant.service
+      ifconfig wlan0 down
+    else
+      echo "Skipping wifi disable in image build mode"
+    fi
   fi
 
   # remove bluetooth services
-  systemctl disable bluetooth.service
-  systemctl disable hciuart.service
+  if [ "${image_build}" != "true" ]; then
+    systemctl disable bluetooth.service
+    systemctl disable hciuart.service
+  else
+    echo "Skipping bluetooth service disable in image build mode"
+  fi
 
   # remove bluetooth packages
   apt-get remove -y --purge pi-bluetooth bluez bluez-firmware
@@ -876,13 +931,21 @@ fi
 echo -e "\n*** RASPI BOOTSTRAP SERVICE ***"
 chmod +x /home/admin/_bootstrap.sh
 cp /home/admin/assets/bootstrap.service /etc/systemd/system/bootstrap.service
-systemctl enable bootstrap
+if [ "${image_build}" != "true" ]; then
+  systemctl enable bootstrap
+else
+  echo "Skipping systemctl enable bootstrap in image build mode"
+fi
 
 # *** BACKGROUND TASKS ***
 echo -e "\n*** RASPI BACKGROUND SERVICE ***"
 chmod +x /home/admin/_background.sh
 cp /home/admin/assets/background.service /etc/systemd/system/background.service
-systemctl enable background
+if [ "${image_build}" != "true" ]; then
+  systemctl enable background
+else
+  echo "Skipping systemctl enable background in image build mode"
+fi
 
 # *** BACKGROUND SCAN ***
 /home/admin/_background.scan.sh install || exit 1
