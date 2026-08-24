@@ -118,10 +118,12 @@ elif
 then
   echo "# Removing the backup plugin"
   sudo rm -f /home/bitcoin/${netprefix}cl-plugins-enabled/backup.py
-  echo "# Backup the existing old backup on the SDcard"
-  now=$(date +"%Y_%m_%d_%H%M%S")
-  sudo mv /home/bitcoin/${netprefix}lightningd.sqlite3.backup \
-    /home/bitcoin/${netprefix}lightningd.sqlite3.backup.${now}
+  if [ -f /home/bitcoin/${netprefix}lightningd.sqlite3.backup ]; then
+    echo "# Backup the existing old backup on the SDcard"
+    now=$(date +"%Y_%m_%d_%H%M%S")
+    sudo mv /home/bitcoin/${netprefix}lightningd.sqlite3.backup \
+      /home/bitcoin/${netprefix}lightningd.sqlite3.backup.${now}
+  fi
   echo "# Removing the backup.lock file"
   sudo rm -f /home/bitcoin/.lightning/${CLNETWORK}/backup.lock
 
