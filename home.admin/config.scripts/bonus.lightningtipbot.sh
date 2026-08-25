@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # https://github.com/LightningTipBot/LightningTipBot/
-BOTVERSION="v1.0"
+BOTVERSION="v1.1"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
