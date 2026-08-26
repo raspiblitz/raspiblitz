@@ -76,7 +76,7 @@ if [ "$1" == "off" ]; then
   exit 0
 fi
 
-# https://github.com/rootzoll/raspiblitz/issues/560
+# https://github.com/raspiblitz/raspiblitz/issues/560
 # when calling this it will backup the wifi config to HDD/SSD (if WIFI is active)
 # or when WIFI is inactive but a backup on HDD/SSD exists restore this
 if [ "$1" == "backup-restore" ]; then

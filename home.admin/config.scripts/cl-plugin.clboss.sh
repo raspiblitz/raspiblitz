@@ -41,7 +41,7 @@ CLBOSS does the following automatically:
 - Set forwarding fees so that they're competitive to other nodes
 
 Links with more info:
-https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.cl.md#clboss
+https://github.com/raspiblitz/raspiblitz/blob/dev/FAQ.cl.md#clboss
 https://github.com/ZmnSCPxj/clboss#operating
 " 0 0
   exit $?

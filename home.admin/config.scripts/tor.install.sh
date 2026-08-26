@@ -230,7 +230,7 @@ ReadWriteDirectories=-${tor_data_dir}
 After=network.target nss-lookup.target mnt-hdd.mount
 " | sudo tee /etc/systemd/system/tor@default.service.d/raspiblitz.conf
 
-  # fix apparmor - https://github.com/rootzoll/raspiblitz/issues/2531
+  # fix apparmor - https://github.com/raspiblitz/raspiblitz/issues/2531
   if [ $(systemctl --type=service | grep -c apparmor) -gt 0 ]; then
     echo "- add custom directories to apparmor"
     echo "\

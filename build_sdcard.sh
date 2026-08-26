@@ -393,7 +393,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 # autossh telnet vnstat -> network tools bandwidth monitoring for future statistics
 # parted dosfstools -> prepare for format data drive
 # btrfs-progs -> prepare for BTRFS data drive raid
-# fbi -> prepare for display graphics mode. https://github.com/rootzoll/raspiblitz/pull/334
+# fbi -> prepare for display graphics mode. https://github.com/raspiblitz/raspiblitz/pull/334
 # sysbench -> prepare for powertest
 # build-essential -> check for build dependencies on Ubuntu, Armbian
 # dialog -> dialog bc python3-dialog
@@ -410,7 +410,7 @@ echo -e "\n*** SOFTWARE UPDATE ***"
 general_utils="sudo htop git curl bash-completion vim jq dphys-swapfile bsdmainutils autossh telnet vnstat parted dosfstools fbi sysbench build-essential dialog bc python3-dialog unzip whois fdisk lsb-release smartmontools rsyslog qrencode dnsutils"
 # add btrfs-progs if not bookworm on aarch64
 [ "${architecture}" = "aarch64" ] && ! grep "12 (bookworm)" < /etc/os-release && general_utils="${general_utils} btrfs-progs"
-# python3-mako --> https://github.com/rootzoll/raspiblitz/issues/3441
+# python3-mako --> https://github.com/raspiblitz/raspiblitz/issues/3441
 python_dependencies="python3-venv python3-dev python3-wheel python3-jinja2 python3-pip python3-mako"
 server_utils="rsync net-tools xxd netcat-openbsd openssh-client openssh-sftp-server sshpass psmisc ufw sqlite3"
 [ "${architecture}" = "amd64" ] && amd64_dependencies="network-manager" # add amd64 dependency
@@ -519,7 +519,7 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   # set WIFI country so boot does not block
   # this will undo the softblock of rfkill on RaspiOS
   [ "${wifi_region}" != "off" ] && raspi-config nonint do_wifi_country $wifi_region
-  # see https://github.com/rootzoll/raspiblitz/issues/428#issuecomment-472822840
+  # see https://github.com/raspiblitz/raspiblitz/issues/428#issuecomment-472822840
 
   if ! grep "Raspiblitz" $raspi_configfile; then
     echo "# Adding Raspiblitz Edits to $raspi_configfile"
@@ -540,8 +540,8 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   fi
 
   # run fsck on sd root partition on every startup to prevent "maintenance login" screen
-  # see: https://github.com/rootzoll/raspiblitz/issues/782#issuecomment-564981630
-  # see https://github.com/rootzoll/raspiblitz/issues/1053#issuecomment-600878695
+  # see: https://github.com/raspiblitz/raspiblitz/issues/782#issuecomment-564981630
+  # see https://github.com/raspiblitz/raspiblitz/issues/1053#issuecomment-600878695
   # use command to check last fsck check: tune2fs -l /dev/mmcblk0p2
   if [ "${tweak_boot_drive}" == "true" ]; then
     echo "* running tune2fs"
@@ -606,7 +606,7 @@ if [ "${baseimage}" = "raspios_arm64" ]; then
   if [ ${autostartDone} -eq 0 ]; then
     # bash autostart for pi
     # run as exec to dont allow easy physical access by keyboard
-    # see https://github.com/rootzoll/raspiblitz/issues/54
+    # see https://github.com/raspiblitz/raspiblitz/issues/54
     bash -c 'echo "# automatic start the LCD info loop" >> /home/pi/.bashrc'
     bash -c 'echo "SCRIPT=\"sudo /home/admin/00infoLCD.sh\"" >> /home/pi/.bashrc'
     bash -c 'echo "# replace shell with script => logout when exiting script" >> /home/pi/.bashrc'
@@ -757,17 +757,17 @@ bash -c "echo 'PATH=\$PATH:/sbin' >> /etc/profile"
 echo -e "\n*** RASPIBLITZ EXTRAS ***"
 
 # screen for background processes
-# tmux for multiple (detachable/background) sessions when using SSH https://github.com/rootzoll/raspiblitz/issues/990
+# tmux for multiple (detachable/background) sessions when using SSH https://github.com/raspiblitz/raspiblitz/issues/990
 # fzf install a command-line fuzzy finder (https://github.com/junegunn/fzf)
 apt_install tmux screen fzf
 
 bash -c "echo '' >> /home/admin/.bashrc"
-bash -c "echo '# https://github.com/rootzoll/raspiblitz/issues/1784' >> /home/admin/.bashrc"
+bash -c "echo '# https://github.com/raspiblitz/raspiblitz/issues/1784' >> /home/admin/.bashrc"
 bash -c "echo 'NG_CLI_ANALYTICS=ci' >> /home/admin/.bashrc"
 
 # raspiblitz custom command prompt #2400
 if ! grep -Eq "^[[:space:]]*PS1.*₿" /home/admin/.bashrc; then
-    sed -i '/^unset color_prompt force_color_prompt$/i # raspiblitz custom command prompt https://github.com/rootzoll/raspiblitz/issues/2400' /home/admin/.bashrc
+    sed -i '/^unset color_prompt force_color_prompt$/i # raspiblitz custom command prompt https://github.com/raspiblitz/raspiblitz/issues/2400' /home/admin/.bashrc
     sed -i '/^unset color_prompt force_color_prompt$/i raspiIp=$(hostname -I | cut -d " " -f1)' /home/admin/.bashrc
     sed -i '/^unset color_prompt force_color_prompt$/i if [ "$color_prompt" = yes ]; then' /home/admin/.bashrc
     sed -i '/^unset color_prompt force_color_prompt$/i \    PS1=\x27${debian_chroot:+($debian_chroot)}\\[\\033[00;33m\\]\\u@$raspiIp:\\[\\033[00;34m\\]\\w\\[\\033[01;35m\\]$(__git_ps1 "(%s)") \\[\\033[01;33m\\]₿\\[\\033[00m\\] \x27' /home/admin/.bashrc
@@ -868,7 +868,7 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian" ]; then
   sed -i "s/^dtoverlay=${dtoverlay}/# dtoverlay=${dtoverlay}/g" ${raspi_configfile}
 
   # I2C fix (make sure dtparam=i2c_arm is not on)
-  # see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
+  # see: https://github.com/raspiblitz/raspiblitz/issues/1058#issuecomment-739517713
   sed -i "s/^dtparam=i2c_arm=.*//g" ${raspi_configfile}
 fi
 

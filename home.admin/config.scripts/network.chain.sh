@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# deprecated - see: https://github.com/rootzoll/raspiblitz/issues/2290
+# deprecated - see: https://github.com/raspiblitz/raspiblitz/issues/2290
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then

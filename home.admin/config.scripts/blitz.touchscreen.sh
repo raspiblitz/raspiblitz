@@ -1,6 +1,6 @@
 #!/bin/bash
-# see issue: https://github.com/rootzoll/raspiblitz/issues/646
-# and issue: https://github.com/rootzoll/raspiblitz/issues/809
+# see issue: https://github.com/raspiblitz/raspiblitz/issues/646
+# and issue: https://github.com/raspiblitz/raspiblitz/issues/809
 # to check debug logs: sudo cat /home/pi/.cache/lxsession/LXDE-pi/run.log
 
 source /home/admin/raspiblitz.info

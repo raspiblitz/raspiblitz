@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# based on: https://github.com/rootzoll/raspiblitz/issues/100#issuecomment-465997126
-# based on: https://github.com/rootzoll/raspiblitz/issues/386
+# based on: https://github.com/raspiblitz/raspiblitz/issues/100#issuecomment-465997126
+# based on: https://github.com/raspiblitz/raspiblitz/issues/386
 
 if [ $# -eq 0 ]; then
  echo "script set the port LND is running on"

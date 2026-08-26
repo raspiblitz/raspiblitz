@@ -193,7 +193,7 @@ if [ ${runGlobal} -eq 1 ]; then
   fi
 
   # sanity check on IP data
-  # see https://github.com/rootzoll/raspiblitz/issues/371#issuecomment-472416349
+  # see https://github.com/raspiblitz/raspiblitz/issues/371#issuecomment-472416349
   echo "# sanity check of IP data:"
   if [[ $globalIP =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$ ]]; then
     echo "# OK IPv6 for ${globalIP}"
@@ -205,7 +205,7 @@ if [ ${runGlobal} -eq 1 ]; then
   fi
 
   # prevent having no publicIP set at all and LND getting stuck
-  # https://github.com/rootzoll/raspiblitz/issues/312#issuecomment-462675101
+  # https://github.com/raspiblitz/raspiblitz/issues/312#issuecomment-462675101
   if [ ${#globalIP} -eq 0 ]; then
     if [ "${ipv6}" == "on" ]; then
       globalIP="::1"

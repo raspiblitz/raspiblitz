@@ -213,7 +213,7 @@ def dynu_update(domain, token, ip):
 def subscriptions_new(ip, dnsservice, domain, token, target):
 
     # check if already one subscription exists (limit to just one)
-    # https://github.com/rootzoll/raspiblitz/issues/1786
+    # https://github.com/raspiblitz/raspiblitz/issues/1786
     if Path(SUBSCRIPTIONS_FILE).is_file():
         subs = toml.load(SUBSCRIPTIONS_FILE)
         if "subscriptions_letsencrypt" in subs:
@@ -633,7 +633,7 @@ to reach the service you wanted.
     except Exception as e:
 
         # service flaky
-        # https://github.com/rootzoll/raspiblitz/issues/1772
+        # https://github.com/raspiblitz/raspiblitz/issues/1772
         if "failed oAuth Service" in str(e):
             Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
 A temporary error with the DYNU API happened:\nInvalid OAuth Bearer Token

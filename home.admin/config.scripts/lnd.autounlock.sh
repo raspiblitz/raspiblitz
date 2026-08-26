@@ -32,7 +32,7 @@ if [ "${turn}" = "on" ] && [ ${#passwordC} -eq 0 ]; then
 
 For more details see chapter in GitHub README 
 'Auto-unlock LND on startup'
-https://github.com/rootzoll/raspiblitz
+https://github.com/raspiblitz/raspiblitz
 
 Password C will be stored on the device.
 " 13 52 2>./.tmp

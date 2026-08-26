@@ -417,7 +417,7 @@ elif [ "$1" = "encrypt" ]; then
 # The words cannot be generated from the hsm_secret (one way function).
 # If you don't have the words the hsm_secret can be still backed up as a file or in hex:
 # https://lightning.readthedocs.io/BACKUP.html#hsm-secret
-# https://github.com/rootzoll/raspiblitz/blob/dev/FAQ.cl.md#seed
+# https://github.com/raspiblitz/raspiblitz/blob/dev/FAQ.cl.md#seed
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
   # encrypt
   walletPassword=$4
@@ -467,7 +467,7 @@ elif [ "$1" = "change-password" ]; then
 
 
 elif [ "$1" = "check" ]; then
-  # TODO https://github.com/rootzoll/raspiblitz/issues/2897
+  # TODO https://github.com/raspiblitz/raspiblitz/issues/2897
   # dumponchaindescriptors <path/to/hsm_secret> [network]
   # get current descriptors
   sudo -u bitcoin /home/bitcoin/lightning/tools/hsmtool dumponchaindescriptors \

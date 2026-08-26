@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # basic background on this feature
-# see: https://github.com/rootzoll/raspiblitz/issues/936
+# see: https://github.com/raspiblitz/raspiblitz/issues/936
 
 # get basic system information
 # these are the same set of infos the WebGUI dialog/controler has

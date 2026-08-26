@@ -26,7 +26,7 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
 # check if LCD (/dev/fb1) or HDMI (/dev/fb0)
-# see https://github.com/rootzoll/raspiblitz/pull/1580
+# see https://github.com/raspiblitz/raspiblitz/pull/1580
 # but basically this just says if the driver for GPIO LCD is installed - not if connected
 fb1Exists=$(ls /dev/fb1 2>/dev/null | grep -c "/dev/fb1")
 
@@ -91,7 +91,7 @@ if [ "${command}" == "image" ]; then
     fi
   fi
 
-  # see https://github.com/rootzoll/raspiblitz/pull/1580
+  # see https://github.com/raspiblitz/raspiblitz/pull/1580
   if [ ${fb1Exists} -eq 1 ] ; then
     # LCD
     fbi -a -T 1 -d /dev/fb1 --noverbose ${imagePath} 2> /dev/null
@@ -115,7 +115,7 @@ if [ "${command}" == "qr" ]; then
   fi
 
   qrencode -l L -o /var/cache/raspiblitz/qr.png "${datastring}" > /dev/null
-  # see https://github.com/rootzoll/raspiblitz/pull/1580
+  # see https://github.com/raspiblitz/raspiblitz/pull/1580
   if [ ${fb1Exists} -eq 1 ] ; then
     # LCD
     fbi -a -T 1 -d /dev/fb1 --noverbose /var/cache/raspiblitz/qr.png 2> /dev/null
@@ -138,7 +138,7 @@ fi
 
 ##################
 # ROTATE
-# see issue: https://github.com/rootzoll/raspiblitz/issues/681
+# see issue: https://github.com/raspiblitz/raspiblitz/issues/681
 ###################
 
 if [ "${command}" == "rotate" ]; then
@@ -189,7 +189,7 @@ fi
 ###################
 # TEST LCD CONNECT
 # only tested on RaspiOS 64-bit with RaspberryPi 4
-# https://github.com/rootzoll/raspiblitz/issues/1265#issuecomment-813660030
+# https://github.com/raspiblitz/raspiblitz/issues/1265#issuecomment-813660030
 ###################
 
 if [ "${command}" == "test-lcd-connect" ]; then
@@ -281,7 +281,7 @@ function install_lcd() {
     #sed -i "s/^#framebuffer_height=.*/framebuffer_height=320/g" ${raspi_configfile}
     #echo "hdmi_force_hotplug=1" >> ${raspi_configfile}
     sed -i "s/^dtparam=i2c_arm=.*//g" ${raspi_configfile}
-    # echo "dtparam=i2c_arm=on" >> ${raspi_configfile} --> this is to be called I2C errors - see: https://github.com/rootzoll/raspiblitz/issues/1058#issuecomment-739517713
+    # echo "dtparam=i2c_arm=on" >> ${raspi_configfile} --> this is to be called I2C errors - see: https://github.com/raspiblitz/raspiblitz/issues/1058#issuecomment-739517713
     # don't enable SPI and UART ports by default
     # echo "dtparam=spi=on" >> ${raspi_configfile}
     # echo "enable_uart=1" >> ${raspi_configfile}
@@ -312,7 +312,7 @@ function install_lcd() {
     # https://github.com/tux1c/wavesharelcd-64bit-rpi#adapting-guide-to-other-lcds
 
     # set font that fits the LCD screen
-    # https://github.com/rootzoll/raspiblitz/issues/244#issuecomment-476713706
+    # https://github.com/raspiblitz/raspiblitz/issues/244#issuecomment-476713706
     # there can be a different font for different types of LCDs with using the displayType parameter in the future
     setfont /usr/share/consolefonts/Uni3-TerminusBold16.psf.gz
 

@@ -252,7 +252,7 @@ Check 'sudo nginx -t' for a detailed error message.
     echo "'${localIP}':'${portSSL}':s' instead of '${localIP}':'${portTCP}':t"
     echo
     echo "For more details check the RaspiBlitz README on ElectRS:"
-    echo "https://github.com/rootzoll/raspiblitz"
+    echo "https://github.com/raspiblitz/raspiblitz"
     echo
     echo "Press ENTER to get back to main menu."
     read key

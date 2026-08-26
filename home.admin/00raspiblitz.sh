@@ -287,7 +287,7 @@ MAINMENU > REPAIR > REPAIR-LND > RETRYSCB
       echo "ERROR - please report to development team"
       echo "***********************************************************"
       echo "state(${state}) message(${message})"
-      echo "https://github.com/rootzoll/raspiblitz#support"
+      echo "https://github.com/raspiblitz/raspiblitz#support"
       echo "command to shutdown --> off"
       exit 1
     elif [ "${state}" == "" ]; then

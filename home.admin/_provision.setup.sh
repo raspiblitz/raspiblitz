@@ -44,7 +44,7 @@ fi
 ###################################
 # Preserve SSH keys
 # just copy dont link anymore
-# see: https://github.com/rootzoll/raspiblitz/issues/1798
+# see: https://github.com/raspiblitz/raspiblitz/issues/1798
 /home/admin/_cache.sh set message "SSH Keys"
 
 # link ssh directory from SD card to HDD

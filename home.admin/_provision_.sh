@@ -54,7 +54,7 @@ echo "# Make sure the user bitcoin is in the debian-tor group"
 usermod -a -G debian-tor bitcoin
 
 # make sure to have bitcoin core >=22 is backwards comp
-# see https://github.com/rootzoll/raspiblitz/issues/2546
+# see https://github.com/raspiblitz/raspiblitz/issues/2546
 sed -i '/^deprecatedrpc=.*/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf 2>/dev/null
 echo "deprecatedrpc=addresses" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf 2>/dev/null
 
@@ -81,7 +81,7 @@ fi
 # PREPARE LND (if activated)
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   # backup LND TLS certs
-  # https://github.com/rootzoll/raspiblitz/issues/324
+  # https://github.com/raspiblitz/raspiblitz/issues/324
   echo "*** Make backup of LND TLS files" >> ${logFile}
   rm -r  /var/cache/raspiblitz/tls_backup 2>/dev/null
   mkdir /var/cache/raspiblitz/tls_backup 2>/dev/null
@@ -768,7 +768,7 @@ else
 fi
 
 # replay backup LND conf & tlscerts
-# https://github.com/rootzoll/raspiblitz/issues/324
+# https://github.com/raspiblitz/raspiblitz/issues/324
 echo "" >> ${logFile}
 echo "*** Replay backup of LND conf/tls" >> ${logFile}
 if [ -d "/var/cache/raspiblitz/tls_backup" ]; then
@@ -808,8 +808,8 @@ sed -i '/^lndKeysend=/d' /mnt/hdd/app-data/raspiblitz.conf
 /home/admin/_cache.sh set message "Setup Done"
 
 # set the local network hostname (just if set in config - will not be set anymore by default in newer version)
-# have at the end - see https://github.com/rootzoll/raspiblitz/issues/462
-# see also https://github.com/rootzoll/raspiblitz/issues/819
+# have at the end - see https://github.com/raspiblitz/raspiblitz/issues/462
+# see also https://github.com/raspiblitz/raspiblitz/issues/819
 if [ ${#hostname} -gt 0 ]; then
   hostnameSanatized=$(echo "${hostname}"| tr -dc '[:alnum:]\n\r')
   if [ ${#hostnameSanatized} -gt 0 ]; then

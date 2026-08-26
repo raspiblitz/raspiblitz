@@ -25,7 +25,7 @@ fi
 /home/admin/config.scripts/tor.onion-service.sh bitcoin${BITCOINRPCPORT} ${BITCOINRPCPORT} ${BITCOINRPCPORT}
 
 hiddenService=$(sudo cat /mnt/hdd/app-data/tor/bitcoin${BITCOINRPCPORT}/hostname)
-# https://github.com/rootzoll/raspiblitz/issues/2339
+# https://github.com/raspiblitz/raspiblitz/issues/2339
 if [ ${#hiddenService} -eq 0 ];then
   hiddenService=$(sudo cat /mnt/hdd/app-data/tor/bitcoin/hostname)
 fi

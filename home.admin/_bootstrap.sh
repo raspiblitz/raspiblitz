@@ -249,7 +249,7 @@ fi
 ################################
 
 # Emergency cleaning logs when over 1GB (to prevent SD card filling up)
-# see https://github.com/rootzoll/raspiblitz/issues/418#issuecomment-472180944
+# see https://github.com/raspiblitz/raspiblitz/issues/418#issuecomment-472180944
 echo "*** Checking Log Size ***"
 logsMegaByte=$(du -c -m /var/log | grep "total" | awk '{print $1;}')
 if [ ${logsMegaByte} -gt 1000 ]; then
@@ -272,9 +272,9 @@ echo ""
 ################################
 
 # display 3 secs logo - try to kickstart LCD
-# see https://github.com/rootzoll/raspiblitz/issues/195#issuecomment-469918692
-# see https://github.com/rootzoll/raspiblitz/issues/647
-# see https://github.com/rootzoll/raspiblitz/pull/1580
+# see https://github.com/raspiblitz/raspiblitz/issues/195#issuecomment-469918692
+# see https://github.com/raspiblitz/raspiblitz/issues/647
+# see https://github.com/raspiblitz/raspiblitz/pull/1580
 randnum=$(shuf -i 0-7 -n 1)
 /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/startlogo${randnum}.png
 sleep 5
@@ -1355,14 +1355,14 @@ else
 
   #################################
   # FIX BLOCKCHAINDATA OWNER (just in case)
-  # https://github.com/rootzoll/raspiblitz/issues/239#issuecomment-450887567
+  # https://github.com/raspiblitz/raspiblitz/issues/239#issuecomment-450887567
   #################################
   chown bitcoin:bitcoin -R /mnt/hdd/bitcoin 2>/dev/null
 
   #################################
   # FIX BLOCKING FILES (just in case)
-  # https://github.com/rootzoll/raspiblitz/issues/1901#issue-774279088
-  # https://github.com/rootzoll/raspiblitz/issues/1836#issue-755342375
+  # https://github.com/raspiblitz/raspiblitz/issues/1901#issue-774279088
+  # https://github.com/raspiblitz/raspiblitz/issues/1836#issue-755342375
   rm -f /mnt/hdd/bitcoin/bitcoind.pid 2>/dev/null
   rm -f /mnt/hdd/bitcoin/.lock 2>/dev/null
 
@@ -1377,7 +1377,7 @@ else
   fi
   # /mnt/hdd/app-data/lnd/logs/bitcoin/mainnet/lnd.log
   rm /mnt/hdd/app-data/lnd/logs/${network}/${chain}net/lnd.log 2>/dev/null
-  # https://github.com/rootzoll/raspiblitz/issues/1700
+  # https://github.com/raspiblitz/raspiblitz/issues/1700
   rm /mnt/storage/app-storage/electrs/db/mainnet/LOCK 2>/dev/null
 
   ####################################

@@ -16,7 +16,7 @@ setuptools.setup(
     description="Common Uses Cases for RaspiBlitz",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/rootzoll/raspiblitz",
+    url="https://github.com/raspiblitz/raspiblitz",
     packages=setuptools.find_packages(exclude=("tests", "docs")),
     classifiers=[
         # How mature is this project? Common values are

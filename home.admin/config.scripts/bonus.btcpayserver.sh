@@ -669,7 +669,7 @@ WantedBy=multi-user.target
       hasFailed=$(sudo systemctl status nbxplorer | grep -c "Active: failed")
       if [ ${hasFailed} -eq 1 ]; then
         echo "# seems like starting nbxplorer service has failed - see: systemctl status nbxplorer"
-        echo "# maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
+        echo "# maybe report here: https://github.com/raspiblitz/raspiblitz/issues/214"
       fi
     done
   else
@@ -721,7 +721,7 @@ WantedBy=multi-user.target
       hasFailed=$(sudo systemctl status btcpayserver | grep -c "Active: failed")
       if [ ${hasFailed} -eq 1 ]; then
         echo "# seems like starting btcpayserver service has failed - see: systemctl status btcpayserver"
-        echo "# maybe report here: https://github.com/rootzoll/raspiblitz/issues/214"
+        echo "# maybe report here: https://github.com/raspiblitz/raspiblitz/issues/214"
       fi
     done
   else

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# DEPRECATED: https://github.com/rootzoll/raspiblitz/issues/2264#issuecomment-872655605
+# DEPRECATED: https://github.com/raspiblitz/raspiblitz/issues/2264#issuecomment-872655605
 # script will stay on v1.7.1 ... but should be removed after that
 
 # command info
@@ -32,7 +32,7 @@ if [ "${MODE}" == "on" ]; then
     whiptail --title " Static Channel Backup on Dropbox " --inputbox "
 Follow the steps described at the following link
 to get the DropBox-Authtoken from your account:
-https://github.com/rootzoll/raspiblitz/#a-dropbox-backup-target" 11 70 2>/home/admin/.tmp
+https://github.com/raspiblitz/raspiblitz/#a-dropbox-backup-target" 11 70 2>/home/admin/.tmp
     authtoken=$(cat /home/admin/.tmp)
     shred -u /home/admin/.tmp
   fi

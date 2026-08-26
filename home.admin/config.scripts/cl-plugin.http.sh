@@ -25,7 +25,7 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
 if [ $1 = connect ];then
   toraddress=$(sudo cat /mnt/hdd/app-data/tor/clHTTPplugin/hostname)
   PASSWORD_B=$(sudo cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-)
-  # https://github.com/rootzoll/raspiblitz/issues/2579#issuecomment-936091256
+  # https://github.com/raspiblitz/raspiblitz/issues/2579#issuecomment-936091256
   # http://rpcuser:rpcpassword@xxx.onion:9080
   url="http://lightning:${PASSWORD_B}@${toraddress}:9080"
   clear

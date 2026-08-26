@@ -189,7 +189,7 @@ This is just a quick patch release for v1.11.1
 - Update: JoinMarket v0.9.10 [details](https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.10)
 - Update: JoininBox v0.8.1 [details](https://github.com/openoms/joininbox/releases/tag/v0.8.1)
 - Update: Balance of Satoshis 15.11.0 (bos) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#15110)
-- Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
+- Fix: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/raspiblitz/raspiblitz/issues/1186)
 - Remove: Spark Wallet and Sparko CLN plugin (not maintained anymore)
 - Remove: Faraday, Loop, Pool single installs - used in the LiT package instead
 - Remove: deactivate LNproxy in the menu and in provision
@@ -197,16 +197,16 @@ This is just a quick patch release for v1.11.1
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
 
-- New: Automated disk image build for amd64 (VM, laptop, desktop, server) and arm64-rpi (Raspberry Pi) [details](https://github.com/rootzoll/raspiblitz/tree/dev/ci/README.md)
+- New: Automated disk image build for amd64 (VM, laptop, desktop, server) and arm64-rpi (Raspberry Pi) [details](https://github.com/raspiblitz/raspiblitz/tree/dev/ci/README.md)
 - New: Fatpack & Minimal sd card builds [details](SECURITY.md#minimal-sd-card-build)
-- New: I2P support for Bitcoin Core (i2pacceptincoming=1) [details](https://github.com/rootzoll/raspiblitz/issues/2413)
+- New: I2P support for Bitcoin Core (i2pacceptincoming=1) [details](https://github.com/raspiblitz/raspiblitz/issues/2413)
 - New: CLN Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
 - New: LNDg v1.6.0 [details](https://github.com/cryptosharks131/lndg)
-- New: Support of X708 UPS HAT [details](https://github.com/rootzoll/raspiblitz/pull/3087)
+- New: Support of X708 UPS HAT [details](https://github.com/raspiblitz/raspiblitz/pull/3087)
 - New: BOS Telegram Bot Support (see OPTIONS on LND Balance of Satoshis menu entry)
 - New: LightningTipBot v0.5 [details](https://github.com/LightningTipBot/LightningTipBot)
 - New: ↬lnproxy cli shortcut and server [details](https://github.com/lnproxy)
-- New: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1186)
+- New: Homebanking Interface FinTS/HBCI (experimental) [details](https://github.com/raspiblitz/raspiblitz/issues/1186)
 - New on WebUI: Jam (JoinMarket Web UI) v0.1.5 [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.1.5)
 - New on WebUI: Generate/Download Debug Report from Settings
 - Update: Bitcoin Core v24.0.1 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-24.0.1.md)
@@ -230,7 +230,7 @@ This is just a quick patch release for v1.11.1
 - Update: Tallycoin Connect v1.8.0 [details](https://github.com/djbooth007/tallycoin_connect/releases/tag/v1.8.0)
 - Update: Fulcrum install script (CLI only) v1.9.1 [details](https://github.com/cculianu/Fulcrum/releases/tag/v1.9.1)
 - Fixed: SCB/Emergency-Backup to USB drive (now also with CLN emergency.recover file)
-- Info: Run RaspiBlitz on Proxmox [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms/Proxmox)
+- Info: Run RaspiBlitz on Proxmox [details](https://github.com/raspiblitz/raspiblitz/tree/dev/alternative.platforms/Proxmox)
 - Info: IP2Tor fix fulmo shop & added new ip2tor.com shop
 - Info: 32GB sdcard is now enforced (after being recommended since v1.5)
 - Info: 'Reindex Blockchain' is now part of 'repair' menu
@@ -248,13 +248,13 @@ This is just a quick patch release for v1.11.1
 
 - New: Multilanguage WebUI [details](https://github.com/cstenglein/raspiblitz-web)
 - New: BackendAPI [details](https://github.com/fusion44/blitz_api)
-- New: ZRAM - compressed swap in memory [details](https://github.com/rootzoll/raspiblitz/issues/2905)
-- New: Core Lightning GRPC plugin [details](https://github.com/rootzoll/raspiblitz/pull/3109)
-- New: Core Lightning connection to BTCPayServer (CONNECT menu) [details](https://github.com/rootzoll/raspiblitz/issues/3155)
+- New: ZRAM - compressed swap in memory [details](https://github.com/raspiblitz/raspiblitz/issues/2905)
+- New: Core Lightning GRPC plugin [details](https://github.com/raspiblitz/raspiblitz/pull/3109)
+- New: Core Lightning connection to BTCPayServer (CONNECT menu) [details](https://github.com/raspiblitz/raspiblitz/issues/3155)
 - New: Alby (Connection Menu) [details](https://getalby.com/)
 - New: Homer Dashboard 22.06.1 [details](https://github.com/bastienwirtz/homer#readme)
 - New: ItchySats 0.5.0 [details](https://github.com/itchysats/itchysats/)
-- New: ckbunker CLI install script (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1062)
+- New: ckbunker CLI install script (experimental) [details](https://github.com/raspiblitz/raspiblitz/issues/1062)
 - Update: Bitcoin Core v23.0 [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-23.0.md)
 - Update: Core Lightning (CLN - formerly C-lightning) v0.11.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.11.2)
 - Update: LND v0.15.0 [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.15.0-beta)
@@ -268,25 +268,25 @@ This is just a quick patch release for v1.11.1
 - Update: JoininBox v0.6.8 [details](https://github.com/openoms/joininbox/releases/tag/v0.6.8)
 - Update: JoinMarket Web UI (Jam) v0.0.9 (CLI install script) [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.0.9)
 - Update: Electrum Server in Rust (electrs) v0.9.7 [details](https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md#097-apr-30-2022)
-- Update: Fulcrum Electrum server v1.7.0 (CLI install script) [issue](https://github.com/rootzoll/raspiblitz/issues/2924)
+- Update: Fulcrum Electrum server v1.7.0 (CLI install script) [issue](https://github.com/raspiblitz/raspiblitz/issues/2924)
 - Update: BTCPayServer 1.6.1 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.6.1)
 - Update: Mempool 2.4.0 [details](hhttps://github.com/mempool/mempool/releases/tag/v2.4.0)
 - Update: Helipad (Podcasting 2.0 Boostagram reader) v0.1.10 [details](https://github.com/Podcastindex-org/helipad/releases/tag/v0.1.10)
 - Update: Adapted Umbrel Migration for new 0.5.0 version with Core Lightning
-- Info: Run RaspiBlitz on amd64 bare metal and virtual machines [details](https://github.com/rootzoll/raspiblitz/tree/dev/alternative.platforms)
+- Info: Run RaspiBlitz on amd64 bare metal and virtual machines [details](https://github.com/raspiblitz/raspiblitz/tree/dev/alternative.platforms)
 
 ## What's new in Version 1.7.2 of RaspiBlitz?
 
 - Refactor: Cache & Backgroundscan of Systeminfo
-- New: Compact the LND channel.db monthly on restart, on-demand from menu and before backups [issue](https://github.com/rootzoll/raspiblitz/issues/2752)
-- New: Run C-lightning backup-compact regularly [issue](https://github.com/rootzoll/raspiblitz/issues/2869)
-- New: Switch LNbits between lnd & c-lightning [issue](https://github.com/rootzoll/raspiblitz/issues/2556)
+- New: Compact the LND channel.db monthly on restart, on-demand from menu and before backups [issue](https://github.com/raspiblitz/raspiblitz/issues/2752)
+- New: Run C-lightning backup-compact regularly [issue](https://github.com/raspiblitz/raspiblitz/issues/2869)
+- New: Switch LNbits between lnd & c-lightning [issue](https://github.com/raspiblitz/raspiblitz/issues/2556)
 - New: Tallycoin Connect [details](https://github.com/djbooth007/tallycoin_connect#readme)
 - New: Helipad (Podcasting 2.0 Boostagram reader) [details](https://github.com/Podcastindex-org/helipad)
-- New: Migration from Citadel to RaspiBlitz [details](https://github.com/rootzoll/raspiblitz/issues/2642)
+- New: Migration from Citadel to RaspiBlitz [details](https://github.com/raspiblitz/raspiblitz/issues/2642)
 - New: Bitcoinminds.org local on RaspiBlitz [details](https://github.com/raulcano/bitcoinminds)
 - New: JoinMarket Web UI v0.0.3 (CLI install of the first public alpha release) [details](https://github.com/joinmarket-webui/joinmarket-webui/releases/tag/v0.0.3)
-- New: Fulcrum Electrum server v1.6.0 (CLI install script) [issue](https://github.com/rootzoll/raspiblitz/issues/2924)
+- New: Fulcrum Electrum server v1.6.0 (CLI install script) [issue](https://github.com/raspiblitz/raspiblitz/issues/2924)
 - Update: LND v0.14.2-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.14.2-beta)
 - Update: C-lightning v0.10.2 [details](https://github.com/ElementsProject/lightning/releases/tag/v0.10.2)
 - Update: LNbits 0.7.0 [details](https://github.com/lnbits/lnbits-legend/releases/tag/0.7.0)
@@ -308,8 +308,8 @@ This is just a quick patch release for v1.11.1
 - Update: Balance of Satoshis 11.50.0 (BOS) [details](https://github.com/alexbosworth/balanceofsatoshis/blob/master/CHANGELOG.md#11500)
 - Update: Re-Add connecting node with Zap mobile wallet iOS & Android
 - Update: additional redaction of private data in debug logs
-- Security: Verify git commits and tags everywhere possible [issue](https://github.com/rootzoll/raspiblitz/issues/2686)
-- Fixed: LND repair options, SEED+SCB and rescue-file restore, RESET options [issue](https://github.com/rootzoll/raspiblitz/issues/2832)
+- Security: Verify git commits and tags everywhere possible [issue](https://github.com/raspiblitz/raspiblitz/issues/2686)
+- Fixed: LND repair options, SEED+SCB and rescue-file restore, RESET options [issue](https://github.com/raspiblitz/raspiblitz/issues/2832)
 - Info: All existing IP2Tor subscriptions need to be canceled & renewed to be functional again.
 - Info: 32GB sd card is now required (was already long time recommended on shopping list)
 - Info: The touchscreen graphical mode is back to experimental for now and missing some UI fixes. This might take until v1.8.1 where the touchscreen will get a refactor/rewrite.
@@ -323,8 +323,8 @@ There was a small patch-update with raspiblitz-v1.7.1-2021-10-28.img.gz to fix a
 - New: CL Spark Wallet v0.3.0rc with BOLT12 offers [details](https://github.com/shesek/spark-wallet/releases)
 - New: CL plugin: Sparko [details](https://github.com/fiatjaf/sparko)
 - New: CL plugin: CLBOSS The Core Lightning Node Manager [details](https://github.com/ZmnSCPxj/clboss#clboss-the-c-lightning-node-manager)
-- New: Refactored Setup-Process [details](https://github.com/rootzoll/raspiblitz/issues/1126#issuecomment-829757665)
-- New: Suez - channel visualization for LND and CL [info](https://github.com/rootzoll/raspiblitz/issues/2366#issuecomment-939521302)[details](https://github.com/prusnak/suez)
+- New: Refactored Setup-Process [details](https://github.com/raspiblitz/raspiblitz/issues/1126#issuecomment-829757665)
+- New: Suez - channel visualization for LND and CL [info](https://github.com/raspiblitz/raspiblitz/issues/2366#issuecomment-939521302)[details](https://github.com/prusnak/suez)
 - New: LND Static Channel Backup to Nextcloud
 - New: Allow SphinxApp to connect over Tor
 - New: Parallel TESTNET & SIGNET services
@@ -347,19 +347,19 @@ There was a small patch-update with raspiblitz-v1.7.1-2021-10-28.img.gz to fix a
 - Update: Channel Tools (chantools) v0.9.3 [details](https://github.com/guggero/chantools/blob/master/README.md)
 - Update: Circuitbreaker v0.3.0 [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
 - Remove: DropBox Backup (its recommended to change to Nextcloud Backup)
-- Remove: Litecoin (fork recommended) [details](https://github.com/rootzoll/raspiblitz/issues/2542)
+- Remove: Litecoin (fork recommended) [details](https://github.com/raspiblitz/raspiblitz/issues/2542)
 
 ## What's new in Version 1.7.0 of RaspiBlitz?
 
 - New: Raspberry Pi OS Base Image 64-bit (April 2021)
-- New: Build SD card Image with parameters & FatPack [details](https://github.com/rootzoll/raspiblitz/pull/2044)
-- New: Improve LND uptime and reliability over Tor [details](https://github.com/rootzoll/raspiblitz/pull/2148)
+- New: Build SD card Image with parameters & FatPack [details](https://github.com/raspiblitz/raspiblitz/pull/2044)
+- New: Improve LND uptime and reliability over Tor [details](https://github.com/raspiblitz/raspiblitz/pull/2148)
 - New: Lightning Terminal v0.4.1-alpha (Loop, Pool & Faraday UI Bundle) [details](https://github.com/lightninglabs/lightning-terminal#lightning-terminal-lit)
 - New: Channel Tools (chantools) v0.8.2 [details](https://github.com/guggero/chantools/blob/master/README.md)
 - New: Circuitbreaker LND firewall (settings menu) [details](https://github.com/lightningequipment/circuitbreaker/blob/master/README.md)
-- New: Telegraf metrics (experimental) [details](https://github.com/rootzoll/raspiblitz/issues/1369)
-- New: Download whitepaper from blockchain [details](https://github.com/rootzoll/raspiblitz/pull/2017)
-- New: Extended CONNECT and SYSTEM options in the ssh menu [details](https://github.com/rootzoll/raspiblitz/pull/2119)
+- New: Telegraf metrics (experimental) [details](https://github.com/raspiblitz/raspiblitz/issues/1369)
+- New: Download whitepaper from blockchain [details](https://github.com/raspiblitz/raspiblitz/pull/2017)
+- New: Extended CONNECT and SYSTEM options in the ssh menu [details](https://github.com/raspiblitz/raspiblitz/pull/2119)
 - Update: bitcoin-core version 0.21.0-beta with UPDATE option [details](https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-0.21.0.md)
 - Update: LND version 0.12.1-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.12.1-beta)
 - Update: RTL 0.10.1 [details](https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.10.1)
@@ -411,7 +411,7 @@ There was a small patch-update with raspiblitz-v1.7.1-2021-10-28.img.gz to fix a
 ## What's new in Version 1.6.1 of RaspiBlitz?
 
 - EMERGENCY-Update: LND version 0.11.1-beta [details](https://lists.linuxfoundation.org/pipermail/lightning-dev/2020-October/002819.html)
-- Update: IP2Tor+LetsEncrypt Functional Test [details](https://github.com/rootzoll/raspiblitz/issues/1412)
+- Update: IP2Tor+LetsEncrypt Functional Test [details](https://github.com/raspiblitz/raspiblitz/issues/1412)
 - Update: JoininBox 0.1.12 (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
 - Update: BTCPayServer v1.0.5.8 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v1.0.5.8)
 - Update: RTL 0.9.1
@@ -423,13 +423,13 @@ There was a small patch-update with raspiblitz-v1.7.1-2021-10-28.img.gz to fix a
 - Update: Faraday 0.2.1
 - Update: Improved IPv6 support
 - Update: LNbits new Quart-Framework install
-- New: Circuit Breaker (config-script) [details](https://github.com/rootzoll/raspiblitz/issues/1581)
+- New: Circuit Breaker (config-script) [details](https://github.com/raspiblitz/raspiblitz/issues/1581)
 - New: PyBlock (Python Util & Fun Scripts) [details](https://github.com/curly60e/pyblock/blob/master/README.md)
 - New: Mempool Explorer [details](https://github.com/mempool/mempool)
 - New: dynu.com as alternative option for LetsEncrypt FreeDNS provider
 - New: Experimental running RaspiBlitz as VM (vagrant & docker)
 
-For ALL small bug fixes & improvements see: https://github.com/rootzoll/raspiblitz/milestone/11
+For ALL small bug fixes & improvements see: https://github.com/raspiblitz/raspiblitz/milestone/11
 
 ## What's new in Version 1.6 of RaspiBlitz?
 
@@ -453,7 +453,7 @@ For ALL small bug fixes & improvements see: https://github.com/rootzoll/raspibli
 - New: JoininBox (terminal based GUI for JoinMarket) [details](https://github.com/openoms/joininbox)
 - New: ZeroTier [details](https://zerotier.com/manual/)
 - New: Kindle Display (on a jailbroken Kindle) [details](https://github.com/dennisreimann/kindle-display)
-- New: Static Channel Backup on USB Thumbdrive [details](https://github.com/rootzoll/raspiblitz/tree/v1.6#c-local-backup-target-usb-thumbdrive)
+- New: Static Channel Backup on USB Thumbdrive [details](https://github.com/raspiblitz/raspiblitz/tree/v1.6#c-local-backup-target-usb-thumbdrive)
 - New: Keep WIFI config over wpa_supplicant.conf for next update
 - Fix: DropBox StaticChannelBackup
 - Removed: Shango from the list of Mobile Wallets
@@ -479,17 +479,17 @@ Beside many small improvements and changes, these are most important changes:
 - Update: lndmanage 0.10.0 [details](https://github.com/bitromortac/lndmanage/releases/tag/v0.10.0)
 - Shoppinglist: Replace Shimfan with passive RP4-Heatcase
 - Shoppinglist: 1TB SSD is now default [details about migration to bigger SSD](README.md#import-a-migration-file)
-- Fix: (Control-D) Give root password for maintenance [details](https://github.com/rootzoll/raspiblitz/issues/1053)
+- Fix: (Control-D) Give root password for maintenance [details](https://github.com/raspiblitz/raspiblitz/issues/1053)
 - Fix: Screen Rotate on update from v1.3
 - New: Specter Desktop (connect DIY Specter-Wallet or ColdCard) [details](https://github.com/cryptoadvance/specter-desktop/blob/master/README.md)
 - New: JoinMarket [details](https://github.com/JoinMarket-Org/joinmarket-clientserver)
-- New: Activate 'Keysend' on LND by Service Menu [details](https://github.com/rootzoll/raspiblitz/issues/1000)
+- New: Activate 'Keysend' on LND by Service Menu [details](https://github.com/raspiblitz/raspiblitz/issues/1000)
 - New: SendMany App (wallet & chat over keysend) [details](https://github.com/fusion44/sendmany/blob/master/README.md)
 - New: Reset SSH cert if SSH login not working [details](FAQ.md#how-can-i-repair-my-ssh-login)
 - New: Make it easier to Copy The Blockchain over Network from running Blitz
 - New: Forwarding Fee Report on Main Menu
 - New: Easy Setup of Auto-Backup of SCB to Dropbox
-- New: LND Interims Updates (verified & reckless) [details](https://github.com/rootzoll/raspiblitz/issues/1116#issuecomment-619467148)
+- New: LND Interims Updates (verified & reckless) [details](https://github.com/raspiblitz/raspiblitz/issues/1116#issuecomment-619467148)
 - New: Sync RaspiBlitz with your forked GitHub repo thru menu [details](FAQ.md#how-can-i-sync-a-branch-of-my-forked-github-with-my-local-raspiblitz)
 - Removed: Clone Blockchain from second HDD (use CopyStation script)
 
@@ -517,10 +517,10 @@ Beside many small improvements and changes, these are most important changes:
 - New: Tor Support to connect mobile Apps
 - New: Migration Export/Import (e.g. HDD -> SSD) [details](README.md#import-a-migration-file)
 - New: Start without LCD (switch to HDMI) [details](FAQ.md#can-i-run-the-raspiblitz-without-a-displaylcd)
-- New: Recovery Sheet (PDF) [details](https://github.com/rootzoll/raspiblitz/raw/v1.4/home.admin/assets/RaspiBlitzRecoverySheet.pdf)
+- New: Recovery Sheet (PDF) [details](https://github.com/raspiblitz/raspiblitz/raw/v1.4/home.admin/assets/RaspiBlitzRecoverySheet.pdf)
 - Experimental: BTRFS [details](FAQ.md#why-use-btrfs-on-raspiblitz)
 
-For full details see issue list of [Release 1.4 Milestone](https://github.com/rootzoll/raspiblitz/milestone/7?closed=1).
+For full details see issue list of [Release 1.4 Milestone](https://github.com/raspiblitz/raspiblitz/milestone/7?closed=1).
 
 Find the full Tutorial how to build a RaspiBlitz in the [README](README.md) or follow the [instructions to update to the latest version](README.md#updating-raspiblitz-to-new-version).
 
@@ -547,7 +547,7 @@ Version 1.3 is using the new Raspbian Buster that is ready to use with the Raspb
 - Experimental: LCD Touchscreen Support
 - Experimental: UPS support (APC) [details](FAQ.md#how-to-connect-a-ups-to-the-raspiblitz)
 
-For full details see issue list of [Release 1.3 Milestone](https://github.com/rootzoll/raspiblitz/milestone/6?closed=1).
+For full details see issue list of [Release 1.3 Milestone](https://github.com/raspiblitz/raspiblitz/milestone/6?closed=1).
 
 ## What's new in Version 1.2 of RaspiBlitz?
 
@@ -576,7 +576,7 @@ Version 1.2 packs some more fixes and enhancements to make the RaspiBlitz more s
 - New: Temp in Fahrenheit on the LCD
 - Experimental: Backup Torrent Seeding (Service)
 
-For full details see issue list of [Release 1.2 Milestone](https://github.com/rootzoll/raspiblitz/milestone/5?closed=1).
+For full details see issue list of [Release 1.2 Milestone](https://github.com/raspiblitz/raspiblitz/milestone/5?closed=1).
 
 ## What's new in Version 1.1 of RaspiBlitz?
 
@@ -595,4 +595,4 @@ Version 1.1 packs some first fixes and enhancements to make the RaspiBlitz more 
 - New: Bootscreen with logo
 - Removed: FTP download option for blockchain
 
-For full details see issue list of [Release 1.1 Milestone](https://github.com/rootzoll/raspiblitz/milestone/3?closed=1).
+For full details see issue list of [Release 1.1 Milestone](https://github.com/raspiblitz/raspiblitz/milestone/3?closed=1).
