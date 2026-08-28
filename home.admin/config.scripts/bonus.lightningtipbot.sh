@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# https://github.com/LightningTipBot/LightningTipBot/
+# https://github.com/ChuckNorrison/LightningTipBot/
 BOTVERSION="v1.1"
 
 # command info
