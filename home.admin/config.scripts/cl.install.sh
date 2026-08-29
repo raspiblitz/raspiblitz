@@ -33,7 +33,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   echo "cl.install.sh install - called by build_sdcard.sh"
   echo "cl.install.sh on <mainnet|testnet|signet>"
   echo "cl.install.sh off <mainnet|testnet|signet> <purge>"
-  echo "cl.install.sh [update <version>|testPR <PRnumber>]"
+  echo "cl.install.sh [update <version>|update-binary <version>|testPR <PRnumber>]"
   echo "cl.install.sh display-seed <mainnet|testnet|signet>"
   echo
   exit 1
@@ -143,10 +143,12 @@ function importPGPKey() {
 }
 
 function verifySHA256SUMSSignature() {
+  # Optional parameter: basename of the SHA256SUMS file (default SHA256SUMS-${CLVERSION})
+  local sumsFile="${1:-SHA256SUMS-${CLVERSION}}"
   local verifyOutput="/tmp/cl_gpg_verify.txt"
   local goodSignature
 
-  sudo -u bitcoin gpg --verify "SHA256SUMS-${CLVERSION}.asc" "SHA256SUMS-${CLVERSION}" 2>&1 | tee "${verifyOutput}"
+  sudo -u bitcoin gpg --verify "${sumsFile}.asc" "${sumsFile}" 2>&1 | tee "${verifyOutput}"
   goodSignature=$(grep -c "Good signature" "${verifyOutput}")
   [ "${goodSignature}" -ge 1 ]
 }
@@ -220,6 +222,111 @@ function downloadAndVerifySourceZip() {
   sudo -u bitcoin rm -f "clightning-${CLVERSION}.zip" "SHA256SUMS-${CLVERSION}" "SHA256SUMS-${CLVERSION}.asc"
 }
 
+function downloadAndVerifyBinaryTarball() {
+  # Downloads, verifies and extracts the prebuilt CLN binary tarball
+  # Uses CLVERSION variable for the version to download
+  # Needed for embargoed security releases where the source zip is not published
+  local arch tarballArch tarballName sumsSuffix ubuntuVersion glibcVersion
+  local downloadUrl expectedChecksum actualChecksum
+
+  cd /home/bitcoin || exit 1
+  echo
+  echo "- Downloading Core Lightning ${CLVERSION} binary release"
+  echo
+
+  # Map machine architecture to release asset naming
+  arch=$(uname -m)
+  case "${arch}" in
+    x86_64) tarballArch="amd64" ;;
+    aarch64) tarballArch="arm64" ;;
+    *)
+      echo "# ERROR --> unsupported architecture for binary install: ${arch}"
+      exit 1
+      ;;
+  esac
+
+  # arm64 checksums are in a separate manifest file
+  if [ "${tarballArch}" = "arm64" ]; then
+    sumsSuffix="-arm64"
+  else
+    sumsSuffix=""
+  fi
+
+  # Pick the Ubuntu build matching the local glibc (binaries need glibc >= build version)
+  # Ubuntu 22.04 = glibc 2.35, 24.04 = 2.39, 26.04 = 2.41
+  glibcVersion=$(ldd --version | head -1 | grep -oE '[0-9]+\.[0-9]+$')
+  case "${glibcVersion}" in
+    2.35|2.36|2.37|2.38) ubuntuVersion="22.04" ;;
+    2.39|2.40) ubuntuVersion="24.04" ;;
+    2.41|2.42) ubuntuVersion="26.04" ;;
+    *)
+      echo "# ERROR --> unsupported glibc version: ${glibcVersion}"
+      echo "# Need glibc >= 2.35 (Debian 12+ / Ubuntu 22.04+)"
+      exit 1
+      ;;
+  esac
+  echo "# Detected: arch=${tarballArch} glibc=${glibcVersion} -> Ubuntu-${ubuntuVersion} build"
+
+  tarballName="clightning-${CLVERSION}-Ubuntu-${ubuntuVersion}-${tarballArch}.tar.xz"
+  downloadUrl="https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}"
+
+  # Download the tarball, checksum manifest and signature
+  sudo -u bitcoin wget -O "${tarballName}" \
+    "${downloadUrl}/${tarballName}" || exit 1
+  sudo -u bitcoin wget -O "SHA256SUMS-${CLVERSION}${sumsSuffix}" \
+    "${downloadUrl}/SHA256SUMS-${CLVERSION}${sumsSuffix}" || exit 1
+  sudo -u bitcoin wget -O "SHA256SUMS-${CLVERSION}${sumsSuffix}.asc" \
+    "${downloadUrl}/SHA256SUMS-${CLVERSION}${sumsSuffix}.asc" || exit 1
+
+  if importPGPKey "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}"; then
+    primaryKeyImported=1
+  else
+    echo "# WARNING --> ${PGPsigner} PGP key could not be imported"
+    primaryKeyImported=0
+  fi
+
+  echo
+  echo "- Verifying SHA256SUMS signature"
+  echo
+
+  if [ "${primaryKeyImported}" -ne 1 ] || ! verifySHA256SUMSSignature "SHA256SUMS-${CLVERSION}${sumsSuffix}"; then
+    echo "# SHA256SUMS signature was not verified with ${PGPsigner}"
+    echo "# Trying fallback PGP key ${PGPfallbackSigner}"
+    importPGPKey "${PGPfallbackSigner}" "${PGPfallbackPubkeyLink}" "${PGPfallbackPubkeyFingerprint}" || exit 1
+    echo
+    echo "- Verifying SHA256SUMS signature with fallback key"
+    echo
+    if ! verifySHA256SUMSSignature "SHA256SUMS-${CLVERSION}${sumsSuffix}"; then
+      echo "# ERROR --> SHA256SUMS signature verification failed"
+      exit 1
+    fi
+  fi
+  echo "# OK - SHA256SUMS signature verified"
+
+  echo
+  echo "- Verifying tarball checksum"
+  echo
+
+  expectedChecksum=$(grep "${tarballName}" "SHA256SUMS-${CLVERSION}${sumsSuffix}" | awk '{print $1}')
+  actualChecksum=$(sha256sum "${tarballName}" | awk '{print $1}')
+  if [ -z "${expectedChecksum}" ] || [ "${expectedChecksum}" != "${actualChecksum}" ]; then
+    echo "# ERROR --> Checksum mismatch for ${tarballName}"
+    echo "# Expected: ${expectedChecksum}"
+    echo "# Actual: ${actualChecksum}"
+    exit 1
+  fi
+  echo "# OK - Checksum verified for ${tarballName}"
+
+  echo
+  echo "- Extracting binaries to /usr/local"
+  echo
+
+  # Tarball contains ./usr/bin, ./usr/libexec, ./usr/share -> strip 2 levels to land in /usr/local
+  sudo tar -xvf "${tarballName}" -C /usr/local --strip-components=2 || exit 1
+  sudo rm -f "${tarballName}" "SHA256SUMS-${CLVERSION}${sumsSuffix}" "SHA256SUMS-${CLVERSION}${sumsSuffix}.asc"
+  echo "# OK - Binaries installed to /usr/local"
+}
+
 function runTests() {
   # Test dependencies are managed by uv sync in installDependencies()
   cd /home/bitcoin/lightning || exit 1
@@ -231,7 +338,7 @@ function runTests() {
 echo "# Running: 'cl.install.sh $*'"
 
 # check for version if specified
-if [ "$1" = "update" ] && [ $# -gt 1 ]; then
+if { [ "$1" = "update" ] || [ "$1" = "update-binary" ]; } && [ $# -gt 1 ]; then
   CLVERSION=$2
   if curl --output /dev/null --silent --head --fail \
     https://github.com/ElementsProject/lightning/releases/tag/${CLVERSION}; then
@@ -303,6 +410,59 @@ if [ "$1" = "install" ]; then
   fi
   echo
   echo "- OK the installation of Core Lightning ${installed} is successful"
+  exit 0
+fi
+
+if [ "$1" = "update-binary" ]; then
+
+  echo "# *** UPDATE CORE LIGHTNING TO ${CLVERSION} FROM BINARY TARBALL ***"
+  echo "# downloads and verifies the prebuilt release, then installs to /usr/local"
+  echo "# use for embargoed security releases where the source zip is not published"
+
+  # check if CLN is installed at all
+  if [ ! -f /usr/local/bin/lightningd ]; then
+    echo "# ERROR --> /usr/local/bin/lightningd not found"
+    echo "# Run 'cl.install.sh on <mainnet|testnet|signet>' for a fresh install instead"
+    exit 1
+  fi
+
+  echo
+  echo "# This replaces the running Core Lightning binaries with ${CLVERSION}"
+  echo "# Enabled lightningd services will be restarted"
+  echo "# Make sure this is intended, there might be no way to downgrade your database"
+  echo "# Press ENTER to continue or CTRL+C to abort the update"
+  read -r key
+
+  downloadAndVerifyBinaryTarball
+
+  installed=$(sudo -u bitcoin /usr/local/bin/lightningd --version)
+  if [ ${#installed} -eq 0 ]; then
+    echo
+    echo "# INSTALL FAILED --> Was not able to install Core Lightning"
+    exit 1
+  fi
+  correctVersion=$(echo "${installed}" | grep -c "${CLVERSION:1}")
+  if [ "${correctVersion}" -eq 0 ]; then
+    echo
+    echo "# INSTALL FAILED --> installed Core Lightning is not version ${CLVERSION}"
+    sudo -u bitcoin /usr/local/bin/lightningd --version
+    exit 1
+  fi
+
+  echo
+  echo "# Restarting enabled lightningd services"
+  for service in lightningd tlightningd slightningd; do
+    if sudo systemctl is-enabled ${service} 2>/dev/null | grep -q "enabled"; then
+      echo "# sudo systemctl restart ${service}"
+      sudo systemctl restart ${service}
+    fi
+  done
+
+  echo
+  echo "- OK the update to Core Lightning ${installed} is successful"
+  echo "# Monitor with:"
+  echo "sudo journalctl -fu lightningd"
+  echo "sudo tail -f /home/bitcoin/.lightning/bitcoin/cl.log"
   exit 0
 fi
 
