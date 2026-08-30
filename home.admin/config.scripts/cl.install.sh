@@ -349,6 +349,19 @@ if { [ "$1" = "update" ] || [ "$1" = "update-binary" ]; } && [ $# -gt 1 ]; then
     echo "# Exiting 'cl.install.sh $*' script"
     exit 1
   fi
+
+  if [ "$1" = "update" ]; then
+    # The source zip is not published for embargoed security releases
+    if curl --output /dev/null --silent --head --fail \
+      "https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-${CLVERSION}.zip"; then
+      echo "# OK the source zip exists for ${CLVERSION}"
+    else
+      echo "# ERROR --> the source zip clightning-${CLVERSION}.zip is not published"
+      echo "# Embargoed security releases only ship prebuilt tarballs"
+      echo "# Use: cl.install.sh update-binary ${CLVERSION}"
+      exit 1
+    fi
+  fi
 fi
 
 # check for PR if testPR
