@@ -35,7 +35,7 @@ jobs:
         # no sudo: these only exercise the version / asset existence checks
         run: |
           cd test
-          bats --verbose-run ./cl.install.bats
+          bats ./cl.install.bats
 
       - name: Run the bats tests with postgresql 15
         run: |
