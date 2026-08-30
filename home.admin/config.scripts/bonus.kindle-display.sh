@@ -10,7 +10,7 @@ CONFIG_FILE=$APP_DATA_DIR/.env
 APP_ROOT_DIR=$HOME_DIR/kindle-display
 APP_SERVER_DIR=$APP_ROOT_DIR/server
 CRON_FILE=$APP_SERVER_DIR/cron.sh
-APP_VERSION=1.1.0
+APP_VERSION=1.1.1
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -117,21 +117,15 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # link config to app
     sudo -u $USERNAME ln -s $CONFIG_FILE $APP_SERVER_DIR/.env
 
-    # generate initial data
-    echo "# run data script"
-    sudo -u $USERNAME npm run data
-
     # open firewall
     echo "# firewall kindle-display service"
     sudo ufw allow $SERVER_PORT comment 'kindle-display HTTP'
 
-    # install service
-    echo "# prepare kindle-display service"
-    cat > /home/admin/kindle-display.service <<EOF
-# systemd unit for kindle-display
-
+    # install services
+    echo "# prepare kindle-display services"
+    cat > /home/admin/kindle-display-server.service <<EOF
 [Unit]
-Description=kindle-display
+Description=Kindle Display Server
 Wants=${network}d.service
 After=${network}d.service
 
@@ -154,28 +148,43 @@ PrivateDevices=true
 [Install]
 WantedBy=multi-user.target
 EOF
-    sudo mv /home/admin/kindle-display.service /etc/systemd/system/kindle-display.service
+    cat > /home/admin/kindle-display-update.service <<EOF
+[Unit]
+Description=Kindle Display Update
+After=kindle-display-server.service
+Requires=kindle-display-server.service
 
-    echo "# enable kindle-display service"
-    sudo systemctl enable kindle-display
+[Service]
+Type=oneshot
+WorkingDirectory=${APP_SERVER_DIR}
+User=$USERNAME
+ExecStart=${CRON_FILE}
+EOF
+    cat > /home/admin/kindle-display-update.timer <<EOF
+[Unit]
+Description=Kindle Display Update Timer
 
-    # https://github.com/rootzoll/raspiblitz/issues/1375
+[Timer]
+OnCalendar=*:0/2
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+    sudo mv /home/admin/kindle-display-server.service /etc/systemd/system/kindle-display-server.service
+    sudo mv /home/admin/kindle-display-update.service /etc/systemd/system/kindle-display-update.service
+    sudo mv /home/admin/kindle-display-update.timer /etc/systemd/system/kindle-display-update.timer
+
+    echo "# enable kindle-display services"
+    sudo systemctl enable kindle-display-server.service
+    sudo systemctl enable kindle-display-update.timer
+
+    # https://github.com/raspiblitz/raspiblitz/issues/1375
     if [ "${state}" == "ready" ]; then
       echo "# starting kindle-display service"
-      sudo systemctl start kindle-display
-
-      # generate initial screenshot
-      echo "# run cronfile"
-      sudo -u $USERNAME $CRON_FILE
+      sudo systemctl start kindle-display-server.service
+      sudo systemctl start kindle-display-update.timer
     fi
-
-    # set cronjob
-    echo "# setting cronjob for kindle-display (default: every 2 minutes)"
-    echo "# /etc/cron.d/kindle-display
-SHELL=/bin/bash
-PATH=/bin:/usr/bin:/usr/local/bin
-# m h dom mon dow user-name command to be executed
-*/2 * * * * $USERNAME $CRON_FILE >/dev/null 2>&1" | sudo tee /etc/cron.d/kindle-display >/dev/null
 
     echo "OK - the KINDLE-DISPLAY script is now installed."
     echo ""
@@ -203,7 +212,8 @@ if [ "$1" = "update" ]; then
       exit 0
     fi
 
-    sudo systemctl stop kindle-display
+    sudo systemctl stop kindle-display-server.service
+    sudo systemctl stop kindle-display-update.timer
     sudo -u $USERNAME wget https://github.com/dennisreimann/kindle-display/archive/v$APP_VERSION.tar.gz
     sudo -u $USERNAME tar -xzf v$APP_VERSION.tar.gz kindle-display-$APP_VERSION/server
     sudo -u $USERNAME mv kindle-display{,-backup}
@@ -234,11 +244,9 @@ if [ "$1" = "update" ]; then
 
     # link config to app
     sudo -u $USERNAME ln -s $CONFIG_FILE $APP_SERVER_DIR/.env
-    # generate initial data
-    echo "# run data script"
-    sudo -u $USERNAME npm run data
     cd -
-    sudo systemctl start kindle-display
+    sudo systemctl start kindle-display-server.service
+    sudo systemctl start kindle-display-update.timer
     sudo -u $USERNAME rm -rf kindle-display-backup
 
     echo "*** KINDLE-DISPLAY UPDATED to $APP_VERSION ***"
@@ -261,10 +269,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     /home/admin/config.scripts/blitz.conf.sh set kindleDisplay "off"
 
     # uninstall service
-    sudo systemctl stop kindle-display
-    sudo systemctl disable kindle-display
-    sudo rm /etc/systemd/system/kindle-display.service
-    sudo rm -f /etc/cron.d/kindle-display
+    sudo systemctl stop kindle-display-server.service
+    sudo systemctl stop kindle-display-update.timer
+    sudo systemctl disable kindle-display-server.service
+    sudo systemctl disable kindle-display-update.timer
+    sudo rm /etc/systemd/system/kindle-display-server.service
+    sudo rm /etc/systemd/system/kindle-display-update.service
+    sudo rm /etc/systemd/system/kindle-display-update.timer
 
     # close port on firewall
     sudo ufw deny $SERVER_PORT
