@@ -356,10 +356,25 @@ if { [ "$1" = "update" ] || [ "$1" = "update-binary" ]; } && [ $# -gt 1 ]; then
       "https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/clightning-${CLVERSION}.zip"; then
       echo "# OK the source zip exists for ${CLVERSION}"
     else
-      echo "# ERROR --> the source zip clightning-${CLVERSION}.zip is not published"
+      echo "# The source zip clightning-${CLVERSION}.zip is not published"
       echo "# Embargoed security releases only ship prebuilt tarballs"
-      echo "# Use: cl.install.sh update-binary ${CLVERSION}"
-      exit 1
+      # check that the prebuilt tarball manifest exists for this architecture
+      case "$(uname -m)" in
+        x86_64) sumsFile="SHA256SUMS-${CLVERSION}" ;;
+        aarch64) sumsFile="SHA256SUMS-${CLVERSION}-arm64" ;;
+        *)
+          echo "# ERROR --> unsupported architecture for binary install: $(uname -m)"
+          exit 1
+          ;;
+      esac
+      if curl --output /dev/null --silent --head --fail \
+        "https://github.com/ElementsProject/lightning/releases/download/${CLVERSION}/${sumsFile}"; then
+        echo "# Falling back to the prebuilt binary tarball"
+        exec bash "$0" update-binary "${CLVERSION}"
+      else
+        echo "# ERROR --> no source zip and no prebuilt tarball found for ${CLVERSION}"
+        exit 1
+      fi
     fi
   fi
 fi
@@ -444,7 +459,11 @@ if [ "$1" = "update-binary" ]; then
   echo "# Enabled lightningd services will be restarted"
   echo "# Make sure this is intended, there might be no way to downgrade your database"
   echo "# Press ENTER to continue or CTRL+C to abort the update"
-  read -r key
+  read -r key || {
+    echo
+    echo "# Aborted - no confirmation given"
+    exit 1
+  }
 
   downloadAndVerifyBinaryTarball
 
