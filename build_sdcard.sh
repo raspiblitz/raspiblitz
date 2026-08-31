@@ -30,8 +30,8 @@ fi
 defaultRepo="raspiblitz" # user that hosts a `raspiblitz` repo
 defaultBranch="v1.12" # latest version branch
 
-defaultAPIuser="fusion44"
-defaultAPIrepo="blitz_api"
+defaultAPIuser="raspiblitz"
+defaultAPIrepo="raspiblitz-api"
 
 defaultWEBUIuser="raspiblitz"
 defaultWEBUIrepo="raspiblitz-web"
