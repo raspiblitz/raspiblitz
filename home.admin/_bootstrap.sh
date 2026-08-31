@@ -90,6 +90,15 @@ if [ $(systemd-detect-virt) != "none" ]; then
   vm=1
 fi
 
+# detect Proxmox VM (used to avoid treating a Proxmox audio device as a stop signal)
+proxmox=0
+if [ "${vm}" = "1" ] && grep -qi "Proxmox" \
+  /sys/class/dmi/id/bios_vendor \
+  /sys/class/dmi/id/sys_vendor \
+  /sys/class/dmi/id/product_name 2>/dev/null; then
+  proxmox=1
+fi
+
 # load already persisted valued (overwriting defaults if exist)
 source ${infoFile} 2>/dev/null
 
@@ -145,9 +154,9 @@ if [ "${flagExists}" = "1" ]; then
   exit 0
 fi
 
-# VM stop signal for manual provision - when an audio device is detected on a VM
+# VM stop signal for manual provision - when an audio device is detected on a non-Proxmox VM
 flagExists=$(lspci | grep -c "Audio")
-if [ "${vm}" = "1"  ] && [ ${flagExists} -gt 0 ]; then
+if [ "${vm}" = "1"  ] && [ "${proxmox}" = "0" ] && [ ${flagExists} -gt 0 ]; then
   localip=$(hostname -I | awk '{print $1}')
   /home/admin/_cache.sh set state "stop"
   /home/admin/_cache.sh set message "VM stopped for manual provision"
