@@ -38,7 +38,7 @@ amd64-lean-desktop-uefi-img:
 	  --preseed_file preseed.cfg \
 	  --boot uefi \
 	  --desktop gnome \
-		--image_type raw
+	  --image_type raw
 
 	# Compute the checksum of the qemu image
 	cd ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu && \
