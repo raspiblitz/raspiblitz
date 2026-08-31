@@ -10,9 +10,23 @@ import sys
 import time
 from datetime import datetime
 
-import toml
-sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
-from config import RaspiBlitzConfig
+import os
+import sys
+
+# Set up paths before importing dependencies that might be in BlitzPy
+script_dir = os.path.dirname(os.path.abspath(__file__))
+local_blitzpy = os.path.abspath(os.path.join(script_dir, '..', 'BlitzPy'))
+if os.path.exists(local_blitzpy):
+    sys.path.insert(0, local_blitzpy)
+
+try:
+    import toml
+except ImportError:
+    # try to load from the raspiblitz python modules path if not in local BlitzPy
+    sys.path.append('/home/admin/raspiblitz/home.admin/BlitzPy/blitzpy')
+    import toml
+
+from blitzpy import RaspiBlitzConfig
 from dialog import Dialog
 
 # constants for standard services
@@ -21,8 +35,13 @@ SERVICE_LND_GRPC_API = "LND-GRPC-API"
 SERVICE_LNBITS = "LNBITS"
 SERVICE_BTCPAY = "BTCPAY"
 
-# load config 
-cfg = RaspiBlitzConfig()
+# load config
+# explicitly set path because some blitzpy versions have wrong default
+# TODO: need reviewer feedback whether absolute paths are acceptable
+cfg_path = "/mnt/hdd/app-data/raspiblitz.conf"
+if not os.path.exists(cfg_path):
+    cfg_path = "/mnt/hdd/raspiblitz.conf"
+cfg = RaspiBlitzConfig(abs_path=cfg_path)
 cfg.reload()
 
 # basic values
@@ -48,6 +67,68 @@ def seconds_left(date_obj):
 
 
 #######################
+# STATUS FUNCTIONS
+#######################
+
+def get_short_status():
+    """Return a short string like '(1 Active)' for the main menu."""
+    active_count = 0
+    try:
+        if not os.path.isfile(SUBSCRIPTIONS_FILE): return ""
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+        
+        for key in ['subscriptions_ip2tor', 'subscriptions_letsencrypt', 'subscriptions_tunnelsats']:
+            if key in subs:
+                for sub in subs[key]:
+                    if sub.get('active'): active_count += 1
+                    
+        if active_count > 0:
+            return f"({active_count} Active)"
+    except:
+        pass
+    return ""
+
+def show_overall_status():
+    """Show a simple message box with all active subscriptions."""
+    d = Dialog(dialog="dialog", autowidgetsize=True)
+    d.set_background_title("RaspiBlitz Subscriptions")
+    
+    status_text = "CURRENT ACTIVE SUBSCRIPTIONS:\n\n"
+    found = False
+    
+    try:
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+        
+        # TunnelSats
+        if 'subscriptions_tunnelsats' in subs:
+            for sub in subs['subscriptions_tunnelsats']:
+                if sub.get('active'):
+                    status_text += f"• TunnelSats VPN: {sub.get('server_id')} (Active)\n"
+                    found = True
+                    
+        # IP2TOR
+        if 'subscriptions_ip2tor' in subs:
+            for sub in subs['subscriptions_ip2tor']:
+                if sub.get('active'):
+                    status_text += f"• IP2TOR Bridge: {sub.get('name')} (Active)\n"
+                    found = True
+                    
+        # LetsEncrypt
+        if 'subscriptions_letsencrypt' in subs:
+            for sub in subs['subscriptions_letsencrypt']:
+                if sub.get('active'):
+                    status_text += f"• LetsEncrypt: {sub.get('id')} (Active)\n"
+                    found = True
+                    
+    except Exception as e:
+        status_text += f"Error loading status: {e}\n"
+        
+    if not found:
+        status_text = "No active subscriptions found."
+        
+    d.msgbox(status_text, title="Overall Status", width=60, height=15)
+
+#######################
 # SSH MENU FUNCTIONS
 #######################
 
@@ -61,6 +142,8 @@ def my_subscriptions():
             count_subscriptions += len(subs['subscriptions_ip2tor'])
         if 'subscriptions_letsencrypt' in subs:
             count_subscriptions += len(subs['subscriptions_letsencrypt'])
+        if 'subscriptions_tunnelsats' in subs:
+            count_subscriptions += len(subs['subscriptions_tunnelsats'])
     except Exception as e:
         print(f"warning: {e}")
 
@@ -102,6 +185,15 @@ You have no active or inactive subscriptions.
             else:
                 active_state = "in-active"
             name = "LETSENCRYPT {0}".format(sub['id'])
+            choices.append(("{0}".format(lookup_index), "{0} ({1})".format(name.ljust(30), active_state)))
+
+    # list tunnelsats subscriptions
+    if 'subscriptions_tunnelsats' in subs:
+        for sub in subs['subscriptions_tunnelsats']:
+            lookup_index += 1
+            lookup[str(lookup_index)] = sub
+            active_state = "active" if sub['active'] else "in-active"
+            name = f"TunnelSats VPN ({sub['server_id']})"
             choices.append(("{0}".format(lookup_index), "{0} ({1})".format(name.ljust(30), active_state)))
 
     # show menu with options
@@ -177,6 +269,43 @@ The following additional information is available:
            description=selected_sub['description'],
            service=selected_sub['name']
            )
+    elif selected_sub['type'] == "tunnelsats-v1":
+        # Try to get live status
+        server_id = selected_sub.get('server_id')
+        live_status = "Unknown"
+        expiry = "Unknown"
+        
+        # Import helper function from tunnelsats module
+        try:
+            script_path = os.path.join(os.path.dirname(__file__), "blitz.subscriptions.tunnelsats.py")
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("tunnelsats_module", script_path)
+            tunnelsats_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(tunnelsats_module)
+            
+            pubkey = tunnelsats_module.get_local_pubkey(server_id)
+            if pubkey:
+                status_data = tunnelsats_module.check_status(pubkey)
+                if status_data:
+                    live_status = status_data.get('status', 'unknown')
+                    expiry = status_data.get('expiry', 'unknown')
+        except:
+            pass
+        
+        text = f'''
+This is a TunnelSats VPN subscription bought on {selected_sub['time_created']}.
+
+Server Location: {server_id}
+Description: {selected_sub['description']}
+
+Subscription State: {"ACTIVE" if selected_sub['active'] else "NOT ACTIVE"}
+Live Status: {live_status}
+Expiry: {expiry}
+
+--- MANAGEMENT ---
+Go to: MAIN MENU > SUBSCRIBE > + TunnelSats VPN
+This will open the dedicated TunnelSats menu.
+'''
     else:
         text = "no text?! FIXME"
 
@@ -204,6 +333,12 @@ The following additional information is available:
             print("# running: {0}".format(cmd))
             os.system(cmd)
             time.sleep(2)
+        elif selected_sub['type'] == "tunnelsats-v1":
+            script_path = os.path.join(os.path.dirname(__file__), "blitz.subscriptions.tunnelsats.py")
+            cmd = f"python3 {script_path} subscription-cancel {selected_sub['id']}"
+            print("# running: {0}".format(cmd))
+            os.system(cmd)
+            time.sleep(2)
         else:
             print("# FAIL: unknown subscription type")
             time.sleep(3)
@@ -213,14 +348,20 @@ The following additional information is available:
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "short-status":
+        print(get_short_status())
+        sys.exit(0)
+
     #######################
     # SSH MENU
     #######################
 
     choices = list()
+    choices.append(("STATUS", "Overall Status"))
     choices.append(("LIST", "My Subscriptions"))
     choices.append(("NEW1", "+ IP2TOR Bridge (paid)"))
     choices.append(("NEW2", "+ LetsEncrypt HTTPS Domain (free)"))
+    choices.append(("NEW3", "+ TunnelSats VPN (paid)"))
 
     d = Dialog(dialog="dialog", autowidgetsize=True)
     d.set_background_title("RaspiBlitz Subscriptions")
@@ -236,8 +377,14 @@ def main():
     # MANAGE SUBSCRIPTIONS
     #######################
 
+    if tag == "STATUS":
+        show_overall_status()
+        main()
+        sys.exit(0)
+
     if tag == "LIST":
         my_subscriptions()
+        main()
         sys.exit(0)
 
     ###############################
@@ -245,9 +392,17 @@ def main():
     ###############################
 
     if tag == "NEW2":
-        # run creating a new IP2TOR subscription
         os.system("clear")
-        cmd = "python /home/admin/config.scripts/blitz.subscriptions.letsencrypt.py create-ssh-dialog"
+        script_path = os.path.join(os.path.dirname(__file__), "blitz.subscriptions.letsencrypt.py")
+        cmd = "python3 {0} create-ssh-dialog".format(script_path)
+        print("# running: {0}".format(cmd))
+        os.system(cmd)
+        sys.exit(0)
+
+    if tag == "NEW3":
+        os.system("clear")
+        script_path = os.path.join(os.path.dirname(__file__), "blitz.subscriptions.tunnelsats.py")
+        cmd = "python3 {0} create-ssh-dialog".format(script_path)
         print("# running: {0}".format(cmd))
         os.system(cmd)
         sys.exit(0)
