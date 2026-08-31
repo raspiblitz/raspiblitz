@@ -1001,17 +1001,29 @@ if [ "$1" = "switch" ]; then
   sudo sed -i "/^LND_REST_ADMIN_MACAROON=/d" $lnbitsConfig 2>/dev/null
   sudo sed -i "/^LND_REST_INVOICE_MACAROON=/d" $lnbitsConfig 2>/dev/null
   sudo sed -i "/^LND_REST_READ_MACAROON=/d" $lnbitsConfig 2>/dev/null
-  sudo /usr/sbin/usermod -G lnbits lnbits
+  # never reset supplementary groups here (can remove required access groups)
+  sudo /usr/sbin/usermod --append --groups bitcoin lnbits
   sudo sed -i "/^CLIGHTNING_RPC=/d" $lnbitsConfig 2>/dev/null
 
   # LND CONFIG
   if [ "${fundingsource}" == "lnd" ] || [ "${fundingsource}" == "tlnd" ] || [ "${fundingsource}" == "slnd" ]; then
 
     # make sure lnbits user can access LND credentials
-    echo "# adding lnbits user is member of lndreadonly, lndinvoice, lndadmin"
+    echo "# adding lnbits user is member of bitcoin, lndreadonly, lndinvoice, lndadmin"
+    sudo /usr/sbin/usermod --append --groups bitcoin lnbits
     sudo /usr/sbin/usermod --append --groups lndinvoice lnbits
     sudo /usr/sbin/usermod --append --groups lndreadonly lnbits
     sudo /usr/sbin/usermod --append --groups lndadmin lnbits
+
+    # allow group traversal to chain folder where LND macaroons are stored
+    if [ "${fundingsource}" == "lnd" ]; then
+      lndChain="main"
+    elif [ "${fundingsource}" == "tlnd" ]; then
+      lndChain="test"
+    else
+      lndChain="sig"
+    fi
+    sudo chmod 750 /mnt/hdd/app-data/lnd/data/chain/bitcoin/${lndChain}net 2>/dev/null
 
     # prepare config entries in lnbits config for lnd
     echo "# preparing lnbits config for lnd"
