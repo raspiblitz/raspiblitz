@@ -569,6 +569,24 @@ else
   echo "Provisioning Specter - keep default" >> ${logFile}
 fi
 
+# Wasabi Wallet daemon (client)
+if [ "${wasabid}" = "on" ]; then
+  echo "Provisioning Wasabi daemon - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Wasabi daemon"
+  sudo /home/admin/config.scripts/bonus.wasabid.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Wasabi daemon - keep default" >> ${logFile}
+fi
+
+# Wasabi (WabiSabi) coinjoin coordinator (advanced bonus, not in services menu)
+if [ "${wasabi}" = "on" ]; then
+  echo "Provisioning Wasabi coordinator - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Wasabi coordinator"
+  sudo /home/admin/config.scripts/bonus.wasabi.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Wasabi coordinator - keep default" >> ${logFile}
+fi
+
 # BOS
 if [ "${bos}" = "on" ]; then
   echo "Provisioning Balance of Satoshis - run config script" >> ${logFile}
