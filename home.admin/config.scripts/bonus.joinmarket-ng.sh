@@ -33,6 +33,37 @@ USER_JM="joinmarketng"
 GITHUB_REPO="https://github.com/joinmarket-ng/joinmarket-ng"
 GITHUB_TAG="0.35.0"
 
+SYSTEM_DEPENDENCIES=(
+  build-essential
+  git
+  libffi-dev
+  libsecp256k1-dev
+  libsodium-dev
+  pkg-config
+  python3-dev
+  python3-venv
+)
+
+install_system_dependencies() {
+  local missing_dependencies=()
+  local package
+
+  for package in "${SYSTEM_DEPENDENCIES[@]}"; do
+    if ! dpkg -s "${package}" >/dev/null 2>&1; then
+      missing_dependencies+=("${package}")
+    fi
+  done
+
+  if [ ${#missing_dependencies[@]} -eq 0 ]; then
+    echo "# System dependencies are already installed."
+    return 0
+  fi
+
+  echo "# Installing system dependencies: ${missing_dependencies[*]}"
+  sudo apt-get update \
+    && sudo apt-get install -y "${missing_dependencies[@]}"
+}
+
 # GPG signature verification URLs
 GITHUB_RAW="https://raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/main"
 GITHUB_RELEASES="https://github.com/joinmarket-ng/joinmarket-ng/releases/download"
@@ -549,8 +580,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # 1. Install System Dependencies
   echo "# Installing system dependencies..."
-  sudo apt-get update
-  sudo apt-get install -y build-essential libffi-dev libsodium-dev pkg-config python3-dev python3-venv git
+  if ! install_system_dependencies; then
+    echo "# FAIL - system dependency installation failed"
+    exit 1
+  fi
 
   # 1b. Ensure Bitcoin Core wallet support is enabled.
   #
@@ -832,6 +865,14 @@ fi
 if [ "$1" = "update" ]; then
 
   echo "# Updating ${APPID} ..."
+
+  # Reconcile native dependencies on existing installations before checking
+  # whether the selected source version is already installed. This ensures an
+  # update can repair nodes provisioned before a dependency was introduced.
+  if ! install_system_dependencies; then
+    echo "# FAIL - system dependency installation failed"
+    exit 1
+  fi
 
   # Determine target version
   if [ -n "${2}" ]; then

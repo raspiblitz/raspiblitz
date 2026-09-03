@@ -146,6 +146,22 @@ teardown_file() {
   grep -q '^disablewallet=0' /mnt/hdd/app-data/bitcoin/bitcoin.conf
 }
 
+@test "install provides the native secp256k1 library" {
+  dpkg -s libsecp256k1-dev
+  run "/home/${USER_JM}/venv/bin/python" -c '
+from bitcointx.core.secp256k1 import get_secp256k1
+
+get_secp256k1()
+'
+  [ "$status" -eq 0 ]
+}
+
+@test "update reconciles system dependencies before version checks" {
+  local update_prefix
+  update_prefix=$(awk '/^if \[ "\$1" = "update" \];/,/# Determine target version/' "${SCRIPT}")
+  echo "${update_prefix}" | grep -q 'install_system_dependencies'
+}
+
 @test "installer calls network.wallet.sh on" {
   # Static check that the bonus script wires the wallet-enablement step,
   # so a future refactor doesn't silently drop it.
