@@ -18,9 +18,9 @@
 #     sudo su - ${USER_JM}          # interactive login as joinmarketng
 #     sudo -u ${USER_JM} jm-ng      # run a single command
 #
-# Only management entry points (start/stop/status of the maker service,
-# storing the wallet password, running self-update) are exposed to the
-# joinmarketng user via the /etc/sudoers.d/${USER_JM}-maker rules.
+# Only fixed maker service actions are exposed to the joinmarketng user via
+# the /etc/sudoers.d/${USER_JM}-maker rules. Password storage and updates run
+# as the unprivileged app user.
 
 # APPID
 APPID="joinmarket-ng"
@@ -32,6 +32,14 @@ USER_JM="joinmarketng"
 # Pinning a specific version/commit for stability
 GITHUB_REPO="https://github.com/joinmarket-ng/joinmarket-ng"
 GITHUB_TAG="0.38.0"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SERVICE_HELPER="/usr/local/sbin/raspiblitz-joinmarket-ng-service"
+SERVICE_HELPER_SOURCE="${SCRIPT_DIR}/joinmarket-ng-service.sh"
+TRUSTED_KEYRING="${SCRIPT_DIR}/joinmarket-ng-trusted-keys.asc"
+TRUSTED_FINGERPRINTS=(
+  "1C53A412D11EF3051704419C44912E1E03005B31"
+  "9253062A4F92D63459085CA62D230520212A5901"
+)
 
 SYSTEM_DEPENDENCIES=(
   build-essential
@@ -43,6 +51,14 @@ SYSTEM_DEPENDENCIES=(
   python3-dev
   python3-venv
 )
+
+run_as_joinmarketng() {
+  if [ "$(id -un)" = "${USER_JM}" ]; then
+    "$@"
+  else
+    sudo -u "${USER_JM}" "$@"
+  fi
+}
 
 install_system_dependencies() {
   local missing_dependencies=()
@@ -57,6 +73,11 @@ install_system_dependencies() {
   if [ ${#missing_dependencies[@]} -eq 0 ]; then
     echo "# System dependencies are already installed."
     return 0
+  fi
+
+  if [ "$(id -un)" = "${USER_JM}" ]; then
+    echo "# Missing system dependencies require an administrator update: ${missing_dependencies[*]}"
+    return 1
   fi
 
   echo "# Installing system dependencies: ${missing_dependencies[*]}"
@@ -107,65 +128,65 @@ verify_release() {
   export GNUPGHOME="${TMPDIR}/gnupg"
   mkdir -m 700 "${GNUPGHOME}"
 
+  restore_gnupghome() {
+    if [ -n "${GNUPGHOME_ORIG}" ]; then
+      export GNUPGHOME="${GNUPGHOME_ORIG}"
+    else
+      unset GNUPGHOME
+    fi
+  }
+
   # Download release manifest
   local MANIFEST="${TMPDIR}/release-manifest-${TAG}.txt"
   echo "# Downloading release manifest for ${TAG}..."
   if ! curl -sfL "${GITHUB_RELEASES}/${TAG}/release-manifest-${TAG}.txt" -o "${MANIFEST}"; then
     echo "# FAIL: Could not download release manifest for ${TAG}"
     rm -rf "${TMPDIR}"
-    [ -n "${GNUPGHOME_ORIG}" ] && export GNUPGHOME="${GNUPGHOME_ORIG}" || unset GNUPGHOME
+    restore_gnupghome
     return 1
   fi
 
-  # Download trusted-keys.txt
-  local TRUSTED_KEYS="${TMPDIR}/trusted-keys.txt"
-  if ! curl -sfL "${GITHUB_RAW}/signatures/trusted-keys.txt" -o "${TRUSTED_KEYS}"; then
-    echo "# FAIL: Could not download trusted-keys.txt"
+  if [ ! -r "${TRUSTED_KEYRING}" ]; then
+    echo "# FAIL: Local JoinMarket-NG trust root is unavailable."
     rm -rf "${TMPDIR}"
-    [ -n "${GNUPGHOME_ORIG}" ] && export GNUPGHOME="${GNUPGHOME_ORIG}" || unset GNUPGHOME
+    restore_gnupghome
     return 1
   fi
 
-  # Parse trusted fingerprints (skip comments and blank lines)
-  local FINGERPRINTS=()
-  while IFS= read -r line; do
-    line=$(echo "${line}" | sed 's/#.*//; s/^[[:space:]]*//; s/[[:space:]]*$//')
-    [ -z "${line}" ] && continue
-    # First field is the fingerprint
-    local fp
-    fp=$(echo "${line}" | awk '{print $1}')
-    FINGERPRINTS+=("${fp}")
-  done < "${TRUSTED_KEYS}"
-
-  if [ ${#FINGERPRINTS[@]} -eq 0 ]; then
-    echo "# FAIL: No trusted keys found in trusted-keys.txt"
+  if ! gpg --batch --quiet --import "${TRUSTED_KEYRING}" 2>/dev/null; then
+    echo "# FAIL: Could not import the local JoinMarket-NG trust root."
     rm -rf "${TMPDIR}"
-    [ -n "${GNUPGHOME_ORIG}" ] && export GNUPGHOME="${GNUPGHOME_ORIG}" || unset GNUPGHOME
+    restore_gnupghome
     return 1
   fi
 
-  echo "# Found ${#FINGERPRINTS[@]} trusted key(s). Importing and verifying..."
-
-  # Import public keys and verify signatures
-  local VALID_SIGS=0
-  for fp in "${FINGERPRINTS[@]}"; do
-    # Import public key
-    local PUBKEY="${TMPDIR}/${fp}.asc"
-    if ! curl -sfL "${GITHUB_RAW}/signatures/pubkeys/${fp}.asc" -o "${PUBKEY}"; then
-      echo "#   Key ${fp}: public key not found, skipping"
-      continue
+  local fp
+  for fp in "${TRUSTED_FINGERPRINTS[@]}"; do
+    if ! gpg --batch --with-colons --list-keys "${fp}" 2>/dev/null \
+      | awk -F: -v expected="${fp}" '$1 == "fpr" && toupper($10) == expected { found = 1 } END { exit !found }'; then
+      echo "# FAIL: Local trust root does not contain expected fingerprint ${fp}."
+      rm -rf "${TMPDIR}"
+      restore_gnupghome
+      return 1
     fi
-    gpg --batch --quiet --import "${PUBKEY}" 2>/dev/null
+  done
 
-    # Download signature for this release
+  echo "# Imported ${#TRUSTED_FINGERPRINTS[@]} locally pinned key(s)."
+
+  # Release signatures are untrusted inputs. A success requires a matching
+  # VALIDSIG fingerprint from the local trust root.
+  local VALID_SIGS=0
+  for fp in "${TRUSTED_FINGERPRINTS[@]}"; do
     local SIG="${TMPDIR}/${fp}.sig"
     if ! curl -sfL "${GITHUB_RAW}/signatures/${TAG}/${fp}.sig" -o "${SIG}"; then
       echo "#   Key ${fp}: no signature for ${TAG}, skipping"
       continue
     fi
 
-    # Verify against CI release manifest first.
-    if gpg --batch --verify "${SIG}" "${MANIFEST}" 2>/dev/null; then
+    local GPG_STATUS
+    if GPG_STATUS=$(gpg --batch --status-fd 1 --verify "${SIG}" "${MANIFEST}" 2>/dev/null) \
+      && printf '%s\n' "${GPG_STATUS}" \
+        | awk -v expected="${fp}" '$1 == "[GNUPG:]" && $2 == "VALIDSIG" && $3 == expected { found = 1 } END { exit !found }'; then
       echo "#   Key ${fp}: VALID signature"
       VALID_SIGS=$((VALID_SIGS + 1))
       continue
@@ -178,7 +199,9 @@ verify_release() {
       continue
     fi
 
-    if ! gpg --batch --verify "${SIG}" "${LOCAL_MANIFEST}" 2>/dev/null; then
+    if ! GPG_STATUS=$(gpg --batch --status-fd 1 --verify "${SIG}" "${LOCAL_MANIFEST}" 2>/dev/null) \
+      || ! printf '%s\n' "${GPG_STATUS}" \
+        | awk -v expected="${fp}" '$1 == "[GNUPG:]" && $2 == "VALIDSIG" && $3 == expected { found = 1 } END { exit !found }'; then
       echo "#   Key ${fp}: INVALID signature!"
       continue
     fi
@@ -196,7 +219,7 @@ verify_release() {
     echo "# FAIL: No valid trusted signatures found for release ${TAG}!"
     echo "# This could indicate a compromised or unsigned release. Aborting."
     rm -rf "${TMPDIR}"
-    [ -n "${GNUPGHOME_ORIG}" ] && export GNUPGHOME="${GNUPGHOME_ORIG}" || unset GNUPGHOME
+    restore_gnupghome
     return 1
   fi
 
@@ -207,14 +230,14 @@ verify_release() {
   if [ -z "${VERIFIED_COMMIT}" ]; then
     echo "# FAIL: Could not extract commit hash from release manifest."
     rm -rf "${TMPDIR}"
-    [ -n "${GNUPGHOME_ORIG}" ] && export GNUPGHOME="${GNUPGHOME_ORIG}" || unset GNUPGHOME
+    restore_gnupghome
     return 1
   fi
   echo "# Verified commit: ${VERIFIED_COMMIT}"
 
   # Cleanup
   rm -rf "${TMPDIR}"
-  [ -n "${GNUPGHOME_ORIG}" ] && export GNUPGHOME="${GNUPGHOME_ORIG}" || unset GNUPGHOME
+  restore_gnupghome
   return 0
 }
 
@@ -232,7 +255,7 @@ installed_release_matches() {
     return 1
   fi
 
-  sudo -u ${USER_JM} "${VENV_PYTHON}" - "${EXPECTED_COMMIT}" <<'PYEOF'
+  run_as_joinmarketng "${VENV_PYTHON}" - "${EXPECTED_COMMIT}" <<'PYEOF'
 import json
 import re
 import sys
@@ -282,6 +305,77 @@ sys.exit(0)
 PYEOF
 }
 
+patch_upstream_tui() {
+  local VENV_DIR="$1"
+  local TUI_SCRIPT
+
+  TUI_SCRIPT=$(run_as_joinmarketng "${VENV_DIR}/bin/python" - <<'PYEOF'
+from importlib import resources
+
+print(resources.files("jmcore").joinpath("data/menu.joinmarket-ng.sh"))
+PYEOF
+) || return 1
+
+  if [ ! -f "${TUI_SCRIPT}" ]; then
+    echo "# FAIL: Installed JoinMarket-NG TUI script was not found."
+    return 1
+  fi
+
+  if ! run_as_joinmarketng "${VENV_DIR}/bin/python" - "${TUI_SCRIPT}" <<'PYEOF'
+import os
+import pathlib
+import stat
+import sys
+import tempfile
+
+menu_path = pathlib.Path(sys.argv[1])
+source = menu_path.read_text()
+replacements = {
+    'BONUS_SCRIPT="/home/admin/config.scripts/bonus.joinmarket-ng.sh"\nif [ -f "$BONUS_SCRIPT" ]; then': (
+        'BONUS_SCRIPT="/home/admin/config.scripts/bonus.joinmarket-ng.sh"\n'
+        'SERVICE_HELPER="/usr/local/sbin/raspiblitz-joinmarket-ng-service"\n'
+        'if [ -f "$BONUS_SCRIPT" ] && [ -x "$SERVICE_HELPER" ]; then'
+    ),
+    'sudo "$BONUS_SCRIPT" store-password "$password"': (
+        'printf \'%s\\n\' "$password" | "$BONUS_SCRIPT" store-password'
+    ),
+    'sudo "$BONUS_SCRIPT" maker-start': 'sudo "$SERVICE_HELPER" start',
+    'sudo "$BONUS_SCRIPT" maker-stop': 'sudo "$SERVICE_HELPER" stop',
+    'sudo "$BONUS_SCRIPT" maker-status': 'sudo "$SERVICE_HELPER" status',
+    'sudo "$BONUS_SCRIPT" update "$TARGET_VERSION"\n': '"$BONUS_SCRIPT" update "$TARGET_VERSION"\n',
+    'sudo "$BONUS_SCRIPT" update main\n': '"$BONUS_SCRIPT" update main\n',
+    'sudo "$BONUS_SCRIPT" update\n': '"$BONUS_SCRIPT" update\n',
+}
+
+patched = source
+for pattern, replacement in replacements.items():
+    source_count = patched.count(pattern)
+    if source_count == 1:
+        patched = patched.replace(pattern, replacement)
+        continue
+    if source_count == 0 and patched.count(replacement) == 1:
+        continue
+    sys.stderr.write("Unexpected JoinMarket-NG TUI compatibility patch state.\n")
+    sys.exit(1)
+
+if patched == source:
+    sys.exit(0)
+
+with tempfile.NamedTemporaryFile(
+    mode="w", encoding="utf-8", dir=menu_path.parent, delete=False
+) as temporary_file:
+    temporary_file.write(patched)
+    temporary_path = pathlib.Path(temporary_file.name)
+
+os.chmod(temporary_path, stat.S_IMODE(menu_path.stat().st_mode))
+os.replace(temporary_path, menu_path)
+PYEOF
+  then
+    echo "# FAIL: Could not apply the JoinMarket-NG TUI compatibility patch."
+    return 1
+  fi
+}
+
 # BASIC COMMANDLINE OPTIONS
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh status    -> status information (key=value)"
@@ -294,9 +388,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-echo "# Running: 'bonus.${APPID}.sh $*'"
+echo "# Running: 'bonus.${APPID}.sh $1'"
 
 # check & load raspiblitz config
+# shellcheck source=/dev/null
 source /mnt/hdd/app-data/raspiblitz.conf
 
 # Helper: returns exit 0 if [wallet] mnemonic_password is set in config.toml (TOML-aware).
@@ -322,6 +417,7 @@ PYEOF
 }
 
 # determine the correct bitcoind service name based on chain
+# shellcheck disable=SC2154  # Assigned by raspiblitz.conf.
 if [ "${chain}" = "test" ]; then
   bitcoind_service="tbitcoind"
   jm_network="testnet"
@@ -341,13 +437,13 @@ fi
 #########################
 
 # check if app is already installed
-isInstalled=$(sudo ls /etc/systemd/system/${APPID}-maker.service 2>/dev/null | grep -c "${APPID}-maker.service")
+isInstalled=$(test -f /etc/systemd/system/${APPID}-maker.service && echo 1 || echo 0)
 # check if service is running
 isRunning=$(systemctl status ${APPID}-maker 2>/dev/null | grep -c 'active (running)')
 
 if [ "$1" = "status" ]; then
   # Determine the actually installed version via pip; fall back to pinned tag
-  installedVersion=$(sudo -u ${USER_JM} /home/${USER_JM}/venv/bin/pip show jmcore 2>/dev/null \
+  installedVersion=$(run_as_joinmarketng /home/${USER_JM}/venv/bin/pip show jmcore 2>/dev/null \
     | awk '/^Version:/{print $2}')
   if [ -z "${installedVersion}" ]; then
     installedVersion="${GITHUB_TAG}"
@@ -386,78 +482,37 @@ if [ "$1" = "menu" ]; then
 fi
 
 ##########################
-# MAKER-START
-##########################
-
-if [ "$1" = "maker-start" ]; then
-  # Called as root (via sudoers from menu).
-  # Password resolution order (the password is never written to config.toml
-  # unless the user explicitly opted in via 'store-password'):
-  #   1. Permanently stored in config.toml [wallet] -> nothing to do.
-  #   2. Already provided by the TUI in .maker.env -> reuse it (no prompt).
-  #   3. Otherwise prompt and write .maker.env for the systemd EnvironmentFile.
-  CONFIG_FILE="/home/${USER_JM}/.joinmarket-ng/config.toml"
-  ENV_FILE="/home/${USER_JM}/.joinmarket-ng/.maker.env"
-  if toml_has_wallet_password "${CONFIG_FILE}"; then
-    echo "# Password found in config.toml [wallet] section, no prompt needed."
-  elif [ -f "${ENV_FILE}" ] && grep -q '^MNEMONIC_PASSWORD=' "${ENV_FILE}"; then
-    echo "# Wallet password already staged in .maker.env, no prompt needed."
-  else
-    read -r -s -p "Wallet encryption password (Enter to skip if unencrypted): " WALLET_PWD
-    echo ""
-    # Write the password for the systemd EnvironmentFile using the
-    # double-quoted form so special characters survive. systemd interprets
-    # C-style escapes inside double quotes, so escape backslash and quote.
-    ESCAPED_PWD=$(printf '%s' "${WALLET_PWD}" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
-    printf 'MNEMONIC_PASSWORD="%s"\n' "${ESCAPED_PWD}" > "${ENV_FILE}"
-    chmod 600 "${ENV_FILE}"
-    chown "${USER_JM}:${USER_JM}" "${ENV_FILE}"
-    unset WALLET_PWD ESCAPED_PWD
-  fi
-  echo "Starting ${APPID}-maker..."
-  systemctl start ${APPID}-maker
-  exit $?
-fi
-
-##########################
-# MAKER-STOP
-##########################
-
-if [ "$1" = "maker-stop" ]; then
-  echo "Stopping ${APPID}-maker..."
-  systemctl stop ${APPID}-maker
-  rm -f "/home/${USER_JM}/.joinmarket-ng/.maker.env"
-  echo "Done."
-  exit $?
-fi
-
-##########################
-# MAKER-STATUS
-##########################
-
-if [ "$1" = "maker-status" ]; then
-  systemctl status ${APPID}-maker --no-pager -l
-  exit $?
-fi
-
-##########################
 # STORE-PASSWORD
 # Permanently write mnemonic_password to config.toml.
-# Usage: bonus.joinmarket-ng.sh store-password <password>
+# Password is accepted only from standard input.
 ##########################
 
 if [ "$1" = "store-password" ]; then
-  PASSWORD="${2}"
+  if [ "$#" -ne 1 ]; then
+    echo "# FAIL: Password must be provided on standard input."
+    exit 1
+  fi
+  if [ "${EUID}" -eq 0 ] || [ "$(id -un)" != "${USER_JM}" ]; then
+    echo "# FAIL: store-password must run as ${USER_JM}."
+    exit 1
+  fi
+  if ! IFS= read -r -s PASSWORD; then
+    echo "# FAIL: Could not read password from standard input."
+    exit 1
+  fi
   CONFIG_FILE="/home/${USER_JM}/.joinmarket-ng/config.toml"
   if [ ! -f "${CONFIG_FILE}" ]; then
     echo "# FAIL: config.toml not found"
     exit 1
   fi
-  python3 - "${CONFIG_FILE}" "${PASSWORD}" <<'PYEOF'
-import sys, re
+  exec 3<<<"${PASSWORD}"
+  unset PASSWORD
+  if ! python3 - "${CONFIG_FILE}" 3<&3 <<'PYEOF'
+import os, re, sys
 
 config_path = sys.argv[1]
-password = sys.argv[2]
+with os.fdopen(3) as password_file:
+    password = password_file.read().rstrip("\n")
 
 with open(config_path, "r") as fh:
     content = fh.read()
@@ -488,12 +543,18 @@ else:
 with open(config_path, "w") as fh:
     fh.write(content)
 PYEOF
+  then
+    exec 3<&-
+    echo "# FAIL: Could not update config.toml."
+    exit 1
+  fi
+  exec 3<&-
   echo "# Password stored in config.toml"
   # Now that the wallet password is permanently stored, enable maker
   # auto-start at boot. systemd can decrypt the wallet on its own, no
   # interactive prompt needed.
   if [ -f "/etc/systemd/system/${APPID}-maker.service" ]; then
-    sudo systemctl enable ${APPID}-maker.service 2>/dev/null \
+    sudo "${SERVICE_HELPER}" enable 2>/dev/null \
       && echo "# Maker auto-start enabled (boot)." \
       || echo "# WARNING: Could not enable maker auto-start."
   fi
@@ -505,63 +566,25 @@ fi
 #########################
 
 if [ "$1" = "prestart" ]; then
-  echo "# PRESTART: Updating configuration..."
-  
-  # Update RPC credentials before start
-  # We read from bitcoin.conf which is root-owned, so this script must run as root (default for ExecStartPre if not restricted)
-  RPC_USER=$(sudo grep rpcuser /mnt/hdd/app-data/bitcoin/bitcoin.conf | cut -d "=" -f 2)
-  RPC_PASSWORD=$(sudo grep rpcpassword /mnt/hdd/app-data/bitcoin/bitcoin.conf | cut -d "=" -f 2)
-  
+  echo "# PRESTART: Validating configuration..."
+
   CONFIG_FILE="/mnt/hdd/app-data/${APPID}/config.toml"
-  
+
   if [ ! -f "${CONFIG_FILE}" ]; then
-      echo "# PRESTART ERROR: Config file not found at ${CONFIG_FILE}"
-      echo "# Run 'bonus.joinmarket-ng.sh on' to reinstall."
-      exit 1
+    echo "# PRESTART ERROR: Config file not found at ${CONFIG_FILE}"
+    echo "# Run 'bonus.joinmarket-ng.sh on' to reinstall."
+    exit 1
   fi
-
-  # Helper: escape a string for safe use in sed replacement
-  escape_sed_replacement() {
-      printf '%s' "$1" | sed -e 's/[&\\/|]/\\&/g'
-  }
-
-  RPC_USER_ESCAPED=$(escape_sed_replacement "${RPC_USER}")
-  RPC_PASSWORD_ESCAPED=$(escape_sed_replacement "${RPC_PASSWORD}")
-
-  # Update RPC User
-  if grep -q "^rpc_user =" "${CONFIG_FILE}"; then
-     sed -i "s|^rpc_user =.*|rpc_user = \"${RPC_USER_ESCAPED}\"|" "${CONFIG_FILE}"
-  elif grep -q "^# rpc_user =" "${CONFIG_FILE}"; then
-     sed -i "s|^# rpc_user =.*|rpc_user = \"${RPC_USER_ESCAPED}\"|" "${CONFIG_FILE}"
-  fi
-
-  # Update RPC Password
-  if grep -q "^rpc_password =" "${CONFIG_FILE}"; then
-     sed -i "s|^rpc_password =.*|rpc_password = \"${RPC_PASSWORD_ESCAPED}\"|" "${CONFIG_FILE}"
-  elif grep -q "^# rpc_password =" "${CONFIG_FILE}"; then
-     sed -i "s|^# rpc_password =.*|rpc_password = \"${RPC_PASSWORD_ESCAPED}\"|" "${CONFIG_FILE}"
-  fi
-
-  echo "# PRESTART: Config updated."
 
   # Abort if no wallet is configured — prevents a useless restart loop
   MNEMONIC_FILE=$(grep '^mnemonic_file[[:space:]]*=' "${CONFIG_FILE}" 2>/dev/null | head -1 | sed 's/^mnemonic_file[[:space:]]*=[[:space:]]*//' | tr -d '"')
   if [ -z "${MNEMONIC_FILE}" ] || [ ! -f "${MNEMONIC_FILE}" ]; then
-      echo "# PRESTART ERROR: No wallet configured (mnemonic_file not set or file missing)."
-      echo "# Use the JoinMarket-NG menu to create or import a wallet, then start the maker."
-      exit 1
+    echo "# PRESTART ERROR: No wallet configured (mnemonic_file not set or file missing)."
+    echo "# Use the JoinMarket-NG menu to create or import a wallet, then start the maker."
+    exit 1
   fi
 
   echo "# PRESTART: Wallet OK: ${MNEMONIC_FILE}"
-
-  # The wallet encryption password (when the user has NOT permanently stored
-  # it in config.toml via 'store-password') is delivered to the maker process
-  # through the systemd EnvironmentFile (.maker.env -> MNEMONIC_PASSWORD; see
-  # the unit's EnvironmentFile= directive). We deliberately do NOT inject the
-  # password into config.toml: keeping it out of the config file means the
-  # secret is never left in cleartext on disk after the maker stops (including
-  # after an unclean shutdown where ExecStopPost would not run).
-
   exit 0
 fi
 
@@ -571,8 +594,31 @@ fi
 
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  if [ ${isInstalled} -eq 1 ]; then
+  if [ "${isInstalled}" -eq 1 ]; then
     echo "# ${APPID} is already installed."
+    exit 1
+  fi
+
+  HOME_DATA_LINK="/home/${USER_JM}/.joinmarket-ng"
+  DATA_DIR="/mnt/hdd/app-data/${APPID}"
+  if [ -L "${DATA_DIR}" ] || { [ -e "${DATA_DIR}" ] && [ ! -d "${DATA_DIR}" ]; }; then
+    echo "# FAIL: ${DATA_DIR} must be a real directory."
+    echo "# Move the unexpected path aside and retry."
+    exit 1
+  fi
+  if [ -L "${DATA_DIR}/config.toml" ]; then
+    echo "# FAIL: ${DATA_DIR}/config.toml must not be a symlink."
+    echo "# Replace it with an app-owned regular file and retry."
+    exit 1
+  fi
+  if [ -e "${HOME_DATA_LINK}" ] && [ ! -L "${HOME_DATA_LINK}" ]; then
+    echo "# FAIL: ${HOME_DATA_LINK} is a real directory or file."
+    echo "# Move its contents to ${DATA_DIR}, then remove ${HOME_DATA_LINK} and retry."
+    exit 1
+  fi
+  if [ -L "${HOME_DATA_LINK}" ] && [ "$(readlink -f "${HOME_DATA_LINK}")" != "${DATA_DIR}" ]; then
+    echo "# FAIL: ${HOME_DATA_LINK} points outside ${DATA_DIR}."
+    echo "# Replace the symlink with one that points to ${DATA_DIR}, then retry."
     exit 1
   fi
 
@@ -606,40 +652,37 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# Creating user ${USER_JM}..."
   if ! id -u "${USER_JM}" > /dev/null 2>&1; then
     sudo adduser --system --group --shell /bin/bash --home /home/${USER_JM} ${USER_JM}
-  else 
+  else
     echo "# User ${USER_JM} already exists"
   fi
-  
+
   # Copy skeleton files
-  sudo -u ${USER_JM} cp -r /etc/skel/. /home/${USER_JM}/ 2>/dev/null
+  run_as_joinmarketng cp -r /etc/skel/. /home/${USER_JM}/ 2>/dev/null
 
   # Add user to debian-tor group (for Tor control port cookie access)
   sudo usermod -aG debian-tor ${USER_JM}
 
   # 3. Create Data Directory on HDD
   echo "# Setting up data directory..."
-  if ! [ -d /mnt/hdd/app-data/${APPID} ]; then
-    sudo mkdir -p /mnt/hdd/app-data/${APPID}
+  if ! [ -d "${DATA_DIR}" ]; then
+    sudo mkdir -p "${DATA_DIR}"
   fi
-  sudo chown ${USER_JM}:${USER_JM} -R /mnt/hdd/app-data/${APPID}
+  sudo chown -hR ${USER_JM}:${USER_JM} "${DATA_DIR}"
 
   # Create wallets subdirectory
-  sudo -u ${USER_JM} mkdir -p /mnt/hdd/app-data/${APPID}/wallets
-  sudo chmod 700 /mnt/hdd/app-data/${APPID}/wallets
+  run_as_joinmarketng mkdir -p "${DATA_DIR}/wallets"
+  run_as_joinmarketng chmod 700 "${DATA_DIR}/wallets"
 
   # Create logs subdirectory (readable by the user for menu access)
-  sudo -u ${USER_JM} mkdir -p /mnt/hdd/app-data/${APPID}/logs
+  run_as_joinmarketng mkdir -p "${DATA_DIR}/logs"
 
   # Symlink to home for standard JM-NG path (~/.joinmarket-ng)
-  # JM-NG expects data in ~/.joinmarket-ng by default
-  # We link the folder itself
-  if [ -d "/home/${USER_JM}/.joinmarket-ng" ] && [ ! -L "/home/${USER_JM}/.joinmarket-ng" ]; then
-     # If it's a real directory (not link), move contents or back up?
-     # For safety, we assume fresh install or handled manually. 
-     # But let's force link for now if empty or not critical.
-     echo "# Warning: /home/${USER_JM}/.joinmarket-ng exists and is not a link."
-  else
-     sudo -u ${USER_JM} ln -sfn /mnt/hdd/app-data/${APPID} /home/${USER_JM}/.joinmarket-ng
+  if [ ! -L "${HOME_DATA_LINK}" ]; then
+    run_as_joinmarketng ln -s "${DATA_DIR}" "${HOME_DATA_LINK}"
+  fi
+  if [ "$(readlink -f "${HOME_DATA_LINK}")" != "${DATA_DIR}" ]; then
+    echo "# FAIL: Could not create ${HOME_DATA_LINK} -> ${DATA_DIR}."
+    exit 1
   fi
 
   # 4. Verify release signature and get immutable commit hash
@@ -661,111 +704,96 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   
   # Create venv and install packages as the dedicated user
   if [ ! -d "${VENV_DIR}" ]; then
-      echo "# Creating Python venv..."
-      sudo -u ${USER_JM} python3 -m venv "${VENV_DIR}"
+    echo "# Creating Python venv..."
+    run_as_joinmarketng python3 -m venv "${VENV_DIR}"
   fi
-  
+
   echo "# Installing jmcore, jmwallet, maker, taker..."
   # Use the venv pip directly by full path. This is more reliable than
   # 'source activate && pip' under sudo -u, which can resolve the wrong pip
   # or cause pip to install scripts to ~/.local/bin instead of the venv.
-  sudo -u ${USER_JM} bash -c "
+  if ! run_as_joinmarketng bash -c "
     ${VENV_DIR}/bin/pip install --upgrade pip && \
     ${VENV_DIR}/bin/pip install '${GIT_URL}#subdirectory=jmcore' && \
     ${VENV_DIR}/bin/pip install '${GIT_URL}#subdirectory=jmwallet' && \
     ${VENV_DIR}/bin/pip install '${GIT_URL}#subdirectory=maker' && \
     ${VENV_DIR}/bin/pip install '${GIT_URL}#subdirectory=taker' && \
     ${VENV_DIR}/bin/pip install packaging
-  "
-  if [ $? -ne 0 ]; then
-      echo "# FAIL - pip install failed"
-      exit 1
+  "; then
+    echo "# FAIL - pip install failed"
+    exit 1
+  fi
+
+  if ! patch_upstream_tui "${VENV_DIR}"; then
+    exit 1
   fi
 
   # 6. Configuration
   echo "# configuring config.toml..."
-  
-  # Get Bitcoin RPC Creds
-  RPC_USER=$(sudo grep rpcuser /mnt/hdd/app-data/bitcoin/bitcoin.conf | cut -d "=" -f 2)
-  RPC_PASSWORD=$(sudo grep rpcpassword /mnt/hdd/app-data/bitcoin/bitcoin.conf | cut -d "=" -f 2)
-  
-  CONFIG_FILE="/mnt/hdd/app-data/${APPID}/config.toml"
-  
+
+  CONFIG_FILE="${DATA_DIR}/config.toml"
+
   # Only create config from template on first install.
   # On reinstall (off/on), preserve the existing config to keep user customizations
-  # (network, rpc_port, wallet settings, etc.). prestart updates RPC creds on each boot.
+  # (network, rpc_port, wallet settings, etc.). The service helper supplies
+  # Bitcoin RPC credentials through its root-owned runtime environment.
   if [ ! -f "${CONFIG_FILE}" ]; then
-     echo "# Downloading config template (first install)..."
-     # The template ships inside jmcore in the source tree. An explicit
-     # non-empty check makes us fail loudly instead of writing an empty file
-     # (which would silently produce a broken config that prestart cannot repair).
-     TEMPLATE_URL="https://raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/${GITHUB_TAG}/jmcore/src/jmcore/data/config.toml.template"
-     if ! sudo wget -q "${TEMPLATE_URL}" -O "${CONFIG_FILE}" || [ ! -s "${CONFIG_FILE}" ]; then
-        echo "# FAIL: Could not download config template from ${TEMPLATE_URL}"
-        sudo rm -f "${CONFIG_FILE}"
-        exit 1
-     fi
+    echo "# Downloading config template (first install)..."
+    TEMPLATE_URL="https://raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/${VERIFIED_COMMIT}/jmcore/src/jmcore/data/config.toml.template"
+    if ! run_as_joinmarketng wget -q "${TEMPLATE_URL}" -O "${CONFIG_FILE}" || [ ! -s "${CONFIG_FILE}" ]; then
+      echo "# FAIL: Could not download config template from ${TEMPLATE_URL}"
+      run_as_joinmarketng rm -f "${CONFIG_FILE}"
+      exit 1
+    fi
 
-     # Ensure file permissions
-     sudo chmod 600 ${CONFIG_FILE}
-     sudo chown ${USER_JM}:${USER_JM} ${CONFIG_FILE}
+    run_as_joinmarketng chmod 600 "${CONFIG_FILE}"
 
-     # Apply initial configuration (only on first install)
+    set_toml_value() {
+      local key=$1
+      local value=$2
+      local file=$3
+      local quote=$4
 
-     # Function to uncomment and set value in TOML
-     set_toml_value() {
-         local key=$1
-         local value=$2
-         local file=$3
-         local quote=$4 # "true" to wrap value in quotes
+      if [ "${quote}" = "true" ]; then
+        value="\"${value}\""
+      fi
 
-         if [ "$quote" == "true" ]; then
-             value="\"${value}\""
-         fi
+      local sed_value
+      sed_value=$(printf '%s' "${value}" | sed -e 's/[&\\/|]/\\&/g')
 
-         # Escape sed metacharacters in the value for safe replacement
-         local sed_value
-         sed_value=$(printf '%s' "$value" | sed -e 's/[&\\/|]/\\&/g')
+      if grep -q "^${key}[[:space:]]*=" "${file}"; then
+        run_as_joinmarketng sed -i "s|^${key}[[:space:]]*=.*|${key} = ${sed_value}|" "${file}"
+      elif grep -q "^#[[:space:]]*${key}[[:space:]]*=" "${file}"; then
+        run_as_joinmarketng sed -i "s|^#[[:space:]]*${key}[[:space:]]*=.*|${key} = ${sed_value}|" "${file}"
+      else
+        echo "# Warning: Could not find key '${key}' in ${file}"
+      fi
+    }
 
-         # 1. Try to replace uncommented key (e.g. 'key = ...')
-         if grep -q "^${key}[[:space:]]*=" "${file}"; then
-             sudo sed -i "s|^${key}[[:space:]]*=.*|${key} = ${sed_value}|" "${file}"
-         # 2. Try to replace commented key (e.g. '# key = ...')
-         elif grep -q "^#[[:space:]]*${key}[[:space:]]*=" "${file}"; then
-             sudo sed -i "s|^#[[:space:]]*${key}[[:space:]]*=.*|${key} = ${sed_value}|" "${file}"
-         else
-             echo "# Warning: Could not find key '${key}' in ${file}"
-         fi
-     }
-
-     # Network
-     set_toml_value "network" "${jm_network}" "${CONFIG_FILE}" "true"
-
-     # Bitcoin Backend
-     set_toml_value "rpc_url" "http://127.0.0.1:${bitcoin_rpc_port}" "${CONFIG_FILE}" "true"
-     set_toml_value "rpc_user" "${RPC_USER}" "${CONFIG_FILE}" "true"
-     set_toml_value "rpc_password" "${RPC_PASSWORD}" "${CONFIG_FILE}" "true"
-     set_toml_value "backend_type" "descriptor_wallet" "${CONFIG_FILE}" "true"
-
-     # Tor
-     set_toml_value "socks_host" "127.0.0.1" "${CONFIG_FILE}" "true"
-     set_toml_value "socks_port" "9050" "${CONFIG_FILE}" "false"
-
-     # Tor Control Port (needed for maker to create ephemeral onion services)
-     # Raspiblitz runs Tor with ControlPort 9051 and CookieAuthentication
-     set_toml_value "control_enabled" "true" "${CONFIG_FILE}" "false"
-     set_toml_value "control_host" "127.0.0.1" "${CONFIG_FILE}" "true"
-     set_toml_value "control_port" "9051" "${CONFIG_FILE}" "false"
-     set_toml_value "cookie_path" "/run/tor/control.authcookie" "${CONFIG_FILE}" "true"
+    set_toml_value "network" "${jm_network}" "${CONFIG_FILE}" "true"
+    set_toml_value "rpc_url" "http://127.0.0.1:${bitcoin_rpc_port}" "${CONFIG_FILE}" "true"
+    set_toml_value "backend_type" "descriptor_wallet" "${CONFIG_FILE}" "true"
+    set_toml_value "socks_host" "127.0.0.1" "${CONFIG_FILE}" "true"
+    set_toml_value "socks_port" "9050" "${CONFIG_FILE}" "false"
+    set_toml_value "control_enabled" "true" "${CONFIG_FILE}" "false"
+    set_toml_value "control_host" "127.0.0.1" "${CONFIG_FILE}" "true"
+    set_toml_value "control_port" "9051" "${CONFIG_FILE}" "false"
+    set_toml_value "cookie_path" "/run/tor/control.authcookie" "${CONFIG_FILE}" "true"
   else
-     echo "# Existing config.toml found — preserving user settings."
-     echo "# RPC credentials will be updated by prestart on next service start."
-     # Just ensure permissions are correct
-     sudo chmod 600 ${CONFIG_FILE}
-     sudo chown ${USER_JM}:${USER_JM} ${CONFIG_FILE}
+    echo "# Existing config.toml found, preserving user settings."
+    run_as_joinmarketng chmod 600 "${CONFIG_FILE}"
   fi
   
-  # 7. Systemd Service (Maker)
+  # 7. Root service helper and systemd service
+  if [ ! -f "${SERVICE_HELPER_SOURCE}" ]; then
+    echo "# FAIL: Service helper source is missing: ${SERVICE_HELPER_SOURCE}"
+    exit 1
+  fi
+  if ! sudo install -o root -g root -m 0755 "${SERVICE_HELPER_SOURCE}" "${SERVICE_HELPER}"; then
+    echo "# FAIL: Could not install the root service helper."
+    exit 1
+  fi
+
   echo "# Creating systemd service for Maker..."
   cat <<EOF | sudo tee /etc/systemd/system/${APPID}-maker.service
 [Unit]
@@ -778,10 +806,12 @@ Type=simple
 User=${USER_JM}
 Group=${USER_JM}
 Environment="PATH=/home/${USER_JM}/venv/bin:/home/${USER_JM}/.local/bin:/usr/local/bin:/usr/bin:/bin"
+EnvironmentFile=-/run/joinmarket-ng/rpc.env
 EnvironmentFile=-/home/${USER_JM}/.joinmarket-ng/.maker.env
-ExecStartPre=+/home/admin/config.scripts/bonus.${APPID}.sh prestart
+ExecStartPre=+${SERVICE_HELPER} prepare
+ExecStartPre=/home/admin/config.scripts/bonus.${APPID}.sh prestart
 ExecStart=/bin/bash -c 'exec jm-maker start'
-ExecStopPost=+/bin/bash -c 'rm -f /home/${USER_JM}/.joinmarket-ng/.maker.env'
+ExecStopPost=/bin/bash -c 'rm -f /home/${USER_JM}/.joinmarket-ng/.maker.env'
 # Bitcoind on RaspiBlitz can take a long time to come up after boot
 # (IBD, mempool rebuild, ...). Retry forever with a 30s backoff instead
 # of letting systemd give up after a few failed attempts.
@@ -814,19 +844,18 @@ EOF
   fi
   # Ensure ~/.local/bin is in PATH (fallback for pip console scripts)
   if ! grep -q '\.local/bin' /home/${USER_JM}/.bashrc; then
+      # shellcheck disable=SC2016  # Write literal variables to the target shell config.
       echo 'export PATH="$HOME/.local/bin:$PATH"' | sudo -u ${USER_JM} tee -a /home/${USER_JM}/.bashrc
   fi
 
-  # 9. Sudoers rule: allow joinmarketng to call this script for maker control
+  # 9. Sudoers rule: fixed maker service actions only
   echo "# Adding sudoers rule..."
   cat <<EOF | sudo tee /etc/sudoers.d/joinmarketng-maker
-# Allow joinmarketng user to run maker commands via the bonus script (no password)
-${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh maker-start
-${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh maker-stop
-${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh maker-status
-${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh store-password *
-${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh update
-${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh update *
+# Allow joinmarketng to run fixed maker service actions without a password.
+${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} start
+${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} stop
+${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} status
+${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} enable
 EOF
   sudo chmod 440 /etc/sudoers.d/joinmarketng-maker
 
@@ -839,7 +868,7 @@ EOF
   sudo systemctl daemon-reload
   if toml_has_wallet_password "${CONFIG_FILE}"; then
     echo "# Wallet password already stored — enabling maker auto-start at boot."
-    sudo systemctl enable ${APPID}-maker.service
+    sudo "${SERVICE_HELPER}" enable
   else
     echo "# No stored wallet password — leaving maker auto-start disabled."
     echo "# Use the TUI ('Store wallet password') to enable boot auto-start."
@@ -892,6 +921,66 @@ if [ "$1" = "update" ]; then
 
   VENV_DIR="/home/${USER_JM}/venv"
 
+  ENV_FILE="/home/${USER_JM}/.joinmarket-ng/.maker.env"
+  MAKER_WAS_RUNNING=0
+  MAKER_STOPPED=0
+  MAKER_PASSWORD_MODE="none"
+  TEMP_ENV_BACKUP=""
+
+  if toml_has_wallet_password "/home/${USER_JM}/.joinmarket-ng/config.toml"; then
+    MAKER_PASSWORD_MODE="stored"
+  elif [ -f "${ENV_FILE}" ] && grep -q '^MNEMONIC_PASSWORD=' "${ENV_FILE}"; then
+    MAKER_PASSWORD_MODE="temporary"
+  fi
+
+  if systemctl is-active --quiet ${APPID}-maker 2>/dev/null; then
+    MAKER_WAS_RUNNING=1
+  fi
+
+  restore_temporary_maker_environment() {
+    if [ "${MAKER_PASSWORD_MODE}" != "temporary" ]; then
+      return 0
+    fi
+    if [ -z "${TEMP_ENV_BACKUP}" ] || [ ! -f "${TEMP_ENV_BACKUP}" ]; then
+      echo "# WARNING: Temporary maker credential backup is unavailable."
+      return 1
+    fi
+    run_as_joinmarketng cp "${TEMP_ENV_BACKUP}" "${ENV_FILE}" \
+      && run_as_joinmarketng chmod 600 "${ENV_FILE}"
+  }
+
+  cleanup_temporary_maker_environment() {
+    if [ -n "${TEMP_ENV_BACKUP}" ]; then
+      run_as_joinmarketng rm -f "${TEMP_ENV_BACKUP}"
+    fi
+  }
+
+  restore_maker_after_update_failure() {
+    local credentials_restored=1
+    if [ "${MAKER_STOPPED}" = "1" ] && [ "${MAKER_WAS_RUNNING}" = "1" ]; then
+      if ! restore_temporary_maker_environment; then
+        echo "# WARNING: Could not restore temporary maker credentials."
+        credentials_restored=0
+      fi
+      if [ "${credentials_restored}" = "1" ] && ! sudo "${SERVICE_HELPER}" start; then
+        echo "# WARNING: Could not restart maker after update failure."
+        if ! restore_temporary_maker_environment; then
+          echo "# WARNING: Temporary maker credential backup was retained for recovery."
+          credentials_restored=0
+        fi
+      fi
+    fi
+    if [ "${credentials_restored}" = "1" ]; then
+      cleanup_temporary_maker_environment
+    fi
+  }
+
+  update_fail() {
+    echo "# FAIL - $1"
+    restore_maker_after_update_failure
+    exit 1
+  }
+
   # Special case: install from the main branch (unreleased, no GPG signing)
   if [ "${UPDATE_TAG}" = "main" ]; then
     echo ""
@@ -904,7 +993,7 @@ if [ "$1" = "update" ]; then
     GIT_URL="git+${GITHUB_REPO}.git@main"
   else
     # Get currently installed version
-    CURRENT_TAG=$(sudo -u ${USER_JM} /home/${USER_JM}/venv/bin/pip show jmcore 2>/dev/null \
+    CURRENT_TAG=$(run_as_joinmarketng /home/${USER_JM}/venv/bin/pip show jmcore 2>/dev/null \
       | grep '^Version:' | awk '{print $2}')
     echo "# Currently installed version: ${CURRENT_TAG:-unknown}"
 
@@ -920,6 +1009,9 @@ if [ "$1" = "update" ]; then
     # release. Only immutable source provenance can prove this release is
     # already installed.
     if installed_release_matches "${VERIFIED_COMMIT}"; then
+      if ! patch_upstream_tui "${VENV_DIR}"; then
+        exit 1
+      fi
       echo "# Already on release ${UPDATE_TAG} at commit ${VERIFIED_COMMIT}, nothing to do."
       exit 0
     fi
@@ -931,20 +1023,31 @@ if [ "$1" = "update" ]; then
     GIT_URL="git+${GITHUB_REPO}.git@${VERIFIED_COMMIT}"
   fi
 
-  # Check if maker was running before update so we can restore state
-  MAKER_WAS_RUNNING=0
-  if systemctl is-active --quiet ${APPID}-maker 2>/dev/null; then
-    MAKER_WAS_RUNNING=1
+  if [ "${MAKER_WAS_RUNNING}" = "1" ] && [ "${MAKER_PASSWORD_MODE}" = "temporary" ]; then
+    TEMP_ENV_BACKUP=$(run_as_joinmarketng mktemp "/tmp/${APPID}-maker-env.XXXXXX") || exit 1
+    if ! run_as_joinmarketng cp "${ENV_FILE}" "${TEMP_ENV_BACKUP}" \
+      || ! run_as_joinmarketng chmod 600 "${TEMP_ENV_BACKUP}"; then
+      cleanup_temporary_maker_environment
+      echo "# FAIL - Could not preserve temporary maker credentials before update"
+      exit 1
+    fi
   fi
 
-  echo "# Stopping maker service..."
-  sudo systemctl stop ${APPID}-maker 2>/dev/null
+  if [ "${MAKER_WAS_RUNNING}" = "1" ]; then
+    echo "# Stopping maker service..."
+    if ! sudo "${SERVICE_HELPER}" stop; then
+      cleanup_temporary_maker_environment
+      echo "# FAIL - Could not stop maker service"
+      exit 1
+    fi
+    MAKER_STOPPED=1
+  fi
 
   echo "# Upgrading pip packages to ${UPDATE_TAG}..."
   # Source commits can share a package version, so force-reinstall the four
   # managed packages first. Resolve dependencies separately to avoid forcing
   # costly reinstalls of every third-party package.
-  sudo -u ${USER_JM} bash -c "
+  if ! run_as_joinmarketng bash -c "
     ${VENV_DIR}/bin/pip install --upgrade pip && \
     ${VENV_DIR}/bin/pip install --upgrade --force-reinstall --no-deps \
       '${GIT_URL}#subdirectory=jmcore' \
@@ -955,36 +1058,53 @@ if [ "$1" = "update" ]; then
       '${GIT_URL}#subdirectory=jmcore' \
       '${GIT_URL}#subdirectory=jmwallet' \
       '${GIT_URL}#subdirectory=maker' \
-      '${GIT_URL}#subdirectory=taker' && \
+       '${GIT_URL}#subdirectory=taker' && \
     ${VENV_DIR}/bin/pip check
-  "
-  if [ $? -ne 0 ]; then
-      echo "# FAIL - pip upgrade failed"
-      exit 1
+  "; then
+    update_fail "pip upgrade failed"
   fi
 
   if [ "${UPDATE_TAG}" != "main" ] && ! installed_release_matches "${VERIFIED_COMMIT}"; then
-    echo "# FAIL - installed packages do not match verified release commit"
-    exit 1
+    update_fail "installed packages do not match verified release commit"
   fi
 
-  # Menu script is bundled in the jmcore pip package — updated automatically
-  # by the pip upgrade above. No separate download needed.
+  if ! patch_upstream_tui "${VENV_DIR}"; then
+    update_fail "could not apply the JoinMarket-NG TUI compatibility patch"
+  fi
 
-  # Only restart maker if it was running before the update (and password file still exists)
   if [ "${MAKER_WAS_RUNNING}" = "1" ]; then
-    ENV_FILE="/home/${USER_JM}/.joinmarket-ng/.maker.env"
-    if [ -f "${ENV_FILE}" ]; then
-      echo "# Restarting maker service (was running before update)..."
-      sudo systemctl start ${APPID}-maker
-    else
-      echo "# Maker was running but password file is gone — not restarting."
-      echo "# Start the maker manually from the JoinMarket-NG menu."
+    if ! restore_temporary_maker_environment; then
+      echo "# FAIL - Could not restore temporary maker credentials"
+      echo "# Temporary maker credential backup was retained for recovery."
+      exit 1
+    fi
+    case "${MAKER_PASSWORD_MODE}" in
+      stored)
+        echo "# Restarting maker service with stored wallet password..."
+        ;;
+      temporary)
+        echo "# Restarting maker service with restored temporary wallet password..."
+        ;;
+      none)
+        echo "# Restarting maker service without a wallet password..."
+        ;;
+    esac
+    if ! sudo "${SERVICE_HELPER}" start; then
+      if ! restore_temporary_maker_environment; then
+        echo "# WARNING: Could not preserve temporary maker credentials for retry."
+        echo "# Temporary maker credential backup was retained for recovery."
+        echo "# FAIL - Could not restart maker service"
+        exit 1
+      fi
+      cleanup_temporary_maker_environment
+      echo "# FAIL - Could not restart maker service"
+      exit 1
     fi
   else
     echo "# Maker was not running before update — leaving it stopped."
   fi
 
+  cleanup_temporary_maker_environment
   echo "# ${APPID} updated to ${UPDATE_TAG} (commit: ${VERIFIED_COMMIT:-main})"
   exit 0
 fi
@@ -1000,6 +1120,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo systemctl disable ${APPID}-maker 2>/dev/null || true
   sudo rm -f /etc/systemd/system/${APPID}-maker.service
   sudo rm -f /etc/sudoers.d/joinmarketng-maker
+  sudo rm -f "${SERVICE_HELPER}"
+  sudo rm -rf /run/joinmarket-ng
   sudo systemctl daemon-reload
 
   echo "# Removing user..."

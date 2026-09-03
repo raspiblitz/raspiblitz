@@ -20,6 +20,9 @@ DATA_DIR="/mnt/hdd/app-data/${APPID}"
 CONFIG_TOML="${DATA_DIR}/config.toml"
 SERVICE_FILE="/etc/systemd/system/${APPID}-maker.service"
 SUDOERS_FILE="/etc/sudoers.d/${USER_JM}-maker"
+SERVICE_HELPER="/usr/local/sbin/raspiblitz-joinmarket-ng-service"
+SERVICE_HELPER_SOURCE="../home.admin/config.scripts/joinmarket-ng-service.sh"
+TRUSTED_KEYRING="../home.admin/config.scripts/joinmarket-ng-trusted-keys.asc"
 
 setup_file() {
   # Create the minimal mock environment that bonus.joinmarket-ng.sh expects.
@@ -84,6 +87,8 @@ teardown_file() {
   rm -rf "${DATA_DIR}" 2>/dev/null || true
   rm -f "${SERVICE_FILE}" 2>/dev/null || true
   rm -f "${SUDOERS_FILE}" 2>/dev/null || true
+  rm -f "${SERVICE_HELPER}" 2>/dev/null || true
+  rm -rf /run/joinmarket-ng 2>/dev/null || true
   # Clean up mock environment
   rm -f /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null || true
   rm -f /mnt/hdd/app-data/bitcoin/bitcoin.conf 2>/dev/null || true
@@ -100,11 +105,22 @@ teardown_file() {
   echo "$output" | grep -q "isInstalled=0"
 }
 
-@test "verify-release accepts local-first signatures" {
-  run bash "${SCRIPT}" verify-release "0.26.1"
+@test "install rejects a real JoinMarket-NG home directory" {
+  mkdir -p "/home/${USER_JM}/.joinmarket-ng"
+
+  run bash "${SCRIPT}" on
+  [ "$status" -eq 1 ]
+  echo "$output" | grep -q "Move its contents"
+
+  rmdir "/home/${USER_JM}/.joinmarket-ng"
+  rmdir "/home/${USER_JM}"
+}
+
+@test "verify-release accepts locally pinned signatures" {
+  run bash "${SCRIPT}" verify-release "${JM_VERSION}"
   [ "$status" -eq 0 ]
   echo "$output" | grep -q "GPG verification passed:"
-  echo "$output" | grep -q "VALID signature (local manifest commit matches release manifest)"
+  echo "$output" | grep -q "VALID signature"
 }
 
 # ---------------------------------------------------------------------------
@@ -129,6 +145,13 @@ teardown_file() {
 
   # Sudoers file was created
   [ -f "${SUDOERS_FILE}" ]
+
+  # The root service helper was installed with fixed permissions
+  [ -x "${SERVICE_HELPER}" ]
+  [ "$(stat -c '%a' "${SERVICE_HELPER}")" = "755" ]
+
+  # The home path is the expected data-directory symlink
+  [ "$(readlink -f "/home/${USER_JM}/.joinmarket-ng")" = "${DATA_DIR}" ]
 
   # jm-ng entry point was installed in the venv (menu script bundled in jmcore)
   [ -x "/home/${USER_JM}/venv/bin/jm-ng" ]
@@ -160,6 +183,7 @@ get_secp256k1()
   local update_prefix
   update_prefix=$(awk '/^if \[ "\$1" = "update" \];/,/# Determine target version/' "${SCRIPT}")
   echo "${update_prefix}" | grep -q 'install_system_dependencies'
+  grep -q 'Missing system dependencies require an administrator update' "${SCRIPT}"
 }
 
 @test "installer calls network.wallet.sh on" {
@@ -168,14 +192,18 @@ get_secp256k1()
   grep -q 'network.wallet.sh on' "${SCRIPT}"
 }
 
-# Regression: the template wget URL must point at the actual file location
-# inside the repo and the resulting config.toml must contain the RPC creds
-# read from bitcoin.conf. A previous version pointed at a non-existent path,
-# silently produced an empty config.toml and broke prestart.
-@test "install produces non-empty config.toml with RPC credentials" {
+# Regression: the template wget URL must point at the actual file location.
+# Bitcoin RPC credentials are supplied separately by the root service helper.
+@test "install produces non-empty config.toml and runtime RPC credentials" {
   [ -s "${CONFIG_TOML}" ]
-  grep -q '^rpc_user = "testuser"' "${CONFIG_TOML}"
-  grep -q '^rpc_password = "testpass"' "${CONFIG_TOML}"
+  ! grep -q '^rpc_user = "testuser"' "${CONFIG_TOML}"
+  ! grep -q '^rpc_password = "testpass"' "${CONFIG_TOML}"
+
+  run bash "${SERVICE_HELPER}" prepare
+  [ "$status" -eq 0 ]
+  [ "$(stat -c '%U:%G %a' /run/joinmarket-ng/rpc.env)" = "root:root 600" ]
+  grep -q '^BITCOIN__RPC_USER="testuser"$' /run/joinmarket-ng/rpc.env
+  grep -q '^BITCOIN__RPC_PASSWORD="testpass"$' /run/joinmarket-ng/rpc.env
 }
 
 # Systemd unit must declare a retry policy so the maker survives a slow
@@ -187,6 +215,11 @@ get_secp256k1()
   grep -q '^RestartSec=30' "${SERVICE_FILE}"
   grep -q '^StartLimitIntervalSec=0' "${SERVICE_FILE}"
   grep -q '^WantedBy=multi-user.target' "${SERVICE_FILE}"
+  grep -q '^EnvironmentFile=-/run/joinmarket-ng/rpc.env' "${SERVICE_FILE}"
+  grep -q "^ExecStartPre=+${SERVICE_HELPER} prepare" "${SERVICE_FILE}"
+  grep -q '^ExecStartPre=/home/admin/config.scripts/bonus.joinmarket-ng.sh prestart' "${SERVICE_FILE}"
+  ! grep -q '^ExecStartPre=+/home/admin/config.scripts/bonus.joinmarket-ng.sh' "${SERVICE_FILE}"
+  ! grep -q '^ExecStopPost=+' "${SERVICE_FILE}"
 }
 
 # Without a permanently stored wallet password the maker cannot start
@@ -300,6 +333,9 @@ direct_url_path.write_text(json.dumps(direct_url))
 PYEOF
 
   # Load the production helper without executing the script's command router.
+  run_as_joinmarketng() {
+    "$@"
+  }
   eval "$(awk '
     /^installed_release_matches\(\)/ { capture=1 }
     capture && /^# BASIC COMMANDLINE OPTIONS/ { exit }
@@ -335,6 +371,34 @@ PYEOF
   # considers its package version current, then validate dependencies.
   grep -q -- '--upgrade --force-reinstall --no-deps' "${SCRIPT}"
   grep -q 'bin/pip check' "${SCRIPT}"
+}
+
+@test "release verification uses the local trust root and exact VALIDSIG fingerprints" {
+  [ -f "${TRUSTED_KEYRING}" ]
+  gpg --batch --with-colons --show-keys "${TRUSTED_KEYRING}" \
+    | grep -q '1C53A412D11EF3051704419C44912E1E03005B31'
+  gpg --batch --with-colons --show-keys "${TRUSTED_KEYRING}" \
+    | grep -q '9253062A4F92D63459085CA62D230520212A5901'
+  grep -q -- '--status-fd 1 --verify' "${SCRIPT}"
+  grep -q '\$2 == "VALIDSIG" && \$3 == expected' "${SCRIPT}"
+  ! grep -q 'trusted-keys.txt\|signatures/pubkeys' "${SCRIPT}"
+}
+
+@test "installer uses the verified commit for the config template" {
+  grep -q 'raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/\${VERIFIED_COMMIT}/jmcore/src/jmcore/data/config.toml.template' "${SCRIPT}"
+  ! grep -q 'raw.githubusercontent.com/joinmarket-ng/joinmarket-ng/\${GITHUB_TAG}/jmcore/src/jmcore/data/config.toml.template' "${SCRIPT}"
+}
+
+@test "update preserves stored temporary and password-free maker modes" {
+  update_block=$(awk '/^if \[ "\$1" = "update" \];/,/^fi$/' "${SCRIPT}")
+  echo "${update_block}" | grep -q 'MAKER_PASSWORD_MODE="stored"'
+  echo "${update_block}" | grep -q 'MAKER_PASSWORD_MODE="temporary"'
+  echo "${update_block}" | grep -q 'MAKER_PASSWORD_MODE="none"'
+  echo "${update_block}" | grep -q 'TEMP_ENV_BACKUP=.*mktemp'
+  echo "${update_block}" | grep -q 'restore_temporary_maker_environment'
+  echo "${update_block}" | grep -q 'restore_maker_after_update_failure'
+  echo "${update_block}" | grep -q 'sudo "\${SERVICE_HELPER}" stop'
+  echo "${update_block}" | grep -q 'sudo "\${SERVICE_HELPER}" start'
 }
 
 # ---------------------------------------------------------------------------
@@ -376,7 +440,7 @@ PYEOF
 }
 
 @test "jm-taker subcommands respond to --help" {
-  local subcommands=(coinjoin tumble config-init)
+  local subcommands=(coinjoin clear-ignored-makers config-init)
   for sub in "${subcommands[@]}"; do
     run "/home/${USER_JM}/venv/bin/jm-taker" "$sub" --help
     [ "$status" -eq 0 ]
@@ -384,22 +448,42 @@ PYEOF
 }
 
 # ---------------------------------------------------------------------------
-# 5. store-password writes mnemonic_password to config.toml
+# 5. Password storage is unprivileged and stdin-only
 # ---------------------------------------------------------------------------
-@test "sudoers allows store-password command" {
-  # The sudoers file should include store-password with wildcard arg
-  grep -q 'store-password' "${SUDOERS_FILE}"
+@test "sudoers exposes only fixed root service actions" {
+  [ "$(wc -l < "${SUDOERS_FILE}")" -eq 5 ]
+  grep -Fx "${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} start" "${SUDOERS_FILE}"
+  grep -Fx "${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} stop" "${SUDOERS_FILE}"
+  grep -Fx "${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} status" "${SUDOERS_FILE}"
+  grep -Fx "${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} enable" "${SUDOERS_FILE}"
+  ! grep -q 'bonus.joinmarket-ng.sh' "${SUDOERS_FILE}"
+  ! grep -q '\*' "${SUDOERS_FILE}"
 }
 
-@test "sudoers allows update command without password" {
-  # Without this rule the TUI, which runs as joinmarketng, prompts for a
-  # system password on every update and then the update aborts.
-  grep -q 'NOPASSWD:.* update$' "${SUDOERS_FILE}"
-  grep -q 'NOPASSWD:.* update \*' "${SUDOERS_FILE}"
-}
-
-@test "store-password sets mnemonic_password in config.toml" {
+@test "store-password rejects root execution and password arguments" {
   run bash "${SCRIPT}" store-password "hunter2"
+  [ "$status" -eq 1 ]
+  ! echo "$output" | grep -q 'hunter2'
+  echo "$output" | grep -q 'Password must be provided on standard input'
+
+  run bash -c 'printf "%s\n" "hunter2" | bash "$1" store-password' \
+    _ "${SCRIPT}"
+  [ "$status" -eq 1 ]
+  ! echo "$output" | grep -q 'hunter2'
+  echo "$output" | grep -q "store-password must run as ${USER_JM}"
+}
+
+@test "store-password reads the secret from a private descriptor" {
+  store_block=$(awk '/^if \[ "\$1" = "store-password" \];/,/^fi$/' "${SCRIPT}")
+  echo "${store_block}" | grep -q 'IFS= read -r -s PASSWORD'
+  echo "${store_block}" | grep -q 'python3 - "\${CONFIG_FILE}" 3<&3'
+  ! echo "${store_block}" | grep -q 'PASSWORD="\${2}"'
+  ! echo "${store_block}" | grep -q 'store-password <password>'
+}
+
+@test "store-password sets mnemonic_password from joinmarketng stdin" {
+  run bash -c 'printf "%s\n" "$3" | sudo -u "$1" bash "$2" store-password' \
+    _ "${USER_JM}" "${SCRIPT}" "hunter2"
   [ "$status" -eq 0 ]
 
   # Verify the active (uncommented) line is present
@@ -413,7 +497,7 @@ PYEOF
 @test "store-password block enables maker auto-start" {
   # Extract the store-password branch and assert it enables the unit.
   awk '/^if \[ "\$1" = "store-password" \];/,/^fi$/' "${SCRIPT}" \
-    | grep -q 'systemctl enable .*-maker.service'
+    | grep -q '"\${SERVICE_HELPER}" enable'
 }
 
 # Symmetric guarantee: the install path must enable the unit when a
@@ -423,7 +507,7 @@ PYEOF
   awk '/# 10. Reload systemd/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
     | grep -q 'toml_has_wallet_password'
   awk '/# 10. Reload systemd/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
-    | grep -q 'systemctl enable'
+    | grep -q '"\${SERVICE_HELPER}" enable'
   awk '/# 10. Reload systemd/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
     | grep -q 'systemctl disable'
 }
@@ -445,7 +529,8 @@ PYEOF
 
 @test "store-password handles special characters safely" {
   # Test with a password containing sed metacharacters: & \ / | " $
-  run bash "${SCRIPT}" store-password 'p@ss/w0rd&with\special|"chars'
+  run bash -c 'printf "%s\n" "$3" | sudo -u "$1" bash "$2" store-password' \
+    _ "${USER_JM}" "${SCRIPT}" 'p@ss/w0rd&with\special|"chars'
   [ "$status" -eq 0 ]
 
   # Verify Python can round-trip the password correctly via TOML
@@ -462,7 +547,8 @@ assert pwd == 'p@ss/w0rd&with\\special|"chars', f"Got {pwd!r}"
 PYEOF
 
   # Reset to the known value for subsequent tests
-  run bash "${SCRIPT}" store-password "hunter2"
+  run bash -c 'printf "%s\n" "$3" | sudo -u "$1" bash "$2" store-password' \
+    _ "${USER_JM}" "${SCRIPT}" "hunter2"
   [ "$status" -eq 0 ]
 }
 
@@ -530,10 +616,20 @@ PYEOF
   ! grep -q 'wipe-password' "${SERVICE_FILE}"
 }
 
-@test "maker-start reuses an existing .maker.env without prompting" {
-  makerstart_block=$(awk '/^if \[ "\$1" = "maker-start" \];/,/^fi$/' "${SCRIPT}")
-  echo "${makerstart_block}" | grep -q '\.maker\.env'
-  echo "${makerstart_block}" | grep -q 'MNEMONIC_PASSWORD='
+@test "TUI compatibility patch uses stdin and the fixed service helper" {
+  local menu
+  menu=$("/home/${USER_JM}/venv/bin/python" -c "
+from importlib import resources
+print(resources.files('jmcore').joinpath('data/menu.joinmarket-ng.sh'))
+")
+
+  grep -q '^SERVICE_HELPER="/usr/local/sbin/raspiblitz-joinmarket-ng-service"' "${menu}"
+  grep -Fq "printf '%s\\n' \"\$password\" | \"\$BONUS_SCRIPT\" store-password" "${menu}"
+  grep -q 'sudo "\$SERVICE_HELPER" start' "${menu}"
+  grep -q 'sudo "\$SERVICE_HELPER" stop' "${menu}"
+  grep -q 'sudo "\$SERVICE_HELPER" status' "${menu}"
+  ! grep -q 'sudo "\$BONUS_SCRIPT"' "${menu}"
+  grep -q '^                "\$BONUS_SCRIPT" update' "${menu}"
 }
 
 @test "prestart does not write mnemonic_password when .maker.env is present" {
@@ -551,7 +647,7 @@ PYEOF
   sed -i '/^mnemonic_password/d' "${CONFIG_TOML}"
   printf 'MNEMONIC_PASSWORD="secret"\n' > "/home/${USER_JM}/.joinmarket-ng/.maker.env"
 
-  run bash "${SCRIPT}" prestart
+  run sudo -u "${USER_JM}" bash "${SCRIPT}" prestart
   [ "$status" -eq 0 ]
 
   # The cleartext password must NOT have been written into config.toml.
@@ -562,32 +658,34 @@ PYEOF
 }
 
 # ---------------------------------------------------------------------------
-# 7. prestart updates RPC credentials from bitcoin.conf
+# 7. Root helper supplies RPC credentials without changing app config
 # ---------------------------------------------------------------------------
-@test "prestart injects RPC credentials into config.toml" {
-  run bash "${SCRIPT}" prestart
-  # prestart may fail on mnemonic_file check, but RPC update happens first
-  # Check that RPC credentials from bitcoin.conf were injected
-  grep -q 'testuser' "${CONFIG_TOML}"
-  grep -q 'testpass' "${CONFIG_TOML}"
-}
-
-@test "prestart handles special characters in RPC credentials" {
+@test "runtime RPC environment handles special characters" {
   # Write RPC credentials with sed metacharacters
   cat > /mnt/hdd/app-data/bitcoin/bitcoin.conf <<'EOF'
 rpcuser=test&user
 rpcpassword=pass/word\with|special
 EOF
-  run bash "${SCRIPT}" prestart
-  # Verify credentials were written (prestart may fail on mnemonic check)
-  grep -q 'rpc_user = "test&user"' "${CONFIG_TOML}"
-  grep -q 'rpc_password = "pass/word\\with|special"' "${CONFIG_TOML}"
+  run bash "${SERVICE_HELPER}" prepare
+  [ "$status" -eq 0 ]
+  grep -q '^BITCOIN__RPC_USER="test&user"$' /run/joinmarket-ng/rpc.env
+  grep -q '^BITCOIN__RPC_PASSWORD="pass/word\\\\with|special"$' /run/joinmarket-ng/rpc.env
+  ! grep -q 'test&user\|pass/word' "${CONFIG_TOML}"
 
   # Restore original test credentials
   cat > /mnt/hdd/app-data/bitcoin/bitcoin.conf <<'EOF'
 rpcuser=testuser
 rpcpassword=testpass
 EOF
+}
+
+@test "root service helper has an exact command boundary" {
+  grep -q '^if \[ "\${EUID}" -ne 0 \]; then' "${SERVICE_HELPER_SOURCE}"
+  grep -q '^if \[ "\$#" -ne 1 \]; then' "${SERVICE_HELPER_SOURCE}"
+  grep -q '^    exec systemctl stop "\${SERVICE_NAME}"$' "${SERVICE_HELPER_SOURCE}"
+  grep -q '^    exec systemctl start "\${SERVICE_NAME}"$' "${SERVICE_HELPER_SOURCE}"
+  grep -q '^    exec systemctl enable "\${SERVICE_NAME}"$' "${SERVICE_HELPER_SOURCE}"
+  ! grep -q '\.maker\.env\|config\.toml' "${SERVICE_HELPER_SOURCE}"
 }
 
 # ---------------------------------------------------------------------------
@@ -605,6 +703,7 @@ EOF
 
   # Sudoers should be removed
   [ ! -f "${SUDOERS_FILE}" ]
+  [ ! -e /run/joinmarket-ng ]
 
   # Data directory should be PRESERVED (deliberate design choice)
   [ -d "${DATA_DIR}" ]
@@ -615,6 +714,24 @@ EOF
   run bash "${SCRIPT}" status
   [ "$status" -eq 0 ]
   echo "$output" | grep -q "isInstalled=0"
+}
+
+@test "reinstall fails closed on a symlinked persisted config" {
+  local target_owner
+  target_owner=$(stat -c '%U:%G' /etc/passwd)
+  mv "${CONFIG_TOML}" "${CONFIG_TOML}.saved"
+  ln -s /etc/passwd "${CONFIG_TOML}"
+
+  run bash "${SCRIPT}" on
+  local install_status="${status}"
+  local install_output="${output}"
+
+  rm -f "${CONFIG_TOML}"
+  mv "${CONFIG_TOML}.saved" "${CONFIG_TOML}"
+
+  [ "${install_status}" -eq 1 ]
+  echo "${install_output}" | grep -q 'config.toml must not be a symlink'
+  [ "$(stat -c '%U:%G' /etc/passwd)" = "${target_owner}" ]
 }
 
 # ---------------------------------------------------------------------------
