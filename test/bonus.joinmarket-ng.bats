@@ -13,6 +13,7 @@
 # Following the pattern from bonus.postgresql-15.bats.
 
 SCRIPT="../home.admin/config.scripts/bonus.joinmarket-ng.sh"
+PASSWORD_SCRIPT="../home.admin/config.scripts/blitz.passwords.sh"
 APPID="joinmarket-ng"
 USER_JM="joinmarketng"
 JM_VERSION="0.38.0"
@@ -686,6 +687,19 @@ EOF
   grep -q '^    exec systemctl start "\${SERVICE_NAME}"$' "${SERVICE_HELPER_SOURCE}"
   grep -q '^    exec systemctl enable "\${SERVICE_NAME}"$' "${SERVICE_HELPER_SOURCE}"
   ! grep -q '\.maker\.env\|config\.toml' "${SERVICE_HELPER_SOURCE}"
+}
+
+@test "Password B rotation reloads root-owned RPC credentials for an active maker" {
+  local joinmarket_password_block
+  joinmarket_password_block=$(awk '
+    /# JoinMarket-NG/ { capture=1 }
+    capture { print }
+    capture && /^  fi$/ { exit }
+  ' "${PASSWORD_SCRIPT}")
+
+  echo "${joinmarket_password_block}" \
+    | grep -q 'systemctl try-restart joinmarket-ng-maker.service'
+  ! echo "${joinmarket_password_block}" | grep -q 'config.toml\|rpc_password'
 }
 
 # ---------------------------------------------------------------------------

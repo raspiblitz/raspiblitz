@@ -11,6 +11,7 @@ on:
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
       - "home.admin/config.scripts/bonus.joinmarket-ng.sh"
+      - "home.admin/config.scripts/blitz.passwords.sh"
       - "home.admin/config.scripts/joinmarket-ng-service.sh"
       - "home.admin/config.scripts/joinmarket-ng-trusted-keys.asc"
       - "test/bonus.joinmarket-ng.bats"
@@ -19,6 +20,7 @@ on:
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
       - "home.admin/config.scripts/bonus.joinmarket-ng.sh"
+      - "home.admin/config.scripts/blitz.passwords.sh"
       - "home.admin/config.scripts/joinmarket-ng-service.sh"
       - "home.admin/config.scripts/joinmarket-ng-trusted-keys.asc"
       - "test/bonus.joinmarket-ng.bats"

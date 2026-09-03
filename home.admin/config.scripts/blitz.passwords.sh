@@ -378,12 +378,12 @@ elif [ "${abcd}" = "b" ]; then
 
   # JoinMarket-NG
   if [ "${joinmarketNG}" == "on" ]; then
-    echo "# changing the RPC password for JOINMARKET-NG"
-    # Escape sed metacharacters in the password for safe replacement
-    escapedNewPassword=$(printf '%s' "${newPassword}" | sed -e 's/[&\\/]/\\&/g')
-    sudo sed -i "s/^rpc_password = .*/rpc_password = \"${escapedNewPassword}\"/" /home/joinmarketng/.joinmarket-ng/config.toml
     echo "# changing the password for the 'joinmarketng' user"
     echo "joinmarketng:${newPassword}" | sudo chpasswd
+    # The root-owned runtime environment reads the new RPC password directly
+    # from bitcoin.conf when the maker starts.
+    echo "# restarting joinmarket-ng maker if it is running"
+    sudo systemctl try-restart joinmarket-ng-maker.service
   fi
 
   # ThunderHub
