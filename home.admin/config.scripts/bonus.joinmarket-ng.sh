@@ -31,7 +31,7 @@ USER_JM="joinmarketng"
 # VERSION
 # Pinning a specific version/commit for stability
 GITHUB_REPO="https://github.com/joinmarket-ng/joinmarket-ng"
-GITHUB_TAG="0.35.0"
+GITHUB_TAG="0.38.0"
 
 SYSTEM_DEPENDENCIES=(
   build-essential
