@@ -40,6 +40,7 @@ TRUSTED_FINGERPRINTS=(
   "1C53A412D11EF3051704419C44912E1E03005B31"
   "9253062A4F92D63459085CA62D230520212A5901"
 )
+REQUIRED_SIGNATURES=2
 
 SYSTEM_DEPENDENCIES=(
   build-essential
@@ -153,6 +154,13 @@ verify_release() {
     return 1
   fi
 
+  if ((REQUIRED_SIGNATURES < 1 || REQUIRED_SIGNATURES > ${#TRUSTED_FINGERPRINTS[@]})); then
+    echo "# FAIL: Invalid JoinMarket-NG signature threshold ${REQUIRED_SIGNATURES}."
+    rm -rf "${TMPDIR}"
+    restore_gnupghome
+    return 1
+  fi
+
   if ! gpg --batch --quiet --import "${TRUSTED_KEYRING}" 2>/dev/null; then
     echo "# FAIL: Could not import the local JoinMarket-NG trust root."
     rm -rf "${TMPDIR}"
@@ -214,16 +222,16 @@ verify_release() {
     fi
   done
 
-  # Require at least one valid trusted signature
-  if [ ${VALID_SIGS} -eq 0 ]; then
-    echo "# FAIL: No valid trusted signatures found for release ${TAG}!"
+  # Require independent signatures from the configured number of pinned keys.
+  if [ "${VALID_SIGS}" -lt "${REQUIRED_SIGNATURES}" ]; then
+    echo "# FAIL: Release ${TAG} has ${VALID_SIGS} valid trusted signature(s), ${REQUIRED_SIGNATURES} required."
     echo "# This could indicate a compromised or unsigned release. Aborting."
     rm -rf "${TMPDIR}"
     restore_gnupghome
     return 1
   fi
 
-  echo "# GPG verification passed: ${VALID_SIGS} valid trusted signature(s)."
+  echo "# GPG verification passed: ${VALID_SIGS} valid trusted signature(s), ${REQUIRED_SIGNATURES} required."
 
   # Extract the immutable commit hash from the manifest
   VERIFIED_COMMIT=$(grep '^commit:' "${MANIFEST}" | awk '{print $2}')

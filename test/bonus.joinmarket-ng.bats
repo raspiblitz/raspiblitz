@@ -120,7 +120,7 @@ teardown_file() {
 @test "verify-release accepts locally pinned signatures" {
   run bash "${SCRIPT}" verify-release "${JM_VERSION}"
   [ "$status" -eq 0 ]
-  echo "$output" | grep -q "GPG verification passed:"
+  echo "$output" | grep -q "GPG verification passed: 2 valid trusted signature(s), 2 required."
   echo "$output" | grep -q "VALID signature"
 }
 
@@ -374,7 +374,7 @@ PYEOF
   grep -q 'bin/pip check' "${SCRIPT}"
 }
 
-@test "release verification uses the local trust root and exact VALIDSIG fingerprints" {
+@test "release verification requires two pinned VALIDSIG fingerprints" {
   [ -f "${TRUSTED_KEYRING}" ]
   gpg --batch --with-colons --show-keys "${TRUSTED_KEYRING}" \
     | grep -q '1C53A412D11EF3051704419C44912E1E03005B31'
@@ -382,6 +382,8 @@ PYEOF
     | grep -q '9253062A4F92D63459085CA62D230520212A5901'
   grep -q -- '--status-fd 1 --verify' "${SCRIPT}"
   grep -q '\$2 == "VALIDSIG" && \$3 == expected' "${SCRIPT}"
+  grep -q '^REQUIRED_SIGNATURES=2$' "${SCRIPT}"
+  grep -q 'VALID_SIGS.*-lt.*REQUIRED_SIGNATURES' "${SCRIPT}"
   ! grep -q 'trusted-keys.txt\|signatures/pubkeys' "${SCRIPT}"
 }
 
