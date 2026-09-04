@@ -28,6 +28,10 @@ TRUSTED_KEYRING="../home.admin/config.scripts/joinmarket-ng-trusted-keys.asc"
 setup_file() {
   # Create the minimal mock environment that bonus.joinmarket-ng.sh expects.
   # The script sources raspiblitz.conf and calls blitz.conf.sh unconditionally.
+  mkdir -p /mnt/hdd /mnt/disk_storage/app-data
+  if [ ! -e /mnt/hdd/app-data ]; then
+    ln -s /mnt/disk_storage/app-data /mnt/hdd/app-data
+  fi
   mkdir -p /mnt/hdd/app-data/bitcoin
   mkdir -p /home/admin/config.scripts
 
@@ -77,6 +81,21 @@ STUB
   apt-get update -qq
   apt-get install -y -qq sudo wget python3-dev python3-venv python3-pip \
     build-essential libffi-dev libgmp-dev pkg-config gpg curl > /dev/null 2>&1
+
+  # CI containers do not run systemd as PID 1. Provide a disposable shim so
+  # reconciliation can still require a successful daemon-reload operation.
+  if ! systemctl show-environment >/dev/null 2>&1; then
+    [ ! -e /usr/local/sbin/systemctl ]
+    cat > /usr/local/sbin/systemctl <<'STUB'
+#!/bin/bash
+# raspiblitz-joinmarket-ng-bats-systemctl
+case "$1" in
+  status | is-active | is-enabled) exit 3 ;;
+  *) exit 0 ;;
+esac
+STUB
+    chmod +x /usr/local/sbin/systemctl
+  fi
 }
 
 teardown_file() {
@@ -95,6 +114,13 @@ teardown_file() {
   rm -f /mnt/hdd/app-data/bitcoin/bitcoin.conf 2>/dev/null || true
   rm -f /home/admin/config.scripts/blitz.conf.sh 2>/dev/null || true
   rm -f /home/admin/config.scripts/network.wallet.sh 2>/dev/null || true
+  if [ "$(readlink /mnt/hdd/app-data 2>/dev/null)" = "/mnt/disk_storage/app-data" ]; then
+    rm -f /mnt/hdd/app-data
+    rmdir /mnt/disk_storage/app-data /mnt/disk_storage 2>/dev/null || true
+  fi
+  if grep -q 'raspiblitz-joinmarket-ng-bats-systemctl' /usr/local/sbin/systemctl 2>/dev/null; then
+    rm -f /usr/local/sbin/systemctl
+  fi
 }
 
 # ---------------------------------------------------------------------------
@@ -152,10 +178,149 @@ teardown_file() {
   [ "$(stat -c '%a' "${SERVICE_HELPER}")" = "755" ]
 
   # The home path is the expected data-directory symlink
-  [ "$(readlink -f "/home/${USER_JM}/.joinmarket-ng")" = "${DATA_DIR}" ]
+  [ "$(readlink -f "/home/${USER_JM}/.joinmarket-ng")" = "$(readlink -f "${DATA_DIR}")" ]
 
   # jm-ng entry point was installed in the venv (menu script bundled in jmcore)
   [ -x "/home/${USER_JM}/venv/bin/jm-ng" ]
+}
+
+@test "on reconciles a realistic legacy system integration without reinstalling JoinMarket-NG" {
+  local menu installed_version config_marker helper_victim helper_victim_marker
+  menu=$("/home/${USER_JM}/venv/bin/python" -c "
+from importlib import resources
+print(resources.files('jmcore').joinpath('data/menu.joinmarket-ng.sh'))
+")
+  installed_version=$("/home/${USER_JM}/venv/bin/pip" show jmcore | awk '/^Version:/{print $2}')
+  config_marker="# RECONCILE_CONFIG_MARKER"
+  printf '\n%s\n' "${config_marker}" >> "${CONFIG_TOML}"
+
+  # This is the pre-hardening 0.38 TUI adapter. Reversing the current exact
+  # patch models an installed package that was never repaired by an update.
+  python3 - "${menu}" <<'PYEOF'
+import pathlib
+import sys
+
+menu_path = pathlib.Path(sys.argv[1])
+source = menu_path.read_text()
+replacements = {
+    'BONUS_SCRIPT="/home/admin/config.scripts/bonus.joinmarket-ng.sh"\n'
+    'SERVICE_HELPER="/usr/local/sbin/raspiblitz-joinmarket-ng-service"\n'
+    'if [ -f "$BONUS_SCRIPT" ] && [ -x "$SERVICE_HELPER" ]; then': (
+        'BONUS_SCRIPT="/home/admin/config.scripts/bonus.joinmarket-ng.sh"\n'
+        'if [ -f "$BONUS_SCRIPT" ]; then'
+    ),
+    'printf \'%s\\n\' "$password" | "$BONUS_SCRIPT" store-password': (
+        'sudo "$BONUS_SCRIPT" store-password "$password"'
+    ),
+    'sudo "$SERVICE_HELPER" start': 'sudo "$BONUS_SCRIPT" maker-start',
+    'sudo "$SERVICE_HELPER" stop': 'sudo "$BONUS_SCRIPT" maker-stop',
+    'sudo "$SERVICE_HELPER" status': 'sudo "$BONUS_SCRIPT" maker-status',
+    '"$BONUS_SCRIPT" update "$TARGET_VERSION"\n': 'sudo "$BONUS_SCRIPT" update "$TARGET_VERSION"\n',
+    '"$BONUS_SCRIPT" update main\n': 'sudo "$BONUS_SCRIPT" update main\n',
+    '"$BONUS_SCRIPT" update\n': 'sudo "$BONUS_SCRIPT" update\n',
+}
+
+for current, legacy in replacements.items():
+    assert source.count(current) == 1, current
+    source = source.replace(current, legacy)
+
+menu_path.write_text(source)
+PYEOF
+
+  helper_victim="/tmp/${APPID}-helper-victim"
+  helper_victim_marker="# HELPER_VICTIM_MARKER"
+  printf '%s\n' "${helper_victim_marker}" > "${helper_victim}"
+  rm -f "${SERVICE_HELPER}"
+  ln -s "${helper_victim}" "${SERVICE_HELPER}"
+  cat > "${SERVICE_FILE}" <<EOF
+[Unit]
+Description=JoinMarket-NG Maker Bot
+
+[Service]
+User=${USER_JM}
+EnvironmentFile=-/home/${USER_JM}/.joinmarket-ng/.maker.env
+ExecStartPre=+/home/admin/config.scripts/bonus.${APPID}.sh prestart
+ExecStart=/bin/bash -c 'exec jm-maker start'
+ExecStopPost=+/bin/bash -c 'rm -f /home/${USER_JM}/.joinmarket-ng/.maker.env'
+EOF
+  cat > "${SUDOERS_FILE}" <<EOF
+${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh maker-start
+${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh maker-stop
+${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh maker-status
+${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh store-password *
+${USER_JM} ALL=(ALL) NOPASSWD: /home/admin/config.scripts/bonus.${APPID}.sh update *
+EOF
+  chmod 440 "${SUDOERS_FILE}"
+
+  run bash "${SCRIPT}" on
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q 'already installed, reconciling system integration'
+
+  [ "$(stat -c '%U:%G %a' "${SERVICE_HELPER}")" = "root:root 755" ]
+  [ ! -L "${SERVICE_HELPER}" ]
+  cmp -s "${SERVICE_HELPER_SOURCE}" "${SERVICE_HELPER}"
+  grep -Fx "${helper_victim_marker}" "${helper_victim}"
+  rm -f "${helper_victim}"
+  [ "$(wc -l < "${SUDOERS_FILE}")" -eq 5 ]
+  grep -Fx "${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} start" "${SUDOERS_FILE}"
+  grep -Fx "${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} stop" "${SUDOERS_FILE}"
+  grep -Fx "${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} status" "${SUDOERS_FILE}"
+  grep -Fx "${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} enable" "${SUDOERS_FILE}"
+  ! grep -q 'bonus.joinmarket-ng.sh' "${SUDOERS_FILE}"
+  grep -q "^ExecStartPre=+${SERVICE_HELPER} prepare" "${SERVICE_FILE}"
+  grep -q '^EnvironmentFile=-/run/joinmarket-ng/rpc.env' "${SERVICE_FILE}"
+  ! grep -q '^ExecStartPre=+/home/admin/config.scripts/bonus.joinmarket-ng.sh' "${SERVICE_FILE}"
+  grep -q '^SERVICE_HELPER="/usr/local/sbin/raspiblitz-joinmarket-ng-service"' "${menu}"
+  grep -Fq "printf '%s\\n' \"\$password\" | \"\$BONUS_SCRIPT\" store-password" "${menu}"
+  grep -q 'sudo "\$SERVICE_HELPER" start' "${menu}"
+  ! grep -q 'sudo "\$BONUS_SCRIPT"' "${menu}"
+  [ "$("/home/${USER_JM}/venv/bin/pip" show jmcore | awk '/^Version:/{print $2}')" = "${installed_version}" ]
+  grep -Fx "${config_marker}" "${CONFIG_TOML}"
+
+  local reconcile_block
+  reconcile_block=$(awk '/^reconcile_system_integration\(\)/ { capture=1 } capture { print } capture && /^}$/ { exit }' "${SCRIPT}")
+  ! echo "${reconcile_block}" | grep -q 'install_system_dependencies\|/bin/pip'
+}
+
+@test "on reconciles an installed application when its systemd unit is missing" {
+  local installed_version config_marker
+  installed_version=$("/home/${USER_JM}/venv/bin/pip" show jmcore | awk '/^Version:/{print $2}')
+  config_marker="# MISSING_UNIT_CONFIG_MARKER"
+  printf '\n%s\n' "${config_marker}" >> "${CONFIG_TOML}"
+  rm -f "${SERVICE_FILE}"
+
+  run bash "${SCRIPT}" on
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q 'already installed, reconciling system integration'
+  [ -f "${SERVICE_FILE}" ]
+  [ "$("/home/${USER_JM}/venv/bin/pip" show jmcore | awk '/^Version:/{print $2}')" = "${installed_version}" ]
+  grep -Fx "${config_marker}" "${CONFIG_TOML}"
+}
+
+@test "menu reconciles an installed application when its systemd unit is missing" {
+  local jm_ng_entrypoint jm_ng_backup
+  jm_ng_entrypoint="/home/${USER_JM}/venv/bin/jm-ng"
+  jm_ng_backup="/tmp/${APPID}-jm-ng-entrypoint"
+  cp "${jm_ng_entrypoint}" "${jm_ng_backup}"
+  cat > "${jm_ng_entrypoint}" <<'STUB'
+#!/bin/bash
+echo "JM_NG_MENU_LAUNCHED"
+STUB
+  chown "${USER_JM}:${USER_JM}" "${jm_ng_entrypoint}"
+  chmod 0755 "${jm_ng_entrypoint}"
+  rm -f "${SERVICE_FILE}"
+
+  run bash "${SCRIPT}" menu
+  local menu_status="$status"
+  local menu_output="$output"
+
+  install -o "${USER_JM}" -g "${USER_JM}" -m 0755 "${jm_ng_backup}" "${jm_ng_entrypoint}"
+  rm -f "${jm_ng_backup}"
+
+  [ "${menu_status}" -eq 0 ]
+  echo "${menu_output}" | grep -q 'JoinMarket-NG system integration reconciled'
+  echo "${menu_output}" | grep -q 'JM_NG_MENU_LAUNCHED'
+  [ -f "${SERVICE_FILE}" ]
 }
 
 # ---------------------------------------------------------------------------
@@ -262,6 +427,40 @@ print(ref)
   ! grep -q 'MENU_FALLBACK_URL' "${SCRIPT}"
 }
 
+@test "menu reconciles integration before launching jm-ng" {
+  local menu_block
+  menu_block=$(awk '
+    /^if \[ "\$1" = "menu" \];/ { capture=1 }
+    capture && /^# STORE-PASSWORD/ { exit }
+    capture { print }
+  ' "${SCRIPT}")
+
+  echo "${menu_block}" | grep -q 'reconcile_system_integration'
+  [ "$(echo "${menu_block}" | grep -n 'reconcile_system_integration' | cut -d : -f 1)" -lt \
+    "$(echo "${menu_block}" | grep -n 'venv/bin/jm-ng' | cut -d : -f 1)" ]
+}
+
+@test "reconcile is an admin or root operation" {
+  run sudo -u "${USER_JM}" bash "${SCRIPT}" reconcile
+  [ "$status" -eq 1 ]
+  echo "$output" | grep -q "reconcile must run as admin or root, not ${USER_JM}"
+}
+
+@test "reconciliation only reloads systemd and does not transition maker state" {
+  local reconciliation_code
+  reconciliation_code=$(awk '
+    /^install_root_service_helper\(\)/ { capture=1 }
+    capture { print }
+    /^system_integration_is_current\(\)/ { exit }
+  ' "${SCRIPT}")
+
+  echo "${reconciliation_code}" | grep -q 'systemctl daemon-reload'
+  ! echo "${reconciliation_code}" \
+    | grep -Eq '(^|[[:space:]])(sudo[[:space:]]+)?systemctl[[:space:]]+(start|stop|enable|disable)([[:space:]]|$)'
+  ! echo "${reconciliation_code}" \
+    | grep -Eq '(^|[[:space:]])sudo[[:space:]]+"\$\{SERVICE_HELPER\}"[[:space:]]+(start|stop|enable|disable)([[:space:]]|$)'
+}
+
 # ---------------------------------------------------------------------------
 # 2d. Menu script contains expected main menu entries
 # ---------------------------------------------------------------------------
@@ -292,6 +491,64 @@ print(resources.files('jmcore').joinpath('data/menu.joinmarket-ng.sh'))
   [ "$status" -eq 0 ]
   echo "$output" | grep -q "isInstalled=1"
   echo "$output" | grep -q "version='${JM_VERSION}'"
+}
+
+@test "app-user update fails early when the root helper is stale" {
+  rm -f "${SERVICE_HELPER}"
+
+  run sudo -u "${USER_JM}" bash "${SCRIPT}" update "${JM_VERSION}"
+  local update_status="$status"
+  local update_output="$output"
+
+  # Restore the shared fixture before making assertions so later update tests
+  # cannot inherit the intentionally stale integration.
+  run bash "${SCRIPT}" reconcile
+  local reconcile_status="$status"
+
+  [ "${reconcile_status}" -eq 0 ]
+  [ "${update_status}" -eq 1 ]
+  echo "${update_output}" | grep -q 'RaspiBlitz main menu'
+  ! echo "${update_output}" | grep -q 'Installing system dependencies'
+  ! echo "${update_output}" | grep -q 'sudo:.*password'
+}
+
+@test "app-user update fails early when the packaged TUI adapter is stale" {
+  local menu
+  menu=$("/home/${USER_JM}/venv/bin/python" -c "
+from importlib import resources
+print(resources.files('jmcore').joinpath('data/menu.joinmarket-ng.sh'))
+")
+  sed -i 's|sudo "$SERVICE_HELPER" status|sudo "$BONUS_SCRIPT" maker-status|' "${menu}"
+
+  run sudo -u "${USER_JM}" bash "${SCRIPT}" update "${JM_VERSION}"
+  local update_status="$status"
+  local update_output="$output"
+
+  run bash "${SCRIPT}" reconcile
+  local reconcile_status="$status"
+
+  [ "${reconcile_status}" -eq 0 ]
+  [ "${update_status}" -eq 1 ]
+  echo "${update_output}" | grep -q 'RaspiBlitz main menu'
+  ! echo "${update_output}" | grep -q 'Installing system dependencies'
+}
+
+@test "app-user update fails early when wildcard helper sudo access remains" {
+  printf '%s\n' \
+    "${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} *" \
+    >> "${SUDOERS_FILE}"
+
+  run sudo -u "${USER_JM}" bash "${SCRIPT}" update "${JM_VERSION}"
+  local update_status="$status"
+  local update_output="$output"
+
+  run bash "${SCRIPT}" reconcile
+  local reconcile_status="$status"
+
+  [ "${reconcile_status}" -eq 0 ]
+  [ "${update_status}" -eq 1 ]
+  echo "${update_output}" | grep -q 'RaspiBlitz main menu'
+  ! grep -q 'bonus.joinmarket-ng.sh' "${SUDOERS_FILE}"
 }
 
 # ---------------------------------------------------------------------------
@@ -507,11 +764,11 @@ PYEOF
 # password is already permanently stored (reinstall case), and disable
 # it otherwise.
 @test "install block gates auto-start on stored password" {
-  awk '/# 10. Reload systemd/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
+  awk '/# 8. Enable auto-start/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
     | grep -q 'toml_has_wallet_password'
-  awk '/# 10. Reload systemd/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
+  awk '/# 8. Enable auto-start/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
     | grep -q '"\${SERVICE_HELPER}" enable'
-  awk '/# 10. Reload systemd/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
+  awk '/# 8. Enable auto-start/,/Mark installed in raspiblitz config/' "${SCRIPT}" \
     | grep -q 'systemctl disable'
 }
 

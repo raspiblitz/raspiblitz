@@ -35,6 +35,10 @@ GITHUB_TAG="0.38.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVICE_HELPER="/usr/local/sbin/raspiblitz-joinmarket-ng-service"
 SERVICE_HELPER_SOURCE="${SCRIPT_DIR}/joinmarket-ng-service.sh"
+DATA_DIR="/mnt/hdd/app-data/${APPID}"
+HOME_DATA_LINK="/home/${USER_JM}/.joinmarket-ng"
+SERVICE_FILE="/etc/systemd/system/${APPID}-maker.service"
+SUDOERS_FILE="/etc/sudoers.d/${USER_JM}-maker"
 TRUSTED_KEYRING="${SCRIPT_DIR}/joinmarket-ng-trusted-keys.asc"
 TRUSTED_FINGERPRINTS=(
   "1C53A412D11EF3051704419C44912E1E03005B31"
@@ -315,6 +319,7 @@ PYEOF
 
 patch_upstream_tui() {
   local VENV_DIR="$1"
+  local MODE="${2:-patch}"
   local TUI_SCRIPT
 
   TUI_SCRIPT=$(run_as_joinmarketng "${VENV_DIR}/bin/python" - <<'PYEOF'
@@ -329,7 +334,7 @@ PYEOF
     return 1
   fi
 
-  if ! run_as_joinmarketng "${VENV_DIR}/bin/python" - "${TUI_SCRIPT}" <<'PYEOF'
+  if ! run_as_joinmarketng "${VENV_DIR}/bin/python" - "${TUI_SCRIPT}" "${MODE}" <<'PYEOF'
 import os
 import pathlib
 import stat
@@ -337,6 +342,7 @@ import sys
 import tempfile
 
 menu_path = pathlib.Path(sys.argv[1])
+mode = sys.argv[2]
 source = menu_path.read_text()
 replacements = {
     'BONUS_SCRIPT="/home/admin/config.scripts/bonus.joinmarket-ng.sh"\nif [ -f "$BONUS_SCRIPT" ]; then': (
@@ -354,7 +360,6 @@ replacements = {
     'sudo "$BONUS_SCRIPT" update main\n': '"$BONUS_SCRIPT" update main\n',
     'sudo "$BONUS_SCRIPT" update\n': '"$BONUS_SCRIPT" update\n',
 }
-
 patched = source
 for pattern, replacement in replacements.items():
     source_count = patched.count(pattern)
@@ -368,6 +373,8 @@ for pattern, replacement in replacements.items():
 
 if patched == source:
     sys.exit(0)
+if mode == "check":
+    sys.exit(1)
 
 with tempfile.NamedTemporaryFile(
     mode="w", encoding="utf-8", dir=menu_path.parent, delete=False
@@ -379,9 +386,193 @@ os.chmod(temporary_path, stat.S_IMODE(menu_path.stat().st_mode))
 os.replace(temporary_path, menu_path)
 PYEOF
   then
-    echo "# FAIL: Could not apply the JoinMarket-NG TUI compatibility patch."
+    if [ "${MODE}" != "check" ]; then
+      echo "# FAIL: Could not apply the JoinMarket-NG TUI compatibility patch."
+    fi
     return 1
   fi
+}
+
+systemd_unit_contents() {
+  cat <<EOF
+[Unit]
+Description=JoinMarket-NG Maker Bot
+Wants=${bitcoind_service}.service tor.service
+After=${bitcoind_service}.service tor.service
+
+[Service]
+Type=simple
+User=${USER_JM}
+Group=${USER_JM}
+Environment="PATH=/home/${USER_JM}/venv/bin:/home/${USER_JM}/.local/bin:/usr/local/bin:/usr/bin:/bin"
+EnvironmentFile=-/run/joinmarket-ng/rpc.env
+EnvironmentFile=-/home/${USER_JM}/.joinmarket-ng/.maker.env
+ExecStartPre=+${SERVICE_HELPER} prepare
+ExecStartPre=/home/admin/config.scripts/bonus.${APPID}.sh prestart
+ExecStart=/bin/bash -c 'exec jm-maker start'
+ExecStopPost=/bin/bash -c 'rm -f /home/${USER_JM}/.joinmarket-ng/.maker.env'
+# Bitcoind on RaspiBlitz can take a long time to come up after boot
+# (IBD, mempool rebuild, ...). Retry forever with a 30s backoff instead
+# of letting systemd give up after a few failed attempts.
+Restart=on-failure
+RestartSec=30
+StartLimitIntervalSec=0
+StandardOutput=append:/home/${USER_JM}/.joinmarket-ng/logs/maker.log
+StandardError=append:/home/${USER_JM}/.joinmarket-ng/logs/maker.log
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
+sudoers_contents() {
+  cat <<EOF
+# Allow joinmarketng to run fixed maker service actions without a password.
+${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} start
+${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} stop
+${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} status
+${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} enable
+EOF
+}
+
+home_data_link_is_current() {
+  local canonical_data_dir canonical_home_link
+
+  canonical_data_dir=$(readlink -f "${DATA_DIR}") || return 1
+  canonical_home_link=$(readlink -f "${HOME_DATA_LINK}") || return 1
+  [ "${canonical_home_link}" = "${canonical_data_dir}" ]
+}
+
+validate_reconciliation_prerequisites() {
+  if ! id -u "${USER_JM}" >/dev/null 2>&1; then
+    echo "# FAIL: ${USER_JM} user is not installed."
+    return 1
+  fi
+  if [ ! -d "${DATA_DIR}" ] || [ -L "${DATA_DIR}" ]; then
+    echo "# FAIL: ${DATA_DIR} must be an installed real directory."
+    return 1
+  fi
+  if [ ! -L "${HOME_DATA_LINK}" ] || ! home_data_link_is_current; then
+    echo "# FAIL: ${HOME_DATA_LINK} must link to ${DATA_DIR}."
+    return 1
+  fi
+  if [ ! -x "/home/${USER_JM}/venv/bin/python" ]; then
+    echo "# FAIL: JoinMarket-NG virtual environment is not installed."
+    return 1
+  fi
+}
+
+install_root_service_helper() {
+  local temporary_helper
+
+  if [ ! -f "${SERVICE_HELPER_SOURCE}" ]; then
+    echo "# FAIL: Service helper source is missing: ${SERVICE_HELPER_SOURCE}"
+    return 1
+  fi
+  temporary_helper=$(sudo mktemp "${SERVICE_HELPER}.XXXXXX") || return 1
+  if ! sudo install -o root -g root -m 0755 "${SERVICE_HELPER_SOURCE}" "${temporary_helper}" \
+    || ! sudo mv -f "${temporary_helper}" "${SERVICE_HELPER}"; then
+    sudo rm -f "${temporary_helper}"
+    echo "# FAIL: Could not install the root service helper."
+    return 1
+  fi
+}
+
+install_fixed_sudoers() {
+  local temporary_sudoers
+
+  temporary_sudoers=$(sudo mktemp "${SUDOERS_FILE}.XXXXXX") || return 1
+  if ! sudoers_contents | sudo tee "${temporary_sudoers}" >/dev/null \
+    || ! sudo chown root:root "${temporary_sudoers}" \
+    || ! sudo chmod 0440 "${temporary_sudoers}" \
+    || ! sudo visudo -cf "${temporary_sudoers}" >/dev/null; then
+    sudo rm -f "${temporary_sudoers}"
+    echo "# FAIL: Could not install validated JoinMarket-NG sudoers rules."
+    return 1
+  fi
+  if ! sudo mv -f "${temporary_sudoers}" "${SUDOERS_FILE}"; then
+    sudo rm -f "${temporary_sudoers}"
+    echo "# FAIL: Could not activate JoinMarket-NG sudoers rules."
+    return 1
+  fi
+}
+
+install_systemd_unit() {
+  local temporary_unit
+
+  temporary_unit=$(sudo mktemp "${SERVICE_FILE}.XXXXXX") || return 1
+  if ! systemd_unit_contents | sudo tee "${temporary_unit}" >/dev/null \
+    || ! sudo chown root:root "${temporary_unit}" \
+    || ! sudo chmod 0644 "${temporary_unit}"; then
+    sudo rm -f "${temporary_unit}"
+    echo "# FAIL: Could not write the JoinMarket-NG systemd unit."
+    return 1
+  fi
+  if ! sudo mv -f "${temporary_unit}" "${SERVICE_FILE}"; then
+    sudo rm -f "${temporary_unit}"
+    echo "# FAIL: Could not activate the JoinMarket-NG systemd unit."
+    return 1
+  fi
+  if ! sudo systemctl daemon-reload; then
+    echo "# FAIL: Could not reload systemd."
+    return 1
+  fi
+}
+
+reconcile_system_integration() {
+  if [ "$(id -un)" = "${USER_JM}" ]; then
+    echo "# FAIL: reconcile must run as admin or root, not ${USER_JM}."
+    return 1
+  fi
+  if [ "${EUID}" -ne 0 ] && [ "$(id -un)" != "admin" ]; then
+    echo "# FAIL: reconcile must run as the RaspiBlitz admin user or root."
+    return 1
+  fi
+  if ! validate_reconciliation_prerequisites \
+    || ! install_root_service_helper \
+    || ! install_fixed_sudoers \
+    || ! install_systemd_unit \
+    || ! patch_upstream_tui "/home/${USER_JM}/venv"; then
+    return 1
+  fi
+  echo "# JoinMarket-NG system integration reconciled."
+}
+
+system_integration_is_current() {
+  local actual_sudo_commands expected_sudo_commands sudo_listing
+
+  if [ ! -f "${SERVICE_HELPER}" ] \
+    || [ -L "${SERVICE_HELPER}" ] \
+    || [ "$(stat -c '%u:%g %a' "${SERVICE_HELPER}" 2>/dev/null)" != "0:0 755" ] \
+    || ! cmp -s "${SERVICE_HELPER_SOURCE}" "${SERVICE_HELPER}"; then
+    return 1
+  fi
+  if [ ! -f "${SERVICE_FILE}" ] \
+    || [ -L "${SERVICE_FILE}" ] \
+    || [ "$(stat -c '%u:%g %a' "${SERVICE_FILE}" 2>/dev/null)" != "0:0 644" ] \
+    || ! cmp -s "${SERVICE_FILE}" <(systemd_unit_contents); then
+    return 1
+  fi
+  if [ ! -f "${SUDOERS_FILE}" ] \
+    || [ -L "${SUDOERS_FILE}" ] \
+    || [ "$(stat -c '%u:%g %a' "${SUDOERS_FILE}" 2>/dev/null)" != "0:0 440" ]; then
+    return 1
+  fi
+  sudo_listing=$(sudo -n -l 2>/dev/null) || return 1
+  actual_sudo_commands=$(awk '
+    /^[[:space:]]+\([^)]*\)[[:space:]]/ {
+      sub(/^[[:space:]]+/, "")
+      print
+    }
+  ' <<<"${sudo_listing}")
+  expected_sudo_commands=$(sudoers_contents | awk '
+    !/^#/ {
+      sub(/^[^[:space:]]+[[:space:]]+ALL=/, "")
+      print
+    }
+  ')
+  [ "${actual_sudo_commands}" = "${expected_sudo_commands}" ] || return 1
+  patch_upstream_tui "/home/${USER_JM}/venv" check >/dev/null 2>&1
 }
 
 # BASIC COMMANDLINE OPTIONS
@@ -390,6 +581,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# bonus.${APPID}.sh on        -> install the app"
   echo "# bonus.${APPID}.sh off       -> uninstall the app"
   echo "# bonus.${APPID}.sh menu      -> SSH menu dialog"
+  echo "# bonus.${APPID}.sh reconcile -> repair installed system integration"
   echo "# bonus.${APPID}.sh verify-release [TAG] -> verify release signatures only"
   echo "# bonus.${APPID}.sh prestart  -> will be called by systemd before start"
   echo "# bonus.${APPID}.sh update [TAG] -> update to latest or specific version"
@@ -475,13 +667,24 @@ if [ "$1" = "verify-release" ]; then
   exit 0
 fi
 
+if [ "$1" = "reconcile" ]; then
+  if ! reconcile_system_integration; then
+    exit 1
+  fi
+  exit 0
+fi
+
 ##########################
 # MENU
 #########################
 
 if [ "$1" = "menu" ]; then
   # Show the TUI menu if installed
-  if [ "${isInstalled}" == "1" ]; then
+  if [ "${isInstalled}" == "1" ] \
+    || validate_reconciliation_prerequisites >/dev/null 2>&1; then
+    if ! reconcile_system_integration; then
+      exit 1
+    fi
     sudo -u ${USER_JM} /home/${USER_JM}/venv/bin/jm-ng
   else
     whiptail --title " JoinMarket-NG " --msgbox "JoinMarket-NG is not installed." 10 40
@@ -602,13 +805,15 @@ fi
 
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  if [ "${isInstalled}" -eq 1 ]; then
-    echo "# ${APPID} is already installed."
-    exit 1
+  if [ "${isInstalled}" -eq 1 ] \
+    || validate_reconciliation_prerequisites >/dev/null 2>&1; then
+    echo "# ${APPID} is already installed, reconciling system integration."
+    if ! reconcile_system_integration; then
+      exit 1
+    fi
+    exit 0
   fi
 
-  HOME_DATA_LINK="/home/${USER_JM}/.joinmarket-ng"
-  DATA_DIR="/mnt/hdd/app-data/${APPID}"
   if [ -L "${DATA_DIR}" ] || { [ -e "${DATA_DIR}" ] && [ ! -d "${DATA_DIR}" ]; }; then
     echo "# FAIL: ${DATA_DIR} must be a real directory."
     echo "# Move the unexpected path aside and retry."
@@ -624,7 +829,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# Move its contents to ${DATA_DIR}, then remove ${HOME_DATA_LINK} and retry."
     exit 1
   fi
-  if [ -L "${HOME_DATA_LINK}" ] && [ "$(readlink -f "${HOME_DATA_LINK}")" != "${DATA_DIR}" ]; then
+  if [ -L "${HOME_DATA_LINK}" ] && ! home_data_link_is_current; then
     echo "# FAIL: ${HOME_DATA_LINK} points outside ${DATA_DIR}."
     echo "# Replace the symlink with one that points to ${DATA_DIR}, then retry."
     exit 1
@@ -688,7 +893,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ! -L "${HOME_DATA_LINK}" ]; then
     run_as_joinmarketng ln -s "${DATA_DIR}" "${HOME_DATA_LINK}"
   fi
-  if [ "$(readlink -f "${HOME_DATA_LINK}")" != "${DATA_DIR}" ]; then
+  if ! home_data_link_is_current; then
     echo "# FAIL: Could not create ${HOME_DATA_LINK} -> ${DATA_DIR}."
     exit 1
   fi
@@ -729,10 +934,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     ${VENV_DIR}/bin/pip install packaging
   "; then
     echo "# FAIL - pip install failed"
-    exit 1
-  fi
-
-  if ! patch_upstream_tui "${VENV_DIR}"; then
     exit 1
   fi
 
@@ -792,48 +993,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     run_as_joinmarketng chmod 600 "${CONFIG_FILE}"
   fi
   
-  # 7. Root service helper and systemd service
-  if [ ! -f "${SERVICE_HELPER_SOURCE}" ]; then
-    echo "# FAIL: Service helper source is missing: ${SERVICE_HELPER_SOURCE}"
-    exit 1
-  fi
-  if ! sudo install -o root -g root -m 0755 "${SERVICE_HELPER_SOURCE}" "${SERVICE_HELPER}"; then
-    echo "# FAIL: Could not install the root service helper."
-    exit 1
-  fi
-
-  echo "# Creating systemd service for Maker..."
-  cat <<EOF | sudo tee /etc/systemd/system/${APPID}-maker.service
-[Unit]
-Description=JoinMarket-NG Maker Bot
-Wants=${bitcoind_service}.service tor.service
-After=${bitcoind_service}.service tor.service
-
-[Service]
-Type=simple
-User=${USER_JM}
-Group=${USER_JM}
-Environment="PATH=/home/${USER_JM}/venv/bin:/home/${USER_JM}/.local/bin:/usr/local/bin:/usr/bin:/bin"
-EnvironmentFile=-/run/joinmarket-ng/rpc.env
-EnvironmentFile=-/home/${USER_JM}/.joinmarket-ng/.maker.env
-ExecStartPre=+${SERVICE_HELPER} prepare
-ExecStartPre=/home/admin/config.scripts/bonus.${APPID}.sh prestart
-ExecStart=/bin/bash -c 'exec jm-maker start'
-ExecStopPost=/bin/bash -c 'rm -f /home/${USER_JM}/.joinmarket-ng/.maker.env'
-# Bitcoind on RaspiBlitz can take a long time to come up after boot
-# (IBD, mempool rebuild, ...). Retry forever with a 30s backoff instead
-# of letting systemd give up after a few failed attempts.
-Restart=on-failure
-RestartSec=30
-StartLimitIntervalSec=0
-StandardOutput=append:/home/${USER_JM}/.joinmarket-ng/logs/maker.log
-StandardError=append:/home/${USER_JM}/.joinmarket-ng/logs/maker.log
-
-[Install]
-WantedBy=multi-user.target
-EOF
-  
-  # 8. Menu Script (TUI)
+  # 7. Menu Script (TUI)
   # The TUI menu script is bundled as package data inside jmcore and launched
   # via the 'jm-ng' console script entry point (installed in the venv by pip).
   # No separate download or file copy is needed.
@@ -856,24 +1016,16 @@ EOF
       echo 'export PATH="$HOME/.local/bin:$PATH"' | sudo -u ${USER_JM} tee -a /home/${USER_JM}/.bashrc
   fi
 
-  # 9. Sudoers rule: fixed maker service actions only
-  echo "# Adding sudoers rule..."
-  cat <<EOF | sudo tee /etc/sudoers.d/joinmarketng-maker
-# Allow joinmarketng to run fixed maker service actions without a password.
-${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} start
-${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} stop
-${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} status
-${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} enable
-EOF
-  sudo chmod 440 /etc/sudoers.d/joinmarketng-maker
+  if ! reconcile_system_integration; then
+    exit 1
+  fi
 
-  # 10. Reload systemd, and enable auto-start at boot only when a
+  # 8. Enable auto-start at boot only when a
   # mnemonic password is already permanently stored in config.toml.
   # Without the password the maker cannot decrypt the wallet under
   # systemd (no TTY to prompt), so we keep the unit disabled by default
   # and rely on the TUI 'maker-start' flow to inject a temporary
   # password via the .maker.env file.
-  sudo systemctl daemon-reload
   if toml_has_wallet_password "${CONFIG_FILE}"; then
     echo "# Wallet password already stored — enabling maker auto-start at boot."
     sudo "${SERVICE_HELPER}" enable
@@ -900,6 +1052,16 @@ fi
 #########################
 
 if [ "$1" = "update" ]; then
+
+  if [ "$(id -un)" = "${USER_JM}" ]; then
+    if ! system_integration_is_current; then
+      echo "# FAIL: JoinMarket-NG system integration is outdated."
+      echo "# Launch JoinMarket-NG from the RaspiBlitz main menu to repair it."
+      exit 1
+    fi
+  elif ! reconcile_system_integration; then
+    exit 1
+  fi
 
   echo "# Updating ${APPID} ..."
 
