@@ -7,6 +7,7 @@
 # the help output). "jmng" and "jm-tui" are NOT valid.
 
 COMMANDS_SH="../home.admin/_commands.sh"
+UPDATE_MENU="../home.admin/99updateMenu.sh"
 
 @test "help listing advertises jm-ng (not jmng or jm-tui)" {
   run grep -E '^\s*echo\s+"\s*jm[-_]?ng\s+' "${COMMANDS_SH}"
@@ -64,4 +65,10 @@ STUB
   echo "$output" | grep -q "stub-menu-called arg=menu"
 
   rm -rf "${tmp}"
+}
+
+@test "JoinMarket-NG updates are not exposed in the general update menu" {
+  ! grep -q 'Update JoinMarket-NG' "${UPDATE_MENU}"
+  ! grep -q 'bonus.joinmarket-ng.sh update' "${UPDATE_MENU}"
+  ! grep -q 'JMNG-MAIN' "${UPDATE_MENU}"
 }
