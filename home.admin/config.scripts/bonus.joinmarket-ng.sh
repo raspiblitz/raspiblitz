@@ -399,6 +399,7 @@ systemd_unit_contents() {
 Description=JoinMarket-NG Maker Bot
 Wants=${bitcoind_service}.service tor.service
 After=${bitcoind_service}.service tor.service
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple
@@ -416,9 +417,9 @@ ExecStopPost=/bin/bash -c 'rm -f /home/${USER_JM}/.joinmarket-ng/.maker.env'
 # of letting systemd give up after a few failed attempts.
 Restart=on-failure
 RestartSec=30
-StartLimitIntervalSec=0
-StandardOutput=append:/home/${USER_JM}/.joinmarket-ng/logs/maker.log
-StandardError=append:/home/${USER_JM}/.joinmarket-ng/logs/maker.log
+# Log to the journal (journalctl -u ${APPID}-maker), never to a file under
+# the app-owned data directory: the system manager opens append: targets
+# as root, so the app user could redirect root writes through a symlink.
 
 [Install]
 WantedBy=multi-user.target
@@ -732,27 +733,49 @@ with open(config_path, "r") as fh:
 escaped = password.replace("\\", "\\\\").replace('"', '\\"')
 new_line = 'mnemonic_password = "{}"'.format(escaped)
 
-# Use a lambda replacement so re.sub does not reinterpret backslash escapes
-# in the password value (which would un-escape the carefully escaped output).
-if re.search(r"^\s*mnemonic_password\s*=", content, re.MULTILINE):
-    content = re.sub(
-        r"^\s*mnemonic_password\s*=.*$",
-        lambda _m: new_line,
-        content,
-        flags=re.MULTILINE,
-    )
-elif re.search(r"^\[wallet\]", content, re.MULTILINE):
-    content = re.sub(
-        r"^\[wallet\]",
-        lambda _m: "[wallet]\n" + new_line,
-        content,
-        flags=re.MULTILINE,
-    )
+# Rewrite section-aware: drop stale or misplaced mnemonic_password entries
+# (legacy installs wrote it at TOML top level, where JoinMarket-NG ignores
+# it) and write the fresh value under [wallet].
+section_re = re.compile(r"^\s*\[([^\]]+)\]")
+key_re = re.compile(r"^\s*#?\s*mnemonic_password\s*=")
+out_lines = []
+current_section = ""
+wallet_header_idx = None
+for line in content.splitlines():
+    section_match = section_re.match(line)
+    if section_match:
+        current_section = section_match.group(1).strip()
+        if current_section == "wallet":
+            wallet_header_idx = len(out_lines)
+        out_lines.append(line)
+        continue
+    if key_re.match(line) and current_section in ("", "wallet"):
+        continue
+    out_lines.append(line)
+
+if wallet_header_idx is not None:
+    out_lines.insert(wallet_header_idx + 1, new_line)
 else:
-    content += "\n[wallet]\n" + new_line + "\n"
+    if out_lines and out_lines[-1].strip() != "":
+        out_lines.append("")
+    out_lines.append("[wallet]")
+    out_lines.append(new_line)
+
+new_content = "\n".join(out_lines) + "\n"
+
+# Validate that the result parses as TOML and round-trips the password
+# before touching the on-disk config.
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib  # type: ignore[no-redef]
+data = tomllib.loads(new_content)
+if data.get("wallet", {}).get("mnemonic_password") != password:
+    sys.stderr.write("mnemonic_password round-trip validation failed\n")
+    sys.exit(1)
 
 with open(config_path, "w") as fh:
-    fh.write(content)
+    fh.write(new_content)
 PYEOF
   then
     exec 3<&-
@@ -859,7 +882,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # rewrites 'disablewallet' to 0 in bitcoin.conf and restarts bitcoind
   # only if the value actually changed.
   echo "# Ensuring Bitcoin Core wallet support is enabled..."
-  sudo /home/admin/config.scripts/network.wallet.sh on
+  if ! sudo /home/admin/config.scripts/network.wallet.sh on; then
+    echo "# FAIL - could not enable Bitcoin Core wallet support"
+    exit 1
+  fi
 
   # 2. Create User
   echo "# Creating user ${USER_JM}..."

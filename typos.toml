@@ -6,7 +6,7 @@
 
 [files]
 # skip these files
-extend-exclude = ["*.nodes","*.torrent","*.sh","*.py","*.proto","*.json","*.conf","*.toml"]
+extend-exclude = ["*.nodes","*.torrent","*.sh","*.py","*.proto","*.json","*.conf","*.toml","*.asc"]
 
 [default.extend-words]
 # don't correct these false positives
