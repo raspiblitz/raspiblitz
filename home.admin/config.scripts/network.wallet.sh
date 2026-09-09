@@ -45,19 +45,25 @@ fi
 # switch on
 ###################
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
-  
+
   # bitcoin config for wallet name & dir will be done by bitcoin.check.sh prestart
 
   if [ ${disablewallet} == 1 ]; then
-    sudo sed -i "s/^disablewallet=.*/disablewallet=0/g" /mnt/hdd/app-data/${network}/${network}.conf
+    if ! sudo sed -i "s/^disablewallet=.*/disablewallet=0/g" /mnt/hdd/app-data/${network}/${network}.conf; then
+      echo "# FAIL - could not enable the ${network} core wallet in the config"
+      exit 1
+    fi
     echo "# Switching the ${network} core wallet on"
   else
-    echo "# The ${network} core wallet is already on"    
+    echo "# The ${network} core wallet is already on"
   fi
   source <(/home/admin/_cache.sh get state)
   if [ ${state} != "recovering" ]; then
     echo "# Restarting ${bitcoind_service}"
-    sudo systemctl restart ${bitcoind_service}
+    if ! sudo systemctl restart ${bitcoind_service}; then
+      echo "# FAIL - could not restart ${bitcoind_service}"
+      exit 1
+    fi
   fi
   exit 0
 fi
@@ -66,8 +72,14 @@ fi
 # switch off
 ###################
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
-  sudo sed -i "s/^disablewallet=.*/disablewallet=1/g" /mnt/hdd/app-data/${network}/${network}.conf
-  sudo systemctl restart ${bitcoind_service}
+  if ! sudo sed -i "s/^disablewallet=.*/disablewallet=1/g" /mnt/hdd/app-data/${network}/${network}.conf; then
+    echo "# FAIL - could not disable the ${network} core wallet in the config"
+    exit 1
+  fi
+  if ! sudo systemctl restart ${bitcoind_service}; then
+    echo "# FAIL - could not restart ${bitcoind_service}"
+    exit 1
+  fi
   exit 0
 fi
 

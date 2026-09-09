@@ -379,13 +379,24 @@ get_secp256k1()
   [ -f "${SERVICE_FILE}" ]
   grep -q '^Restart=on-failure' "${SERVICE_FILE}"
   grep -q '^RestartSec=30' "${SERVICE_FILE}"
-  grep -q '^StartLimitIntervalSec=0' "${SERVICE_FILE}"
+  # StartLimitIntervalSec is a [Unit] directive; under [Service] systemd
+  # ignores it and the service can still enter start-limit-hit.
+  awk '
+    /^\[Unit\]/ { in_unit=1 }
+    /^\[Service\]/ || /^\[Install\]/ { in_unit=0 }
+    in_unit && /^StartLimitIntervalSec=0/ { found=1 }
+    END { exit !found }
+  ' "${SERVICE_FILE}"
   grep -q '^WantedBy=multi-user.target' "${SERVICE_FILE}"
   grep -q '^EnvironmentFile=-/run/joinmarket-ng/rpc.env' "${SERVICE_FILE}"
   grep -q "^ExecStartPre=+${SERVICE_HELPER} prepare" "${SERVICE_FILE}"
   grep -q '^ExecStartPre=/home/admin/config.scripts/bonus.joinmarket-ng.sh prestart' "${SERVICE_FILE}"
   ! grep -q '^ExecStartPre=+/home/admin/config.scripts/bonus.joinmarket-ng.sh' "${SERVICE_FILE}"
   ! grep -q '^ExecStopPost=+' "${SERVICE_FILE}"
+  # stdout/stderr must go to the journal (the default), never to a file
+  # inside the app-owned data directory: the system manager opens append:
+  # targets as root, letting the app user redirect root writes via symlink.
+  ! grep -qE '^Standard(Output|Error)=append:' "${SERVICE_FILE}"
 }
 
 # Without a permanently stored wallet password the maker cannot start
@@ -812,6 +823,33 @@ PYEOF
   [ "$status" -eq 0 ]
 }
 
+@test "store-password migrates a legacy top-level mnemonic_password into [wallet]" {
+  # Simulate a config written by the version that stored the password at
+  # TOML top level, where JoinMarket-NG ignores it.
+  sed -i '/mnemonic_password/d' "${CONFIG_TOML}"
+  { echo 'mnemonic_password = "legacy-outdated"'; cat "${CONFIG_TOML}"; } > "${CONFIG_TOML}.tmp"
+  mv "${CONFIG_TOML}.tmp" "${CONFIG_TOML}"
+  chown "${USER_JM}:${USER_JM}" "${CONFIG_TOML}"
+  chmod 600 "${CONFIG_TOML}"
+
+  run bash -c 'printf "%s\n" "$3" | sudo -u "$1" bash "$2" store-password' \
+    _ "${USER_JM}" "${SCRIPT}" "hunter2"
+  [ "$status" -eq 0 ]
+
+  # The top-level key must be gone and [wallet] must hold the new password.
+  python3 - "${CONFIG_TOML}" <<'PYEOF'
+import sys
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+import pathlib
+data = tomllib.loads(pathlib.Path(sys.argv[1]).read_text())
+assert "mnemonic_password" not in data, f"top-level key survived: {data.keys()}"
+assert data.get("wallet", {}).get("mnemonic_password") == "hunter2", data.get("wallet")
+PYEOF
+}
+
 @test "mnemonic_password at top level (not under [wallet]) is not visible to Python settings" {
   # Write a config with mnemonic_password at top level only (not under [wallet])
   local tmp_cfg
@@ -956,9 +994,38 @@ EOF
     capture && /^  fi$/ { exit }
   ' "${PASSWORD_SCRIPT}")
 
-  echo "${joinmarket_password_block}" \
-    | grep -q 'systemctl try-restart joinmarket-ng-maker.service'
+  # A temporary wallet password (.maker.env) is deleted by ExecStopPost
+  # during the stop phase, so the rotation must back it up and restore it
+  # between stop and start.
+  echo "${joinmarket_password_block}" | grep -q 'JM_MAKER_ENV='
+  echo "${joinmarket_password_block}" | grep -q 'JM_ENV_BACKUP=\$(sudo mktemp'
+  echo "${joinmarket_password_block}" | grep -q 'systemctl stop \${JM_MAKER_SERVICE}'
+  echo "${joinmarket_password_block}" | grep -q 'systemctl start \${JM_MAKER_SERVICE}'
+  # A failed reload must be surfaced, not hidden behind an OK result.
+  echo "${joinmarket_password_block}" | grep -q 'jmRestartOK'
+  echo "${joinmarket_password_block}" | grep -q 'passwordBReloadFailed=1'
   ! echo "${joinmarket_password_block}" | grep -q 'config.toml\|rpc_password'
+}
+
+@test "Password B rotation fails visibly when a service reload fails" {
+  grep -q 'passwordBReloadFailed}' "${PASSWORD_SCRIPT}"
+  grep -q 'FAIL -> RPC Password B was changed' "${PASSWORD_SCRIPT}"
+  awk '
+    /passwordBReloadFailed/ && /== "1"/ { found=1 }
+    END { exit !found }
+  ' "${PASSWORD_SCRIPT}"
+}
+
+@test "Password B rotation restarts the chain-specific bitcoin service" {
+  grep -q 'bitcoindService="tbitcoind"' "${PASSWORD_SCRIPT}"
+  grep -q 'bitcoindService="sbitcoind"' "${PASSWORD_SCRIPT}"
+  grep -q 'systemctl restart \${bitcoindService}' "${PASSWORD_SCRIPT}"
+  ! grep -q 'systemctl restart \${network}d' "${PASSWORD_SCRIPT}"
+}
+
+@test "install aborts when Bitcoin Core wallet support cannot be enabled" {
+  grep -A3 'network.wallet.sh on' "${SCRIPT}" | grep -q 'exit 1'
+  grep -q 'FAIL - could not enable Bitcoin Core wallet support' "${SCRIPT}"
 }
 
 # ---------------------------------------------------------------------------
