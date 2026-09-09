@@ -560,6 +560,15 @@ else
   echo "Provisioning Jam - keep default" >> ${logFile}
 fi
 
+# JoinMarket-NG
+if [ "${joinmarketNG}" = "on" ]; then
+  echo "Provisioning JoinMarket-NG - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup JoinMarket-NG"
+  sudo /home/admin/config.scripts/bonus.joinmarket-ng.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning JoinMarket-NG - keep default" >> ${logFile}
+fi
+
 # Specter
 if [ "${specter}" = "on" ]; then
   echo "Provisioning Specter - run config script" >> ${logFile}

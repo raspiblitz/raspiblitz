@@ -126,6 +126,9 @@ fi
 if [ "${jam}" == "on" ]; then
   OPTIONS+=(JAM "Jam (JoinMarket WebUI)")
 fi
+if [ "${joinmarketNG}" == "on" ]; then
+  OPTIONS+=(JMNG "JoinMarket-NG (Next Gen)")
+fi
 if [ "${faraday}" == "on" ]; then
   OPTIONS+=(FARADAY "Faraday Channel Management")
 fi
@@ -309,6 +312,9 @@ case $CHOICE in
             ;;
         JAM)
             /home/admin/config.scripts/bonus.jam.sh menu
+            ;;
+        JMNG)
+            /home/admin/config.scripts/bonus.joinmarket-ng.sh menu
             ;;
         BOS)
             sudo /home/admin/config.scripts/bonus.bos.sh menu
