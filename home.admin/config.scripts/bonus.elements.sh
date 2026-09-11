@@ -2,7 +2,7 @@
 
 # set version (change if update is available)
 # https://github.com/ElementsProject/elements/releases
-VERSION="elements-23.3.0"
+VERSION="elements-23.3.4"
 SIG_PUBKEY="BD0F3062F87842410B06A0432F656B0610604482" # Pablo Greco <pgreco@blockstream.com>
 
 # command info
