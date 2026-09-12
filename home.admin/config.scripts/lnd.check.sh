@@ -224,6 +224,7 @@ if [ "$1" == "prestart" ]; then
   # lndPublicPeers=off in raspiblitz.conf -> node is outbound-only (not reachable, not announced)
   if [ "${lndPublicPeers}" == "off" ]; then
     echo "# lndPublicPeers=off -> disable the inbound peer listener (outbound-only node)"
+    echo "# (the [tor] section below sets tor.v3=false as lnd rejects nolisten + tor.v3=true)"
     setting ${lndConfFile} ${insertLine} "nolisten" "1"
   else
     # default: public peer connectivity enabled - remove nolisten if present
@@ -317,7 +318,14 @@ if [ "$1" == "prestart" ]; then
     setting ${lndConfFile} ${insertLine} "tor.control" "9051"
     setting ${lndConfFile} ${insertLine} "tor.socks" "9050"
     setting ${lndConfFile} ${insertLine} "tor.privatekeypath" "\/mnt\/hdd\/lnd\/${netprefix}v3_onion_private_key"
-    setting ${lndConfFile} ${insertLine} "tor.v3" "true"
+    # lndPublicPeers=off -> outbound-only over Tor: no inbound hidden service
+    # (tor.v3=false, because nolisten + tor.v3=true is rejected by lnd:
+    # 'listening must be enabled when enabling inbound connections over Tor')
+    if [ "${lndPublicPeers}" == "off" ]; then
+      setting ${lndConfFile} ${insertLine} "tor.v3" "false"
+    else
+      setting ${lndConfFile} ${insertLine} "tor.v3" "true"
+    fi
     setting ${lndConfFile} ${insertLine} "tor.active" "true"
 
     # take care of incompatible settings https://github.com/rootzoll/raspiblitz/issues/2787#issuecomment-991245694
