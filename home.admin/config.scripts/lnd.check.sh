@@ -220,6 +220,16 @@ if [ "$1" == "prestart" ]; then
     sed -i '/^externalip=*/d' ${lndConfFile}
   fi
 
+  # enforce/disable public peer connectivity (inbound connections)
+  # lndPublicPeers=off in raspiblitz.conf -> node is outbound-only (not reachable, not announced)
+  if [ "${lndPublicPeers}" == "off" ]; then
+    echo "# lndPublicPeers=off -> disable the inbound peer listener (outbound-only node)"
+    setting ${lndConfFile} ${insertLine} "nolisten" "1"
+  else
+    # default: public peer connectivity enabled - remove nolisten if present
+    sed -i '/^nolisten=*/d' ${lndConfFile}
+  fi
+
   # if no maxlogfiles set - set to 2
   if [ $(cat ${lndConfFile} | grep -c "^maxlogfiles=") -eq 0 ]; then
     setting ${lndConfFile} ${insertLine} "maxlogfiles" "2"

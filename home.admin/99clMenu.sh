@@ -23,6 +23,11 @@ OPTIONS=()
   OPTIONS+=(RECEIVE "Create an invoice / payment request")
   OPTIONS+=(SUMMARY "Information about this node")
   OPTIONS+=(NAME "Change the name / alias of the node")
+if [ "${clPublicPeers}" == "off" ]; then
+  OPTIONS+=(PUBPEERS "Public Peer Connectivity: OFF")
+else
+  OPTIONS+=(PUBPEERS "Public Peer Connectivity: ON")
+fi
 ln_getInfo=$($lightningcli_alias getinfo 2>/dev/null)
 ln_channels_online="$(echo "${ln_getInfo}" | jq -r '.num_active_channels')" 2>/dev/null
 cl_num_inactive_channels="$(echo "${ln_getInfo}" | jq -r '.num_inactive_channels')" 2>/dev/null
@@ -83,6 +88,29 @@ case $CHOICE in
       ;;
   NAME)
       sudo /home/admin/config.scripts/cl.setname.sh $CHAIN
+      ;;
+  PUBPEERS)
+      clear
+      echo
+      if [ "${clPublicPeers}" == "off" ]; then
+        # enable public peer connectivity (default)
+        /home/admin/config.scripts/blitz.conf.sh set clPublicPeers "on"
+        echo "# Public peer connectivity ENABLED"
+        echo "# The node is reachable and announced to the network over Tor."
+      else
+        # disable public peer connectivity - outbound-only node
+        /home/admin/config.scripts/blitz.conf.sh set clPublicPeers "off"
+        echo "# Public peer connectivity DISABLED"
+        echo "# The node is now outbound-only: not reachable and not announced."
+        echo "# Existing channels keep working over the outbound connections."
+        echo "# New inbound channels cannot be opened TO this node."
+      fi
+      echo
+      echo "# Restarting Core Lightning to apply the change ..."
+      sudo systemctl restart ${netprefix}lightningd
+      echo
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   WATCHTOWER)
       /home/admin/config.scripts/cl-plugin.watchtower-client.sh info
