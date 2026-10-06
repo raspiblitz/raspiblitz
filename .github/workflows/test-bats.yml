@@ -73,4 +73,5 @@ jobs:
         run: |
           cd test
           bats ./commands.joinmarket-ng.bats
+          bats ./bonus.joinmarket-ng-unit.bats
           sudo bats ./bonus.joinmarket-ng.bats

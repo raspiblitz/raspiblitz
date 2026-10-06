@@ -21,6 +21,14 @@
 # Only fixed maker service actions are exposed to the joinmarketng user via
 # the /etc/sudoers.d/${USER_JM}-maker rules. Password storage and updates run
 # as the unprivileged app user.
+#
+# After upgrading the scripts, run install/update as admin/root to reconcile
+# the maker unit, then restart it explicitly. The staging-source environment
+# marker is ignored by older NG releases; enforcing wallet binding requires
+# an NG release with --staged-credentials-file support. With that release,
+# restage unbound BIP39 credentials through the TUI before starting the maker.
+# Missing staging requires an explicitly configured BIP39 credential (possibly
+# empty), or a registered selected wallet identity. No rescan is triggered.
 
 # APPID
 APPID="joinmarket-ng"
@@ -408,6 +416,7 @@ Group=${USER_JM}
 Environment="PATH=/home/${USER_JM}/venv/bin:/home/${USER_JM}/.local/bin:/usr/local/bin:/usr/bin:/bin"
 EnvironmentFile=-/run/joinmarket-ng/rpc.env
 EnvironmentFile=-/home/${USER_JM}/.joinmarket-ng/.maker.env
+Environment="JOINMARKET_STAGED_CREDENTIALS_FILE=/home/${USER_JM}/.joinmarket-ng/.maker.env"
 ExecStartPre=+${SERVICE_HELPER} prepare
 ExecStartPre=/home/admin/config.scripts/bonus.${APPID}.sh prestart
 ExecStart=/bin/bash -c 'exec jm-maker start'
