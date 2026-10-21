@@ -4,6 +4,7 @@
 # SSH Dialogs to manage Subscriptions on the RaspiBlitz
 ########################################################
 
+import json
 import os
 import subprocess
 import sys
@@ -27,6 +28,58 @@ cfg.reload()
 
 # basic values
 SUBSCRIPTIONS_FILE = "/mnt/hdd/app-data/subscriptions/subscriptions.toml"
+TUNNELSATS_MODULE = "/home/admin/config.scripts/blitz.subscriptions.tunnelsats.py"
+BLITZ_CONF_FILE = "/mnt/hdd/app-data/raspiblitz.conf"
+
+
+def tunnelsats_list():
+    """TunnelSats subscriptions from the module's local state (no network); [] on any error."""
+    try:
+        proc = subprocess.run(["sudo", TUNNELSATS_MODULE, "subscriptions-list", "--json"],
+                              stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=20)
+        items = json.loads(proc.stdout.decode("utf-8")).get("subscriptions", [])
+        return [i for i in items if isinstance(i, dict) and i.get("type") == "tunnelsats-v1"]
+    except Exception:
+        return []
+
+
+def blitz_conf_value(key):
+    """A value of raspiblitz.conf (KEY=v, KEY='v' or KEY="v"), parsed without sourcing."""
+    value = ""
+    try:
+        with open(BLITZ_CONF_FILE, encoding="utf-8", errors="replace") as handle:
+            for line in handle:
+                if line.startswith(key + "="):
+                    value = line[len(key) + 1:].strip().strip("'\"")
+    except OSError:
+        pass
+    return value
+
+
+def tunnelsats_detail_text():
+    """Local TunnelSats status (status --cached: no API call) as plain text."""
+    try:
+        proc = subprocess.run(["sudo", TUNNELSATS_MODULE, "status", "--cached", "--json"],
+                              stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=20)
+        doc = json.loads(proc.stdout.decode("utf-8"))
+    except Exception:
+        return "\nThe TunnelSats status could not be read.\n"
+    guard = doc.get("guard") or {}
+    return '''
+This is a TunnelSats VPN subscription (https://tunnelsats.com) for
+Lightning clearnet traffic.
+
+Server:        {server} (VPN port {port})
+Expires:       {expiry}
+TunnelSats:    {flag}
+Start guard:   {decision} ({reason})
+Last check:    {check}
+Resources:     https://tunnelsats.com/guide | /status | /faq | /support
+
+Use MANAGE for STATUS, CHECK, REPAIR, REMOVE and ABOUT.
+'''.format(server=doc.get("server_domain"), port=doc.get("vpn_port"), expiry=doc.get("expiry") or "unknown",
+           flag=doc.get("tunnelsats"), decision=guard.get("decision"), reason=guard.get("reason"),
+           check=(doc.get("last_check") or {}).get("verdict") or "none")
 
 
 #######################
@@ -63,6 +116,8 @@ def my_subscriptions():
             count_subscriptions += len(subs['subscriptions_letsencrypt'])
     except Exception as e:
         print(f"warning: {e}")
+    tunnelsats_subs = tunnelsats_list()
+    count_subscriptions += len(tunnelsats_subs)
 
     if count_subscriptions == 0:
         Dialog(dialog="dialog", autowidgetsize=True).msgbox('''
@@ -74,7 +129,10 @@ You have no active or inactive subscriptions.
     choices = []
     lookup = {}
     lookup_index = 0
-    subs = toml.load(SUBSCRIPTIONS_FILE)
+    try:
+        subs = toml.load(SUBSCRIPTIONS_FILE)
+    except Exception:
+        subs = {}
 
     # list ip2tor subscriptions
     if 'subscriptions_ip2tor' in subs:
@@ -103,6 +161,14 @@ You have no active or inactive subscriptions.
                 active_state = "in-active"
             name = "LETSENCRYPT {0}".format(sub['id'])
             choices.append(("{0}".format(lookup_index), "{0} ({1})".format(name.ljust(30), active_state)))
+
+    # list TunnelSats subscriptions (local state of the TunnelSats module)
+    for sub in tunnelsats_subs:
+        lookup_index += 1
+        lookup[str(lookup_index)] = sub
+        active_state = "active" if sub.get('active') else "in-active"
+        name = "TUNNELSATS {0}".format(sub.get('name'))
+        choices.append(("{0}".format(lookup_index), "{0} ({1})".format(name.ljust(30), active_state)))
 
     # show menu with options
     d = Dialog(dialog="dialog", autowidgetsize=True)
@@ -177,10 +243,16 @@ The following additional information is available:
            description=selected_sub['description'],
            service=selected_sub['name']
            )
+    elif selected_sub['type'] == "tunnelsats-v1":
+        text = tunnelsats_detail_text()
+
     else:
         text = "no text?! FIXME"
 
-    if selected_sub['active']:
+    if selected_sub['type'] == "tunnelsats-v1":
+        # REMOVE does not cancel a TunnelSats subscription: MANAGE opens the TunnelSats menu
+        extra_label = "MANAGE"
+    elif selected_sub['active']:
         extra_label = "CANCEL SUBSCRIPTION"
     else:
         extra_label = "DELETE SUBSCRIPTION"
@@ -204,6 +276,8 @@ The following additional information is available:
             print("# running: {0}".format(cmd))
             os.system(cmd)
             time.sleep(2)
+        elif selected_sub['type'] == "tunnelsats-v1":
+            subprocess.run(["sudo", TUNNELSATS_MODULE, "menu"])
         else:
             print("# FAIL: unknown subscription type")
             time.sleep(3)
@@ -221,6 +295,9 @@ def main():
     choices.append(("LIST", "My Subscriptions"))
     choices.append(("NEW1", "+ IP2TOR Bridge (paid)"))
     choices.append(("NEW2", "+ LetsEncrypt HTTPS Domain (free)"))
+    if blitz_conf_value("chain") == "main" and blitz_conf_value("lightning") in ("lnd", "cl"):
+        tunnelsats_label = "TunnelSats VPN" if tunnelsats_list() else "+ TunnelSats VPN (paid)"
+        choices.append(("TUNNELSATS", tunnelsats_label))
 
     d = Dialog(dialog="dialog", autowidgetsize=True)
     d.set_background_title("RaspiBlitz Subscriptions")
@@ -238,6 +315,15 @@ def main():
 
     if tag == "LIST":
         my_subscriptions()
+        sys.exit(0)
+
+    ###############################
+    # TUNNELSATS VPN
+    ###############################
+
+    if tag == "TUNNELSATS":
+        os.system("clear")
+        subprocess.run(["sudo", TUNNELSATS_MODULE, "menu"])
         sys.exit(0)
 
     ###############################

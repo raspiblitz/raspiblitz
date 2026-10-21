@@ -1,0 +1,53 @@
+{
+  "servers": [
+    {
+      "id": "us-east",
+      "country": "USA",
+      "city": "Ashburn",
+      "flag": "🇺🇸",
+      "status": "online"
+    },
+    {
+      "id": "us-west",
+      "country": "USA",
+      "city": "Hillsboro",
+      "flag": "🇺🇸",
+      "status": "online"
+    },
+    {
+      "id": "eu-de",
+      "country": "Germany",
+      "city": "Nuremberg",
+      "flag": "🇩🇪",
+      "status": "online"
+    },
+    {
+      "id": "asia-sg",
+      "country": "Singapore",
+      "city": "Singapore",
+      "flag": "🇸🇬",
+      "status": "online"
+    },
+    {
+      "id": "sa-br",
+      "country": "Brazil",
+      "city": "Sao Paulo",
+      "flag": "🇧🇷",
+      "status": "online"
+    },
+    {
+      "id": "oc-au",
+      "country": "Australia",
+      "city": "Sydney",
+      "flag": "🇦🇺",
+      "status": "online"
+    },
+    {
+      "id": "eu-ch",
+      "country": "Switzerland",
+      "city": "Geneva",
+      "flag": "🇨🇭",
+      "status": "online"
+    }
+  ]
+}

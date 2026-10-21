@@ -150,6 +150,16 @@ else
 fi
 echo
 
+echo "*** TUNNELSATS ***"
+# tunnelsats comes from raspiblitz.conf (sourced above); status prints no keys and no home IP
+# shellcheck disable=SC2154
+if [ "${tunnelsats}" = "on" ]; then
+  sudo /home/admin/config.scripts/internet.tunnelsats.sh status
+else
+  echo "- not activated -"
+fi
+echo
+
 echo "*** BLOCKCHAIN (TESTNET) SYSTEMD STATUS ***"
 if [ "${testnet}" == "on" ] || [ "${testnet}" == "1" ]; then
   sudo systemctl status t${network}d -n2 --no-pager

@@ -1,0 +1,8 @@
+# >>> TunnelSats block (managed by internet.tunnelsats.sh, do not edit) >>>
+# Restores the TunnelSats tunnel after an SD-card update; Lightning stays Tor-only until it is back.
+if [ -x /home/admin/config.scripts/internet.tunnelsats.sh ]; then
+  /home/admin/config.scripts/internet.tunnelsats.sh restore || echo "# TunnelSats: restore failed (exit $?); Lightning stays Tor-only. SSH menu > SUBSCRIBE > TunnelSats > REPAIR"
+else
+  echo "# TunnelSats: this RaspiBlitz image has no TunnelSats integration; Lightning stays Tor-only"
+fi
+# <<< TunnelSats block <<<

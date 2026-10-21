@@ -1,0 +1,1 @@
+{"contract":1,"command":"verify","tool_version":"3.2","ok":false,"exit_code":3,"errors":[{"code":"E_NOT_INSTALLED","class":"not_installed","message":"No TunnelSats install found"}]}

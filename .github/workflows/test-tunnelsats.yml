@@ -1,0 +1,158 @@
+name: Test TunnelSats
+
+# Tests of the TunnelSats integration (internet.tunnelsats.sh, the SUBSCRIBE module and the unit
+# template lines). Path-filtered: runs only when one of these files changes.
+
+concurrency:
+  group: test-tunnelsats-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["dev"]
+    paths:
+      - ".github/workflows/test-tunnelsats.yml"
+      - "home.admin/config.scripts/internet.tunnelsats.sh"
+      - "home.admin/config.scripts/blitz.subscriptions.tunnelsats.py"
+      - "home.admin/config.scripts/blitz.subscriptions.py"
+      - "home.admin/config.scripts/lnd.install.sh"
+      - "home.admin/config.scripts/cl.install-service.sh"
+      - "home.admin/config.scripts/tor.network.sh"
+      - "home.admin/00settingsMenuBasics.sh"
+      - "home.admin/assets/lnd.service"
+      - "home.admin/assets/custom-installs.sh"
+      - "test/tunnelsats/**"
+  pull_request:
+    paths:
+      - ".github/workflows/test-tunnelsats.yml"
+      - "home.admin/config.scripts/internet.tunnelsats.sh"
+      - "home.admin/config.scripts/blitz.subscriptions.tunnelsats.py"
+      - "home.admin/config.scripts/blitz.subscriptions.py"
+      - "home.admin/config.scripts/lnd.install.sh"
+      - "home.admin/config.scripts/cl.install-service.sh"
+      - "home.admin/config.scripts/tor.network.sh"
+      - "home.admin/00settingsMenuBasics.sh"
+      - "home.admin/assets/lnd.service"
+      - "home.admin/assets/custom-installs.sh"
+      - "test/tunnelsats/**"
+
+permissions:
+  contents: read
+
+jobs:
+  bats:
+    name: bats (guard, audit, block, restore)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install bats and jq
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq bats jq
+
+      - name: Run the suites (not as root)
+        run: |
+          bats --version
+          jq --version
+          bats test/tunnelsats/
+
+      - name: Run the suites with jq 1.6 (Debian 12, the RaspiBlitz base)
+        run: |
+          mkdir -p "$RUNNER_TEMP/jq16"
+          curl -fsSL -o "$RUNNER_TEMP/jq16/jq" https://github.com/jqlang/jq/releases/download/jq-1.6/jq-linux64
+          echo "af986793a515d500ab2d35f8d2aecd656e764504b789b66d7e1a0b727a124c44  $RUNNER_TEMP/jq16/jq" | sha256sum -c -
+          chmod 0755 "$RUNNER_TEMP/jq16/jq"
+          export PATH="$RUNNER_TEMP/jq16:$PATH"
+          jq --version
+          bats test/tunnelsats/
+
+  python:
+    name: python unittest (3.11, Debian 12)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+
+      - name: Compile
+        run: |
+          python3 --version
+          python3 -m py_compile \
+            home.admin/config.scripts/blitz.subscriptions.tunnelsats.py \
+            home.admin/config.scripts/blitz.subscriptions.py \
+            test/tunnelsats/test_module.py \
+            test/tunnelsats/schema_check.py
+
+      - name: Run the unit tests
+        run: python3 -W error::ResourceWarning -m unittest discover -s test/tunnelsats -v
+
+  systemd-smoke:
+    name: systemd smoke (sudo)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run the smoke test
+        run: |
+          systemctl --version | sed -n 1p
+          sudo --preserve-env=GITHUB_ACTIONS bash test/tunnelsats/systemd_smoke.sh
+
+  shellcheck:
+    name: shellcheck -S warning
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install ShellCheck v0.11.0 (pinned)
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/shellcheck.tar.xz" https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz
+          echo "8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198  $RUNNER_TEMP/shellcheck.tar.xz" | sha256sum -c -
+          tar -xJf "$RUNNER_TEMP/shellcheck.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/shellcheck-v0.11.0" >> "$GITHUB_PATH"
+
+      # The repository-wide ShellCheck job stays at severity error; these files are held to warning.
+      - name: Run ShellCheck
+        run: |
+          shellcheck --version
+          shellcheck -S warning \
+            home.admin/config.scripts/internet.tunnelsats.sh \
+            test/tunnelsats/helpers.bash \
+            test/tunnelsats/*.bats \
+            test/tunnelsats/systemd_smoke.sh \
+            test/tunnelsats/template_lint.sh \
+            test/tunnelsats/smoke/*.sh \
+            test/tunnelsats/fixtures/*/*.sh
+
+  template-lint:
+    name: template lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: The literal unit template and Tor-off refusal lines are present
+        run: bash test/tunnelsats/template_lint.sh

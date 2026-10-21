@@ -199,6 +199,17 @@ fi
 # Tor process choice
 choice="off"; check=$(echo "${CHOICES}" | grep -c "t")
 if [ ${check} -eq 1 ]; then choice="on"; fi
+# TunnelSats needs Tor (tunnelsats comes from raspiblitz.conf, sourced above)
+# shellcheck disable=SC2154
+if [ "${choice}" = "off" ] && [ "${runBehindTor}" = "on" ] && [ "${tunnelsats}" = "on" ]; then
+  whiptail --title " TunnelSats is active " --msgbox "
+TunnelSats needs Tor: Lightning keeps its Tor connections and uses the VPN only for clearnet.
+
+To switch Tor off, remove TunnelSats first:
+SUBSCRIBE > TunnelSats > REMOVE
+" 12 66
+  choice="on"
+fi
 if [ "${runBehindTor}" != "${choice}" ]; then
   echo "Tor Setting changed .."
 
