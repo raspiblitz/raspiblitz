@@ -1,0 +1,1 @@
+{"contract":1,"command":"install","tool_version":"3.2","ok":false,"exit_code":7,"errors":[{"code":"E_MANAGED_PRESENT","class":"refused","message":"A managed install already exists (complete, interrupted or partly removed); run 'tunnelsats.sh uninstall --managed' first"}]}

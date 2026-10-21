@@ -1,0 +1,17 @@
+# lightningd configuration for bitcoin mainnet (hybrid settings at rest)
+
+network=bitcoin
+log-file=cl.log
+log-level=info
+plugin-dir=/home/bitcoin/cl-plugins-enabled
+
+# Tor settings
+proxy=127.0.0.1:9050
+bind-addr=127.0.0.1:9736
+addr=statictor:127.0.0.1:9051/torport=9736
+always-use-proxy=false
+
+# TunnelSats
+bind-addr=0.0.0.0:9735
+announce-addr=1.2.3.4:24556
+announce-addr=exampleonionaddressexampleonionaddressexampleonion.onion:9735

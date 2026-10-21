@@ -1,0 +1,15 @@
+# lightningd configuration for bitcoin mainnet
+
+network=bitcoin
+log-file=cl.log
+log-level=info
+plugin-dir=/home/bitcoin/cl-plugins-enabled
+clnrest-port=7378
+clnrest-host=0.0.0.0
+grpc-port=4772
+
+# Tor settings
+proxy=127.0.0.1:9050
+bind-addr=127.0.0.1:9736
+addr=statictor:127.0.0.1:9051/torport=9736
+always-use-proxy=true
