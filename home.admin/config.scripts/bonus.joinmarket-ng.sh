@@ -23,12 +23,14 @@
 # as the unprivileged app user.
 #
 # After upgrading the scripts, run install/update as admin/root to reconcile
-# the maker unit, then restart it explicitly. The staging-source environment
-# marker is ignored by older NG releases; enforcing wallet binding requires
-# an NG release with --staged-credentials-file support. With that release,
-# restage unbound BIP39 credentials through the TUI before starting the maker.
-# Missing staging requires an explicitly configured BIP39 credential (possibly
-# empty), or a registered selected wallet identity. No rescan is triggered.
+# the maker unit, then restart it explicitly. NG 0.42.0 requires a registered
+# selected wallet identity or an explicit wallet.bip39_passphrase (possibly
+# empty) when staging is missing, including at boot and after service stops.
+# A stored mnemonic_password alone is not sufficient for an older wallet.
+# Register the intended wallet identity once through the TUI wallet menu before
+# relying on boot auto-start. Restage unbound BIP39 credentials through the TUI;
+# password-only staging remains compatible. Config and wallet data are preserved,
+# and this integration triggers no rescan.
 
 # APPID
 APPID="joinmarket-ng"
@@ -39,7 +41,7 @@ USER_JM="joinmarketng"
 # VERSION
 # Pinning a specific version/commit for stability
 GITHUB_REPO="https://github.com/joinmarket-ng/joinmarket-ng"
-GITHUB_TAG="0.38.0"
+GITHUB_TAG="0.42.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVICE_HELPER="/usr/local/sbin/raspiblitz-joinmarket-ng-service"
 SERVICE_HELPER_SOURCE="${SCRIPT_DIR}/joinmarket-ng-service.sh"
@@ -943,13 +945,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # 5. Install JoinMarket-NG (using verified commit for immutable install)
   echo "# Installing JoinMarket-NG software..."
-  
+
   # Venv lives on the system disk (not HDD) because /mnt/hdd is mounted noexec.
   # Only data (config, wallets, logs) goes on the HDD via the ~/.joinmarket-ng symlink.
   VENV_DIR="/home/${USER_JM}/venv"
   # Use the verified commit SHA (immutable) instead of the mutable tag
   GIT_URL="git+${GITHUB_REPO}.git@${VERIFIED_COMMIT}"
-  
+
   # Create venv and install packages as the dedicated user
   if [ ! -d "${VENV_DIR}" ]; then
     echo "# Creating Python venv..."
@@ -1027,7 +1029,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# Existing config.toml found, preserving user settings."
     run_as_joinmarketng chmod 600 "${CONFIG_FILE}"
   fi
-  
+
   # 7. Menu Script (TUI)
   # The TUI menu script is bundled as package data inside jmcore and launched
   # via the 'jm-ng' console script entry point (installed in the venv by pip).
@@ -1078,7 +1080,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# Use 'sudo su - ${USER_JM}' then 'jm-ng' to access the menu."
   echo "# Wallet files live at /mnt/hdd/app-data/${APPID}/wallets (owned by"
   echo "# ${USER_JM}, mode 0700). Access them via 'sudo -u ${USER_JM} ...'."
-  
+
   exit 0
 fi
 
@@ -1294,6 +1296,9 @@ if [ "$1" = "update" ]; then
         echo "# Restarting maker service without a wallet password..."
         ;;
     esac
+    if [ "${MAKER_PASSWORD_MODE}" != "temporary" ]; then
+      echo "# NG 0.41+: if the maker exits, register the intended wallet identity once in jm-ng before retrying."
+    fi
     if ! sudo "${SERVICE_HELPER}" start; then
       if ! restore_temporary_maker_environment; then
         echo "# WARNING: Could not preserve temporary maker credentials for retry."
@@ -1334,7 +1339,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
   echo "# Mark uninstalled in config"
   /home/admin/config.scripts/blitz.conf.sh set ${CONFIGKEY} "off"
-  
+
   echo "# Note: Data directory /mnt/hdd/app-data/${APPID} was KEPT safe."
   echo "# To delete data: sudo rm -rf /mnt/hdd/app-data/${APPID}"
 

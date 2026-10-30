@@ -16,7 +16,7 @@ SCRIPT="../home.admin/config.scripts/bonus.joinmarket-ng.sh"
 PASSWORD_SCRIPT="../home.admin/config.scripts/blitz.passwords.sh"
 APPID="joinmarket-ng"
 USER_JM="joinmarketng"
-JM_VERSION="0.38.0"
+JM_VERSION="0.42.0"
 DATA_DIR="/mnt/hdd/app-data/${APPID}"
 CONFIG_TOML="${DATA_DIR}/config.toml"
 SERVICE_FILE="/etc/systemd/system/${APPID}-maker.service"
@@ -699,11 +699,90 @@ PYEOF
 }
 
 @test "jm-maker subcommands respond to --help" {
-  local subcommands=(start generate-address config-init)
+  # NG 0.42.0 removed the generate-address maker subcommand.
+  local subcommands=(start config-init)
   for sub in "${subcommands[@]}"; do
     run "/home/${USER_JM}/venv/bin/jm-maker" "$sub" --help
     [ "$status" -eq 0 ]
   done
+}
+
+@test "maker requires identity registration when legacy staging is missing" {
+  run sudo -u "${USER_JM}" "/home/${USER_JM}/venv/bin/python" - <<'PYEOF'
+import os
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
+
+from jmcore.settings import JoinMarketSettings
+from jmcore.wallet_metadata import selected_identity
+from jmwallet.backends.descriptor_wallet import get_mnemonic_fingerprint
+from jmwallet.cli.identity import confirm_and_register
+from maker.cli import _staged_wallet_binding, app
+from typer.testing import CliRunner
+
+# Public BIP39 test vector, never fund this wallet.
+mnemonic = "abandon " * 11 + "about"
+boundary = "OFFLINE_CONFIG_BOUNDARY"
+
+with TemporaryDirectory() as directory:
+    root = Path(directory)
+    config = root / "config.toml"
+    config.write_text("")
+    config.chmod(0o600)
+    source = root / "legacy.mnemonic"
+    source.write_text(mnemonic)
+    source.chmod(0o600)
+    missing_stage = root / "nonexistent"
+
+    with patch.dict(os.environ, {
+        "HOME": str(root),
+        "JOINMARKET_CONFIG_FILE": str(config),
+        "JOINMARKET_DATA_DIR": str(root),
+        "JOINMARKET_STAGED_CREDENTIALS_FILE": str(missing_stage),
+    }, clear=True):
+        settings = JoinMarketSettings(data_dir=root)
+        assert settings.wallet.bip39_passphrase is None
+        assert selected_identity(source) is None
+
+        def invoke():
+            with (
+                patch("maker.cli.setup_cli", return_value=settings),
+                patch("maker.cli.ensure_config_file"),
+                patch("jmcore.process_hardening.harden_current_process"),
+                patch("maker.cli.build_maker_config", side_effect=ValueError(boundary)) as build,
+                patch("maker.cli.create_wallet_service") as backend,
+                patch("maker.cli.logger") as log,
+            ):
+                result = CliRunner().invoke(app, ["start", "--mnemonic-file", str(source)])
+                backend.assert_not_called()
+                assert result.exit_code == 1, result.output
+                # Loguru's existing stderr sink is outside CliRunner's capture.
+                errors = "\n".join(str(call.args[0]) for call in log.error.call_args_list)
+                return build.called, result.output + errors
+
+        built, output = invoke()
+        assert not built
+        assert "Declared maker staging is missing" in output
+        assert boundary not in output
+
+        # Explicitly authorize the intended empty BIP39 credential, not missing metadata.
+        confirm_and_register(settings, source, no_bip39_passphrase=True, yes=True)
+        identity = selected_identity(source)
+        expected = get_mnemonic_fingerprint(mnemonic, "")
+        assert identity is not None
+        assert identity.fingerprint == expected
+        assert identity.bip39 == "none"
+        assert _staged_wallet_binding(missing_stage, settings, source) == (expected, None)
+
+        built, output = invoke()
+        assert built
+        assert boundary in output
+        assert "Declared maker staging is missing" not in output
+        assert not missing_stage.exists()
+PYEOF
+  echo "$output"
+  [ "$status" -eq 0 ]
 }
 
 @test "jm-taker --help works" {
@@ -929,7 +1008,9 @@ print(resources.files('jmcore').joinpath('data/menu.joinmarket-ng.sh'))
   grep -q 'sudo "\$SERVICE_HELPER" stop' "${menu}"
   grep -q 'sudo "\$SERVICE_HELPER" status' "${menu}"
   ! grep -q 'sudo "\$BONUS_SCRIPT"' "${menu}"
-  grep -q '^                "\$BONUS_SCRIPT" update' "${menu}"
+  [ "$(grep -Ec '^[[:space:]]+"\$BONUS_SCRIPT" update "\$TARGET_VERSION"$' "${menu}")" -eq 1 ]
+  [ "$(grep -Ec '^[[:space:]]+"\$BONUS_SCRIPT" update main$' "${menu}")" -eq 1 ]
+  [ "$(grep -Ec '^[[:space:]]+"\$BONUS_SCRIPT" update$' "${menu}")" -eq 1 ]
 }
 
 @test "prestart does not write mnemonic_password when .maker.env is present" {
