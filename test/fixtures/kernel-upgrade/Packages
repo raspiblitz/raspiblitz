@@ -1,0 +1,28 @@
+Package: linux-image-rpi-test
+Version: 2.0
+Architecture: all
+Depends: linux-image-test-new (= 2.0)
+Filename: pool/linux-image-rpi-test_2.0_all.deb
+Size: 1
+Description: Synthetic new kernel metapackage
+
+Package: linux-image-test-new
+Version: 2.0
+Architecture: all
+Filename: pool/linux-image-test-new_2.0_all.deb
+Size: 1
+Description: Synthetic new kernel ABI dependency
+
+Package: ordinary-update
+Version: 2.0
+Architecture: all
+Filename: pool/ordinary-update_2.0_all.deb
+Size: 1
+Description: Synthetic ordinary upgrade
+
+Package: openssh-server
+Version: 1.0
+Architecture: all
+Filename: pool/openssh-server_1.0_all.deb
+Size: 1
+Description: Synthetic unchanged SSH package for the release upgrade argv

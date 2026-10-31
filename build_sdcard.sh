@@ -383,7 +383,8 @@ done
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get upgrade -f -y \
+# Allow new kernel ABI dependencies without allowing package removals.
+apt-get upgrade --with-new-pkgs -f -y \
   -o Dpkg::Options::="--force-confdef" \
   -o Dpkg::Options::="--force-confold"
 

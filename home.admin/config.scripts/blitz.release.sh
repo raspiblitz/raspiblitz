@@ -89,8 +89,9 @@ if [ "$1" != "-quick" ]; then
   echo
   echo "update OS ..."
   sudo apt-get update -y
-  sudo apt-get upgrade -o Dir::Etc::SourceList=/etc/apt/sources.list.d/security.list -y
-  sudo apt-get upgrade openssh-server -y
+  # Allow new kernel ABI dependencies without allowing package removals.
+  sudo apt-get upgrade --with-new-pkgs -o Dir::Etc::SourceList=/etc/apt/sources.list.d/security.list -y
+  sudo apt-get upgrade --with-new-pkgs openssh-server -y
   sudo dpkg --configure -a
 else
   echo

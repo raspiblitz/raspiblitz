@@ -1,0 +1,39 @@
+name: Test kernel dependency upgrades
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["dev"]
+    paths:
+      - "build_sdcard.sh"
+      - "home.admin/_bootstrap.sh"
+      - "home.admin/config.scripts/blitz.release.sh"
+      - "test/kernel-upgrade.bats"
+      - "test/kernel_upgrade_solver.py"
+      - "test/fixtures/kernel-upgrade/**"
+      - ".github/workflows/test-kernel-upgrade.yml"
+  pull_request:
+    paths:
+      - "build_sdcard.sh"
+      - "home.admin/_bootstrap.sh"
+      - "home.admin/config.scripts/blitz.release.sh"
+      - "test/kernel-upgrade.bats"
+      - "test/kernel_upgrade_solver.py"
+      - "test/fixtures/kernel-upgrade/**"
+      - ".github/workflows/test-kernel-upgrade.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  kernel-upgrade:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install test tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats python3
+      - name: Test offline APT kernel dependency upgrades (no root required)
+        run: bats test/kernel-upgrade.bats
