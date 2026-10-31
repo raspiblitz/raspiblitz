@@ -12,6 +12,9 @@ APP_SERVER_DIR=$APP_ROOT_DIR/server
 CRON_FILE=$APP_SERVER_DIR/cron.sh
 APP_VERSION=1.1.1
 
+# pinned checksum of the released tarball; update together with APP_VERSION
+SHA256=48a54ae42d4d88cfe52834c2765379ef5ed2bfd9b41090d408e6e8118bd6e8e9
+
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "small config script to switch kindle-display on or off"
@@ -19,6 +22,12 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "bonus.kindle-display.sh [update]"
  exit 1
 fi
+
+# checks the downloaded tarball was not manipulated (checksum test)
+verifyKindleTarball() {
+  local tarball="$1"
+  [ "$(sha256sum "$tarball" | cut -d " " -f1)" = "${SHA256}" ]
+}
 
 source /home/admin/raspiblitz.info
 source <(/home/admin/_cache.sh get state)
@@ -69,6 +78,35 @@ DISPLAY_THEME="$3"
 EOF
 }
 
+# removes kindle-display service units on setup failure
+cleanupKindleDisplayServices() {
+  sudo systemctl stop kindle-display-server.service 2>/dev/null
+  sudo systemctl stop kindle-display-update.timer 2>/dev/null
+  sudo systemctl disable kindle-display-server.service 2>/dev/null
+  sudo systemctl disable kindle-display-update.timer 2>/dev/null
+  sudo rm -f /etc/systemd/system/kindle-display-server.service
+  sudo rm -f /etc/systemd/system/kindle-display-update.service
+  sudo rm -f /etc/systemd/system/kindle-display-update.timer
+  sudo systemctl daemon-reload
+  /home/admin/config.scripts/blitz.conf.sh set kindleDisplay "off" 2>/dev/null
+}
+
+# polls whether the kindle-display server service is failing after start
+# (unit uses Restart=on-failure with a burst limit of 2 restarts in 600s)
+# usage: systemdPollServerHealth (returns 0 when not failed)
+systemdPollServerHealth() {
+  local i
+  for i in $(seq 1 10); do
+    if [ "$(sudo systemctl is-failed kindle-display-server.service 2>/dev/null)" = "failed" ]; then
+      return 1
+    fi
+    if [ "$(sudo systemctl is-active kindle-display-server.service 2>/dev/null)" = "active" ]; then
+      return 0
+    fi
+    sleep 2
+  done
+}
+
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "*** INSTALL KINDLE-DISPLAY ***"
@@ -89,6 +127,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# install .."
     cd $HOME_DIR
     sudo -u $USERNAME wget https://github.com/dennisreimann/kindle-display/archive/v$APP_VERSION.tar.gz
+    if ! verifyKindleTarball "v$APP_VERSION.tar.gz"; then
+      echo "# FAIL # Downloaded kindle-display tarball not matching SHA256 checksum: ${SHA256}"
+      exit 1
+    fi
     sudo -u $USERNAME tar -xzf v$APP_VERSION.tar.gz kindle-display-$APP_VERSION/server
     sudo -u $USERNAME mv kindle-display{-$APP_VERSION,}
     sudo -u $USERNAME rm v$APP_VERSION.tar.gz
@@ -176,14 +218,22 @@ EOF
     sudo mv /home/admin/kindle-display-update.timer /etc/systemd/system/kindle-display-update.timer
 
     echo "# enable kindle-display services"
-    sudo systemctl enable kindle-display-server.service
-    sudo systemctl enable kindle-display-update.timer
+    if ! sudo systemctl enable kindle-display-server.service || ! sudo systemctl enable kindle-display-update.timer; then
+      echo "# FAIL # kindle-display service enable failed"
+      cleanupKindleDisplayServices
+      exit 1
+    fi
 
     # https://github.com/raspiblitz/raspiblitz/issues/1375
     if [ "${state}" == "ready" ]; then
       echo "# starting kindle-display service"
       sudo systemctl start kindle-display-server.service
       sudo systemctl start kindle-display-update.timer
+      if ! systemdPollServerHealth; then
+        echo "# FAIL # kindle-display service failed to start"
+        cleanupKindleDisplayServices
+        exit 1
+      fi
     fi
 
     echo "OK - the KINDLE-DISPLAY script is now installed."
@@ -215,6 +265,10 @@ if [ "$1" = "update" ]; then
     sudo systemctl stop kindle-display-server.service
     sudo systemctl stop kindle-display-update.timer
     sudo -u $USERNAME wget https://github.com/dennisreimann/kindle-display/archive/v$APP_VERSION.tar.gz
+    if ! verifyKindleTarball "v$APP_VERSION.tar.gz"; then
+      echo "# FAIL # Downloaded kindle-display tarball not matching SHA256 checksum: ${SHA256}"
+      exit 1
+    fi
     sudo -u $USERNAME tar -xzf v$APP_VERSION.tar.gz kindle-display-$APP_VERSION/server
     sudo -u $USERNAME mv kindle-display{,-backup}
     sudo -u $USERNAME mv kindle-display{-$APP_VERSION,}
@@ -247,6 +301,11 @@ if [ "$1" = "update" ]; then
     cd -
     sudo systemctl start kindle-display-server.service
     sudo systemctl start kindle-display-update.timer
+    if ! systemdPollServerHealth; then
+      echo "# FAIL # kindle-display service failed to start"
+      cleanupKindleDisplayServices
+      exit 1
+    fi
     sudo -u $USERNAME rm -rf kindle-display-backup
 
     echo "*** KINDLE-DISPLAY UPDATED to $APP_VERSION ***"
