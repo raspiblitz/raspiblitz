@@ -3,7 +3,7 @@
 - Update: BTCPayServer v2.3.9 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.3.9)
 - Update: Bitcoin Core v29.5 (security fixes) [details](https://bitcoincore.org/en/releases/29.5/)
 - Update: Bitcoin Core v32.1 (optional tested update) [details](https://bitcoincore.org/en/releases/32.1/)
-- Update: LND v0.21.5-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.21.5-beta)
+- Update: LND v0.21.6-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.21.6-beta)
 
 ## What's new in Version 1.12.1 of RaspiBlitz?
 

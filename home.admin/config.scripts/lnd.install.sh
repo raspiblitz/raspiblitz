@@ -4,9 +4,9 @@
 ## based on https://raspibolt.github.io/raspibolt/raspibolt_40_lnd.html#lightning-lnd
 ## see LND releases: https://github.com/lightningnetwork/lnd/releases
 ### If you change here - make sure to also change interims version in lnd.update.sh #!
-lndVersion="0.21.5-beta"
+lndVersion="0.21.6-beta"
 
-# ziggie (roasbeef did not sign v0.21.5-beta)
+# ziggie (signed v0.21.5-beta and v0.21.6-beta, roasbeef skipped v0.21.5-beta)
 PGPauthor="ziggie1984"
 PGPpkeys="https://raw.githubusercontent.com/lightningnetwork/lnd/master/scripts/keys/ziggie1984.asc"
 PGPcheck="5F75437E11695F86D50C11BB1AFF9C4DCED6D666"
