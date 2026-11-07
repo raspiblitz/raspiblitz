@@ -23,6 +23,7 @@ RaspiBlitz is mainly targeted for learning how to run your own node decentralize
 - [FAQ Core Lightning](https://docs.raspiblitz.org/docs/faq/cl)
 - [Workshop Tutorial](https://docs.raspiblitz.org/docs/community/workshops)
 - [Security Policy](https://docs.raspiblitz.org/docs/security)
+- [Linux kernel update guidance: CVE-2026-98432](docs/security/CVE-2026-98432.md)
 - [Alternative Platforms](alternative.platforms/README.md)
 - [Automated Builds](ci/README.md)
 - [MIT OpenSource License](LICENSE)
