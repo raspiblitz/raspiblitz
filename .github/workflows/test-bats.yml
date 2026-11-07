@@ -10,10 +10,14 @@ on:
     branches: ["dev"]
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
+      - "home.admin/config.scripts/cl.install.sh"
+      - "test/**"
   pull_request:
     branches: ["*"]
     paths:
       - "home.admin/config.scripts/bonus.postgresql.sh"
+      - "home.admin/config.scripts/cl.install.sh"
+      - "test/**"
 
 jobs:
   run-bats-tests:
@@ -26,6 +30,12 @@ jobs:
         run: |
           sudo apt update &>/dev/null
           sudo apt install -y bats
+
+      - name: Run the cl.install.sh pre-flight tests
+        # no sudo: these only exercise the version / asset existence checks
+        run: |
+          cd test
+          bats ./cl.install.bats
 
       - name: Run the bats tests with postgresql 15
         run: |
