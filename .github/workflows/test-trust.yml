@@ -1,0 +1,27 @@
+name: Test trust refresh
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: ["dev", "fix/vendor-ca-trust-refresh"]
+
+permissions:
+  contents: read
+
+jobs:
+  trust-refresh:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build disposable Java, Node, Bats and ShellCheck environment
+        run: docker build -f test/trust.Dockerfile -t raspiblitz-trust-tests .
+      - name: All offline regressions and full changed-path static checks
+        run: docker run --rm --network none raspiblitz-trust-tests
+      - name: Real before/after Java and fixed Node TLS controls
+        # A timeout, changed endpoint, expired chain or missing accepted-before
+        # baseline is a FAILURE, never an expected certificate rejection.
+        run: docker run --rm raspiblitz-trust-tests bash test/run-trust-tests.sh live

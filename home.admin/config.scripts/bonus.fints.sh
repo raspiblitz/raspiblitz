@@ -188,8 +188,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "# Installing ${APPID} ..."
 
   # install java & build tool
-  sudo apt install -y default-jdk
-  sudo apt install -y maven
+  sudo apt install -y default-jdk || exit 1
+  sudo apt install -y maven || exit 1
+  # JDK installation can create stale Java trust after the earlier setup gate.
+  # Gate the selected default JRE before Maven can download any dependencies.
+  /home/admin/config.scripts/blitz.trust.sh update || exit 1
 
   # make sure mysql/myria db is available & running
   sudo apt-get install -y mariadb-server mariadb-client
@@ -220,7 +223,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # other install scripts to see how that implement code download & verify.
   echo "# download the source code & verify"
   sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
-  cd /home/${APPID}/${APPID}
+  cd /home/${APPID}/${APPID} || exit 1
 
   if [ "${GITHUB_TAG}" != "" ]; then
     sudo -u ${APPID} git reset --hard $GITHUB_TAG
@@ -232,9 +235,21 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # compile/install the app
   echo "# compile/install the app"
-  cd /home/${APPID}/${APPID}
+  cd /home/${APPID}/${APPID} || exit 1
+  # Maven startup files can select another JRE/store after the default-JRE gate.
+  # Do not silently certify custom startup configuration or project JVM options.
+  for config in /etc/mavenrc /etc/maven/jvm.config /usr/local/etc/mavenrc /home/fints/.mavenrc /home/fints/.m2/jvm.config /home/fints/fints/.mvn /home/fints/.mvn /home/.mvn /.mvn; do
+    if sudo test -e "$config"; then
+      echo "FAIL - Review custom Maven startup configuration $config and its effective Java trust before building."
+      exit 1
+    fi
+  done
+  /home/admin/config.scripts/blitz.trust.sh check || exit 1
   # install dependencies from pom.xml
-  sudo -u fints mvn package
+  # Bind Maven to the same alternatives-selected JRE checked above. Skip rc
+  # evaluation so another user's environment cannot silently select a new JRE.
+  fints_java_home=$(dirname "$(dirname "$(readlink -f /usr/bin/java)")") || exit 1
+  sudo -u fints env JAVA_HOME="$fints_java_home" MAVEN_SKIP_RC=true /usr/bin/mvn package
   if ! [ $? -eq 0 ]; then
       echo "# FAIL - mvn package did not run correctly - deleting code & exit"
       sudo rm -r /home/${APPID}/${APPID}
@@ -254,7 +269,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo mariadb -e "FLUSH PRIVILEGES;"
   if [ -f "dbsetup.sql" ]; then
     # set default encrypted PIN 123456789 within dbsetup.sql if not yet set
-    sudo sed -i -e "s/REPLACE_ENCRYPTED_PIN/$(mvn compile exec:java -Dexec.mainClass="net.petafuel.fuelifints.cryptography.aesencryption.AESUtil" -Dexec.args=123456789 -q)/g" dbsetup.sql
+    sudo sed -i -e "s/REPLACE_ENCRYPTED_PIN/$(env JAVA_HOME="$fints_java_home" MAVEN_SKIP_RC=true /usr/bin/mvn compile exec:java -Dexec.mainClass="net.petafuel.fuelifints.cryptography.aesencryption.AESUtil" -Dexec.args=123456789 -q)/g" dbsetup.sql
     
     mariadb -ufintsuser -pfints fints < dbsetup.sql
   else

@@ -88,6 +88,7 @@ echo "OK"
 if [ "$1" != "-quick" ]; then
   echo
   echo "update OS ..."
+  /home/admin/config.scripts/blitz.trust.sh update || exit 1
   sudo apt-get update -y
   sudo apt-get upgrade -o Dir::Etc::SourceList=/etc/apt/sources.list.d/security.list -y
   sudo apt-get upgrade openssh-server -y

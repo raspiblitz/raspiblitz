@@ -73,6 +73,9 @@ fi
 
 echo "prechecks OK"  >> ${logFile}
 
+# Refresh OS and installed Node.js trust before starting updated services.
+/home/admin/config.scripts/blitz.trust.sh update >> "${logFile}" 2>&1 || exit 1
+
 # MIGRATION - DATA CONVERSION when updating config
 # this is the place if on a future version change
 # a conversion of config data or app data is needed
