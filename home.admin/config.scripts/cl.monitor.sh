@@ -95,6 +95,7 @@ if [ "$2" = "status" ]; then
     touch /var/cache/raspiblitz/.cl-${randStr}.error
     echo "# ${lightningcli_alias} getinfo"
     $lightningcli_alias getinfo 1>/var/cache/raspiblitz/.cl-${randStr}.out 2>/var/cache/raspiblitz/.cl-${randStr}.error
+    getinfoResult=$?
     winData=$(cat /var/cache/raspiblitz/.cl-${randStr}.out 2>/dev/null)
     failData=$(cat /var/cache/raspiblitz/.cl-${randStr}.error 2>/dev/null)
     rm /var/cache/raspiblitz/.cl-${randStr}.out
@@ -106,10 +107,12 @@ if [ "$2" = "status" ]; then
       cl_error_short=""
       cl_error_full=$(echo ${failData} | tr -d "'" | tr -d '"')
 
-    # check results if proof for online
-    else
+    # Require a successful RPC and a usable getinfo response before reporting ready.
+    elif [ "${getinfoResult}" -eq 0 ] && connections=$(echo "${winData}" | jq -ser '
+      select(length == 1) | .[0] | select(type == "object") | .num_peers |
+      select(type == "number") | select(. >= 0 and . == floor)
+    ' 2>/dev/null); then
       cl_ready="1"
-      connections=$(echo "${winData}" | grep "num_peers\"" | tr -cd '[[:digit:]]')
       if [ "${connections}" != "" ] && [ "${connections}" != "0" ]; then
         cl_online="1"
       fi

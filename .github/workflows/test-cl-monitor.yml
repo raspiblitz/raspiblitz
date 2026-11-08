@@ -1,0 +1,30 @@
+name: Core Lightning monitor readiness
+on:
+  push:
+    branches: [audit/cl-monitor-readiness-20261101]
+    paths: &monitor_paths
+      - home.admin/config.scripts/cl.monitor.sh
+      - tests/test_cl_monitor_status.py
+      - tests/cl-monitor.Dockerfile
+      - .github/workflows/test-cl-monitor.yml
+  pull_request:
+    paths: *monitor_paths
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  readiness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Build disposable GNU test environment
+        run: docker build -f tests/cl-monitor.Dockerfile -t raspiblitz-cl-monitor-tests .
+      - name: Syntax and static checks
+        run: |
+          docker run --rm -i --network none raspiblitz-cl-monitor-tests bash -n < home.admin/config.scripts/cl.monitor.sh
+          docker run --rm -i --network none raspiblitz-cl-monitor-tests shellcheck --severity=error - < home.admin/config.scripts/cl.monitor.sh
+      - name: Execute complete monitor with isolated service and RPC fixtures
+        run: python3 tests/test_cl_monitor_status.py home.admin/config.scripts/cl.monitor.sh
