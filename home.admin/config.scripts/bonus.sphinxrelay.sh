@@ -334,12 +334,16 @@ if [ "$1" = "status" ]; then
     echo "ip2torWarn='Connection String not updated yet. Try again a bit later or check for errors.'"
   fi
 
-  # test connection (accept self-signed certs here) ... calling the url /app should return INDEX
+  # Only explicit self-signed modes skip CA verification; /app should return INDEX.
   connectionTest="n/a"
+  connectionTLS=()
+  if [ "${connection}" == "ip2tor&selfsigned" ] || [ "${connection}" == "dns&selfsigned" ]; then
+    connectionTLS=(--no-check-certificate)
+  fi
   if [ "${sphinxrelay_connection}" == "tor" ]; then
-    connectionResponse=$(torsocks wget --no-check-certificate -qO- ${publicURL}/app 2>/dev/null)
+    connectionResponse=$(torsocks wget "${connectionTLS[@]}" -qO- "${publicURL}/app" 2>/dev/null) || connectionResponse=""
   else
-    connectionResponse=$(wget --no-check-certificate -qO- ${publicURL}/app 2>/dev/null)
+    connectionResponse=$(wget "${connectionTLS[@]}" -qO- "${publicURL}/app" 2>/dev/null) || connectionResponse=""
   fi
   if [ "${connectionResponse}" == "INDEX" ]; then
     connectionTest="OK"

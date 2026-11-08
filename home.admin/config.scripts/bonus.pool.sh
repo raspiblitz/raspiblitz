@@ -113,8 +113,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# check binary was not manipulated (checksum test)"
     # https://github.com/lightninglabs/pool/releases/download/v0.5.0-alpha/manifest-v0.5.0-alpha.txt.sig
     wget -N https://github.com/lightninglabs/pool/releases/download/${poolVersion}/manifest-${poolVersion}.txt.sig
-    sudo -u admin wget --no-check-certificate -N -O "pgp_keys.asc" ${PGPpkeys}
-    #wget --no-check-certificate ${PGPpkeys}
+    sudo -u admin wget -N -O "pgp_keys.asc" "${PGPpkeys}" || exit 1
     binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
     if [ "${binaryChecksum}" != "${SHA256}" ]; then
       echo "# FAIL # Downloaded Pool BINARY not matching SHA256 checksum: ${SHA256}"

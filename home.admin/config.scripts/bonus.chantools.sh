@@ -77,7 +77,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check binary was not manipulated (checksum test)
   sudo -u admin wget -N https://github.com/guggero/chantools/releases/download/v${pinnedVersion}/manifest-v${pinnedVersion}.txt
-  sudo -u admin wget --no-check-certificate -N -O "${downloadDir}/pgp_keys.asc" ${PGPpkeys}
+  sudo -u admin wget -N -O "${downloadDir}/pgp_keys.asc" "${PGPpkeys}" || exit 1
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   if [ "${binaryChecksum}" != "${SHA256}" ]; then
     echo "# FAIL # Downloaded Channel Tools BINARY not matching SHA256 checksum: ${SHA256}"
