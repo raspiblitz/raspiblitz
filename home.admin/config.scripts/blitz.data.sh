@@ -256,7 +256,8 @@ if [ "$action" = "status" ]; then
 
             # mount partition if not already mounted
             needsUnmount=0
-            mountPath=$(findmnt -n -o TARGET "/dev/${name}" 2>/dev/null)   
+            # Select one target even when PrivateTmp adds bind mounts of this device.
+            mountPath=$(findmnt --first-only -n -o TARGET "/dev/${name}" 2>/dev/null)
             if [ -z "${mountPath}" ]; then
                 # create temp mount point if not exists
                 mkdir -p /mnt/temp 2>/dev/null
