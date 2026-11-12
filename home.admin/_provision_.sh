@@ -614,6 +614,15 @@ else
   echo "Provisioning letsencrypt - keep default" >> ${logFile}
 fi
 
+# Datum
+if [ "${datum}" = "on" ]; then
+  echo "Provisioning Datum - run config script" >> ${logFile}
+  /home/admin/_cache.sh set message "Setup Datum"
+  sudo -u admin /home/admin/config.scripts/bonus.datum.sh on >> ${logFile} 2>&1
+else
+  echo "Provisioning Datum - keep default" >> ${logFile}
+fi
+
 # kindle-display
 if [ "${kindleDisplay}" = "on" ]; then
   echo "Provisioning kindle-display - run config script" >> ${logFile}
