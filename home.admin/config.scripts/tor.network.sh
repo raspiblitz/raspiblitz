@@ -171,6 +171,15 @@ EOF
   0|off)
     echo "# switching Tor OFF"
 
+    # TunnelSats keeps Lightning Tor-only at rest and needs Tor: refuse while it is active
+    # (tunnelsats comes from raspiblitz.conf, sourced above)
+    # shellcheck disable=SC2154
+    if [ "${tunnelsats}" = "on" ]; then
+      echo "# FAIL: TunnelSats is active and needs Tor. Remove it first: SUBSCRIBE > TunnelSats > REMOVE"
+      echo "err='tunnelsats active'"
+      exit 1
+    fi
+
     # setting value in raspi blitz config
     /home/admin/config.scripts/blitz.conf.sh set runBehindTor "off"
 

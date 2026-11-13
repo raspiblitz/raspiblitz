@@ -57,8 +57,13 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
+# TunnelSats start guard (no-op unless TunnelSats is on): clearnet flags for this start only
+# (without internet.tunnelsats.sh, for example older code after a PATCH, Lightning starts Tor-only)
+Environment=TUNNELSATS_CLN_ARGS=
+EnvironmentFile=-/run/tunnelsats/hybrid-${netprefix}lightningd.env
 ExecStartPre=-/home/admin/config.scripts/cl.check.sh prestart $CHAIN
-ExecStart=/bin/sh -c '${passwordInput}/usr/local/bin/lightningd --conf=${CLCONF} ${encryptedHSMoption} --rpc-file-mode 0660'
+ExecStartPre=+/bin/sh -c 'if [ -x /home/admin/config.scripts/internet.tunnelsats.sh ]; then exec /home/admin/config.scripts/internet.tunnelsats.sh guard cl $CHAIN; fi; echo tunnelsats-guard: internet.tunnelsats.sh is missing, Lightning starts Tor-only >&2; mkdir -p /run/tunnelsats && echo TUNNELSATS_CLN_ARGS= > /run/tunnelsats/hybrid-${netprefix}lightningd.env'
+ExecStart=/bin/sh -c '${passwordInput}/usr/local/bin/lightningd --conf=${CLCONF} ${encryptedHSMoption} --rpc-file-mode 0660 \$\$TUNNELSATS_CLN_ARGS'
 ExecStartPost=-/home/admin/config.scripts/cl.check.sh poststart $CHAIN
 
 # Creates /run/lightningd owned by bitcoin

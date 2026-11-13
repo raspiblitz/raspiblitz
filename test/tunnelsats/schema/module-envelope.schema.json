@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "blitz.subscriptions.tunnelsats.py: document envelope of every verb",
+  "type": "object",
+  "required": ["contract", "command", "module_version", "ok", "exit_code", "errors"],
+  "properties": {
+    "contract": {"const": 1},
+    "command": {"type": "string", "pattern": "^[a-z-]+$"},
+    "module_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "ok": {"type": "boolean"},
+    "exit_code": {"enum": [0, 1, 2, 3, 4, 5, 10, 11, 12, 13, 14]},
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "class", "message"],
+        "properties": {
+          "code": {"type": "string", "pattern": "^E_[A-Z0-9_]+$"},
+          "class": {"type": "string", "pattern": "^[a-z_]+$"},
+          "message": {"type": "string"}
+        }
+      }
+    }
+  }
+}
