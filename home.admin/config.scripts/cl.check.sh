@@ -50,11 +50,12 @@ if [ "$1" == "prestart" ]; then
     fi
   fi
 
-  if [ $(grep -c "^feeadjuster" <${CLCONF}) -gt 0 ]; then
+  if grep -Eq '^[[:blank:]]*feeadjuster(-[[:alnum:]_-]+)?[[:blank:]]*(=|$)' "${CLCONF}"; then
     if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py ] || [ "$(eval echo \$${netprefix}feeadjuster)" != "on" ]; then
-      echo "# The feeadjuster plugin is not present but in config"
-      sed -i "/^feeadjuster/d" ${CLCONF}
-      rm -rf /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py
+      echo "# Parking feeadjuster options while the plugin is unavailable or disabled"
+      # ExecStartPre runs as bitcoin with NoNewPrivileges=true: do not sudo.
+      python3 /home/admin/config.scripts/cl-plugin.feeadjuster-config.py park "$CLCONF" || exit 1
+      rm -f /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py || exit 1
     fi
   fi
 

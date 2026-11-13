@@ -1,0 +1,33 @@
+name: Offline feeadjuster regressions
+on:
+  pull_request:
+    paths:
+      - 'home.admin/config.scripts/cl-plugin.feeadjuster.sh'
+      - 'home.admin/config.scripts/cl-plugin.feeadjuster-config.py'
+      - 'home.admin/config.scripts/cl.check.sh'
+      - 'home.admin/config.scripts/cl.install-service.sh'
+      - 'test/feeadjuster*'
+      - '.github/workflows/test-feeadjuster.yml'
+  push:
+    paths:
+      - 'home.admin/config.scripts/cl-plugin.feeadjuster.sh'
+      - 'home.admin/config.scripts/cl-plugin.feeadjuster-config.py'
+      - 'home.admin/config.scripts/cl.check.sh'
+      - 'home.admin/config.scripts/cl.install-service.sh'
+      - 'test/feeadjuster*'
+      - '.github/workflows/test-feeadjuster.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build disposable test OS (network only for distro tools)
+        run: docker build -t feeadjuster-tests:local -f test/feeadjuster.Dockerfile test
+      - name: Run actual scripts without networking or host mounts
+        run: python3 test/feeadjuster.py
