@@ -82,7 +82,6 @@ fi
 if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
   OPTIONS+=(ZEUS_CLNREST "Zeus to CLNrest (Android or iOS)")
 	OPTIONS+=(ZEUS_CLREST "Zeus to C-Lightning-REST (Android or iOS)[DEPRECATED]")
-	OPTIONS+=(FULLYNODED_CL "Fully Noded to CL REST (iOS+Tor)")
 fi
 
 # Additional Options with Tor
@@ -224,28 +223,6 @@ Or scan the qr code on the LCD with your mobile phone.
   	  exit 0;
 	;;
 
-  FULLYNODED_CL)
-	  if [ ! -L /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ];then
-	    /home/admin/config.scripts/cl-plugin.http.sh on
-	  fi
-      appstoreLink="https://apps.apple.com/us/app/fully-noded/id1436425586"
-      sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_fullynoded.png
-	  whiptail --title "Install Fully Noded on your iOS device" \
-		--yes-button "Continue" \
-		--no-button "StoreLink" \
-		--yesno "Open the Apple App Store on your mobile phone.\n\nSearch for --> 'fully noded'\n\nCheck that logo is like on LCD and author is: Denton LLC\nWhen app is installed and started --> Continue." 12 65
-	  if [ $? -eq 1 ]; then
-		sudo /home/admin/config.scripts/blitz.display.sh qr ${appstoreLink}
-		whiptail --title " App Store Link " --msgbox "\
-To install app open the following link:\n
-${appstoreLink}\n
-Or scan the qr code on the LCD with your mobile phone.
-" 11 70
-	  fi
-	  sudo /home/admin/config.scripts/blitz.display.sh hide
-  	  /home/admin/config.scripts/cl-plugin.http.sh connect
-  	  exit 0;
-  	;;
 ZEUS_CLNREST)
     sudo /home/admin/config.scripts/blitz.display.sh image /home/admin/raspiblitz/pictures/app_zeus.png
 	  whiptail --title "Install Zeus on your Android or iOS Phone" \

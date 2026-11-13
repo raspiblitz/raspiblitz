@@ -424,9 +424,6 @@ alias ${netprefix}clconf=\"sudo nano ${CLCONF}\"
   # setting values in the raspiblitz.conf
   /home/admin/config.scripts/blitz.conf.sh set ${netprefix}cl on
   # blitz.conf.sh needs sudo access - cannot be run in cl.check.sh
-  if [ ! -f /home/bitcoin/cl-plugins-enabled/c-lightning-http-plugin ]; then
-    /home/admin/config.scripts/blitz.conf.sh set clHTTPplugin "off"
-  fi
   if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py ]; then
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}feeadjuster "off"
   fi

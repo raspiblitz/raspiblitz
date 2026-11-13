@@ -383,14 +383,6 @@ else
     echo "Provisioning RTL CL - keep default" >> ${logFile}
 fi
 
-# clHTTPplugin
-if [ "${clHTTPplugin}" = "on" ]; then
-    echo "Provisioning clHTTPplugin - run config script" >> ${logFile}
-    /home/admin/_cache.sh set message "Setup clHTTPplugin"
-    sudo -u admin /home/admin/config.scripts/cl-plugin.http.sh on >> ${logFile} 2>&1
-else
-    echo "Provisioning clHTTPplugin - keep default" >> ${logFile}
-fi
 
 # clboss
 if [ "${clboss}" = "on" ]; then
