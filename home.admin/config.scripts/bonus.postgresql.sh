@@ -19,14 +19,97 @@ db_backupfile=$5
 PG_VERSION=15
 echo "# Using the default PostgreSQL version: $PG_VERSION"
 
+# Function to verify socket-only configuration
+function verify_socket_config() {
+  echo "# Verifying socket-only configuration"
+  
+  # Check that TCP is not listening
+  if sudo netstat -tlnp 2>/dev/null | grep -q ":5432 "; then
+    echo "⚠️  WARNING: PostgreSQL is still listening on TCP port 5432"
+    echo "   This may indicate socket configuration was not applied correctly"
+  else
+    echo "✅ PostgreSQL is not listening on TCP port 5432 (good)"
+  fi
+  
+  # Check that socket exists
+  if [ -S "/var/run/postgresql/.s.PGSQL.5432" ]; then
+    echo "✅ Unix socket exists at /var/run/postgresql/.s.PGSQL.5432"
+  else
+    echo "❌ Unix socket not found - PostgreSQL may not be running correctly"
+  fi
+  
+  # Test socket connection
+  if sudo -u postgres psql -h /var/run/postgresql -c "SELECT version();" >/dev/null 2>&1; then
+    echo "✅ Socket connection test successful"
+  else
+    echo "❌ Socket connection test failed"
+  fi
+}
+
+# Function to apply socket configuration to existing cluster
+function apply_socket_config() {
+  echo "# Applying socket-only configuration"
+  
+  # Configure postgresql.conf for socket-only access
+  # First, uncomment any existing listen_addresses line and set to empty
+  sudo sed -i -E "s/^[[:space:]]*#?[[:space:]]*listen_addresses[[:space:]]*=.*/listen_addresses = ''/" /etc/postgresql/$PG_VERSION/main/postgresql.conf
+  
+  # Ensure unix_socket_directories is set
+  sudo sed -i -E "s/^[[:space:]]*#?[[:space:]]*unix_socket_directories[[:space:]]*=.*/unix_socket_directories = '\/var\/run\/postgresql'/" /etc/postgresql/$PG_VERSION/main/postgresql.conf
+  
+  # Add socket permissions if not present
+  if ! sudo grep -q "unix_socket_permissions" /etc/postgresql/$PG_VERSION/main/postgresql.conf; then
+    echo "unix_socket_permissions = '0770'" | sudo tee -a /etc/postgresql/$PG_VERSION/main/postgresql.conf
+  fi
+  if ! sudo grep -q "unix_socket_group" /etc/postgresql/$PG_VERSION/main/postgresql.conf; then
+    echo "unix_socket_group = 'postgres'" | sudo tee -a /etc/postgresql/$PG_VERSION/main/postgresql.conf
+  fi
+  
+  # Update pg_hba.conf for socket-only access
+  if sudo grep -q "^host" /etc/postgresql/$PG_VERSION/main/pg_hba.conf; then
+    sudo cp /etc/postgresql/$PG_VERSION/main/pg_hba.conf /etc/postgresql/$PG_VERSION/main/pg_hba.conf.backup
+    sudo sed -i '/^host/s/^/#/' /etc/postgresql/$PG_VERSION/main/pg_hba.conf
+  fi
+}
+
+# Function to retrieve postgres password (Password B)
+function load_postgres_password() {
+  # Load password B from bitcoin.conf (standard Bitcoin RPC password)
+  if [ -f "/mnt/hdd/app-data/bitcoin/bitcoin.conf" ]; then
+    PASSWORDB=$(grep rpcpassword /mnt/hdd/app-data/bitcoin/bitcoin.conf | cut -d'=' -f2 | tr -d ' ')
+  fi
+
+  # check if password B was loaded
+  if [ -z "$PASSWORDB" ]; then
+    echo "FAIL - PASSWORDB not found in bitcoin.conf" >&2
+    exit 1
+  fi
+}
+
 # switch on
 if [ "$command" = "1" ] || [ "$command" = "on" ]; then
 
-  # check if PostgreSQL is already installed
-  if psql --version | grep -q "psql (PostgreSQL) $PG_VERSION"; then
-    echo "# PostgreSQL $PG_VERSION is already installed"
+  # Install PostgreSQL client package first (needed for version check)
+  if ! command -v psql &> /dev/null; then
+    echo "# Installing PostgreSQL client package"
+    if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
+      curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+      echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+      sudo apt update
+    fi
+    sudo apt install -y postgresql-client-$PG_VERSION
+  fi
+
+  # check if PostgreSQL server is already installed
+  if dpkg -l | grep -q "postgresql-$PG_VERSION" && [ -d "/etc/postgresql/$PG_VERSION" ]; then
+    echo "# PostgreSQL $PG_VERSION server is already installed"
+    echo "# Applying socket configuration to existing installation"
+    apply_socket_config
+    echo "# Restarting PostgreSQL to apply socket configuration"
+    sudo systemctl restart postgresql
+    sudo systemctl restart postgresql@$PG_VERSION-main
   else
-    echo "# Install PostgreSQL"
+    echo "# Install PostgreSQL server"
     if [ ! -f /etc/apt/trusted.gpg.d/postgresql.gpg ]; then
       curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
       echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
@@ -68,7 +151,16 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo chown -R postgres:postgres $postgres_datadir
 
     echo "# Create cluster"
-    sudo pg_createcluster $PG_VERSION main
+    if ! sudo pg_lsclusters | grep -q "$PG_VERSION.*main"; then
+      sudo pg_createcluster $PG_VERSION main
+    else
+      echo "# Cluster already exists, skipping creation"
+    fi
+    
+    # Configure socket-only access
+    echo "# Configure socket-only access for security"
+    apply_socket_config
+    
     sudo pg_ctlcluster $PG_VERSION main start
 
   elif [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION/main ]; then
@@ -85,15 +177,16 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       echo "# Create $PG_VERSION config"
       sudo mkdir -p $postgres_datadir/$PG_VERSION/main
       sudo chown -R postgres:postgres $postgres_datadir
-      sudo pg_createcluster $PG_VERSION main
-      sudo pg_ctlcluster $PG_VERSION main start
-      echo "Setting default password for postgres user"
+      if ! sudo pg_lsclusters | grep -q "$PG_VERSION.*main"; then
+        sudo pg_createcluster $PG_VERSION main
+        sudo pg_ctlcluster $PG_VERSION main start
+      fi
       # start cluster temporarily
       sudo systemctl start postgresql
-      sudo pg_createcluster $PG_VERSION main
-      sudo pg_ctlcluster $PG_VERSION main start
+      sudo systemctl start postgresql@$PG_VERSION-main
       echo "Setting default password for postgres user"
-      sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+      load_postgres_password
+      sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$PASSWORDB';"
       sudo systemctl stop postgresql
       sudo systemctl stop postgresql@$PG_VERSION-main
       # move and symlink conf dir
@@ -114,8 +207,10 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo chown -R postgres:postgres $postgres_datadir
     sudo systemctl start postgresql
     sudo systemctl start postgresql@13-main
-    sudo pg_createcluster $PG_VERSION main
-    sudo pg_ctlcluster $PG_VERSION main start
+    if ! sudo pg_lsclusters | grep -q "$PG_VERSION.*main"; then
+      sudo pg_createcluster $PG_VERSION main
+      sudo pg_ctlcluster $PG_VERSION main start
+    fi
 
   elif [ -d /mnt/hdd/app-data/postgresql/13/main ]; then
     echo "# There is old data for pg 13, start and upgrade cluster ..."
@@ -136,10 +231,13 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       sudo chown -R postgres:postgres $postgres_datadir
       # start cluster temporarily
       sudo systemctl start postgresql
-      sudo pg_createcluster 13 main
-      sudo pg_ctlcluster 13 main start
+      if ! sudo pg_lsclusters | grep -q "13.*main"; then
+        sudo pg_createcluster 13 main
+        sudo pg_ctlcluster 13 main start
+      fi
       echo "# Setting default password for postgres user"
-      sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+      load_postgres_password
+      sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$PASSWORDB';"
       sudo systemctl stop postgresql
       sudo systemctl stop postgresql@13-main
       # move and symlink conf dir
@@ -160,8 +258,10 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     sudo chown -R postgres:postgres $postgres_datadir
     sudo systemctl start postgresql
     sudo systemctl start postgresql@13-main
-    sudo pg_createcluster 13 main
-    sudo pg_ctlcluster 13 main start
+    if ! sudo pg_lsclusters | grep -q "13.*main"; then
+      sudo pg_createcluster 13 main
+      sudo pg_ctlcluster 13 main start
+    fi
 
     if [ -d /mnt/hdd/app-data/postgresql/$PG_VERSION ] || pg_lsclusters | grep -q "$PG_VERSION  main"; then
       echo "# backup /mnt/hdd/app-data/postgresql/$PG_VERSION"
@@ -176,6 +276,11 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     # /usr/bin/pg_upgradecluster [OPTIONS] <old version> <cluster name> [<new data directory>]
     sudo pg_upgradecluster 13 main $postgres_datadir/$PG_VERSION/main || exit 1
     sudo chown -R postgres:postgres /mnt/hdd/app-data/postgresql/$PG_VERSION
+    
+    # Configure socket-only access for upgraded cluster
+    echo "# Configure socket-only access for upgraded cluster"
+    apply_socket_config
+    
     echo "# backup /mnt/hdd/app-data/postgresql/13"
     now=$(date +"%Y_%m_%d_%H%M%S")
     sudo mv /mnt/hdd/app-data/postgresql/13 /mnt/hdd/app-data/postgresql/13-backup-$now
@@ -202,7 +307,7 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
     echo "# wait for the postgresql server to start"
     count=0
     count_max=30
-    while ! nc -zv '127.0.0.1' 5432 2>/dev/null; do
+    while ! sudo -u postgres psql -h /var/run/postgresql -c "SELECT 1;" >/dev/null 2>&1; do
       count=$((count + 1))
       echo "sleep $count/$count_max"
       sleep 1
@@ -214,8 +319,13 @@ if [ "$command" = "1" ] || [ "$command" = "on" ]; then
       fi
     done
     echo "Setting default password for postgres user"
-    sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
-    echo "OK PostgreSQL installed"
+    load_postgres_password
+    sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '$PASSWORDB';"
+    echo "OK PostgreSQL installed with socket-only access"
+    
+    # Verify socket-only configuration
+    verify_socket_config
+    
     exit 0
   else
     echo "FAIL - Was not able to install PostgreSQL"
