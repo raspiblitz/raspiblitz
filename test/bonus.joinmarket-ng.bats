@@ -173,6 +173,14 @@ teardown_file() {
   # Systemd service file was written
   [ -f "${SERVICE_FILE}" ]
 
+  # The installer itself provides the root-owned RPC credential file for
+  # interactive commands and points the config at it.
+  [ "$(stat -c '%U:%G %a' /etc/joinmarket-ng/rpc.cookie)" = "root:${USER_JM} 640" ]
+  grep -Fx 'testuser:testpass' /etc/joinmarket-ng/rpc.cookie
+  grep -Fx 'rpc_cookie_file = "/etc/joinmarket-ng/rpc.cookie"' "${CONFIG_TOML}"
+  # The app account has no usable login password.
+  [ "$(passwd -S "${USER_JM}" | awk '{print $2}')" = "L" ]
+
   # Sudoers file was created
   [ -f "${SUDOERS_FILE}" ]
 
@@ -1109,6 +1117,14 @@ STUB
   local missing_status="$status"
   local missing_output="$output"
 
+  # Malformed staging: nothing is exported and the maker still decides.
+  printf '%s\n' 'MNEMONIC_PASSWORD="unterminated' > "${staging}"
+  chown "${USER_JM}:${USER_JM}" "${staging}"
+  run sudo -u "${USER_JM}" bash "${SCRIPT}" maker-exec
+  local malformed_status="$status"
+  local malformed_output="$output"
+  rm -f "${staging}"
+
   run bash "${SCRIPT}" maker-exec
   local root_status="$status"
 
@@ -1127,7 +1143,52 @@ STUB
   [ "${missing_status}" -eq 0 ]
   echo "${missing_output}" | grep -Fx 'password=unset'
 
+  [ "${malformed_status}" -eq 0 ]
+  echo "${malformed_output}" | grep -Fx 'args=start'
+  echo "${malformed_output}" | grep -Fx 'password=unset'
+
   [ "${root_status}" -eq 1 ]
+}
+
+# An install created by an earlier revision can still run a release without
+# the upstream config and staging helpers. Reconcile must repair it so that
+# the update can run, and the maker must still start with a stored password.
+@test "reconcile and maker-exec tolerate a release without the upstream helpers" {
+  local package_dir maker="/home/${USER_JM}/venv/bin/jm-maker"
+  local maker_backup config_backup
+  package_dir=$("/home/${USER_JM}/venv/bin/python" -c "
+from importlib import resources
+print(resources.files('jmcore'))
+")
+  maker_backup=$(mktemp)
+  config_backup=$(mktemp)
+  cp -p "${maker}" "${maker_backup}"
+  cp -p "${CONFIG_TOML}" "${config_backup}"
+  printf '%s\n' '#!/bin/bash' 'printf "args=%s\n" "$*"' > "${maker}"
+  sed -i '/^rpc_cookie_file = /d' "${CONFIG_TOML}"
+  mv "${package_dir}/config_file.py" "${package_dir}/config_file.py.hidden"
+  mv "${package_dir}/maker_env.py" "${package_dir}/maker_env.py.hidden"
+
+  run bash "${SCRIPT}" reconcile
+  local reconcile_status="$status"
+  local reconcile_output="$output"
+  run sudo -u "${USER_JM}" bash "${SCRIPT}" maker-exec
+  local exec_status="$status"
+  local exec_output="$output"
+
+  mv "${package_dir}/config_file.py.hidden" "${package_dir}/config_file.py"
+  mv "${package_dir}/maker_env.py.hidden" "${package_dir}/maker_env.py"
+  cp -p "${maker_backup}" "${maker}"
+  cp -p "${config_backup}" "${CONFIG_TOML}"
+  rm -f "${maker_backup}" "${config_backup}"
+
+  echo "${reconcile_output}"
+  [ "${reconcile_status}" -eq 0 ]
+  echo "${reconcile_output}" | grep -q 'WARNING: could not set bitcoin.rpc_cookie_file'
+  echo "${reconcile_output}" | grep -q 'JoinMarket-NG system integration reconciled'
+  [ "${exec_status}" -eq 0 ]
+  echo "${exec_output}" | grep -q 'cannot load staged wallet credentials'
+  echo "${exec_output}" | grep -Fx 'args=start'
 }
 
 @test "TUI compatibility patch uses stdin and the fixed service helper" {
@@ -1320,6 +1381,8 @@ EOF
   # And the install should be functional again
   id "${USER_JM}"
   [ -f "${SERVICE_FILE}" ]
+  # 'off' removed the credential file; the reinstall writes it again.
+  [ "$(stat -c '%U:%G %a' /etc/joinmarket-ng/rpc.cookie)" = "root:${USER_JM} 640" ]
 }
 
 # ---------------------------------------------------------------------------

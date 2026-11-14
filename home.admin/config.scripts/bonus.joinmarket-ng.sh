@@ -481,22 +481,31 @@ import sys
 import tomllib
 from pathlib import Path
 
-from jmcore.config_file import set_config_value
-
 config_path = Path(sys.argv[1])
+cookie_path = sys.argv[2]
 try:
+    # Releases before 0.39.2 do not ship jmcore.config_file. Such an install
+    # is repaired first and gets the key after its next update.
+    from jmcore.config_file import ConfigFileError, set_config_value
+
     bitcoin = tomllib.loads(config_path.read_text(encoding="utf-8")).get("bitcoin", {})
-except (OSError, UnicodeError, tomllib.TOMLDecodeError) as exc:
-    # A config the operator has to repair by hand must not block the repair
-    # of the system integration.
-    print(f"# WARNING: config.toml could not be parsed ({exc}).")
-    print(f"# Set bitcoin.rpc_cookie_file = \"{sys.argv[2]}\" after fixing it.")
-    sys.exit(0)
-if not isinstance(bitcoin, dict):
-    bitcoin = {}
-if bitcoin.get("rpc_user") or bitcoin.get("rpc_password") or bitcoin.get("rpc_cookie_file"):
-    sys.exit(0)
-set_config_value(config_path, "bitcoin", "rpc_cookie_file", sys.argv[2])
+    if not isinstance(bitcoin, dict):
+        raise ValueError("[bitcoin] is not a table")
+    if bitcoin.get("rpc_user") or bitcoin.get("rpc_password"):
+        print("# Note: config.toml sets explicit Bitcoin RPC credentials. They are kept")
+        print("# and are not changed when Password B is rotated.")
+        sys.exit(0)
+    if bitcoin.get("rpc_cookie_file"):
+        sys.exit(0)
+    try:
+        set_config_value(config_path, "bitcoin", "rpc_cookie_file", cookie_path)
+    except ConfigFileError as exc:
+        raise ValueError(str(exc)) from exc
+except (ImportError, OSError, UnicodeError, ValueError) as exc:
+    # A config the operator has to repair by hand, or an old release, must
+    # not block the repair of the system integration.
+    print(f"# WARNING: could not set bitcoin.rpc_cookie_file in config.toml ({exc}).")
+    print(f"# Wallet commands need: rpc_cookie_file = \"{cookie_path}\" under [bitcoin].")
 PYEOF
   then
     echo "# FAIL: Could not configure the Bitcoin RPC credential file."
@@ -604,6 +613,11 @@ reconcile_system_integration() {
     || ! patch_upstream_tui "/home/${USER_JM}/venv" \
     || ! ensure_rpc_cookie_config; then
     return 1
+  fi
+  # The app account has no login password. Lock it again in case an earlier
+  # revision of the Password B rotation set one.
+  if ! sudo usermod -L "${USER_JM}"; then
+    echo "# WARNING: Could not lock the ${USER_JM} account password."
   fi
   # Refresh the root-owned RPC credentials so wallet and taker commands run
   # from the TUI or the app shell can reach Bitcoin Core.
@@ -920,17 +934,25 @@ if [ "$1" = "maker-exec" ]; then
 import os
 import sys
 
-from jmcore.maker_env import parse_maker_env
-
 staging_path, maker = sys.argv[1], sys.argv[2]
 try:
-    with open(staging_path, "rb") as staging_file:
-        staged = parse_maker_env(staging_file.read().decode("utf-8"))
+    from jmcore.maker_env import parse_maker_env
+except ImportError:
+    # Releases before 0.41.0 have no staging parser. A stored wallet password
+    # still works; staged credentials need an update first.
+    print("# maker-exec: this JoinMarket-NG release cannot load staged wallet credentials.")
+    print("# Update JoinMarket-NG from its menu, then start the maker again.")
+    parse_maker_env = None
+
+try:
+    if parse_maker_env is not None:
+        with open(staging_path, "rb") as staging_file:
+            os.environ.update(parse_maker_env(staging_file.read().decode("utf-8")))
 except (OSError, UnicodeError, ValueError):
-    # Missing, unreadable or malformed staging: export nothing. jm-maker
+    # Missing, unreadable or malformed staging: export nothing more. jm-maker
     # checks the declared staging file itself and logs why it refuses to start.
-    staged = {}
-os.environ.update(staged)
+    pass
+sys.stdout.flush()
 os.execv(maker, [maker, "start"])
 PYEOF
 fi
@@ -1227,8 +1249,11 @@ if [ "$1" = "update" ]; then
     UPDATE_TAG=$(curl -sf https://api.github.com/repos/joinmarket-ng/joinmarket-ng/releases/latest \
       | grep '"tag_name"' | cut -d '"' -f4)
     if [ -z "${UPDATE_TAG}" ]; then
-      echo "# WARNING: Could not fetch latest version from GitHub, falling back to ${GITHUB_TAG}"
-      UPDATE_TAG="${GITHUB_TAG}"
+      # Do not fall back to the pinned tag: on a node that already runs a
+      # newer release that would silently reinstall the older one.
+      echo "# FAIL: Could not fetch the latest release from GitHub."
+      echo "# Retry later or name a version: bonus.${APPID}.sh update ${GITHUB_TAG}"
+      exit 1
     elif ! [[ "${UPDATE_TAG}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
       # Only an explicit operator argument may select the unsigned 'main'
       # branch. A tag name reported by the API must be a signed release.
@@ -1401,6 +1426,12 @@ if [ "$1" = "update" ]; then
 
   if ! patch_upstream_tui "${VENV_DIR}"; then
     update_fail "could not apply the JoinMarket-NG TUI compatibility patch"
+  fi
+
+  # An install that predates the managed RPC credential file gets the config
+  # key once the updated release ships the config helper.
+  if ! ensure_rpc_cookie_config; then
+    update_fail "could not configure the Bitcoin RPC credential file"
   fi
 
   if [ "${MAKER_WAS_RUNNING}" = "1" ]; then
