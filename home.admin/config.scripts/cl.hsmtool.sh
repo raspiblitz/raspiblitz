@@ -42,6 +42,7 @@ echo "# Running 'cl.hsmtool.sh $*'"
 source /mnt/hdd/app-data/raspiblitz.conf
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 hsmSecretPath="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
+hsmSecretHelper="/home/admin/config.scripts/cl.hsmsecret.py"
 
 # password file is on the disk if encrypted and auto-unlock is enabled
 passwordFile="/dev/shm/.${netprefix}cl.pw"
@@ -54,6 +55,58 @@ fi
 #############
 # Functions #
 #############
+# Checks the hsm_secret at $hsmSecretPath against the seed words with the
+# installed 'lightning-hsmtool checkhsm' (libwally, independent of
+# cl.hsmsecret.py). Its stdin interface depends on the Core Lightning version,
+# both are tried:
+#   CLN >= v25.12: passphrase, mnemonic
+#   CLN <  v25.12: passphrase, language id ("0" = english), mnemonic
+# The wrong interface can not pass: it reads "0" as the mnemonic or the
+# mnemonic as the language id and fails.
+# $1 = seedwords (space separated)
+# $2 = seedpassword (may be empty)
+function checkHsmSecret() {
+  if printf '%s\n%s\n' "$2" "$1" | sudo -u bitcoin \
+   lightning-hsmtool checkhsm "${hsmSecretPath}" 1>/dev/null 2>&1; then
+    return 0
+  fi
+  if printf '%s\n0\n%s\n' "$2" "$1" | sudo -u bitcoin \
+   lightning-hsmtool checkhsm "${hsmSecretPath}" 1>/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
+}
+
+# Creates the hsm_secret at $hsmSecretPath from BIP39 seed words in the legacy
+# 32-byte format, byte-for-byte what 'lightning-hsmtool generatehsm' wrote
+# before CLN v25.12 (see cl.hsmsecret.py). Since v25.12 'generatehsm' writes a
+# mnemonic format with a different on-chain wallet for the same seed words,
+# which would not restore existing RaspiBlitz wallets.
+# Secrets are only passed on stdin. Fails without creating the hsm_secret on
+# invalid seed words and moves it aside if lightning-hsmtool does not confirm it.
+# $1 = seedwords (space separated)
+# $2 = seedpassword (may be empty)
+function createHsmSecret() {
+  local mnemonic words
+  # normalize whitespace between the words
+  read -r -a words <<< "$1"
+  mnemonic="${words[*]}"
+  if ! printf '%s\n%s\n' "${mnemonic}" "$2" | python "${hsmSecretHelper}" derive |
+   sudo -u bitcoin python "${hsmSecretHelper}" write "${hsmSecretPath}"; then
+    echo "# ERROR: could not create the hsm_secret at ${hsmSecretPath}" >&2
+    return 1
+  fi
+  if ! checkHsmSecret "${mnemonic}" "$2"; then
+    local unverified
+    unverified="${hsmSecretPath}.unverified.$(date +"%Y_%m_%d_%H%M%S")"
+    echo "# ERROR: lightning-hsmtool checkhsm did not confirm the new hsm_secret" >&2
+    echo "# Moving it to ${unverified}" >&2
+    sudo -u bitcoin mv "${hsmSecretPath}" "${unverified}"
+    return 1
+  fi
+  echo "# Created and checked the hsm_secret at ${hsmSecretPath}"
+}
+
 function passwordToFile() {
   if [ $# -gt 0 ];then
     text="$1"
@@ -263,14 +316,12 @@ seedwords6x4='${seedwords6x4}'
 # Will be removed safely when the hsm_secret is encrypted.
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
 
-  # pass to 'hsmtool generatehsm hsm_secret'
-  if [ ${#seedpassword} -eq 0 ]; then
-    (echo "0"; echo "${seedwords}"; echo) | sudo -u bitcoin lightning-hsmtool \
-     "generatehsm" $hsmSecretPath 1>&2
-  else
-    # pass to 'hsmtool generatehsm hsm_secret' - confirm seedpassword
-    (echo "0"; echo "${seedwords}"; echo "$seedpassword"; echo "$seedpassword")\
-     | sudo -u bitcoin lightning-hsmtool "generatehsm" $hsmSecretPath 1>&2
+  # create the hsm_secret (legacy format, see createHsmSecret)
+  if ! createHsmSecret "${seedwords}" "${seedpassword}" 1>&2; then
+    # keep no seedwords.info that matches no hsm_secret
+    echo "# Shredding the seedwords.info of the failed wallet" >&2
+    sudo -u bitcoin shred -u /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
+    exit 1
   fi
 
   echo "# Re-init the backup plugin with the new wallet"
