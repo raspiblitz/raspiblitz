@@ -162,7 +162,9 @@ not_called() { if called "$1"; then echo "unexpected call: $1"; return 1; fi; }
   run installDependencies
   [ "$status" -eq 0 ]
   called "cd /home/lnbits/lnbits"
-  called "lnbits: /home/lnbits/.uv/bin/uv sync --frozen --no-dev --extra migration --no-python-downloads"
+  called "lnbits: /home/lnbits/.uv/bin/uv sync --frozen --no-dev --no-python-downloads"
+  # no extras: psycopg2 from the 'migration' extra would make the broken migrate command run
+  not_called "--extra"
   called "lnbits: test -x /home/lnbits/lnbits/.venv/bin/lnbits"
   called "lnbits: /home/lnbits/.uv/bin/uv cache clean"
   # the virtual environment of the old poetry based install is removed

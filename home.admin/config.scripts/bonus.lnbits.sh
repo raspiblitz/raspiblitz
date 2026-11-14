@@ -59,9 +59,9 @@ function installDependencies() {
   cd ${lnbitsCodeDir} || return 1
   # --frozen: exactly the versions from the uv.lock of the release
   # --no-dev: without the development tools
-  # --extra migration: psycopg2 for tools/conv.py (SQLite to PostgreSQL)
   # --no-python-downloads: only use the Python of the system
-  if ! sudo -u lnbits ${lnbitsUvDir}/bin/uv sync --frozen --no-dev --extra migration --no-python-downloads; then
+  # (no extras: the 'migration' extra would make tools/conv.py work, see the migrate command)
+  if ! sudo -u lnbits ${lnbitsUvDir}/bin/uv sync --frozen --no-dev --no-python-downloads; then
     echo "# FAIL: uv sync failed (see above)"
     return 1
   fi
@@ -916,9 +916,15 @@ if [ "$1" = "update" ]; then
 
   # backup first: the database migrations of a new version cannot be reverted
   # - also if LNbits is switched off but the data was kept
-  # - not when the code is already updated (repeated update): the database may be
-  #   migrated already and the backup from before the update would get rotated out
-  if sudo test -f ${lnbitsConfig} && [ "$(sudo -u lnbits git rev-parse HEAD 2>/dev/null)" != "${tagCommit}" ]; then
+  # - not when the pinned release is already installed (code on the pinned commit and the
+  #   poetry venv replaced): it may have migrated the database already, and repeated updates
+  #   would rotate out the backup from before the update
+  releaseInstalled=0
+  if [ "$(sudo -u lnbits git rev-parse HEAD 2>/dev/null)" = "${tagCommit}" ] &&
+    ! sudo -u lnbits test -d /home/lnbits/.cache/pypoetry; then
+    releaseInstalled=1
+  fi
+  if sudo test -f ${lnbitsConfig} && [ "${releaseInstalled}" = "0" ]; then
     backupDatabase || abortUpdate "database backup failed"
   fi
 
@@ -1526,9 +1532,9 @@ if [ "$1" = "migrate" ]; then
     sudo systemctl stop lnbits
 
     echo "# Start convert old SQLite to new PostgreSQL"
-    # known issue (unchanged): the conversion only runs with /home/lnbits/lnbits as working
-    # directory, and the cleanup below also deletes the LNbits config in the data directory.
-    # Dont make the conversion succeed before that cleanup is reworked.
+    # known issue (as before): the conversion cannot run (psycopg2 is not installed, wrong
+    # working directory) and the cleanup below also deletes the LNbits config in the data
+    # directory. Dont make the conversion work before that cleanup is reworked.
     if ! sudo -u lnbits ${lnbitsCodeDir}/.venv/bin/python tools/conv.py; then
       echo "FAIL - Convert failed, revert migration process"
       revertMigration
