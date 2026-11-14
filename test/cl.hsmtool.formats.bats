@@ -142,7 +142,7 @@ called() { grep -qF -- "$1" "${CALLS}"; }
   export INVOCATION=""
   run clStartJournal lightningd
   [ "$output" = "${NEW_MISSING}" ]
-  called "sudo journalctl --no-pager -n 60 -u lightningd"
+  called "sudo journalctl --no-pager -b -n 60 -u lightningd"
 }
 
 @test "clStartJournal + clHsmStartError: the v26 error is found above its backtrace" {

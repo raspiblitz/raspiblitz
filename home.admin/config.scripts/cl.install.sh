@@ -469,6 +469,7 @@ always-use-proxy=true
       # do not start lightningd without the wallet: it would create its own
       # wallet without seedwords.info
       # (stdout has the seed words, keep only the errors for the log)
+      # shellcheck disable=SC2069
       if ! /home/admin/config.scripts/cl.hsmtool.sh new-force mainnet 2>&1 1>/dev/null ||
        ! sudo ls $hsmSecretPath 1>/dev/null 2>&1; then
         echo "# ERROR: could not create the wallet from seedwords - not starting lightningd"

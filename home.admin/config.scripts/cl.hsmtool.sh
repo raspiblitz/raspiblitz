@@ -150,7 +150,8 @@ function clStartJournal() {
   if [ -n "${invocation}" ]; then
     sudo journalctl --no-pager -n 200 "_SYSTEMD_INVOCATION_ID=${invocation}"
   else
-    sudo journalctl --no-pager -n 60 -u "$1"
+    # not started yet: only this boot, no stale error of an earlier boot
+    sudo journalctl --no-pager -b -n 60 -u "$1"
   fi
 }
 
