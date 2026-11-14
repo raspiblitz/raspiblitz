@@ -37,17 +37,26 @@ function install() {
   sudo -u bitcoin git pull
   sudo -u bitcoin git reset --hard ${pinnedVersion} || exit 1
 
+  # uv should be installed from main CLN install.
+  if ! command -v uv &>/dev/null; then
+    echo "# Installing uv for backup plugin"
+    # This HTTPS installer is version-pinned, not checksum/attestation verified.
+    (set -o pipefail; curl -LsSf https://releases.astral.sh/github/uv/releases/download/0.13.6/uv-installer.sh | sudo UV_INSTALL_DIR=/usr/local/bin sh) || exit 1
+    export PATH="/usr/local/bin:$PATH"
+  fi
+
+  # uv bundles its own TLS trust; updating Debian's CA store alone is not enough.
+  # https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62
+  uvVersion=$(sudo -u bitcoin uv --version | cut -d ' ' -f 2)
+  if [[ ! "${uvVersion}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || ! dpkg --compare-versions "${uvVersion}" ge 0.13.4; then
+    echo "# ERROR: eMudhra SSL certificate fix requires uv >= 0.13.4; update uv before continuing"
+    exit 1
+  fi
+
   if [ $($lightningcli_alias plugin list 2>/dev/null | grep -c "/${plugin}") -eq 0 ]; then
     echo "# Checking dependencies"
-    # uv should be installed from main CLN install
-    if ! command -v uv &>/dev/null; then
-      echo "# Installing uv for backup plugin"
-      curl -LsSf https://astral.sh/uv/install.sh | sudo UV_INSTALL_DIR=/usr/local/bin sh
-      export PATH="/usr/local/bin:$PATH"
-    fi
-    
     cd ${plugindir}/backup/ || exit 1
-    sudo -u bitcoin uv sync --all-extras
+    sudo -u bitcoin uv sync --all-extras || exit 1
 
     sudo chmod +x ${plugindir}/${plugin}/${plugin}.py
 

@@ -1,0 +1,48 @@
+name: uv installer execution tests
+
+on:
+  push:
+    branches:
+      - fix/uv-emudhra-trust
+      - fix/uv-cve-2026-44891
+    paths:
+      - home.admin/config.scripts/cl.install.sh
+      - home.admin/config.scripts/cl-plugin.backup.sh
+      - test/uv*test.py
+      - test/UV-TRUST.md
+      - .github/workflows/test-uv-installers.yml
+  pull_request:
+    paths:
+      - home.admin/config.scripts/cl.install.sh
+      - home.admin/config.scripts/cl-plugin.backup.sh
+      - test/uv*test.py
+      - test/UV-TRUST.md
+      - .github/workflows/test-uv-installers.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installer-execution:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform: linux/amd64
+          - runner: ubuntu-24.04-arm
+            platform: linux/arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell syntax and version boundaries
+        run: |
+          bash -n home.admin/config.scripts/cl.install.sh
+          bash -n home.admin/config.scripts/cl-plugin.backup.sh
+          python3 test/uv_trust_version_test.py
+      - name: Execute both production entry points offline
+        env:
+          UV_TEST_PLATFORM: ${{ matrix.platform }}
+        run: python3 test/uv_installer_execution_test.py
