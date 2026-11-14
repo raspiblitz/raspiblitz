@@ -608,6 +608,10 @@ if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "Update BTCPayServer")
 fi
 
+if [ "${LNBits}" == "on" ]; then
+  OPTIONS+=(LNBITS "Update LNbits")
+fi
+
 if [ "${sphinxrelay}" == "on" ]; then
   OPTIONS+=(SPHINX "Update Sphinx Server Relay")
 fi
@@ -675,6 +679,12 @@ case $CHOICE in
     ;;
   BTCPAY)
     /home/admin/config.scripts/bonus.btcpayserver.sh update
+    ;;
+  LNBITS)
+    /home/admin/config.scripts/bonus.lnbits.sh update
+    echo
+    echo "PRESS ENTER to continue"
+    read key
     ;;
   SPHINX)
     /home/admin/config.scripts/bonus.sphinxrelay.sh update
