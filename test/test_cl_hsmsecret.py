@@ -292,6 +292,49 @@ class TestWrite(unittest.TestCase):
             code, _, err = self.write()
         self.assertEqual(code, 1)
         self.assertIn("could not sync", err)
+        # all or nothing: no unsynced hsm_secret is left behind
+        self.assert_no_leftovers()
+        # the directory is synced again after the removal
+        self.assertEqual(len(calls), 3)
+
+    def test_directory_sync_error_persists(self):
+        real_fsync = os.fsync
+        calls = []
+
+        def fsync(fd):
+            calls.append(fd)
+            if len(calls) >= 2:
+                raise OSError(errno.EIO, os.strerror(errno.EIO))
+            real_fsync(fd)
+
+        with mock.patch.object(hs.os, "fsync", fsync):
+            code, _, err = self.write()
+        self.assertEqual(code, 1)
+        self.assertIn("could not sync", err)
+        self.assert_no_leftovers()
+
+    def test_directory_sync_error_and_the_hsm_secret_can_not_be_removed(self):
+        real_fsync, real_unlink = os.fsync, os.unlink
+        calls = []
+
+        def fsync(fd):
+            calls.append(fd)
+            if len(calls) == 2:
+                raise OSError(errno.EIO, os.strerror(errno.EIO))
+            real_fsync(fd)
+
+        def unlink(path):
+            if path == self.path:
+                raise OSError(errno.EIO, os.strerror(errno.EIO))
+            real_unlink(path)
+
+        with mock.patch.object(hs.os, "fsync", fsync), \
+                mock.patch.object(hs.os, "unlink", unlink):
+            code, _, err = self.write()
+        # still reported as failed: the caller does not use the wallet
+        self.assertEqual(code, 1)
+        self.assertIn("could not sync", err)
+        self.assert_no_leftovers(["hsm_secret"])
 
     def test_interrupted_process_never_leaves_a_partial_hsm_secret(self):
         # SIGKILL the writer at each step: the hsm_secret is either complete
