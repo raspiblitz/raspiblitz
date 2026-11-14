@@ -3,8 +3,80 @@
 # https://github.com/lnbits/lnbits
 
 # https://github.com/lnbits/lnbits/releases
-tag="v1.2.1"
+tag="v1.7.1"
 VERSION="${tag}"
+
+# uv installs the dependencies from the uv.lock of the LNbits release
+# (poetry is legacy upstream and cannot install LNbits on Python 3.13)
+# https://pypi.org/project/uv/#files
+uvVersion="0.13.5"
+# sha256 of the Linux wheels: manylinux_2_17_aarch64, manylinux_2_28_aarch64, manylinux_2_17_x86_64
+uvChecksums="2386c2dc9b59fc1d39b1c500e4319d71d3268232eb3b38e29cd6775d6269e8d4
+91e58e304b63b6c91bac5561459ab0c3ea24f17bc01ea9359d69fed72142978f
+fa8d26e08e34c29c0c4e820cf3181757086d547240b4f4d31ff1d8bd810ca946"
+
+lnbitsCodeDir="/home/lnbits/lnbits"
+# virtual environment of the lnbits user that only contains uv
+lnbitsUvDir="/home/lnbits/.uv"
+# LNbits runs from the virtual environment that uv creates in the code directory
+lnbitsBin="${lnbitsCodeDir}/.venv/bin/lnbits"
+lnbitsExecStart="${lnbitsBin} --port 5000 --host 0.0.0.0"
+
+# install the pinned uv for the lnbits user (no system-wide pip install needed)
+function installUv() {
+  local installedUv checksum requirement
+  installedUv=$(sudo -u lnbits ${lnbitsUvDir}/bin/uv --version 2>/dev/null | cut -d" " -f2)
+  if [ "${installedUv}" = "${uvVersion}" ]; then
+    echo "# uv ${uvVersion} is already installed"
+    return 0
+  fi
+
+  echo "# install uv ${uvVersion}"
+  cd /home/lnbits || return 1
+  sudo -u lnbits rm -rf ${lnbitsUvDir}
+  sudo -u lnbits python3 -m venv ${lnbitsUvDir} || return 1
+  # pip only accepts a wheel that matches one of the pinned checksums
+  requirement="uv==${uvVersion}"
+  for checksum in ${uvChecksums}; do
+    requirement="${requirement} --hash=sha256:${checksum}"
+  done
+  echo "${requirement}" | sudo -u lnbits tee ${lnbitsUvDir}/requirements.txt >/dev/null || return 1
+  if ! sudo -u lnbits ${lnbitsUvDir}/bin/pip install --disable-pip-version-check \
+    --require-hashes --only-binary :all: -r ${lnbitsUvDir}/requirements.txt; then
+    echo "# FAIL: could not install uv ${uvVersion}"
+    # dont keep a half installed uv
+    sudo -u lnbits rm -rf ${lnbitsUvDir}
+    return 1
+  fi
+}
+
+# install the dependencies of the checked out LNbits version
+function installDependencies() {
+  installUv || return 1
+  echo "# installing application dependencies"
+  cd ${lnbitsCodeDir} || return 1
+  # --frozen: exactly the versions from the uv.lock of the release
+  # --no-dev: without the development tools
+  # --extra migration: psycopg2 for tools/conv.py (SQLite to PostgreSQL)
+  if ! sudo -u lnbits ${lnbitsUvDir}/bin/uv sync --frozen --no-dev --extra migration; then
+    echo "# FAIL: uv sync failed (see above)"
+    return 1
+  fi
+  if ! sudo -u lnbits test -x ${lnbitsBin}; then
+    echo "# FAIL: ${lnbitsBin} is missing after uv sync"
+    return 1
+  fi
+  # remove the virtual environment of poetry (used up to LNbits v1.2.1)
+  sudo -u lnbits rm -rf /home/lnbits/.cache/pypoetry
+}
+
+# installs made with LNbits up to v1.2.1 start with 'poetry run lnbits'
+function setServiceExecStart() {
+  if sudo test -f /etc/systemd/system/lnbits.service; then
+    sudo sed -i "s|^ExecStart=.*|ExecStart=${lnbitsExecStart}|" /etc/systemd/system/lnbits.service
+    sudo systemctl daemon-reload
+  fi
+}
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -12,6 +84,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Installs the version ${VERSION} by default."
   echo "Usage:"
   echo "bonus.lnbits.sh [install|uninstall] [?GITHUBUSER] [?BRANCH|?TAG]"
+  echo "bonus.lnbits.sh update"
   echo "bonus.lnbits.sh on [lnd|tlnd|slnd|cl|tcl|scl]"
   echo "bonus.lnbits.sh switch [lnd|tlnd|slnd|cl|tcl|scl]"
   echo "bonus.lnbits.sh off <--keep-data|--delete-data>"
@@ -121,6 +194,30 @@ function revertMigration() {
     echo "# OK revert migration done"
   else
     echo "# No migration started yet, nothing to do."
+  fi
+}
+
+# backup the database (the caller has to restart the service)
+function backupDatabase() {
+  source <(/home/admin/_cache.sh get LNBitsDB)
+  echo "# Start Backup LNBits ${LNBitsDB} database"
+  if [ "${LNBitsDB}" == "PostgreSQL" ]; then
+    # postgresql backup
+    sudo /home/admin/config.scripts/bonus.postgresql.sh backup lnbits_db || return 1
+  else
+    # sqlite backup
+    backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
+    backup_file="lnbits_sqlite_$(date +%d)-$(date +%m)-$(date +%Y)_$(date +%H)-$(date +%M)_fs.tar"
+    if [ ! -d $backup_target ]; then
+      sudo mkdir -p $backup_target 1>&2
+    fi
+    # Delete old backups (keep last 3 backups)
+    sudo chown -R admin:admin $backup_target
+    ls -tp $backup_target/*.tar | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm -- 2>/dev/null
+
+    cd $backup_target || return 1
+    sudo tar -cf $backup_file -C "/mnt/hdd/app-data" LNBits/ || return 1
+    echo "OK - Backup finished, file saved as ${backup_target}/${backup_file}"
   fi
 }
 
@@ -611,21 +708,9 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   # pull latest code
   sudo -u lnbits git pull
 
-  echo "# check if poetry in installed, if not install it"
-  if ! sudo -u lnbits which poetry; then
-    echo "# install poetry"
-    sudo pip3 config set global.break-system-packages true
-    sudo pip3 install --upgrade pip
-    sudo pip3 install poetry
-  fi
-
   echo "# install"
-  sudo -u lnbits poetry install
-
-  echo "# make sure the default virtualenv is used"
-  sudo apt-get remove -y python3-virtualenv 2>/dev/null
-  sudo pip uninstall -y virtualenv 2>/dev/null
-  sudo apt-get install -y python3-virtualenv
+  installDependencies || exit 1
+  setServiceExecStart
 
   echo "# restart lnbits service"
   sudo systemctl restart lnbits
@@ -639,8 +724,8 @@ sudo systemctl stop lnbits 2>/dev/null
 # install (code & compile)
 if [ "$1" = "install" ]; then
 
-  # check if already installed
-  if compgen -u | grep -w lnbits; then
+  # check if already installed (user exists and the dependencies are in place)
+  if compgen -u | grep -w lnbits && sudo -u lnbits test -x ${lnbitsBin}; then
     echo "result='already installed'"
     exit 0
   fi
@@ -674,32 +759,15 @@ if [ "$1" = "install" ]; then
   cd /home/lnbits/lnbits || exit 1
   sudo -u lnbits git checkout ${tag} || exit 1
 
-  # to the install
-  echo "# installing application dependencies"
-  cd /home/lnbits/lnbits || exit 1
-
-  # check if poetry is installed
-  if ! sudo -u lnbits which poetry; then
-    echo "# install poetry"
-    sudo pip3 config set global.break-system-packages true
-    sudo pip3 install --upgrade pip
-    sudo pip3 install poetry
-  fi
-
-  echo "# install"
+  # do the install
   exitCode=0
-  if sudo -u lnbits poetry install; then
-    echo "Poetry install completed successfully."
+  if installDependencies; then
+    echo "# Install of the dependencies completed successfully."
   else
-    echo "Error: Poetry install failed (see above).. waiting 10 seconds"
+    echo "Error: Install of the dependencies failed (see above).. waiting 10 seconds"
     exitCode=1
     sleep 10
   fi
-
-  # make sure default virtaulenv is used
-  sudo apt-get remove -y python3-virtualenv 2>/dev/null
-  sudo pip uninstall -y virtualenv 2>/dev/null
-  sudo apt-get install -y python3-virtualenv
 
   exit $exitCode
 fi
@@ -722,13 +790,94 @@ if [ "$1" = "uninstall" ]; then
   exit 0
 fi
 
+# update an existing install to the LNbits version of this script
+if [ "$1" = "update" ]; then
+
+  echo "# *** UPDATE LNBITS to ${tag} ***"
+
+  if ! sudo -u lnbits test -d ${lnbitsCodeDir}/.git; then
+    echo "# FAIL: LNbits is not installed"
+    echo "error='not installed'"
+    exit 1
+  fi
+
+  # the service got stopped above - it is only started again if it is set up
+  serviceInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
+
+  cd ${lnbitsCodeDir} || exit 1
+  installedVersion=$(sudo -u lnbits git describe --tags 2>/dev/null)
+  echo "# installed version: ${installedVersion}"
+
+  # LNbits before v1.7.0 is affected by the security incident of November 2026
+  # (the poetry venv is still there if an earlier update stopped after the checkout)
+  securityNotice=0
+  if [ "${installedVersion}" = "" ] || dpkg --compare-versions "${installedVersion#v}" lt "1.7.0" ||
+    sudo -u lnbits test -d /home/lnbits/.cache/pypoetry; then
+    securityNotice=1
+  fi
+
+  # as long as the code is unchanged the installed version gets started again
+  function abortUpdate() {
+    echo "# FAIL: $1 - LNbits is not updated"
+    if [ "${serviceInstalled}" = "1" ]; then
+      sudo systemctl start lnbits
+    fi
+    echo "error='$1'"
+    exit 1
+  }
+
+  # backup first: the database migrations of a new version cannot be reverted
+  if [ "${LNBits}" = "on" ]; then
+    backupDatabase || abortUpdate "database backup failed"
+  fi
+
+  echo "# get the code of ${tag}"
+  cd ${lnbitsCodeDir} || abortUpdate "missing ${lnbitsCodeDir}"
+  sudo -u lnbits git fetch origin "refs/tags/${tag}:refs/tags/${tag}" || abortUpdate "git fetch of ${tag} failed"
+  sudo -u lnbits git checkout ${tag} || abortUpdate "git checkout of ${tag} failed"
+
+  # from here on the code is updated: LNbits stays stopped if the dependencies fail
+  if ! installDependencies; then
+    echo "# FAIL: LNbits stays stopped because the dependencies of ${tag} are not installed"
+    echo "# check the internet connection and run again: /home/admin/config.scripts/bonus.lnbits.sh update"
+    echo "error='install of dependencies failed'"
+    exit 1
+  fi
+  setServiceExecStart
+
+  if [ "${serviceInstalled}" = "1" ]; then
+    echo "# starting LNbits ${tag} (the first start migrates the database)"
+    sudo systemctl start lnbits
+  fi
+  echo "# OK - LNbits is updated to ${tag}"
+
+  if [ "${securityNotice}" = "1" ]; then
+    echo
+    echo "#######################################################################"
+    echo "# IMPORTANT: LNbits before v1.7.0 has a critical vulnerability."
+    echo "# The update does not lock out an attacker who already copied credentials:"
+    echo "# - reset all wallet keys in LNbits as Super User:"
+    echo "#   Settings -> Users -> Reset Wallet Keys"
+    echo "# - renew the connections of apps and extensions"
+    echo "#   (NWC, LNDHub, Bolt Cards, TPoS, ...) with the new keys"
+    echo "# - replace the credentials of the funding source,"
+    echo "#   with LND these are the macaroons stored in the LNbits config"
+    echo "# https://news.lnbits.com/news/lnbits-1-7-0-security-update"
+    echo "#######################################################################"
+  fi
+
+  # needed for API/WebUI as signal that the update ran thru
+  echo "result='OK'"
+  exit 0
+fi
+
 # on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   # check if already installed
   if compgen -u | grep -w lnbits; then
-    # check poetry if the user exists
-    if ! sudo -u lnbits which poetry; then
+    # check the dependencies if the user exists (also replaces an old poetry based install)
+    if ! sudo -u lnbits test -x ${lnbitsBin}; then
       echo "# Fix faulty installation"
       /home/admin/config.scripts/bonus.lnbits.sh off --keep-data
       /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
@@ -869,7 +1018,7 @@ PartOf=${systemdDependency}
 [Service]
 WorkingDirectory=/home/lnbits/lnbits
 ExecStartPre=/home/admin/config.scripts/bonus.lnbits.sh prestart
-ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && poetry run lnbits --port 5000 --host 0.0.0.0'
+ExecStart=${lnbitsExecStart}
 User=lnbits
 Restart=always
 TimeoutSec=120
@@ -1127,26 +1276,7 @@ fi
 
 # backup
 if [ "$1" = "backup" ]; then
-  source <(/home/admin/_cache.sh get LNBitsDB)
-  echo "# Start Backup LNBits ${LNBitsDB} database"
-  if [ "${LNBitsDB}" == "PostgreSQL" ]; then
-    # postgresql backup
-    sudo /home/admin/config.scripts/bonus.postgresql.sh backup lnbits_db
-  else
-    # sqlite backup
-    backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
-    backup_file="lnbits_sqlite_$(date +%d)-$(date +%m)-$(date +%Y)_$(date +%H)-$(date +%M)_fs.tar"
-    if [ ! -d $backup_target ]; then
-      sudo mkdir -p $backup_target 1>&2
-    fi
-    # Delete old backups (keep last 3 backups)
-    sudo chown -R admin:admin $backup_target
-    ls -tp $backup_target/*.tar | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm -- 2>/dev/null
-
-    cd $backup_target
-    sudo tar -cf $backup_file -C "/mnt/hdd/app-data" LNBits/
-    echo "OK - Backup finished, file saved as ${backup_target}/${backup_file}"
-  fi
+  backupDatabase
   sudo systemctl start lnbits
   exit 0
 fi
@@ -1273,7 +1403,8 @@ if [ "$1" = "migrate" ]; then
     sudo systemctl stop lnbits
 
     echo "# Start convert old SQLite to new PostgreSQL"
-    if ! sudo -u lnbits poetry run python tools/conv.py; then
+    # conv.py reads the .env from the code directory
+    if ! cd ${lnbitsCodeDir} || ! sudo -u lnbits ${lnbitsCodeDir}/.venv/bin/python tools/conv.py; then
       echo "FAIL - Convert failed, revert migration process"
       revertMigration
       exit 1
