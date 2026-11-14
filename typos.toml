@@ -14,3 +14,5 @@ tpos = "tpos"
 ba = "ba"
 tne = "tne"
 HD = "HD"
+# gpg --with-colons fingerprint record
+fpr = "fpr"

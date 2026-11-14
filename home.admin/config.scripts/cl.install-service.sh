@@ -10,6 +10,26 @@ if [ "$1" = "-h" ]||[ "$1" = "--help" ];then
   exit 1
 fi
 
+lightningdBin="/usr/local/bin/lightningd"
+
+# The lightningd option to read the hsm_secret password from stdin:
+# --hsm-passphrase since CLN v25.12, where --encrypted-hsm is deprecated
+# (refused with allow-deprecated-apis=false and once the deprecation ends);
+# --encrypted-hsm for older versions.
+# Uses 'lightningd --version': it is handled before the config is read,
+# unlike '--help' which needs a full start (config, log file, plugins).
+function hsmPassphraseOption() {
+  local version
+  version=$("${lightningdBin}" --version 2>/dev/null | head -n 1 |
+    sed -nE 's/^v?([0-9]+\.[0-9]+(\.[0-9]+)?).*$/\1/p')
+  if [ -n "${version}" ] &&
+   [ "$(printf '%s\n' "${version}" "25.12" | sort -V | head -n 1)" != "25.12" ]; then
+    echo "--encrypted-hsm"
+  else
+    echo "--hsm-passphrase"
+  fi
+}
+
 # source <(/home/admin/config.scripts/network.aliases.sh getvars cl <mainnet|testnet|signet>)
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $1)
 
@@ -34,7 +54,7 @@ if grep -Eq "${netprefix}clEncryptedHSM=on" /mnt/hdd/app-data/raspiblitz.conf;th
     passwordFile=/dev/shm/.${netprefix}cl.pw
   fi
   passwordInput="(cat $passwordFile;echo;cat $passwordFile) | "
-  encryptedHSMoption="--encrypted-hsm"
+  encryptedHSMoption="$(hsmPassphraseOption)"
 else
   passwordInput=""
   encryptedHSMoption=""
@@ -58,7 +78,7 @@ After=network-online.target
 
 [Service]
 ExecStartPre=-/home/admin/config.scripts/cl.check.sh prestart $CHAIN
-ExecStart=/bin/sh -c '${passwordInput}/usr/local/bin/lightningd --conf=${CLCONF} ${encryptedHSMoption} --rpc-file-mode 0660'
+ExecStart=/bin/sh -c '${passwordInput}${lightningdBin} --conf=${CLCONF} ${encryptedHSMoption} --rpc-file-mode 0660'
 ExecStartPost=-/home/admin/config.scripts/cl.check.sh poststart $CHAIN
 
 # Creates /run/lightningd owned by bitcoin

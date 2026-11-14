@@ -7,7 +7,7 @@
 
 # command info
 if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
-  ! echo "$@" | grep -Eq "new|seed|unlock|lock|encrypt|decrypt|autounlock-on|autounlock-off|change-password" ;then
+  ! echo "$@" | grep -Eq "new|seed|unlock|lock|encrypt|decrypt|autounlock-on|autounlock-off|change-password|hsm-type|start-error" ;then
   echo
   echo "Create new wallet or import seed"
   echo "Unlock/lock, encrypt, decrypt, set autounlock or change password for the hsm_secret"
@@ -34,6 +34,12 @@ if [ $# -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]||\
   echo
   echo "cl.hsmtool.sh [change-password] <mainnet|testnet|signet> <NewPassword>"
   echo
+  echo "cl.hsmtool.sh [hsm-type] <mainnet|testnet|signet>"
+  echo "  prints hsmSecretType='plain|encrypted|mnemonic|mnemonic-passphrase|invalid'"
+  echo
+  echo "cl.hsmtool.sh [start-error] <mainnet|testnet|signet>"
+  echo "  prints clStartError='password-unreadable|password-missing|password-wrong|'"
+  echo
   exit 1
 fi
 
@@ -42,6 +48,7 @@ echo "# Running 'cl.hsmtool.sh $*'"
 source /mnt/hdd/app-data/raspiblitz.conf
 source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 hsmSecretPath="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
+hsmSecretHelper="/home/admin/config.scripts/cl.hsmsecret.py"
 
 # password file is on the disk if encrypted and auto-unlock is enabled
 passwordFile="/dev/shm/.${netprefix}cl.pw"
@@ -54,6 +61,100 @@ fi
 #############
 # Functions #
 #############
+# Checks the hsm_secret at $hsmSecretPath against the seed words with the
+# installed 'lightning-hsmtool checkhsm' (libwally, independent of
+# cl.hsmsecret.py). Its stdin interface depends on the Core Lightning version,
+# both are tried:
+#   CLN >= v25.12: passphrase, mnemonic
+#   CLN <  v25.12: passphrase, language id ("0" = english), mnemonic
+# The wrong interface can not pass: it reads "0" as the mnemonic or the
+# mnemonic as the language id and fails.
+# $1 = seedwords (space separated)
+# $2 = seedpassword (may be empty)
+function checkHsmSecret() {
+  if printf '%s\n%s\n' "$2" "$1" | sudo -u bitcoin \
+   lightning-hsmtool checkhsm "${hsmSecretPath}" 1>/dev/null 2>&1; then
+    return 0
+  fi
+  if printf '%s\n0\n%s\n' "$2" "$1" | sudo -u bitcoin \
+   lightning-hsmtool checkhsm "${hsmSecretPath}" 1>/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
+}
+
+# Creates the hsm_secret at $hsmSecretPath from BIP39 seed words in the legacy
+# 32-byte format, byte-for-byte what 'lightning-hsmtool generatehsm' wrote
+# before CLN v25.12 (see cl.hsmsecret.py). Since v25.12 'generatehsm' writes a
+# mnemonic format with a different on-chain wallet for the same seed words,
+# which would not restore existing RaspiBlitz wallets.
+# Secrets are only passed on stdin. Fails without creating the hsm_secret on
+# invalid seed words and moves it aside if lightning-hsmtool does not confirm it.
+# $1 = seedwords (space separated)
+# $2 = seedpassword (may be empty)
+function createHsmSecret() {
+  local mnemonic words
+  # normalize whitespace between the words
+  read -r -a words <<< "$1"
+  mnemonic="${words[*]}"
+  if ! printf '%s\n%s\n' "${mnemonic}" "$2" | python "${hsmSecretHelper}" derive |
+   sudo -u bitcoin python "${hsmSecretHelper}" write "${hsmSecretPath}"; then
+    echo "# ERROR: could not create the hsm_secret at ${hsmSecretPath}" >&2
+    return 1
+  fi
+  if ! checkHsmSecret "${mnemonic}" "$2"; then
+    local unverified
+    unverified="${hsmSecretPath}.unverified.$(date +"%Y_%m_%d_%H%M%S")"
+    echo "# ERROR: lightning-hsmtool checkhsm did not confirm the new hsm_secret" >&2
+    echo "# Moving it to ${unverified}" >&2
+    sudo -u bitcoin mv "${hsmSecretPath}" "${unverified}"
+    return 1
+  fi
+  echo "# Created and checked the hsm_secret at ${hsmSecretPath}"
+}
+
+# Prints the format of the hsm_secret at $hsmSecretPath, read as the bitcoin
+# user and detected from the file itself like Core Lightning does (see
+# cl.hsmsecret.py type): plain|encrypted|mnemonic|mnemonic-passphrase|invalid.
+# Prints nothing and fails if the file can not be read.
+# Replaces parsing the messages of 'lightning-hsmtool decrypt', which changed
+# in CLN v25.12 (no "hsm_secret is not encrypted" any more).
+function getHsmSecretType() {
+  sudo -u bitcoin python "${hsmSecretHelper}" type "${hsmSecretPath}"
+}
+
+# Classifies the hsm_secret related start errors of lightningd in $1 (journal
+# or log lines) for the unlock loop and cl.monitor.sh. Prints one of
+#   password-unreadable  no or an empty password on stdin
+#   password-missing     encrypted hsm_secret, but no (usable) passphrase
+#                        option given - the service needs to be reinstalled
+#   password-wrong       wrong password
+# or nothing. Matches the messages of CLN < v25.12 and >= v25.12.
+function clHsmStartError() {
+  if echo "$1" | grep -Eq '(encrypted-hsm|hsm-passphrase): (Could not read pass from stdin|Invalid hsm_secret format)'; then
+    echo "password-unreadable"
+  elif echo "$1" | grep -Eq 'hsm_secret is encrypted, you need to pass the --encrypted-hsm startup option|Failed to load hsm_secret: Passphrase required but not provided|--encrypted-hsm was removed, use --hsm-passphrase instead'; then
+    echo "password-missing"
+  elif echo "$1" | grep -Eq 'Wrong password for encrypted hsm_secret|Failed to load hsm_secret: Wrong passphrase'; then
+    echo "password-wrong"
+  fi
+}
+
+# Prints the journal of the latest run of the lightningd service $1 (the
+# running one, or the failed one while systemd waits to restart it).
+# CLN >= v25.12 prints a backtrace after some hsm_secret errors, so the last
+# few lines of the journal do not contain the error message any more.
+function clStartJournal() {
+  local invocation
+  invocation=$(systemctl show -p InvocationID --value "$1" 2>/dev/null)
+  if [ -n "${invocation}" ]; then
+    sudo journalctl --no-pager -n 200 "_SYSTEMD_INVOCATION_ID=${invocation}"
+  else
+    # not started yet: only this boot, no stale error of an earlier boot
+    sudo journalctl --no-pager -b -n 60 -u "$1"
+  fi
+}
+
 function passwordToFile() {
   if [ $# -gt 0 ];then
     text="$1"
@@ -128,14 +229,18 @@ function decryptHSMsecret() {
   password=$1
 
   # check if encrypted
-  trap 'rm -f "$output"' EXIT
-  output=$(mktemp -p /dev/shm/)
-  echo "test" | sudo -u bitcoin lightning-hsmtool decrypt "$hsmSecretPath" \
-   2> "$output"
-  if [ "$(grep -c "hsm_secret is not encrypted" < "$output")" -gt 0 ];then
-    echo "# The hsm_secret is not encrypted"
+  hsmSecretType=$(getHsmSecretType)
+  if [ "${hsmSecretType}" = "plain" ] || [ "${hsmSecretType}" = "mnemonic" ]; then
+    echo "# The hsm_secret is not encrypted (${hsmSecretType})"
     shredPasswordFile
     echo "# Continue to record in the raspiblitz.conf"
+  elif [ "${hsmSecretType}" = "mnemonic-passphrase" ]; then
+    echo "# ERROR: the hsm_secret is in the mnemonic format with a passphrase."
+    echo "# The passphrase is part of the wallet, it can not be decrypted."
+    return 1
+  elif [ "${hsmSecretType}" != "encrypted" ]; then
+    echo "# ERROR: could not detect the format of ${hsmSecretPath}: '${hsmSecretType}'"
+    return 1
   else
     # setting value in raspiblitz.conf
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "on"
@@ -171,23 +276,23 @@ function decryptHSMsecret() {
 if [ "$1" = "new" ] || [ "$1" = "new-force" ] || [ "$1" = "seed" ] || [ "$1" = "seed-force" ]; then
 
   # make sure /home/bitcoin/.lightning/bitcoin exists (when lightningd was not run yet)
-  if ! sudo ls /home/bitcoin/.lightning/bitcoin 2>/dev/null; then
+  if ! sudo ls /home/bitcoin/.lightning/bitcoin 1>/dev/null 2>&1; then
     echo "# Create /home/bitcoin/.lightning/bitcoin/"
     sudo -u bitcoin mkdir -p /home/bitcoin/.lightning/bitcoin/
   fi
 
   # check/delete existing wallet
   if [ "$1" = "new-force" ] || [ "$1" = "seed-force" ]; then
-    if sudo ls $hsmSecretPath 2>1 1>/dev/null; then
+    if sudo ls $hsmSecretPath 1>/dev/null 2>&1; then
       echo "# Moving the old wallet to backup"
       now=$(date +"%Y_%m_%d_%H%M%S")
       sudo mv $hsmSecretPath $hsmSecretPath.backup.${now} 2>/dev/null || exit 1
     fi
   else
-    if sudo ls $hsmSecretPath 2>1 1>/dev/null; then
+    if sudo ls $hsmSecretPath 1>/dev/null 2>&1; then
       echo "# The hsm_secret is already present at $hsmSecretPath."
       if [ ${CHAIN} = "mainnet" ]; then
-        if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info 2>1 1>/dev/null; then
+        if sudo ls /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info 1>/dev/null 2>&1; then
           echo "# There is a /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info so don't create new"
           # show seed
           if [ "$3" != "noninteractive" ]; then
@@ -263,14 +368,12 @@ seedwords6x4='${seedwords6x4}'
 # Will be removed safely when the hsm_secret is encrypted.
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
 
-  # pass to 'hsmtool generatehsm hsm_secret'
-  if [ ${#seedpassword} -eq 0 ]; then
-    (echo "0"; echo "${seedwords}"; echo) | sudo -u bitcoin lightning-hsmtool \
-     "generatehsm" $hsmSecretPath 1>&2
-  else
-    # pass to 'hsmtool generatehsm hsm_secret' - confirm seedpassword
-    (echo "0"; echo "${seedwords}"; echo "$seedpassword"; echo "$seedpassword")\
-     | sudo -u bitcoin lightning-hsmtool "generatehsm" $hsmSecretPath 1>&2
+  # create the hsm_secret (legacy format, see createHsmSecret)
+  if ! createHsmSecret "${seedwords}" "${seedpassword}" 1>&2; then
+    # keep no seedwords.info that matches no hsm_secret
+    echo "# Shredding the seedwords.info of the failed wallet" >&2
+    sudo -u bitcoin shred -u /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
+    exit 1
   fi
 
   echo "# Re-init the backup plugin with the new wallet"
@@ -284,7 +387,7 @@ elif [ "$1" = "unlock" ]; then
   attempt=0
   justUnlocked=0
   while [ $($lightningcli_alias getinfo 2>&1 | grep -c '"id":') -eq 0 ];do
-    clError=$(sudo journalctl -n5 -u ${netprefix}lightningd)
+    clError=$(clStartJournal ${netprefix}lightningd)
     clLog=$(sudo tail -n 5 /home/bitcoin/.lightning/${CLNETWORK}/cl.log)
 
     # check passwordfile
@@ -297,8 +400,7 @@ elif [ "$1" = "unlock" ]; then
         sudo systemctl restart ${netprefix}lightningd
 
     # getpassword
-    elif [ $(echo "${clError}" | \
-      grep -c 'encrypted-hsm: Could not read pass from stdin.') -gt 0 ];then
+    elif [ "$(clHsmStartError "${clError}")" = "password-unreadable" ];then
       if [ ${justUnlocked} -eq 0 ];then
         if [ -f $passwordFile ];then
           echo "# Wrong passwordFile is present"
@@ -317,9 +419,8 @@ elif [ "$1" = "unlock" ]; then
         sleep 5
       fi
 
-    # configure --encrypted-hsm
-    elif [ $(echo "${clError}" | \
-      grep -c 'hsm_secret is encrypted, you need to pass the --encrypted-hsm startup option.') -gt 0 ];then
+    # configure the passphrase option (cl.install-service.sh)
+    elif [ "$(clHsmStartError "${clError}")" = "password-missing" ];then
 
         echo "# The hsm_secret is encrypted, but unlock is not configured"
         if [ $# -lt 3 ];then
@@ -332,8 +433,7 @@ elif [ "$1" = "unlock" ]; then
         /home/admin/config.scripts/cl.install-service.sh $CHAIN
 
     # get new password
-    elif [ $(echo "${clError}" | \
-      grep -c 'Wrong password for encrypted hsm_secret.') -gt 0 ];then
+    elif [ "$(clHsmStartError "${clError}")" = "password-wrong" ];then
       echo "# Wrong password"
       if [ $# -lt 3 ];then
         sudo rm -f $passwordFile
@@ -364,7 +464,7 @@ elif [ "$1" = "unlock" ]; then
       sudo tail -n 5 /home/bitcoin/.lightning/${CLNETWORK}/cl.log
       echo
       echo "# The last lines of the ${netprefix}lightningd journal ('sudo journalctl -u ${netprefix}lightningd'):"
-      sudo journalctl -n 5 -u ${netprefix}lightningd
+      clStartJournal ${netprefix}lightningd | tail -n 40
       echo
       exit 3
     fi
@@ -387,6 +487,21 @@ elif [ "$1" = "encrypt" ]; then
    # check if sudo
   if [ "$EUID" -ne 0 ]; then
     echo "Please run as root (with sudo)"
+    exit 1
+  fi
+
+  # 'lightning-hsmtool encrypt' only encrypts the legacy plain format,
+  # check before the seedwords.info is shredded
+  hsmSecretType=$(getHsmSecretType)
+  if [ "${hsmSecretType}" != "plain" ]; then
+    if [ "${hsmSecretType}" = "encrypted" ]; then
+      echo "# The hsm_secret is already encrypted"
+    elif [ "${hsmSecretType}" = "mnemonic" ] || [ "${hsmSecretType}" = "mnemonic-passphrase" ]; then
+      echo "# ERROR: the hsm_secret is in the mnemonic format (created by lightningd >= v25.12),"
+      echo "# 'lightning-hsmtool encrypt' only supports the legacy format."
+    else
+      echo "# ERROR: could not detect the format of ${hsmSecretPath}: '${hsmSecretType}'"
+    fi
     exit 1
   fi
 
@@ -425,7 +540,7 @@ elif [ "$1" = "encrypt" ]; then
 
 
 elif [ "$1" = "decrypt" ]; then
-  decryptHSMsecret
+  decryptHSMsecret || exit 1
 
 
 elif [ "$1" = "autounlock-on" ]; then
@@ -463,6 +578,17 @@ elif [ "$1" = "change-password" ]; then
     echo "sudo /home/admin/config.scripts/cl.hsmtool encrypt $2"
     exit 1
   fi
+  exit 0
+
+
+elif [ "$1" = "start-error" ]; then
+  # for cl.monitor.sh
+  echo "clStartError='$(clHsmStartError "$(clStartJournal ${netprefix}lightningd)")'"
+  exit 0
+
+
+elif [ "$1" = "hsm-type" ]; then
+  echo "hsmSecretType='$(getHsmSecretType)'"
   exit 0
 
 

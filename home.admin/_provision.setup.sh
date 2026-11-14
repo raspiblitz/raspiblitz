@@ -374,22 +374,19 @@ if [ "${lightning}" == "cl" ]; then
     # detect if the imported hsm_secret is encrypted and set in raspiblitz.conf
     # use the variables for the default network
     source <(/home/admin/config.scripts/network.aliases.sh getvars cl mainnet)
-    hsmSecretPath="/home/bitcoin/.lightning/bitcoin/hsm_secret"
-    # check if encrypted
-    trap 'rm -f "$output"' EXIT
-    output=$(mktemp -p /dev/shm/)
-    echo "test" | sudo -u bitcoin lightning-hsmtool decrypt "$hsmSecretPath" \
-     2> "$output"
-    if [ "$(grep -c "hsm_secret is not encrypted" < "$output")" -gt 0 ];then
-      echo "# The hsm_secret is not encrypted"
-      echo "# Record in raspiblitz.conf"
-      /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clEncryptedHSM" "off"
+    # format of the hsm_secret file (not from lightning-hsmtool messages,
+    # they changed in CLN v25.12)
+    source <(/home/admin/config.scripts/cl.hsmtool.sh hsm-type mainnet)
+    if [ "${hsmSecretType}" = "plain" ] || [ "${hsmSecretType}" = "mnemonic" ]; then
+      echo "# The hsm_secret is not encrypted (${hsmSecretType})"
     else
-      cat $output
-      echo "# The hsm_secret is encrypted"
-      echo "# Record in raspiblitz.conf"
-      /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clEncryptedHSM" "off"
+      echo "# The hsm_secret needs a password (${hsmSecretType})"
+      echo "# 'cl.hsmtool.sh unlock' configures it when lightningd asks for it"
     fi
+    # record as off in raspiblitz.conf (as before): an encrypted wallet is
+    # detected and configured by the unlock on the first start
+    echo "# Record in raspiblitz.conf"
+    /home/admin/config.scripts/blitz.conf.sh set "${netprefix}clEncryptedHSM" "off"
 
     # update from raspiblitz.conf
     source ${configFile}
