@@ -1067,7 +1067,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # Use the venv pip directly by full path. This is more reliable than
   # 'source activate && pip' under sudo -u, which can resolve the wrong pip
   # or cause pip to install scripts to ~/.local/bin instead of the venv.
+  # Run it from the app user's home: newer git aborts 'git clone' when the
+  # caller's working directory is below a path the app user cannot traverse.
   if ! run_as_joinmarketng bash -c "
+    cd /home/${USER_JM} && \
     ${VENV_DIR}/bin/pip install --upgrade pip && \
     ${VENV_DIR}/bin/pip install '${GIT_URL}#subdirectory=jmcore' && \
     ${VENV_DIR}/bin/pip install '${GIT_URL}#subdirectory=jmwallet' && \
@@ -1372,8 +1375,10 @@ if [ "$1" = "update" ]; then
   echo "# Upgrading pip packages to ${UPDATE_TAG}..."
   # Source commits can share a package version, so force-reinstall the four
   # managed packages first. Resolve dependencies separately to avoid forcing
-  # costly reinstalls of every third-party package.
+  # costly reinstalls of every third-party package. As in the installer, pip
+  # runs from the app user's home so 'git clone' has an accessible directory.
   if ! run_as_joinmarketng bash -c "
+    cd /home/${USER_JM} && \
     ${VENV_DIR}/bin/pip install --upgrade pip && \
     ${VENV_DIR}/bin/pip install --upgrade --force-reinstall --no-deps \
       '${GIT_URL}#subdirectory=jmcore' \
