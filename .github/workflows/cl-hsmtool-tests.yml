@@ -1,0 +1,66 @@
+name: Core Lightning wallet creation tests
+
+concurrency:
+  group: cl-hsmtool-tests-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['dev', 'v1.10', 'v1.11']
+    paths:
+      - '.github/workflows/cl-hsmtool-tests.yml'
+      - 'home.admin/config.scripts/cl.hsmtool.sh'
+      - 'home.admin/config.scripts/cl.hsmsecret.py'
+      - 'home.admin/config.scripts/cl.install.sh'
+      - 'test/test_cl_hsmsecret.py'
+      - 'test/cl.hsmtool.hsmsecret.bats'
+      - 'test/cl.hsmtool.real-cln.bats'
+  pull_request:
+    branches: ['dev', 'v1.10', 'v1.11']
+    paths:
+      - '.github/workflows/cl-hsmtool-tests.yml'
+      - 'home.admin/config.scripts/cl.hsmtool.sh'
+      - 'home.admin/config.scripts/cl.hsmsecret.py'
+      - 'home.admin/config.scripts/cl.install.sh'
+      - 'test/test_cl_hsmsecret.py'
+      - 'test/cl.hsmtool.hsmsecret.bats'
+      - 'test/cl.hsmtool.real-cln.bats'
+
+jobs:
+  tests:
+    name: cl.hsmtool.sh / cl.hsmsecret.py tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python (Debian bookworm version)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install bats and python dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y bats
+          python3 -m pip install mnemonic==0.19 coverage
+
+      - name: Syntax check
+        run: |
+          bash -n home.admin/config.scripts/cl.hsmtool.sh
+          python3 -m py_compile home.admin/config.scripts/cl.hsmsecret.py
+
+      - name: cl.hsmsecret.py unit tests with full branch coverage
+        working-directory: test
+        run: |
+          python3 -m coverage run --branch --include='*/cl.hsmsecret.py' -m unittest -v test_cl_hsmsecret.py
+          python3 -m coverage report -m --fail-under=100
+
+      - name: cl.hsmtool.sh unit tests
+        run: bats --print-output-on-failure test/cl.hsmtool.hsmsecret.bats
+
+      - name: Tests with the real lightning-hsmtool (CLN v25.09.3 and the pinned version)
+        env:
+          CL_HSMTOOL_REQUIRE_DOCKER: '1'
+        run: bats --print-output-on-failure test/cl.hsmtool.real-cln.bats
