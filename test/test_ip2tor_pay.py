@@ -74,11 +74,20 @@ class LndPayInvoiceTest(unittest.TestCase):
             {'result': {'status': 'SUCCEEDED', 'payment_hash': 'ab'}},
         ]))
         self.assertEqual(payment['payment_hash'], 'ab')
-        _, kwargs = self.post.call_args
+        args, kwargs = self.post.call_args
+        self.assertEqual(args, ('https://{0}:8080/v2/router/send'.format(ip2tor.LND_IP),))
         self.assertEqual(kwargs['headers'], {'Grpc-Metadata-macaroon': '0102'})
-        self.assertEqual(kwargs['json']['payment_request'], 'lnbc1invoice')
+        self.assertEqual(kwargs['json'], {'payment_request': 'lnbc1invoice', 'fee_limit_sat': 1000,
+                                          'timeout_seconds': 60})
+        self.assertEqual(kwargs['verify'], ip2tor.LND_TLS_PATH)
         self.assertTrue(kwargs['stream'])
         self.assertEqual(kwargs['timeout'], (10, 90))
+
+    def assertPaymentInFlight(self, **kwargs):
+        with self.assertRaises(BlitzError) as ctx:
+            self.pay(**kwargs)
+        self.assertEqual(ctx.exception.short, 'payment in flight')
+        self.assertEqual(ctx.exception.details['payment_hash'], 'ab')
 
     def test_connection_failure(self):
         self.assertPaymentFails('refused', post_error=requests.exceptions.ConnectionError('refused'))
@@ -99,11 +108,26 @@ class LndPayInvoiceTest(unittest.TestCase):
     def test_empty_stream(self):
         self.assertPaymentFails('payment not completed', post_result=fake_response([b'', b'']))
 
-    def test_stalled_stream(self):
+    def test_stalled_stream_before_update(self):
         # requests raises ConnectionError(ReadTimeoutError) when no bytes arrive within the read timeout
         self.assertPaymentFails('timed out', post_result=fake_response(
-            [{'result': {'status': 'IN_FLIGHT'}}],
+            [], iter_error=requests.exceptions.ConnectionError('Read timed out.')))
+
+    def test_stalled_stream_in_flight(self):
+        # an HTLC is pending when the stream stalls: it can still settle, so this is not a failure
+        self.assertPaymentInFlight(post_result=fake_response(
+            [{'result': {'status': 'IN_FLIGHT', 'payment_hash': 'ab'}}],
             iter_error=requests.exceptions.ConnectionError('Read timed out.')))
+
+    def test_stream_ends_in_flight(self):
+        self.assertPaymentInFlight(post_result=fake_response(
+            [{'result': {'status': 'IN_FLIGHT', 'payment_hash': 'ab'}}]))
+
+    def test_error_after_in_flight(self):
+        self.assertPaymentInFlight(post_result=fake_response([
+            {'result': {'status': 'IN_FLIGHT', 'payment_hash': 'ab'}},
+            {'error': {'code': 14, 'message': 'server shutting down'}},
+        ]))
 
 
 if __name__ == '__main__':

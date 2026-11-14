@@ -334,6 +334,7 @@ def lndDecodeInvoice(lnInvoiceString):
 
 
 def lndPayInvoice(lnInvoiceString):
+    payment = {}
     try:
         # call LND REST API (SendPaymentSync was removed in LND 0.21, lndlibs has no router stubs)
         macaroon = codecs.encode(open(LND_ADMIN_MACAROON_PATH, 'rb').read(), 'hex').decode()
@@ -343,13 +344,13 @@ def lndPayInvoice(lnInvoiceString):
             json={'payment_request': lnInvoiceString, 'fee_limit_sat': 1000, 'timeout_seconds': 60},
             verify=LND_TLS_PATH,
             stream=True,
-            # connect timeout, and max seconds between streamed updates (LND gives up after timeout_seconds)
+            # connect timeout, and max seconds between streamed updates. LND stops new attempts after
+            # timeout_seconds, but an HTLC already sent stays pending until it settles or fails.
             timeout=(10, 90),
         )
         response.raise_for_status()
 
         # stream of payment updates, the last one has the final status
-        payment = {}
         for line in response.iter_lines():
             if not line:
                 continue
@@ -358,12 +359,21 @@ def lndPayInvoice(lnInvoiceString):
                 raise BlitzError(update['error'].get('message', 'unknown error'), {'invoice': lnInvoiceString})
             payment = update['result']
 
-        # validate results
-        if payment.get('status') != 'SUCCEEDED':
-            raise BlitzError(payment.get('failure_reason', 'payment not completed'), {'invoice': lnInvoiceString})
-
     except Exception as e:
-        raise BlitzError("payment failed", {'invoice': lnInvoiceString}, e)
+        if payment.get('status') != 'IN_FLIGHT':
+            raise BlitzError("payment failed", {'invoice': lnInvoiceString}, e)
+        # the stream broke off while an HTLC was pending, so the payment can still settle
+
+    # validate results
+    if payment.get('status') == 'IN_FLIGHT':
+        # not a failure: paying a new invoice now could pay twice
+        raise BlitzError("payment in flight", {'invoice': lnInvoiceString,
+                                               'payment_hash': payment.get('payment_hash', ''),
+                                               'check': 'lncli listpayments'})
+    if payment.get('status') != 'SUCCEEDED':
+        raise BlitzError("payment failed", {'invoice': lnInvoiceString},
+                         BlitzError(payment.get('failure_reason', 'payment not completed'),
+                                    {'invoice': lnInvoiceString}))
 
     return payment
 
