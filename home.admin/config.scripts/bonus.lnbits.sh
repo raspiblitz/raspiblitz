@@ -242,6 +242,8 @@ function revertMigration() {
 function backupDatabase() {
   source <(/home/admin/_cache.sh get LNBitsDB)
   echo "# Start Backup LNBits ${LNBitsDB} database"
+  # older SQLite backups contain the LNbits config with the credentials of the funding source
+  sudo chmod 600 /mnt/hdd/app-data/backup/lnbits_sqlite/*.tar /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar* 2>/dev/null
   if [ "${LNBitsDB}" == "PostgreSQL" ]; then
     # postgresql backup
     sudo /home/admin/config.scripts/bonus.postgresql.sh backup lnbits_db || return 1
@@ -257,8 +259,7 @@ function backupDatabase() {
     ls -tp $backup_target/*.tar | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm -- 2>/dev/null
 
     cd $backup_target || return 1
-    # the backups contain the LNbits config with the credentials of the funding source
-    sudo chmod 600 $backup_target/*.tar 2>/dev/null
+    # the backup contains the LNbits config with the credentials of the funding source
     sudo touch $backup_file || return 1
     sudo chmod 600 $backup_file || return 1
     sudo tar -cf $backup_file -C "/mnt/hdd/app-data" LNBits/ || return 1
@@ -907,14 +908,17 @@ if [ "$1" = "update" ]; then
     abortUpdate "installed version ${installedVersion} is newer than ${tag}"
   fi
 
-  # only the files of the release: a changed file could survive the checkout
+  # a changed tracked file could survive the checkout (untracked files are not checked)
   if [ "$(sudo -u lnbits git status --porcelain --untracked-files=no)" != "" ]; then
     sudo -u lnbits git status --short --untracked-files=no
     abortUpdate "changed files in ${lnbitsCodeDir}"
   fi
 
   # backup first: the database migrations of a new version cannot be reverted
-  if [ "${LNBits}" = "on" ]; then
+  # - also if LNbits is switched off but the data was kept
+  # - not when the code is already updated (repeated update): the database may be
+  #   migrated already and the backup from before the update would get rotated out
+  if sudo test -f ${lnbitsConfig} && [ "$(sudo -u lnbits git rev-parse HEAD 2>/dev/null)" != "${tagCommit}" ]; then
     backupDatabase || abortUpdate "database backup failed"
   fi
 
@@ -940,16 +944,18 @@ if [ "$1" = "update" ]; then
     echo "# starting LNbits ${tag} (the first start migrates the database)"
     if sudo systemctl start lnbits; then
       # systemd reports the start before LNbits is up: wait until it answers
-      count=0
-      count_max=300
+      waitMax=300
+      waitStart=${SECONDS}
+      waitReported=0
       while ! curl -s -o /dev/null --max-time 5 http://127.0.0.1:5000/; do
-        count=$((count + 1))
-        if [ ${count} -ge ${count_max} ]; then
+        waited=$((SECONDS - waitStart))
+        if [ ${waited} -ge ${waitMax} ]; then
           startFailed=1
           break
         fi
-        if [ $((count % 10)) -eq 0 ]; then
-          echo "# waiting for LNbits to answer (${count}s/${count_max}s)"
+        if [ $((waited - waitReported)) -ge 10 ]; then
+          echo "# waiting for LNbits to answer (${waited}s/${waitMax}s)"
+          waitReported=${waited}
         fi
         sleep 1
       done
@@ -1520,8 +1526,10 @@ if [ "$1" = "migrate" ]; then
     sudo systemctl stop lnbits
 
     echo "# Start convert old SQLite to new PostgreSQL"
-    # conv.py reads the .env from the code directory
-    if ! cd ${lnbitsCodeDir} || ! sudo -u lnbits ${lnbitsCodeDir}/.venv/bin/python tools/conv.py; then
+    # known issue (unchanged): the conversion only runs with /home/lnbits/lnbits as working
+    # directory, and the cleanup below also deletes the LNbits config in the data directory.
+    # Dont make the conversion succeed before that cleanup is reworked.
+    if ! sudo -u lnbits ${lnbitsCodeDir}/.venv/bin/python tools/conv.py; then
       echo "FAIL - Convert failed, revert migration process"
       revertMigration
       exit 1

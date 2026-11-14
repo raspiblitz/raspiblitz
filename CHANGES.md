@@ -4,7 +4,7 @@
 - Update: Bitcoin Core v29.5 (security fixes) [details](https://bitcoincore.org/en/releases/29.5/)
 - Update: Bitcoin Core v32.1 (optional tested update) [details](https://bitcoincore.org/en/releases/32.1/)
 - Update: LND v0.21.8-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.21.8-beta)
-- Update: LNbits v1.7.1 (critical security fixes: update with MENU > UPDATE > LNBITS, then reset the wallet keys and replace the funding source credentials; the browser login needs HTTPS) [details](https://news.lnbits.com/news/lnbits-1-7-0-security-update)
+- Update: LNbits v1.7.1 (critical security fixes: update with MENU > UPDATE > LNBITS, then reset the wallet keys and replace the funding source credentials; the browser login needs HTTPS or the Tor address) [details](https://news.lnbits.com/news/lnbits-1-7-0-security-update)
 
 ## What's new in Version 1.12.1 of RaspiBlitz?
 
