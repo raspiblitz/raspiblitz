@@ -64,17 +64,14 @@ if [ "$2" = "status" ]; then
         passwordFile=/home/bitcoin/.${netprefix}cl.pw
       fi
     fi
-    clError=$(sudo journalctl -n5 -u ${netprefix}lightningd)
+    # the hsm_secret errors of the latest lightningd run (CLN < and >= v25.12)
+    clStartError=""
+    source <(/home/admin/config.scripts/cl.hsmtool.sh start-error $1 2>/dev/null | grep "^clStartError=")
 
     # cases from 'cl.hsmtool.sh unlock'
     if
       [ "$(eval echo \$${netprefix}clEncryptedHSM)" = "on" ] && [ ! -f $passwordFile ] ||
-        [ $(echo "${clError}" |
-          grep -c 'encrypted-hsm: Could not read pass from stdin.') -gt 0 ] ||
-        [ $(echo "${clError}" |
-          grep -c 'hsm_secret is encrypted, you need to pass the --encrypted-hsm startup option.') -gt 0 ] ||
-        [ $(echo "${clError}" |
-          grep -c 'Wrong password for encrypted hsm_secret.') -gt 0 ]
+        [ -n "${clStartError}" ]
     then
 
       # signal wallet locked

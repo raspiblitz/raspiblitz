@@ -368,18 +368,15 @@ if [ ${mode} = "cl-import-gui" ]; then
   # detect if the imported hsm_secret is encrypted
   # use the variables for the default network 
   source <(/home/admin/config.scripts/network.aliases.sh getvars cl)
-  hsmSecretPath="/home/bitcoin/.lightning/${CLNETWORK}/hsm_secret"
-  # check if encrypted
-  trap 'rm -f "$output"' EXIT
-  output=$(mktemp -p /dev/shm/)
-  echo "test" | sudo -u bitcoin lightning-hsmtool decrypt "$hsmSecretPath" \
-   2> "$output"
-  if [ "$(grep -c "hsm_secret is not encrypted" < "$output")" -gt 0 ];then
-    echo "# The hsm_secret is not encrypted"
+  # format of the hsm_secret file (not from lightning-hsmtool messages,
+  # they changed in CLN v25.12)
+  source <(/home/admin/config.scripts/cl.hsmtool.sh hsm-type ${CHAIN})
+  if [ "${hsmSecretType}" = "plain" ] || [ "${hsmSecretType}" = "mnemonic" ]; then
+    echo "# The hsm_secret is not encrypted (${hsmSecretType})"
     echo "# Record in raspiblitz.conf"
     /home/admin/config.scripts/blitz.conf.sh set ${netprefix}clEncryptedHSM "off"
   else
-    cat $output
+    echo "# The hsm_secret needs a password (${hsmSecretType})"
     echo "# Starting cl.hsmtool.sh unlock ${CHAIN}"
     /home/admin/config.scripts/cl.hsmtool.sh unlock ${CHAIN}
   fi

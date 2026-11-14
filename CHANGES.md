@@ -5,6 +5,7 @@
 - Update: Bitcoin Core v32.1 (optional tested update) [details](https://bitcoincore.org/en/releases/32.1/)
 - Update: LND v0.21.8-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.21.8-beta)
 - Update: Core Lightning v26.06.10 (security fixes) [details](https://github.com/ElementsProject/lightning/releases/tag/v26.06.10)
+- Fix: Core Lightning >= v25.12 wallet encryption, unlock and restore detection; the release signature must be by the pinned key
 
 ## What's new in Version 1.12.1 of RaspiBlitz?
 
