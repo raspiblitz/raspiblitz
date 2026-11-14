@@ -19,6 +19,7 @@ setup() {
   UNIT="${BATS_TEST_TMPDIR}/lnbits.service"
   FAKE_UV_VERSION=""     # what an already installed uv reports
   FAKE_VENV_FAILS=""     # 1 = python3 -m venv fails
+  FAKE_TEE_FAILS=""      # 1 = the requirements file cannot be written
   FAKE_PIP_FAILS=""      # 1 = pip refuses the wheel (e.g. checksum mismatch)
   FAKE_SYNC_FAILS=""     # 1 = uv sync fails
   FAKE_LNBITS_BIN="1"    # 1 = the lnbits binary exists after uv sync
@@ -42,7 +43,7 @@ setup() {
       "/home/lnbits/.uv/bin/uv --version") [ -n "${FAKE_UV_VERSION}" ] && echo "uv ${FAKE_UV_VERSION} (aarch64-unknown-linux-gnu)" ;;
       "/home/lnbits/.uv/bin/uv sync") [ -z "${FAKE_SYNC_FAILS}" ] ;;
       "/home/lnbits/.uv/bin/pip install") [ -z "${FAKE_PIP_FAILS}" ] ;;
-      "tee /home/lnbits/.uv/requirements.txt") cat >"${REQUIREMENTS}" ;;
+      "tee /home/lnbits/.uv/requirements.txt") cat >"${REQUIREMENTS}" && [ -z "${FAKE_TEE_FAILS}" ] ;;
       "test -x") [ -n "${FAKE_LNBITS_BIN}" ] ;;
       "test -f") [ -n "${FAKE_UNIT}" ] ;;
       # run the real sed, but on the unit file of the test
@@ -63,6 +64,7 @@ not_called() { if called "$1"; then echo "unexpected call: $1"; return 1; fi; }
 
 @test "the pinned commit is the commit of the pinned tag on GitHub" {
   [[ "${tagCommit}" =~ ^[0-9a-f]{40}$ ]]
+  command -v curl
   if ! curl -sS --max-time 20 -o /dev/null https://github.com; then
     skip "GitHub not reachable"
   fi
@@ -134,6 +136,13 @@ not_called() { if called "$1"; then echo "unexpected call: $1"; return 1; fi; }
 
 @test "installUv fails when the venv cannot be created" {
   FAKE_VENV_FAILS=1
+  run installUv
+  [ "$status" -eq 1 ]
+  not_called "pip install"
+}
+
+@test "installUv fails when the requirements file cannot be written" {
+  FAKE_TEE_FAILS=1
   run installUv
   [ "$status" -eq 1 ]
   not_called "pip install"
@@ -217,14 +226,18 @@ EOF
   run securityNotice
   [ "$status" -eq 0 ]
   [[ "$output" == *"Reset Wallet Keys"* ]]
+  [[ "$output" == *"Activate 'Admin UI'"* ]]
   [[ "$output" == *"connections of apps and extensions"* ]]
   [[ "$output" == *"credentials of the funding source"* ]]
   [[ "$output" == *"all other secrets"* ]]
   [[ "$output" == *"fresh"* ]]
   [[ "$output" == *"https://news.lnbits.com/news/lnbits-1-7-0-security-update"* ]]
+  # the session cookie is only sent over HTTPS since LNbits v1.7
+  [[ "$output" == *"needs HTTPS (port 5001)"* ]]
 }
 
 @test "pinned uv checksums match the Linux wheels on PyPI" {
+  command -v curl
   # without -f a missing release (404) is not skipped: it fails below on the empty checksum
   if ! metadata=$(curl -sSL --max-time 20 "https://pypi.org/pypi/uv/${uvVersion}/json"); then
     skip "PyPI not reachable"
