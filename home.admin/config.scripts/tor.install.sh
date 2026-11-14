@@ -33,6 +33,7 @@ tor_deb_repo="tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpq
 #tor_deb_repo="https://deb.torproject.org"
 tor_deb_repo_clean="${tor_deb_repo#*tor+}"
 tor_deb_repo_pgp_fingerprint="A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89"
+tor_min_supported_version="0.4.9"
 
 ## https://github.com/keroserene/snowflake/commits/master
 snowflake_commit_hash="af6e2c30e1a6aacc6e7adf9a31df0a387891cc37"
@@ -43,32 +44,37 @@ architecture=$(dpkg --print-architecture)
 #### FUNCTIONS ####
 
 add_tor_sources(){
-  echo -e "\n*** Adding deb.torproject.org keyring ***"
-  curl -s -x socks5h://127.0.0.1:9050 --connect-timeout 60 \
-   "${tor_deb_repo_clean}/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" \
-   | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg 1>/dev/null
-  validSignature=$(sudo gpg --show-keys --with-fingerprint /etc/apt/trusted.gpg.d/torproject.gpg | grep -c "${tor_deb_repo_pgp_fingerprint::4}")
-  if [ ${validSignature} -gt 0 ]; then
-    echo "- OK key added over Tor"
-  else
-    echo "WARN: Was not able to import deb.torproject.org key over Tor";
-    curl -s "https://deb.torproject.org/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" \
-     | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/torproject.gpg 1>/dev/null
-    validSignature=$(sudo gpg --show-keys --with-fingerprint /etc/apt/trusted.gpg.d/torproject.gpg | grep -c "${tor_deb_repo_pgp_fingerprint::4}")
-    if [ ${validSignature} -gt 0 ]; then
-      echo "- OK key added over clearnet"
+  local key_dir endpoint fingerprint key_info
+  key_dir=$(mktemp -d) || return 1
+  # Compare the complete primary fingerprint before trusting the key. Keep the
+  # previous keyring intact if either transport or key validation fails.
+  for endpoint in "${tor_deb_repo_clean}" "https://deb.torproject.org"; do
+    if [ "${endpoint}" = "${tor_deb_repo_clean}" ]; then
+      curl -fsS -x socks5h://127.0.0.1:9050 --connect-timeout 60 \
+        "${endpoint}/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" -o "${key_dir}/key.asc" || continue
     else
-      echo "! FAIL: Was not able to import deb.torproject.org key over clearnet - see: sudo gpg --show-keys --with-fingerprint /etc/apt/trusted.gpg.d/torproject.gpg";
-      exit 1
+      curl -fsS --connect-timeout 60 \
+        "${endpoint}/torproject.org/${tor_deb_repo_pgp_fingerprint}.asc" -o "${key_dir}/key.asc" || continue
     fi
-  fi
-
-  echo -e "\n*** Adding Tor Sources ***"
-  echo "\
-deb [arch=${architecture}] ${tor_deb_repo}/torproject.org ${distribution} main
-deb-src [arch=${architecture}] ${tor_deb_repo}/torproject.org  ${distribution} main
-" | sudo tee /etc/apt/sources.list.d/tor.list
-  echo "- OK sources added"
+    key_info=$(gpg --batch --show-keys --with-colons "${key_dir}/key.asc" 2>/dev/null) || continue
+    fingerprint=$(echo "${key_info}" |
+      awk -F: '$1 == "pub" {keys++} $1 == "fpr" && !fingerprint {fingerprint=$10}
+        END {if (keys == 1) print fingerprint}')
+    if [ "${fingerprint}" = "${tor_deb_repo_pgp_fingerprint}" ] &&
+       gpg --batch --yes --dearmor -o "${key_dir}/key.gpg" "${key_dir}/key.asc" &&
+       sudo install -m 644 "${key_dir}/key.gpg" /usr/share/keyrings/torproject.gpg; then
+      rm -rf "${key_dir}"
+      echo "deb [arch=${architecture} signed-by=/usr/share/keyrings/torproject.gpg] ${tor_deb_repo}/torproject.org ${distribution} main
+ deb-src [arch=${architecture} signed-by=/usr/share/keyrings/torproject.gpg] ${tor_deb_repo}/torproject.org ${distribution} main" |
+        sudo tee /etc/apt/sources.list.d/tor.list || return 1
+      # Remove legacy global trust only after scoped trust and sources exist.
+      sudo rm -f /etc/apt/trusted.gpg.d/torproject.gpg
+      return $?
+    fi
+  done
+  rm -rf "${key_dir}"
+  echo "! FAIL: Was not able to verify deb.torproject.org key"
+  return 1
 }
 
 configure_default_torrc(){
@@ -114,6 +120,30 @@ configure_bridges_torrc(){
 ## Obfs4
 ##Bridge obfs4 IP:PORT FINGERPRINT cert=CERTIFICATE iat-mode=[0|1|2]
 " | sudo tee ${torrc_bridges}
+}
+
+require_supported_tor_version(){
+  local tor_output
+  tor_output=$(tor --version) || { echo "! FAIL: Tor version command failed"; return 1; }
+  tor_version=$(echo "${tor_output}" | awk 'NR==1 {print $3}' | sed 's/\.$//')
+  if [ ${#tor_version} -eq 0 ]; then
+    echo "! FAIL: Was not able to detect installed Tor version"
+    return 1
+  fi
+  if ! dpkg --compare-versions "${tor_version}" ge "${tor_min_supported_version}"; then
+    echo "! FAIL: Installed Tor ${tor_version} is older than required ${tor_min_supported_version}"
+    echo "! INFO: Tor 0.4.8 and older are EOL and scheduled to stop working on the Tor network"
+    return 1
+  fi
+  echo "- OK Tor ${tor_version} >= ${tor_min_supported_version}"
+}
+
+restart_tor_service(){
+  if systemctl cat tor@default.service >/dev/null 2>&1; then
+    sudo systemctl restart tor@default
+  else
+    sudo systemctl restart tor
+  fi
 }
 
 
@@ -168,13 +198,14 @@ if [ "${action}" = "install" ]; then
   # shellcheck disable=SC2086
   sudo apt install -y ${tor_pkgs}
 
-  add_tor_sources
+  add_tor_sources || exit 1
 
   echo -e "\n*** Reinstall ***"
   sudo apt update -y
   sudo apt -o Dpkg::Options::="--force-confold" install -y tor
   # shellcheck disable=SC2086
   sudo apt install -y ${tor_pkgs}
+  require_supported_tor_version || exit 1
 
   # make sure tor is not running after is was installed
   # should be enabled after main menu when HDD is mounted
@@ -286,36 +317,105 @@ profile system_tor flags=(attach_disconnected) {
 fi
 
 if [ "${action}" = "update" ]; then
-    case "$2" in
-      source)
-        # as in https://2019.www.torproject.org/docs/debian#source
-        echo "# Install the dependencies"
-        sudo apt update
-        sudo apt install -y build-essential fakeroot devscripts
-        sudo apt build-dep -y tor deb.torproject.org-keyring
-        rm -rf /home/admin/download/debian-packages
-        mkdir -p /home/admin/download/debian-packages
-        cd /home/admin/download/debian-packages || exit 1
-        echo "# Building Tor from the source code ..."
-        apt source tor
-        cd tor-* || exit 1
-        debuild -rfakeroot -uc -us
-        cd ..
-        echo "# Stopping the tor.service before updating"
-        sudo systemctl stop tor
-        echo "# Update ..."
-        sudo dpkg -i tor_*.deb
-        echo "# Starting the tor.service "
-        sudo systemctl start tor
-        echo "# Installed $(tor --version)"
+  # Preserve the whole installed package when available. Repositories may
+  # retain only the newest version, so rollback cannot be an upgrade prerequisite.
+  previous_version=$(dpkg-query -W -f='${Version}' tor) || exit 1
+  update_stage=$(sudo mktemp -d /var/tmp/tor-update.XXXXXXXX) || exit 1
+  install_attempted=0
+  stop_attempted=0
+  update_complete=0
+  finish_update(){
+    local result=$?
+    trap - EXIT
+    if [ "${update_complete}" -eq 0 ]; then
+      if [ "${install_attempted}" -eq 1 ] && sudo test -f "${update_stage}/previous.deb"; then
+        sudo dpkg --force-confold -i "${update_stage}/previous.deb" ||
+          echo "! FAIL: Package rollback failed; recovery package: ${update_stage}/previous.deb"
+      fi
+      if [ "${stop_attempted}" -eq 1 ]; then
+        restart_tor_service || echo "! FAIL: Unable to restart the Tor service"
+      fi
+      echo "! INFO: Recovery files retained in ${update_stage}"
+    else
+      sudo rm -rf "${update_stage}"
+    fi
+    exit "${result}"
+  }
+  trap finish_update EXIT
+  trap 'exit 1' HUP INT TERM
+  # Download through authenticated APT first. Copy a matching cached package
+  # only as a fallback, validating metadata rather than trusting its filename.
+  if ! sudo bash -c '
+    cd "$1" || exit 1
+    valid_package(){
+      [ "$(dpkg-deb -f "$1" Package)" = tor ] &&
+      [ "$(dpkg-deb -f "$1" Version)" = "$2" ] &&
+      { [ "$(dpkg-deb -f "$1" Architecture)" = all ] ||
+        [ "$(dpkg-deb -f "$1" Architecture)" = "$3" ]; }
+    }
+    if apt download "tor=$2"; then
+      for package in ./*.deb; do
+        if valid_package "$package" "$2" "$3"; then
+          mv -- "$package" previous.deb && exit 0
+        fi
+      done
+    fi
+    for package in /var/cache/apt/archives/tor_*.deb; do
+      [ -f "$package" ] || continue
+      cp -- "$package" cached.deb || continue
+      if valid_package cached.deb "$2" "$3"; then
+        mv cached.deb previous.deb && exit 0
+      fi
+      rm -f cached.deb
+    done
+    exit 1' bash "${update_stage}" "${previous_version}" "${architecture}"; then
+    echo "! WARNING: Previous Tor package unavailable, continuing without package rollback"
+  fi
+
+  case "$2" in
+    source)
+      sudo apt -o APT::Update::Error-Mode=any update || exit 1
+      sudo apt install -y build-essential fakeroot devscripts || exit 1
+      sudo apt build-dep -y tor deb.torproject.org-keyring || exit 1
+      # A fresh build directory prevents installing stale .deb files after a
+      # failed download/build. Source signatures are checked by APT.
+      mkdir -p "${download_dir}" || exit 1
+      build_dir=$(mktemp -d "${download_dir}/tor-source.XXXXXXXX") || exit 1
+      cd "${build_dir}" || exit 1
+      apt source tor || exit 1
+      cd tor-* || exit 1
+      debuild -rfakeroot -uc -us || exit 1
+      cd .. || exit 1
+      set -- tor_*.deb
+      [ "$#" -eq 1 ] && [ -f "$1" ] || exit 1
+      stop_attempted=1
+      if systemctl cat tor@default.service >/dev/null 2>&1; then
+        sudo systemctl stop tor@default || exit 1
+      else
+        sudo systemctl stop tor || exit 1
+      fi
+      install_attempted=1
+      sudo dpkg -i "$1" || exit 1
       ;;
-      *)
-        add_tor_sources
-        sudo apt update && sudo apt install tor && sudo systemctl restart tor
+    *)
+      add_tor_sources || exit 1
+      sudo apt -o APT::Update::Error-Mode=any update || exit 1
+      # Download and authenticate all packages before the first install.
+      sudo apt -o Dpkg::Options::="--force-confold" install --download-only -y tor || exit 1
+      # shellcheck disable=SC2086
+      sudo apt install --download-only -y ${tor_pkgs} || exit 1
+      install_attempted=1
+      # APT may stop the service even when installation reports an error.
+      stop_attempted=1
+      sudo apt -o Dpkg::Options::="--force-confold" install -y tor || exit 1
+      # shellcheck disable=SC2086
+      sudo apt install -y ${tor_pkgs} || exit 1
       ;;
-    esac
-  echo
-  exit
+  esac
+  require_supported_tor_version || exit 1
+  restart_tor_service || exit 1
+  update_complete=1
+  exit 0
 fi
 
 # if above didnt matched - show info onf usage
