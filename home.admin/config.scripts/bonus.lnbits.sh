@@ -5,6 +5,8 @@
 # https://github.com/lnbits/lnbits/releases
 tag="v1.7.1"
 VERSION="${tag}"
+# LNbits does not sign tags or commits: the code of ${VERSION} has to be this commit
+tagCommit="4fa70f338d274e14fc82746a83fba5c2c658211f"
 
 # uv installs the dependencies from the uv.lock of the LNbits release
 # (poetry is legacy upstream and cannot install LNbits on Python 3.13)
@@ -58,7 +60,8 @@ function installDependencies() {
   # --frozen: exactly the versions from the uv.lock of the release
   # --no-dev: without the development tools
   # --extra migration: psycopg2 for tools/conv.py (SQLite to PostgreSQL)
-  if ! sudo -u lnbits ${lnbitsUvDir}/bin/uv sync --frozen --no-dev --extra migration; then
+  # --no-python-downloads: only use the Python of the system
+  if ! sudo -u lnbits ${lnbitsUvDir}/bin/uv sync --frozen --no-dev --extra migration --no-python-downloads; then
     echo "# FAIL: uv sync failed (see above)"
     return 1
   fi
@@ -66,8 +69,22 @@ function installDependencies() {
     echo "# FAIL: ${lnbitsBin} is missing after uv sync"
     return 1
   fi
+  # free the space of the download cache (the installed files stay in the venv)
+  sudo -u lnbits ${lnbitsUvDir}/bin/uv cache clean >/dev/null 2>&1
   # remove the virtual environment of poetry (used up to LNbits v1.2.1)
   sudo -u lnbits rm -rf /home/lnbits/.cache/pypoetry
+  return 0
+}
+
+# check that a git revision of the code directory is the pinned commit of ${VERSION}
+function verifyCommit() {
+  local found
+  found=$(sudo -u lnbits git -C ${lnbitsCodeDir} rev-parse --verify "${1}^{commit}" 2>/dev/null)
+  if [ "${found}" != "${tagCommit}" ]; then
+    echo "# FAIL: ${1} is the commit '${found}' - ${VERSION} is pinned to ${tagCommit}"
+    return 1
+  fi
+  echo "# OK: ${1} is the pinned commit ${tagCommit}"
 }
 
 # installs made with LNbits up to v1.2.1 start with 'poetry run lnbits'
@@ -76,6 +93,29 @@ function setServiceExecStart() {
     sudo sed -i "s|^ExecStart=.*|ExecStart=${lnbitsExecStart}|" /etc/systemd/system/lnbits.service
     sudo systemctl daemon-reload
   fi
+}
+
+# what to do after an update from a LNbits version before v1.7.0
+# https://news.lnbits.com/news/lnbits-1-7-0-security-update
+function securityNotice() {
+  echo
+  echo "#######################################################################"
+  echo "# IMPORTANT: LNbits before v1.7.0 has a critical vulnerability."
+  echo "# The update does not lock out an attacker who already copied credentials:"
+  echo "# - reset all wallet keys in LNbits as Super User:"
+  echo "#   Settings -> Users -> Reset Wallet Keys"
+  echo "# - renew the connections of apps and extensions"
+  echo "#   (NWC, LNDHub, Bolt Cards, TPoS, ...) with the new keys"
+  echo "# - replace the credentials of the funding source,"
+  echo "#   with LND these are the macaroons stored in the LNbits config"
+  echo "# - replace all other secrets stored in the LNbits settings"
+  echo "# - if you suspect a compromise: keep the logs and set up LNbits on a"
+  echo "#   fresh system, an update cannot remove access an attacker already has"
+  echo "# https://news.lnbits.com/news/lnbits-1-7-0-security-update"
+  echo "#"
+  echo "# The login in the browser now needs HTTPS (port 5001),"
+  echo "# plain HTTP on port 5000 does not keep the session anymore."
+  echo "#######################################################################"
 }
 
 # command info
@@ -121,6 +161,8 @@ function postgresConfig() {
   sudo -u postgres psql -c "create database lnbits_db;" 2>/dev/null
   sudo -u postgres psql -c "create user lnbits_user with encrypted password 'raspiblitz';" 2>/dev/null
   sudo -u postgres psql -c "grant all privileges on database lnbits_db to lnbits_user;" 2>/dev/null
+  # since PostgreSQL 15 only the owner can create tables in the public schema
+  sudo -u postgres psql -d lnbits_db -c "grant all on schema public to lnbits_user;" 2>/dev/null
 
   # check
   check=$(sudo -u postgres psql -c "SELECT datname FROM pg_database;" | grep lnbits_db)
@@ -216,6 +258,9 @@ function backupDatabase() {
     ls -tp $backup_target/*.tar | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm -- 2>/dev/null
 
     cd $backup_target || return 1
+    # the backup contains the LNbits config with the credentials of the funding source
+    sudo touch $backup_file || return 1
+    sudo chmod 600 $backup_file || return 1
     sudo tar -cf $backup_file -C "/mnt/hdd/app-data" LNBits/ || return 1
     echo "OK - Backup finished, file saved as ${backup_target}/${backup_file}"
   fi
@@ -316,12 +361,13 @@ ${toraddress}"
   fi
 
   # Allow New Accounts (only if AdminUI is OFF)
-  allowNewAccountsFalse=$(sudo grep -c "LNBITS_ALLOW_NEW_ACCOUNTS=false" $lnbitsConfig)
+  # new accounts are off by default since LNbits v1.7.0
+  allowNewAccounts=$(sudo grep -c "^LNBITS_ALLOW_NEW_ACCOUNTS=true" $lnbitsConfig)
   if [ ${activatedAdminUI} -eq 0 ]; then
-    if [ ${allowNewAccountsFalse} -eq 0 ]; then
-      OPTIONS+=(NEWACCOUNTS "Disable New Accounts")
-    else
+    if [ ${allowNewAccounts} -eq 0 ]; then
       OPTIONS+=(NEWACCOUNTS "Enable New Accounts")
+    else
+      OPTIONS+=(NEWACCOUNTS "Disable New Accounts")
     fi
   fi
 
@@ -394,16 +440,16 @@ ${toraddress}"
   NEWACCOUNTS)
     clear
     echo
-    if [ ${allowNewAccountsFalse} -eq 0 ]; then
-      echo "Disable New Accounts"
-      sudo sed -i "/^LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
-      sudo sed -i "/^# LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
-      sudo bash -c "echo 'LNBITS_ALLOW_NEW_ACCOUNTS=false' >> ${lnbitsConfig}"
-    else
+    if [ ${allowNewAccounts} -eq 0 ]; then
       echo "Enable New Accounts"
       sudo sed -i "/^LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
       sudo sed -i "/^# LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
       sudo bash -c "echo 'LNBITS_ALLOW_NEW_ACCOUNTS=true' >> ${lnbitsConfig}"
+    else
+      echo "Disable New Accounts"
+      sudo sed -i "/^LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
+      sudo sed -i "/^# LNBITS_ALLOW_NEW_ACCOUNTS=/d" $lnbitsConfig
+      sudo bash -c "echo 'LNBITS_ALLOW_NEW_ACCOUNTS=false' >> ${lnbitsConfig}"
     fi
     echo "Restarting LNbits to activate new setting ..."
     sudo systemctl restart lnbits
@@ -758,6 +804,10 @@ if [ "$1" = "install" ]; then
   sudo -u lnbits git clone https://github.com/${githubUser}/lnbits lnbits
   cd /home/lnbits/lnbits || exit 1
   sudo -u lnbits git checkout ${tag} || exit 1
+  # the default version has to be the pinned commit (not checked for an own repo, branch or tag)
+  if [ "${githubUser}" = "lnbits" ] && [ "${tag}" = "${VERSION}" ]; then
+    verifyCommit HEAD || exit 1
+  fi
 
   # do the install
   exitCode=0
@@ -807,13 +857,18 @@ if [ "$1" = "update" ]; then
   cd ${lnbitsCodeDir} || exit 1
   installedVersion=$(sudo -u lnbits git describe --tags 2>/dev/null)
   echo "# installed version: ${installedVersion}"
+  # only compare versions like v1.2.1 or v1.2.1-5-g1234567 (not an own tag)
+  installedNumber=""
+  if [[ "${installedVersion}" =~ ^v?[0-9]+\.[0-9] ]]; then
+    installedNumber="${installedVersion#v}"
+  fi
 
   # LNbits before v1.7.0 is affected by the security incident of November 2026
   # (the poetry venv is still there if an earlier update stopped after the checkout)
-  securityNotice=0
-  if [ "${installedVersion}" = "" ] || dpkg --compare-versions "${installedVersion#v}" lt "1.7.0" ||
+  showSecurityNotice=0
+  if [ "${installedNumber}" = "" ] || dpkg --compare-versions "${installedNumber}" lt "1.7.0" ||
     sudo -u lnbits test -d /home/lnbits/.cache/pypoetry; then
-    securityNotice=1
+    showSecurityNotice=1
   fi
 
   # as long as the code is unchanged the installed version gets started again
@@ -821,10 +876,20 @@ if [ "$1" = "update" ]; then
     echo "# FAIL: $1 - LNbits is not updated"
     if [ "${serviceInstalled}" = "1" ]; then
       sudo systemctl start lnbits
+      echo "# the installed version ${installedVersion} is started again"
+      if [ "${showSecurityNotice}" = "1" ]; then
+        echo "# WARNING: this version is affected by the vulnerability of LNbits before v1.7.0"
+        echo "# to stop it until the update works: sudo systemctl stop lnbits"
+      fi
     fi
     echo "error='$1'"
     exit 1
   }
+
+  # never go back to an older version: the database is already migrated
+  if [ "${installedNumber}" != "" ] && dpkg --compare-versions "${installedNumber}" gt "${tag#v}"; then
+    abortUpdate "installed version ${installedVersion} is newer than ${tag}"
+  fi
 
   # backup first: the database migrations of a new version cannot be reverted
   if [ "${LNBits}" = "on" ]; then
@@ -834,36 +899,36 @@ if [ "$1" = "update" ]; then
   echo "# get the code of ${tag}"
   cd ${lnbitsCodeDir} || abortUpdate "missing ${lnbitsCodeDir}"
   sudo -u lnbits git fetch origin "refs/tags/${tag}:refs/tags/${tag}" || abortUpdate "git fetch of ${tag} failed"
-  sudo -u lnbits git checkout ${tag} || abortUpdate "git checkout of ${tag} failed"
+  verifyCommit "refs/tags/${tag}" || abortUpdate "${tag} is not the pinned commit"
+  sudo -u lnbits git checkout ${tagCommit} || abortUpdate "git checkout of ${tag} failed"
 
-  # from here on the code is updated: LNbits stays stopped if the dependencies fail
+  # from here on the code is updated: the service must not start it with the old
+  # poetry environment, and LNbits stays stopped if the dependencies fail
+  setServiceExecStart
   if ! installDependencies; then
     echo "# FAIL: LNbits stays stopped because the dependencies of ${tag} are not installed"
     echo "# check the internet connection and run again: /home/admin/config.scripts/bonus.lnbits.sh update"
     echo "error='install of dependencies failed'"
     exit 1
   fi
-  setServiceExecStart
 
+  startFailed=0
   if [ "${serviceInstalled}" = "1" ]; then
     echo "# starting LNbits ${tag} (the first start migrates the database)"
-    sudo systemctl start lnbits
+    if ! sudo systemctl start lnbits; then
+      startFailed=1
+    fi
   fi
   echo "# OK - LNbits is updated to ${tag}"
 
-  if [ "${securityNotice}" = "1" ]; then
-    echo
-    echo "#######################################################################"
-    echo "# IMPORTANT: LNbits before v1.7.0 has a critical vulnerability."
-    echo "# The update does not lock out an attacker who already copied credentials:"
-    echo "# - reset all wallet keys in LNbits as Super User:"
-    echo "#   Settings -> Users -> Reset Wallet Keys"
-    echo "# - renew the connections of apps and extensions"
-    echo "#   (NWC, LNDHub, Bolt Cards, TPoS, ...) with the new keys"
-    echo "# - replace the credentials of the funding source,"
-    echo "#   with LND these are the macaroons stored in the LNbits config"
-    echo "# https://news.lnbits.com/news/lnbits-1-7-0-security-update"
-    echo "#######################################################################"
+  if [ "${showSecurityNotice}" = "1" ]; then
+    securityNotice
+  fi
+
+  if [ "${startFailed}" = "1" ]; then
+    echo "# FAIL: the lnbits service did not start - check: sudo journalctl -u lnbits"
+    echo "error='update done but service start failed'"
+    exit 1
   fi
 
   # needed for API/WebUI as signal that the update ran thru
@@ -879,6 +944,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # check the dependencies if the user exists (also replaces an old poetry based install)
     if ! sudo -u lnbits test -x ${lnbitsBin}; then
       echo "# Fix faulty installation"
+      # replacing an old poetry based install (LNbits up to v1.2.1) is an update
+      if sudo -u lnbits test -d /home/lnbits/.cache/pypoetry; then
+        showSecurityNotice=1
+        if sudo test -f ${lnbitsConfig}; then
+          # the database migrations of the new version cannot be reverted
+          backupDatabase || echo "# WARN: database backup failed - continuing without a backup"
+        fi
+      fi
       /home/admin/config.scripts/bonus.lnbits.sh off --keep-data
       /home/admin/config.scripts/bonus.lnbits.sh install || exit 1
     fi
@@ -1077,6 +1150,10 @@ EOF
   fi
 
   echo "# OK install done ... might need to restart or call: sudo systemctl start lnbits"
+
+  if [ "${showSecurityNotice}" = "1" ]; then
+    securityNotice
+  fi
 
   # needed for API/WebUI as signal that install ran thru
   echo "result='OK'"
@@ -1384,8 +1461,9 @@ if [ "$1" = "migrate" ]; then
     sudo systemctl start lnbits
 
     # execStartPre is not enough, wait for lnbits is finally running
+    # the first start creates the tables: takes longer since LNbits v1.7
     count=0
-    count_max=30
+    count_max=120
     while ! nc -zv 127.0.0.1 5000 2>/dev/null; do
       count=$(expr $count + 1)
       echo "wait for LNBIts to start (${count}s/${count_max}s)"
