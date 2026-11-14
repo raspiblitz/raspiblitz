@@ -1,0 +1,38 @@
+name: LNbits Script Tests
+
+concurrency:
+  group: lnbits-script-tests-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['dev', 'v1.10', 'v1.11', 'v1.12']
+    paths:
+      - '.github/workflows/lnbits-script-tests.yml'
+      - 'home.admin/config.scripts/bonus.lnbits.sh'
+      - 'test/bonus.lnbits.bats'
+  pull_request:
+    branches: ['dev', 'v1.10', 'v1.11', 'v1.12']
+    paths:
+      - '.github/workflows/lnbits-script-tests.yml'
+      - 'home.admin/config.scripts/bonus.lnbits.sh'
+      - 'test/bonus.lnbits.bats'
+
+jobs:
+  bats:
+    name: bonus.lnbits.sh unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install bats
+        run: sudo apt-get update && sudo apt-get install -y bats
+
+      - name: Syntax check
+        run: bash -n home.admin/config.scripts/bonus.lnbits.sh
+
+      - name: Run tests
+        run: bats --print-output-on-failure test/bonus.lnbits.bats

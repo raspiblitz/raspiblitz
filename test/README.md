@@ -10,10 +10,11 @@ sudo apt install bats
 bats --verbose-run ./bonus.postgresql-13.bats
 bats --verbose-run ./bonus.postgresql-15.bats
 bats --verbose-run ./bonus.btcpayserver.bats
+bats --verbose-run ./bonus.lnbits.bats
 ```
 
-`bonus.btcpayserver.bats` stubs `sudo` and needs no RaspiBlitz, it also runs in CI
-(`.github/workflows/btcpayserver-script-tests.yml`).
+`bonus.btcpayserver.bats` and `bonus.lnbits.bats` stub `sudo` and need no RaspiBlitz, they also run in CI
+(`.github/workflows/btcpayserver-script-tests.yml`, `.github/workflows/lnbits-script-tests.yml`).
 
 ## Python unit tests
 ```

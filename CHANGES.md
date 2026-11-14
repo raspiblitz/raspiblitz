@@ -4,6 +4,7 @@
 - Update: Bitcoin Core v29.5 (security fixes) [details](https://bitcoincore.org/en/releases/29.5/)
 - Update: Bitcoin Core v32.1 (optional tested update) [details](https://bitcoincore.org/en/releases/32.1/)
 - Update: LND v0.21.8-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.21.8-beta)
+- Update: LNbits v1.7.1 (critical security fixes, update with MENU > UPDATE > LNBITS) [details](https://news.lnbits.com/news/lnbits-1-7-0-security-update)
 
 ## What's new in Version 1.12.1 of RaspiBlitz?
 
