@@ -26,7 +26,7 @@ fi
 if [ "${BTCPayServer}" == "on" ] && [ "${cl}" = "on" ]; then
   OPTIONS+=(BTCPAY-CLN "Show CLN connection string")
 fi
-OPTIONS+=(${network}RPC "Connect Specter Desktop or JoinMarket")
+OPTIONS+=(${network}RPC "Connect Specter Desktop, JoinMarket or JM-NG")
 OPTIONS+=(BISQ "Connect Bisq to this node")
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(ALBY "Connect Alby to this node")

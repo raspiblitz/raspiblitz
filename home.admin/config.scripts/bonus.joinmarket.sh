@@ -41,6 +41,16 @@ PGPpubkeyFingerprint="13C688DB5B9C745DE4D2E4545BFB77609B081B65"
 
 source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
+# determine the correct bitcoind service name based on chain
+# chain from raspiblitz.conf: main|test|sig
+if [ "${chain}" = "test" ]; then
+  bitcoind_service="tbitcoind"
+elif [ "${chain}" = "sig" ]; then
+  bitcoind_service="sbitcoind"
+else
+  bitcoind_service="bitcoind"
+fi
+
 # switch on
 if [ "$1" = "install" ]; then
   echo "# INSTALL JOINMARKET"
@@ -200,8 +210,8 @@ fi
     echo "deprecatedrpc=create_bdb" | sudo tee -a "/mnt/hdd/app-data/bitcoin/bitcoin.conf"
     source <(/home/admin/_cache.sh get state)
     if [ ${state} != "recovering" ]; then
-      echo "# Restarting bitcoind"
-      sudo systemctl restart bitcoind
+      echo "# Restarting ${bitcoind_service}"
+      sudo systemctl restart ${bitcoind_service}
     fi
   fi
 

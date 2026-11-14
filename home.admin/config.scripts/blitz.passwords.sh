@@ -343,8 +343,16 @@ elif [ "${abcd}" = "b" ]; then
   # systemd dependencies like on bitcoind (Partof=...) after all configs changed
   reboot=0;
 
-  echo "# restart bitcoind"
-  sudo systemctl restart ${network}d
+  # restart the chain-specific bitcoin daemon (bitcoind/tbitcoind/sbitcoind)
+  if [ "${chain}" = "test" ]; then
+    bitcoindService="tbitcoind"
+  elif [ "${chain}" = "sig" ]; then
+    bitcoindService="sbitcoind"
+  else
+    bitcoindService="bitcoind"
+  fi
+  echo "# restart ${bitcoindService}"
+  sudo systemctl restart ${bitcoindService}
 
   # NOTE: now other bonus apps configs that need passwordB need to be adapted manually
   # bonus apps that use a "prestart" will adapt themselves on service
@@ -374,6 +382,57 @@ elif [ "${abcd}" = "b" ]; then
     echo "joinmarket:${newPassword}" | sudo chpasswd
     echo "# restarting jopinmarket API"
     sudo systemctl restart joinmarket-api.service
+  fi
+
+  # JoinMarket-NG
+  if [ "${joinmarketNG}" == "on" ]; then
+    # The joinmarketng account stays locked (access is 'sudo -u joinmarketng'),
+    # so no login password is set here.
+    # The root-owned credential files are regenerated from bitcoin.conf by the
+    # service helper: now for interactive commands, and again when the maker
+    # starts. Staged wallet credentials live only in .maker.env, which
+    # ExecStopPost deletes on stop, so they are restored between stop and
+    # start. That file is app-owned: it is only read and written as the app
+    # user, never as root.
+    JM_MAKER_SERVICE="joinmarket-ng-maker.service"
+    JM_MAKER_ENV="/home/joinmarketng/.joinmarket-ng/.maker.env"
+    JM_SERVICE_HELPER="/usr/local/sbin/raspiblitz-joinmarket-ng-service"
+    JM_ENV_BACKUP=""
+    jmRestartOK=1
+    if ! sudo "${JM_SERVICE_HELPER}" prepare; then
+      echo "# FAIL - could not refresh the joinmarket-ng RPC credentials"
+      jmRestartOK=0
+    fi
+    if sudo systemctl is-active --quiet ${JM_MAKER_SERVICE}; then
+      echo "# restarting joinmarket-ng maker with the new RPC password"
+      if sudo -u joinmarketng test -f "${JM_MAKER_ENV}"; then
+        if ! JM_ENV_BACKUP=$(sudo -u joinmarketng mktemp /tmp/joinmarket-ng-maker-env.XXXXXX) \
+          || ! sudo -u joinmarketng cp "${JM_MAKER_ENV}" "${JM_ENV_BACKUP}" \
+          || ! sudo -u joinmarketng chmod 600 "${JM_ENV_BACKUP}"; then
+          echo "# FAIL - could not back up the staged maker wallet credentials"
+          jmRestartOK=0
+        fi
+        if [ ${jmRestartOK} -eq 1 ]; then
+          if sudo systemctl stop ${JM_MAKER_SERVICE} \
+            && sudo -u joinmarketng cp "${JM_ENV_BACKUP}" "${JM_MAKER_ENV}" \
+            && sudo -u joinmarketng chmod 600 "${JM_MAKER_ENV}"; then
+            sudo systemctl start ${JM_MAKER_SERVICE} || jmRestartOK=0
+          else
+            jmRestartOK=0
+          fi
+        fi
+      else
+        sudo systemctl restart ${JM_MAKER_SERVICE} || jmRestartOK=0
+      fi
+    fi
+    if [ -n "${JM_ENV_BACKUP}" ]; then
+      sudo -u joinmarketng rm -f "${JM_ENV_BACKUP}"
+    fi
+    if [ ${jmRestartOK} -eq 0 ]; then
+      echo "# FAIL - joinmarket-ng-maker could not be reloaded with the new RPC password"
+      echo "# recover with: sudo systemctl restart ${JM_MAKER_SERVICE}"
+      passwordBReloadFailed=1
+    fi
   fi
 
   # ThunderHub
@@ -436,6 +495,10 @@ elif [ "${abcd}" = "b" ]; then
     sudo /home/admin/config.scripts/bonus.specter.sh config
   fi
 
+  if [ "${passwordBReloadFailed}" == "1" ]; then
+    echo "# FAIL -> RPC Password B was changed, but at least one service failed to reload (see messages above)"
+    exit 1
+  fi
   echo "# OK -> RPC Password B changed"
   sleep 3
 
