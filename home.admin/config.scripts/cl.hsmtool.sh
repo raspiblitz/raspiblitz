@@ -317,7 +317,13 @@ seedwords6x4='${seedwords6x4}'
 " | sudo -u bitcoin tee /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
 
   # create the hsm_secret (legacy format, see createHsmSecret)
-  createHsmSecret "${seedwords}" "${seedpassword}" 1>&2 || exit 1
+  if ! createHsmSecret "${seedwords}" "${seedpassword}" 1>&2; then
+    # keep no seedwords.info that matches no hsm_secret
+    seedwordsUnused="/home/bitcoin/.lightning/${CLNETWORK}/seedwords.info.unused.$(date +"%Y_%m_%d_%H%M%S")"
+    echo "# Moving the seedwords.info of the failed wallet to ${seedwordsUnused}" >&2
+    sudo -u bitcoin mv /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info "${seedwordsUnused}"
+    exit 1
+  fi
 
   echo "# Re-init the backup plugin with the new wallet"
   /home/admin/config.scripts/cl-plugin.backup.sh on $CHAIN

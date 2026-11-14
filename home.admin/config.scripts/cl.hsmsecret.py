@@ -14,7 +14,8 @@ CLN >= v25.12 still loads the legacy plain format.
 
 Usage:
   cl.hsmsecret.py derive
-      stdin: line 1 = mnemonic (space separated), line 2 = passphrase (may be empty)
+      stdin: line 1 = mnemonic (space separated), line 2 = passphrase (may be
+      empty, hashed as raw bytes like libwally)
       stdout: the 32-byte hsm_secret as 64 hex characters
   cl.hsmsecret.py write <path/to/hsm_secret>
       stdin: the 64 hex characters from 'derive'
@@ -64,19 +65,22 @@ def check_mnemonic(mnemonic):
 
 
 def derive_hsm_secret(mnemonic, passphrase):
-    """Return the legacy 32-byte hsm_secret for a checked mnemonic.
+    """Return the legacy 32-byte hsm_secret for a checked mnemonic (str) and
+    passphrase (raw bytes).
 
-    Same as libwally bip39_mnemonic_to_seed() as used by CLN < v25.12, which
-    does not apply unicode normalization.
+    Same as libwally bip39_mnemonic_to_seed() as used by CLN < v25.12: the
+    passphrase bytes are hashed as given, without unicode normalization and
+    independent of the locale.
     """
-    seed = hashlib.pbkdf2_hmac("sha512", mnemonic.encode("utf-8"),
-                               b"mnemonic" + passphrase.encode("utf-8"), 2048)
+    seed = hashlib.pbkdf2_hmac("sha512", mnemonic.encode("ascii"),
+                               b"mnemonic" + passphrase, 2048)
     return seed[:SECRET_LEN]
 
 
 def read_line(stream):
+    """Read one line of raw bytes from a binary stream, without the newline."""
     line = stream.readline()
-    if not line.endswith("\n"):
+    if not line.endswith(b"\n"):
         # EOF before the end of the line: the input was cut off
         raise HsmSecretError("incomplete input on stdin")
     return line[:-1]
@@ -85,6 +89,11 @@ def read_line(stream):
 def derive(stdin, stdout):
     mnemonic = read_line(stdin)
     passphrase = read_line(stdin)
+    try:
+        mnemonic = mnemonic.decode("ascii")
+    except UnicodeDecodeError:
+        raise HsmSecretError("invalid mnemonic: not in the BIP39 english "
+                             "wordlist (non-ASCII characters)")
     check_mnemonic(mnemonic)
     stdout.write(derive_hsm_secret(mnemonic, passphrase).hex() + "\n")
 
@@ -144,12 +153,16 @@ def write_hsm_secret(path, secret):
         raise HsmSecretError("could not sync %s: %s" % (directory, e.strerror))
 
 
-def main(argv, stdin=sys.stdin, stdout=sys.stdout):
+def main(argv, stdin=None, stdout=sys.stdout):
+    """stdin is a binary stream (default: sys.stdin.buffer)."""
+    if stdin is None:
+        stdin = sys.stdin.buffer
     try:
         if len(argv) == 2 and argv[1] == "derive":
             derive(stdin, stdout)
         elif len(argv) == 3 and argv[1] == "write":
-            write_hsm_secret(argv[2], parse_secret_hex(stdin.read()))
+            write_hsm_secret(
+                argv[2], parse_secret_hex(stdin.read().decode("ascii", "replace")))
         else:
             sys.stderr.write(__doc__ or "")
             return 2

@@ -229,7 +229,11 @@ no_wallet() {
 }
 
 @test "script: wallet creation uses createHsmSecret and exits on failure" {
-  grep -qxF '  createHsmSecret "${seedwords}" "${seedpassword}" 1>&2 || exit 1' "${SCRIPT}"
+  # the failure path itself is run in cl.hsmtool.real-cln.bats (end-to-end)
+  run awk '/^  if ! createHsmSecret "\$\{seedwords\}" "\$\{seedpassword\}" 1>&2; then$/ {f=1}
+    f && /^    exit 1$/ {print "exit"; exit}
+    f && /^  fi$/ {exit}' "${SCRIPT}"
+  [ "$output" = "exit" ]
   grep -qxF 'hsmSecretHelper="/home/admin/config.scripts/cl.hsmsecret.py"' "${SCRIPT}"
 }
 

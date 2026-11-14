@@ -133,6 +133,24 @@ ${ZOO_24// /_} TREZOR ${ZOO_24_TREZOR}
 EOF
 }
 
+@test "both interfaces: a non-ASCII / non-UTF-8 passphrase with spaces is hashed as raw bytes" {
+  local pass=$'p\xc3\xa9ss e\xcc\x81 \xff'
+  mkdir "${WORK}/old" "${WORK}/new"
+  hsmSecretPath="${WORK}/old/hsm_secret"
+  export HSMTOOL_IMAGE="${OLD_IMAGE}"
+  run createHsmSecret "${ZOO_24}" "${pass}"
+  echo "$output"
+  [ "$status" -eq 0 ]
+  old_generatehsm "${ZOO_24}" "${pass}" "${WORK}/old/reference"
+  cmp "${hsmSecretPath}" "${WORK}/old/reference"
+  hsmSecretPath="${WORK}/new/hsm_secret"
+  export HSMTOOL_IMAGE="${NEW_IMAGE}"
+  run createHsmSecret "${ZOO_24}" "${pass}"
+  echo "$output"
+  [ "$status" -eq 0 ]
+  cmp "${hsmSecretPath}" "${WORK}/old/reference"
+}
+
 @test "CLN pinned: createHsmSecret is confirmed by checkhsm and restores the same node and on-chain wallet as CLN v25.09.3" {
   export HSMTOOL_IMAGE="${NEW_IMAGE}"
   run createHsmSecret "${ABANDON_12}" "TREZOR"
@@ -234,6 +252,9 @@ if bash config.scripts/cl.hsmtool.sh seed mainnet "${ABANDON_12% about} abandon"
 fi
 [ ! -e "${hsm}" ] || fail "wallet created from invalid seed words"
 [ ! -e /tmp/calls ] || fail "continued after the failure: $(cat /tmp/calls)"
+# no seedwords.info without a matching hsm_secret
+[ ! -e /home/bitcoin/.lightning/bitcoin/seedwords.info ] || fail "seedwords.info left for no wallet"
+ls /home/bitcoin/.lightning/bitcoin/seedwords.info.unused.* >/dev/null || fail "seedwords.info not kept aside"
 
 echo "## new-force (new wallet from generated seed words)"
 out="$(bash config.scripts/cl.hsmtool.sh new-force mainnet 2>/dev/null)" || fail "new-force"

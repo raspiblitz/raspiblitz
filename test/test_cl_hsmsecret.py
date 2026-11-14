@@ -8,6 +8,7 @@ With branch coverage (as in CI):
 """
 
 import errno
+import hashlib
 import importlib.util
 import io
 import os
@@ -49,10 +50,12 @@ VECTORS = [
 SECRET = bytes.fromhex(VECTORS[0][2])
 
 
-def run_main(argv, stdin_text):
+def run_main(argv, stdin_data):
+    if isinstance(stdin_data, str):
+        stdin_data = stdin_data.encode("utf-8")
     stdout, stderr = io.StringIO(), io.StringIO()
     with mock.patch.object(sys, "stderr", stderr):
-        code = hs.main(argv, stdin=io.StringIO(stdin_text), stdout=stdout)
+        code = hs.main(argv, stdin=io.BytesIO(stdin_data), stdout=stdout)
     return code, stdout.getvalue(), stderr.getvalue()
 
 
@@ -65,18 +68,32 @@ class TestDerive(unittest.TestCase):
                     ["x", "derive"], "%s\n%s\n" % (mnemonic, passphrase))
                 self.assertEqual((code, err), (0, ""))
                 self.assertEqual(out, expected + "\n")
-                self.assertEqual(
-                    hs.derive_hsm_secret(mnemonic, passphrase).hex(), expected)
+                self.assertEqual(hs.derive_hsm_secret(
+                    mnemonic, passphrase.encode()).hex(), expected)
 
     def test_passphrase_changes_the_secret(self):
-        self.assertNotEqual(hs.derive_hsm_secret(ABANDON_12, "TREZOR"),
-                            hs.derive_hsm_secret(ABANDON_12, "TREZOR "))
+        self.assertNotEqual(hs.derive_hsm_secret(ABANDON_12, b"TREZOR"),
+                            hs.derive_hsm_secret(ABANDON_12, b"TREZOR "))
 
-    def test_non_ascii_passphrase_is_not_normalized(self):
-        # libwally (CLN < v25.12) hashes the raw UTF-8 bytes, no NFKD
-        composed, decomposed = "\u00e9", "e\u0301"
+    def test_non_ascii_passphrase_is_hashed_as_raw_bytes(self):
+        # libwally (CLN < v25.12) hashes the raw bytes: no NFKD, no locale
+        composed, decomposed = "\u00e9".encode(), "e\u0301".encode()
         self.assertNotEqual(hs.derive_hsm_secret(ABANDON_12, composed),
                             hs.derive_hsm_secret(ABANDON_12, decomposed))
+        for passphrase in (b"p\xc3\xa4ss word", b"se\xffcret\x80"):
+            with self.subTest(passphrase=passphrase):
+                code, out, err = run_main(
+                    ["x", "derive"], ABANDON_12.encode() + b"\n" + passphrase + b"\n")
+                self.assertEqual((code, err), (0, ""))
+                expected = hashlib.pbkdf2_hmac(
+                    "sha512", ABANDON_12.encode(), b"mnemonic" + passphrase,
+                    2048)[:32].hex()
+                self.assertEqual(out, expected + "\n")
+
+    def test_non_ascii_mnemonic(self):
+        err = self.assert_rejected(
+            ABANDON_12.replace("about", "ab\u00f6ut") + "\n\n", "non-ASCII")
+        self.assertNotIn("abandon", err)
 
     def assert_rejected(self, stdin_text, message):
         code, out, err = run_main(["x", "derive"], stdin_text)
@@ -312,6 +329,7 @@ class TestCommandLine(unittest.TestCase):
 
     def test_script_entry_point(self):
         with mock.patch.object(sys, "argv", [HELPER]), \
+                mock.patch.object(sys, "stdin", io.TextIOWrapper(io.BytesIO())), \
                 mock.patch.object(sys, "stderr", io.StringIO()):
             with self.assertRaises(SystemExit) as cm:
                 runpy.run_path(HELPER, run_name="__main__")

@@ -12,6 +12,7 @@ on:
       - '.github/workflows/cl-hsmtool-tests.yml'
       - 'home.admin/config.scripts/cl.hsmtool.sh'
       - 'home.admin/config.scripts/cl.hsmsecret.py'
+      - 'home.admin/config.scripts/blitz.mnemonic.py'
       - 'home.admin/config.scripts/cl.install.sh'
       - 'test/test_cl_hsmsecret.py'
       - 'test/cl.hsmtool.hsmsecret.bats'
@@ -22,10 +23,14 @@ on:
       - '.github/workflows/cl-hsmtool-tests.yml'
       - 'home.admin/config.scripts/cl.hsmtool.sh'
       - 'home.admin/config.scripts/cl.hsmsecret.py'
+      - 'home.admin/config.scripts/blitz.mnemonic.py'
       - 'home.admin/config.scripts/cl.install.sh'
       - 'test/test_cl_hsmsecret.py'
       - 'test/cl.hsmtool.hsmsecret.bats'
       - 'test/cl.hsmtool.real-cln.bats'
+
+permissions:
+  contents: read
 
 jobs:
   tests:
@@ -35,6 +40,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # the tests mount the checkout into third-party CLN images
+          persist-credentials: false
 
       - name: Set up Python (Debian bookworm version)
         uses: actions/setup-python@v5
