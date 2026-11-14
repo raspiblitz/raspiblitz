@@ -144,13 +144,27 @@ def write_hsm_secret(path, secret):
             pass
     # persist the new directory entry
     try:
-        dirfd = os.open(directory, os.O_RDONLY)
-        try:
-            os.fsync(dirfd)
-        finally:
-            os.close(dirfd)
+        sync_directory(directory)
     except OSError as e:
+        # all or nothing: remove the not persisted hsm_secret again, the
+        # caller treats the wallet as not created (and shreds its seed words)
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
+        try:
+            sync_directory(directory)
+        except OSError:
+            pass
         raise HsmSecretError("could not sync %s: %s" % (directory, e.strerror))
+
+
+def sync_directory(directory):
+    dirfd = os.open(directory, os.O_RDONLY)
+    try:
+        os.fsync(dirfd)
+    finally:
+        os.close(dirfd)
 
 
 def main(argv, stdin=None, stdout=sys.stdout):
