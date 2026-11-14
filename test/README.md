@@ -22,6 +22,8 @@ Run in CI by `.github/workflows/cl-hsmtool-tests.yml`.
 python3 -m coverage run --branch --include='*/cl.hsmsecret.py' -m unittest -v test_cl_hsmsecret.py
 python3 -m coverage report -m --fail-under=100
 bats ./cl.hsmtool.hsmsecret.bats
+bats ./cl.hsmtool.formats.bats
+bats ./cl.install.pgp.bats
 CL_HSMTOOL_REQUIRE_DOCKER=1 bats ./cl.hsmtool.real-cln.bats
 ```
 

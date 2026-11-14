@@ -142,13 +142,23 @@ function importPGPKey() {
   sudo -u bitcoin gpg --import "${keyPath}" || return 1
 }
 
+# Succeeds if SHA256SUMS-${CLVERSION} has a valid signature by the pinned key
+# $1 (fingerprint of the primary key or of the signing subkey).
+# Parses the machine readable gpg status: a "Good signature" line would also
+# be printed for any other key in the bitcoin user's keyring (other apps
+# import their signers there) and for expired or revoked keys.
+# Only a GOODSIG followed by a VALIDSIG with the pinned fingerprint counts.
 function verifySHA256SUMSSignature() {
-  local verifyOutput="/tmp/cl_gpg_verify.txt"
-  local goodSignature
-
-  sudo -u bitcoin gpg --verify "SHA256SUMS-${CLVERSION}.asc" "SHA256SUMS-${CLVERSION}" 2>&1 | tee "${verifyOutput}"
-  goodSignature=$(grep -c "Good signature" "${verifyOutput}")
-  [ "${goodSignature}" -ge 1 ]
+  local keyFingerprint="$1"
+  local verifyStatus
+  verifyStatus=$(sudo -u bitcoin gpg --status-fd 1 --verify \
+    "SHA256SUMS-${CLVERSION}.asc" "SHA256SUMS-${CLVERSION}" 2>/dev/null)
+  echo "${verifyStatus}" | grep -E "^\[GNUPG:\] (GOODSIG|EXPKEYSIG|REVKEYSIG|BADSIG|ERRSIG)"
+  echo "${verifyStatus}" | awk -v fpr="${keyFingerprint}" '
+    $1 == "[GNUPG:]" && $2 ~ /^(NEWSIG|EXPSIG|EXPKEYSIG|REVKEYSIG|BADSIG|ERRSIG)$/ { good = 0 }
+    $1 == "[GNUPG:]" && $2 == "GOODSIG" { good = 1 }
+    $1 == "[GNUPG:]" && $2 == "VALIDSIG" && good && ($3 == fpr || $NF == fpr) { found = 1 }
+    END { exit !found }'
 }
 
 function downloadAndVerifySourceZip() {
@@ -180,14 +190,14 @@ function downloadAndVerifySourceZip() {
   echo
 
   # Verify the signature on SHA256SUMS
-  if [ "${primaryKeyImported}" -ne 1 ] || ! verifySHA256SUMSSignature; then
+  if [ "${primaryKeyImported}" -ne 1 ] || ! verifySHA256SUMSSignature "${PGPpubkeyFingerprint}"; then
     echo "# SHA256SUMS signature was not verified with ${PGPsigner}"
     echo "# Trying fallback PGP key ${PGPfallbackSigner}"
     importPGPKey "${PGPfallbackSigner}" "${PGPfallbackPubkeyLink}" "${PGPfallbackPubkeyFingerprint}" || exit 1
     echo
     echo "- Verifying SHA256SUMS signature with fallback key"
     echo
-    if ! verifySHA256SUMSSignature; then
+    if ! verifySHA256SUMSSignature "${PGPfallbackPubkeyFingerprint}"; then
       echo "# ERROR --> SHA256SUMS signature verification failed"
       exit 1
     fi
@@ -456,7 +466,14 @@ always-use-proxy=true
       echo "# $hsmSecretPath is already present"
     else
       echo "Create a wallet from seedwords for mainnet"
-      /home/admin/config.scripts/cl.hsmtool.sh new-force mainnet 1>/dev/null 2>/dev/null
+      # do not start lightningd without the wallet: it would create its own
+      # wallet without seedwords.info
+      # (stdout has the seed words, keep only the errors for the log)
+      if ! /home/admin/config.scripts/cl.hsmtool.sh new-force mainnet 2>&1 1>/dev/null ||
+       ! sudo ls $hsmSecretPath 1>/dev/null 2>&1; then
+        echo "# ERROR: could not create the wallet from seedwords - not starting lightningd"
+        exit 1
+      fi
     fi
   fi
 

@@ -317,11 +317,50 @@ class TestWrite(unittest.TestCase):
                     os.unlink(os.path.join(self.dir, name))
 
 
+class TestType(unittest.TestCase):
+    # the format detection follows CLN detect_hsm_secret_type(); the real
+    # files of CLN v25.09.3 and the pinned CLN are checked in
+    # cl.hsmtool.real-cln.bats
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.path = os.path.join(self.tmp.name, "hsm_secret")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def put(self, data):
+        with open(self.path, "wb") as f:
+            f.write(data)
+
+    def run_cmd(self, command):
+        return run_main(["x", command, self.path], b"")
+
+    def test_types(self):
+        mnemonic = ABANDON_12.encode()
+        for data, expected in (
+                (b"", "invalid"),
+                (b"\x01" * 31, "invalid"),
+                (SECRET, "plain"),
+                (b"\x01" * 73, "encrypted"),
+                (bytes(32) + mnemonic, "mnemonic"),
+                (b"\x01" + bytes(31) + mnemonic, "mnemonic-passphrase"),
+                (b"\x01" * 33, "mnemonic-passphrase")):
+            with self.subTest(expected=expected, length=len(data)):
+                self.put(data)
+                self.assertEqual(self.run_cmd("type"), (0, expected + "\n", ""))
+
+    def test_type_of_a_missing_file(self):
+        code, out, err = self.run_cmd("type")
+        self.assertEqual((code, out), (1, ""))
+        self.assertIn("could not read", err)
+
+
 class TestCommandLine(unittest.TestCase):
 
     def test_usage(self):
         for argv in (["x"], ["x", "derive", "extra"], ["x", "write"],
-                     ["x", "unknown"]):
+                     ["x", "type"], ["x", "type", "a", "b"], ["x", "mnemonic", "a"], ["x", "unknown"]):
             with self.subTest(argv=argv):
                 code, out, err = run_main(argv, "")
                 self.assertEqual((code, out), (2, ""))

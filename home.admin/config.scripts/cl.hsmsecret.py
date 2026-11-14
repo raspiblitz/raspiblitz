@@ -21,9 +21,18 @@ Usage:
       stdin: the 64 hex characters from 'derive'
       Creates the file with mode 0400. Never overwrites an existing file and
       never leaves a partially written hsm_secret behind.
+  cl.hsmsecret.py type <path/to/hsm_secret>
+      stdout: the format of an existing hsm_secret, detected like CLN
+      detect_hsm_secret_type() (independent of lightning-hsmtool messages):
+        plain               legacy 32 bytes, not encrypted
+        encrypted           legacy 73 bytes, encrypted with a password
+        mnemonic            CLN >= v25.12 mnemonic format without passphrase
+        mnemonic-passphrase CLN >= v25.12 mnemonic format with passphrase
+        invalid             anything else
 
 Secrets are passed on stdin only, never as arguments (visible in 'ps').
-'derive' needs the python-mnemonic package, 'write' only the standard library.
+'derive' needs the python-mnemonic package, the other commands only the
+standard library (they run as the bitcoin user, who owns the hsm_secret).
 """
 
 import hashlib
@@ -32,6 +41,7 @@ import sys
 
 VALID_WORD_COUNTS = (12, 15, 18, 21, 24)
 SECRET_LEN = 32
+ENCRYPTED_LEN = 73
 HEX_DIGITS = "0123456789abcdef"
 
 
@@ -153,6 +163,29 @@ def write_hsm_secret(path, secret):
         raise HsmSecretError("could not sync %s: %s" % (directory, e.strerror))
 
 
+def read_hsm_secret(path):
+    try:
+        with open(path, "rb") as f:
+            return f.read()
+    except OSError as e:
+        raise HsmSecretError("could not read %s: %s" % (path, e.strerror))
+
+
+def hsm_secret_type(data):
+    """Same rules as CLN common/hsm_secret.c detect_hsm_secret_type()."""
+    if len(data) < SECRET_LEN:
+        return "invalid"
+    if len(data) == SECRET_LEN:
+        return "plain"
+    if len(data) == ENCRYPTED_LEN:
+        return "encrypted"
+    # mnemonic formats: 32-byte hash of the seed (all zero without a
+    # passphrase) followed by the mnemonic
+    if data[:SECRET_LEN] == bytes(SECRET_LEN):
+        return "mnemonic"
+    return "mnemonic-passphrase"
+
+
 def main(argv, stdin=None, stdout=sys.stdout):
     """stdin is a binary stream (default: sys.stdin.buffer)."""
     if stdin is None:
@@ -163,6 +196,8 @@ def main(argv, stdin=None, stdout=sys.stdout):
         elif len(argv) == 3 and argv[1] == "write":
             write_hsm_secret(
                 argv[2], parse_secret_hex(stdin.read().decode("ascii", "replace")))
+        elif len(argv) == 3 and argv[1] == "type":
+            stdout.write(hsm_secret_type(read_hsm_secret(argv[2])) + "\n")
         else:
             sys.stderr.write(__doc__ or "")
             return 2

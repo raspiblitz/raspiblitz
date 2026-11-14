@@ -4,8 +4,10 @@
 # real 'lightning-hsmtool' binaries in the official Docker images:
 #  - CLN v25.09.3: the last release with the old generatehsm/checkhsm interface
 #  - CLN ${CLVERSION} pinned in cl.install.sh: the new (>= v25.12) interface
-# and an end-to-end run of cl.hsmtool.sh seed-force / seed / new-force inside
-# the pinned CLN image (Debian) with python3, sudo and mnemonic==0.19.
+# and end-to-end runs of cl.hsmtool.sh (seed-force / seed / new-force,
+# hsm-type / encrypt / decrypt, wallets created by lightningd >= v25.12)
+# inside the pinned CLN image (Debian) with python3, sudo and mnemonic==0.19.
+# The start errors of the real lightningd are checked against the unlock loop.
 #
 # Needs docker and network access (image pulls, apt, pip).
 # Without docker the tests are skipped unless CL_HSMTOOL_REQUIRE_DOCKER=1 (CI).
@@ -272,4 +274,186 @@ EOF
   echo "$output"
   [ "$status" -eq 0 ]
   [[ "$output" == *"E2E OK"* ]]
+}
+
+@test "both versions: the hsm_secret format is detected from real files" {
+  eval "$(sed -n '/^function getHsmSecretType()/,/^}/p' "${SCRIPT}")"
+  # plain: CLN v25.09.3 generatehsm
+  old_generatehsm "${ABANDON_12}" "" "${WORK}/plain"
+  # encrypted: lightning-hsmtool encrypt of both versions
+  for image in "${OLD_IMAGE}" "${NEW_IMAGE}"; do
+    cp "${WORK}/plain" "${WORK}/encrypted-${image##*:}"
+    chmod 600 "${WORK}/encrypted-${image##*:}"
+    printf 'pw\npw\n' | hsmtool "${image}" encrypt "${WORK}/encrypted-${image##*:}" >/dev/null
+  done
+  # mnemonic formats: generatehsm of CLN >= v25.12
+  new_generatehsm "${ABANDON_12}" "" "${WORK}/mnemonic"
+  new_generatehsm "${ABANDON_12}" "TREZOR" "${WORK}/mnemonic-passphrase"
+  for file in plain "encrypted-${OLD_IMAGE##*:}" "encrypted-${NEW_IMAGE##*:}" mnemonic mnemonic-passphrase; do
+    hsmSecretPath="${WORK}/${file}"
+    echo "${file}: $(getHsmSecretType)"
+    [ "$(getHsmSecretType)" = "${file%%-v*}" ]
+  done
+}
+
+@test "both versions: the start errors of the real lightningd are classified and the chosen passphrase option unlocks" {
+  eval "$(sed -n '/^function clHsmStartError()/,/^}/p' "${SCRIPT}")"
+  eval "$(sed -n '/^function hsmPassphraseOption()/,/^}/p' "${REPO}/home.admin/config.scripts/cl.install-service.sh")"
+  cat >"${WORK}/start.sh" <<'EOF'
+#!/bin/bash
+# start lightningd on regtest with an encrypted hsm_secret (password "pw")
+# $1 = stdin for lightningd, $2.. = options; prints stderr + log
+W=$(mktemp -d)
+mkdir -p "$W/regtest"
+cp /work/encrypted "$W/regtest/hsm_secret"
+input="$1"; shift
+printf '%b' "${input}" | timeout 20 lightningd --network=regtest --lightning-dir="$W" \
+  --bitcoin-rpcconnect=127.0.0.1 --bitcoin-rpcport=1 --log-file="$W/log" "$@" 2>&1
+echo "rc=$?"
+cat "$W/log" 2>/dev/null
+EOF
+  old_generatehsm "${ABANDON_12}" "" "${WORK}/encrypted"
+  chmod 600 "${WORK}/encrypted"
+  printf 'pw\npw\n' | hsmtool "${OLD_IMAGE}" encrypt "${WORK}/encrypted" >/dev/null
+  start() { # image stdin options...
+    docker run --rm -v "${WORK}:/work:ro" --entrypoint bash "$1" /work/start.sh "${@:2}"
+  }
+  for image in "${OLD_IMAGE}" "${NEW_IMAGE}"; do
+    # the option cl.install-service.sh chooses for this lightningd
+    printf '#!/bin/sh\nexec docker run --rm --entrypoint lightningd %s "$@"\n' "${image}" >"${WORK}/bin/lightningd-${image##*:}"
+    chmod +x "${WORK}/bin/lightningd-${image##*:}"
+    lightningdBin="${WORK}/bin/lightningd-${image##*:}"
+    option=$(hsmPassphraseOption)
+    echo "${image}: ${option}"
+    if [ "${image}" = "${OLD_IMAGE}" ]; then
+      [ "${option}" = "--encrypted-hsm" ]
+    else
+      [ "${option}" = "--hsm-passphrase" ]
+    fi
+    out=$(start "${image}" "")
+    echo "no option: ${out}"
+    [ "$(clHsmStartError "${out}")" = "password-missing" ]
+    if [ "${image}" = "${NEW_IMAGE}" ]; then
+      # the message is followed by a backtrace: not in the last 5 lines
+      # (the old 'journalctl -n5'), clStartJournal reads the whole run
+      [ -z "$(clHsmStartError "$(echo "${out}" | grep -v '^rc=' | tail -n 5)")" ]
+      # the deprecated option is refused with allow-deprecated-apis=false
+      out=$(start "${image}" 'pw\npw' --encrypted-hsm --allow-deprecated-apis=false)
+      echo "deprecated option refused: ${out}"
+      [[ "${out}" == *"--encrypted-hsm was removed, use --hsm-passphrase instead"* ]]
+      [ "$(clHsmStartError "${out}")" = "password-missing" ]
+    fi
+    out=$(start "${image}" "" "${option}")
+    echo "empty stdin: ${out}"
+    [ "$(clHsmStartError "${out}")" = "password-unreadable" ]
+    out=$(start "${image}" 'bad\nbad\n' "${option}")
+    echo "wrong password: ${out}"
+    [ "$(clHsmStartError "${out}")" = "password-wrong" ]
+    # the password input of the systemd service: (cat pw;echo;cat pw)
+    out=$(start "${image}" 'pw\npw' "${option}")
+    echo "right password: ${out}"
+    [ -z "$(clHsmStartError "${out}")" ]
+    # the hsm_secret was loaded, lightningd then waits for or gives up on bitcoind
+    [[ "${out}" == *"bitcoin"* ]] || [[ "${out}" == *"legacy HSM secret"* ]]
+    [[ "${out}" != *"rc=2"[123]* ]]
+  done
+}
+
+@test "both versions: hsmPassphraseOption works with the node config of the admin user" {
+  # /home/admin/.lightning links to the node directory: a log-file that is
+  # not writable for admin made 'lightningd --help' fail before any output
+  eval "$(sed -n '/^function hsmPassphraseOption()/,/^}/p' "${REPO}/home.admin/config.scripts/cl.install-service.sh")"
+  mkdir -p "${WORK}/home/.lightning/bitcoin"
+  printf 'network=bitcoin\nlog-file=/proc/cl.log\n' >"${WORK}/home/.lightning/config"
+  for image in "${OLD_IMAGE}" "${NEW_IMAGE}"; do
+    lightningdBin="${WORK}/bin/lightningd-node-${image##*:}"
+    printf '#!/bin/sh\nexec docker run --rm -e HOME=/h -v %s:/h --entrypoint lightningd %s "$@"\n' "${WORK}/home" "${image}" >"${lightningdBin}"
+    chmod +x "${lightningdBin}"
+    run "${lightningdBin}" --help
+    echo "--help: ${output}"
+    [[ "${output}" != *"--hsm-passphrase"* ]]
+    option=$(hsmPassphraseOption)
+    echo "${image}: ${option}"
+    if [ "${image}" = "${OLD_IMAGE}" ]; then
+      [ "${option}" = "--encrypted-hsm" ]
+    else
+      [ "${option}" = "--hsm-passphrase" ]
+    fi
+  done
+}
+
+@test "end-to-end: hsm-type, encrypt and decrypt of RaspiBlitz and lightningd wallets with the pinned CLN" {
+  cat >"${WORK}/e2e-formats.sh" <<'EOF'
+#!/bin/bash
+set -u
+fail() { echo "FAIL: $*"; exit 1; }
+hex() { od -An -v -tx1 "$1" | tr -d ' \n'; }
+mkdir -p /home/admin/config.scripts /mnt/hdd/app-data
+cp -a /repo/home.admin/config.scripts/. /home/admin/config.scripts/
+for stub in cl-plugin.backup.sh cl.install-service.sh cl.backup.sh cl.install.sh; do
+  printf '#!/bin/sh\necho "%s $*" >>/tmp/calls\n' "${stub}" >/home/admin/config.scripts/${stub}
+done
+printf '#!/bin/sh\n' >/home/admin/_cache.sh
+chmod +x /home/admin/config.scripts/* /home/admin/_cache.sh
+printf 'network=bitcoin\nchain=main\nlightning=cl\nclEncryptedHSM=off\n' >/mnt/hdd/app-data/raspiblitz.conf
+touch /home/admin/raspiblitz.info
+dir=/home/bitcoin/.lightning/bitcoin
+hsm=${dir}/hsm_secret
+info=${dir}/seedwords.info
+cd /home/admin
+type_is() {
+  source <(bash config.scripts/cl.hsmtool.sh hsm-type mainnet)
+  [ "${hsmSecretType}" = "$1" ] || fail "hsm-type: '${hsmSecretType}', expected $1"
+}
+
+echo "## legacy wallet: hsm-type, encrypt, decrypt"
+bash config.scripts/cl.hsmtool.sh seed-force mainnet "${ABANDON_12}" "" >/dev/null || fail "seed-force"
+type_is plain
+# the seed words are shown (whiptail) before encrypting, assume confirmed
+rm "${info}"
+bash config.scripts/cl.hsmtool.sh encrypt mainnet x pw || fail "encrypt"
+type_is encrypted
+[ "$(stat -c %s "${hsm}")" = "73" ] || fail "not encrypted"
+grep -qx "clEncryptedHSM=on" /mnt/hdd/app-data/raspiblitz.conf || fail "clEncryptedHSM not on"
+if bash config.scripts/cl.hsmtool.sh encrypt mainnet x pw2; then fail "encrypted twice"; fi
+# decrypt with the password in memory, as after an unlock
+echo pw > /dev/shm/.cl.pw
+chown bitcoin:bitcoin /dev/shm/.cl.pw
+bash config.scripts/cl.hsmtool.sh decrypt mainnet || fail "decrypt"
+type_is plain
+[ "$(hex "${hsm}")" = "${ABANDON_12_NOPASS}" ] || fail "decrypted bytes"
+grep -qx "clEncryptedHSM=off" /mnt/hdd/app-data/raspiblitz.conf || fail "clEncryptedHSM not off"
+[ ! -e /dev/shm/.cl.pw ] || fail "password file left"
+out=$(bash config.scripts/cl.hsmtool.sh decrypt mainnet) || fail "decrypt of a plain wallet"
+[[ "${out}" == *"not encrypted (plain)"* ]] || fail "decrypt of a plain wallet: ${out}"
+
+echo "## wallet created by lightningd >= v25.12 (mnemonic format)"
+rm -f "${hsm}" "${info}"
+printf '%s\n\n' "${ZOO_24}" | sudo -u bitcoin lightning-hsmtool generatehsm "${hsm}" >/dev/null || fail "generatehsm"
+type_is mnemonic
+echo "# marker" | sudo -u bitcoin tee "${info}" >/dev/null
+before=$(hex "${hsm}")
+if bash config.scripts/cl.hsmtool.sh encrypt mainnet x pw; then fail "encrypted the mnemonic format"; fi
+[ "$(hex "${hsm}")" = "${before}" ] || fail "mnemonic wallet changed"
+grep -qx "# marker" "${info}" || fail "seedwords.info shredded although the encryption was refused"
+out=$(bash config.scripts/cl.hsmtool.sh decrypt mainnet) || fail "decrypt of a mnemonic wallet"
+[[ "${out}" == *"not encrypted (mnemonic)"* ]] || fail "decrypt of a mnemonic wallet: ${out}"
+# no seed words are taken from it: they would restore a different wallet
+# with 'seed-force' (legacy format)
+grep -qx "# marker" "${info}" || fail "seedwords.info changed"
+
+echo "## mnemonic format with passphrase"
+rm -f "${hsm}" "${info}"
+printf '%s\nTREZOR\n' "${ZOO_24}" | sudo -u bitcoin lightning-hsmtool generatehsm "${hsm}" >/dev/null || fail "generatehsm with passphrase"
+type_is mnemonic-passphrase
+if bash config.scripts/cl.hsmtool.sh decrypt mainnet; then fail "decrypted a passphrase wallet"; fi
+if bash config.scripts/cl.hsmtool.sh encrypt mainnet x pw; then fail "encrypted a passphrase wallet"; fi
+echo "E2E FORMATS OK"
+EOF
+  run docker run --rm -v "${REPO}:/repo:ro" -v "${WORK}/e2e-formats.sh:/e2e.sh:ro" \
+    -e ABANDON_12="${ABANDON_12}" -e ABANDON_12_NOPASS="${ABANDON_12_NOPASS}" \
+    -e ZOO_24="${ZOO_24}" "${E2E_IMAGE}" bash /e2e.sh
+  echo "$output"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"E2E FORMATS OK"* ]]
 }

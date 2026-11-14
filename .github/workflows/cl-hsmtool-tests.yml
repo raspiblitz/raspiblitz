@@ -14,8 +14,13 @@ on:
       - 'home.admin/config.scripts/cl.hsmsecret.py'
       - 'home.admin/config.scripts/blitz.mnemonic.py'
       - 'home.admin/config.scripts/cl.install.sh'
+      - 'home.admin/config.scripts/cl.install-service.sh'
+      - 'home.admin/config.scripts/cl.backup.sh'
+      - 'home.admin/_provision.setup.sh'
       - 'test/test_cl_hsmsecret.py'
       - 'test/cl.hsmtool.hsmsecret.bats'
+      - 'test/cl.hsmtool.formats.bats'
+      - 'test/cl.install.pgp.bats'
       - 'test/cl.hsmtool.real-cln.bats'
   pull_request:
     branches: ['dev', 'v1.10', 'v1.11']
@@ -25,8 +30,13 @@ on:
       - 'home.admin/config.scripts/cl.hsmsecret.py'
       - 'home.admin/config.scripts/blitz.mnemonic.py'
       - 'home.admin/config.scripts/cl.install.sh'
+      - 'home.admin/config.scripts/cl.install-service.sh'
+      - 'home.admin/config.scripts/cl.backup.sh'
+      - 'home.admin/_provision.setup.sh'
       - 'test/test_cl_hsmsecret.py'
       - 'test/cl.hsmtool.hsmsecret.bats'
+      - 'test/cl.hsmtool.formats.bats'
+      - 'test/cl.install.pgp.bats'
       - 'test/cl.hsmtool.real-cln.bats'
 
 permissions:
@@ -57,6 +67,10 @@ jobs:
       - name: Syntax check
         run: |
           bash -n home.admin/config.scripts/cl.hsmtool.sh
+          bash -n home.admin/config.scripts/cl.install.sh
+          bash -n home.admin/config.scripts/cl.install-service.sh
+          bash -n home.admin/config.scripts/cl.backup.sh
+          bash -n home.admin/_provision.setup.sh
           python3 -m py_compile home.admin/config.scripts/cl.hsmsecret.py
 
       - name: cl.hsmsecret.py unit tests with full branch coverage
@@ -66,7 +80,10 @@ jobs:
           python3 -m coverage report -m --fail-under=100
 
       - name: cl.hsmtool.sh unit tests
-        run: bats --print-output-on-failure test/cl.hsmtool.hsmsecret.bats
+        run: bats --print-output-on-failure test/cl.hsmtool.hsmsecret.bats test/cl.hsmtool.formats.bats
+
+      - name: cl.install.sh release signature check tests
+        run: bats --print-output-on-failure test/cl.install.pgp.bats
 
       - name: Tests with the real lightning-hsmtool (CLN v25.09.3 and the pinned version)
         env:
