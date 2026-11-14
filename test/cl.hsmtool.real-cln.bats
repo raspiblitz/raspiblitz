@@ -252,9 +252,9 @@ if bash config.scripts/cl.hsmtool.sh seed mainnet "${ABANDON_12% about} abandon"
 fi
 [ ! -e "${hsm}" ] || fail "wallet created from invalid seed words"
 [ ! -e /tmp/calls ] || fail "continued after the failure: $(cat /tmp/calls)"
-# no seedwords.info without a matching hsm_secret
+# no seed words left for a wallet that does not exist
 [ ! -e /home/bitcoin/.lightning/bitcoin/seedwords.info ] || fail "seedwords.info left for no wallet"
-ls /home/bitcoin/.lightning/bitcoin/seedwords.info.unused.* >/dev/null || fail "seedwords.info not kept aside"
+if ls /home/bitcoin/.lightning/bitcoin/ | grep -q seedwords; then fail "copy of the seed words left"; fi
 
 echo "## new-force (new wallet from generated seed words)"
 out="$(bash config.scripts/cl.hsmtool.sh new-force mainnet 2>/dev/null)" || fail "new-force"

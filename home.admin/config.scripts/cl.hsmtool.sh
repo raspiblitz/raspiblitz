@@ -319,9 +319,8 @@ seedwords6x4='${seedwords6x4}'
   # create the hsm_secret (legacy format, see createHsmSecret)
   if ! createHsmSecret "${seedwords}" "${seedpassword}" 1>&2; then
     # keep no seedwords.info that matches no hsm_secret
-    seedwordsUnused="/home/bitcoin/.lightning/${CLNETWORK}/seedwords.info.unused.$(date +"%Y_%m_%d_%H%M%S")"
-    echo "# Moving the seedwords.info of the failed wallet to ${seedwordsUnused}" >&2
-    sudo -u bitcoin mv /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info "${seedwordsUnused}"
+    echo "# Shredding the seedwords.info of the failed wallet" >&2
+    sudo -u bitcoin shred -u /home/bitcoin/.lightning/${CLNETWORK}/seedwords.info
     exit 1
   fi
 
