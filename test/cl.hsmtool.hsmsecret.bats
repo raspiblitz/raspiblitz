@@ -171,10 +171,10 @@ no_wallet() {
 }
 
 @test "createHsmSecret: invalid mnemonic (unknown word) creates no wallet and does not log the words" {
-  run createHsmSecret "${ABANDON_12% about} satoshi" ""
+  run createHsmSecret "${ABANDON_12% about} satoshis" ""
   [ "$status" -eq 1 ]
   [[ "$output" == *"word(s) number 12 not in the BIP39 english wordlist"* ]]
-  [[ "$output" != *"satoshi"* ]]
+  [[ "$output" != *"satoshis"* ]]
   no_wallet
 }
 
