@@ -18,14 +18,19 @@ mode="$1"
 
 # RECOMMENDED UPDATE BY RASPIBLITZ TEAM
 # comment will be shown as "BEWARE Info" when option is choosen (can be multiple lines)
-lndUpdateVersion="" # example: 0.13.2-beta .. keep empty if no newer version as sd card build is available
+lndUpdateVersion="0.21.8-beta" # example: 0.13.2-beta .. keep empty if no newer version as sd card build is available
 lndUpdateComment="Please keep in mind that downgrading afterwards is not tested. Also not all additional apps are fully tested with the this update - but it looked good on first tests."
 
 # check who signed the release in https://github.com/lightningnetwork/lnd/releases
+# ziggie (signed v0.21.5-beta, v0.21.6-beta and v0.21.8-beta, roasbeef skipped v0.21.5-beta)
+PGPauthor="ziggie1984"
+lndUpdatePGPpkeys="https://raw.githubusercontent.com/lightningnetwork/lnd/master/scripts/keys/ziggie1984.asc"
+lndUpdatePGPcheck="5F75437E11695F86D50C11BB1AFF9C4DCED6D666"
+
 # olaoluwa
-PGPauthor="roasbeef"
-lndUpdatePGPpkeys="https://keybase.io/roasbeef/pgp_keys.asc"
-lndUpdatePGPcheck="4AB7F8DA6FAEBB3B70B1F903BC13F65E2DC84465"
+# PGPauthor="roasbeef"
+# lndUpdatePGPpkeys="https://raw.githubusercontent.com/lightningnetwork/lnd/master/scripts/keys/roasbeef.asc"
+# lndUpdatePGPcheck="A5B61896952D9FDA83BC054CDC42612E89237182"
 
 # bitconner
 # PGPauthor="bitconner"

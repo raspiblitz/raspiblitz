@@ -2,7 +2,7 @@
 
 # set version (change if update is available)
 # https://bitcoincore.org/en/download/
-bitcoinVersion="29.2"
+bitcoinVersion="29.5"
 
 
 # command info

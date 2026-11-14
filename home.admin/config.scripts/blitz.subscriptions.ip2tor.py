@@ -334,28 +334,48 @@ def lndDecodeInvoice(lnInvoiceString):
 
 
 def lndPayInvoice(lnInvoiceString):
+    payment = {}
     try:
-        # call LND GRPC API
-        macaroon = codecs.encode(open(LND_ADMIN_MACAROON_PATH, 'rb').read(), 'hex')
-        os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
-        cert = open(LND_TLS_PATH, 'rb').read()
-        ssl_creds = grpc.ssl_channel_credentials(cert)
-        channel = grpc.secure_channel("{0}:10009".format(LND_IP), ssl_creds)
-        stub = rpcstub.LightningStub(channel)
-        request = lnrpc.SendRequest(
-            payment_request=lnInvoiceString,
-            fee_limit=lnrpc.FeeLimit(fixed=1000),
+        # call LND REST API (SendPaymentSync was removed in LND 0.21, lndlibs has no router stubs)
+        macaroon = codecs.encode(open(LND_ADMIN_MACAROON_PATH, 'rb').read(), 'hex').decode()
+        response = requests.post(
+            "https://{0}:8080/v2/router/send".format(LND_IP),
+            headers={'Grpc-Metadata-macaroon': macaroon},
+            json={'payment_request': lnInvoiceString, 'fee_limit_sat': 1000, 'timeout_seconds': 60},
+            verify=LND_TLS_PATH,
+            stream=True,
+            # connect timeout, and max seconds between streamed updates. LND stops new attempts after
+            # timeout_seconds, but an HTLC already sent stays pending until it settles or fails.
+            timeout=(10, 90),
         )
-        response = stub.SendPaymentSync(request, metadata=[('macaroon', macaroon)])
+        response.raise_for_status()
 
-        # validate results
-        if len(response.payment_error) > 0:
-            raise BlitzError(response.payment_error, {'invoice': lnInvoiceString})
+        # stream of payment updates, the last one has the final status
+        for line in response.iter_lines():
+            if not line:
+                continue
+            update = json.loads(line)
+            if 'error' in update:
+                raise BlitzError(update['error'].get('message', 'unknown error'), {'invoice': lnInvoiceString})
+            payment = update['result']
 
     except Exception as e:
-        raise BlitzError("payment failed", {'invoice': lnInvoiceString}, e)
+        if payment.get('status') != 'IN_FLIGHT':
+            raise BlitzError("payment failed", {'invoice': lnInvoiceString}, e)
+        # the stream broke off while an HTLC was pending, so the payment can still settle
 
-    return response
+    # validate results
+    if payment.get('status') == 'IN_FLIGHT':
+        # not a failure: paying a new invoice now could pay twice
+        raise BlitzError("payment in flight", {'invoice': lnInvoiceString,
+                                               'payment_hash': payment.get('payment_hash', ''),
+                                               'check': 'lncli listpayments'})
+    if payment.get('status') != 'SUCCEEDED':
+        raise BlitzError("payment failed", {'invoice': lnInvoiceString},
+                         BlitzError(payment.get('failure_reason', 'payment not completed'),
+                                    {'invoice': lnInvoiceString}))
+
+    return payment
 
 
 #####################
