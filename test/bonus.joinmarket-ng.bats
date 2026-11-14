@@ -109,6 +109,7 @@ teardown_file() {
   rm -f "${SUDOERS_FILE}" 2>/dev/null || true
   rm -f "${SERVICE_HELPER}" 2>/dev/null || true
   rm -rf /run/joinmarket-ng 2>/dev/null || true
+  rm -rf /etc/joinmarket-ng 2>/dev/null || true
   # Clean up mock environment
   rm -f /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null || true
   rm -f /mnt/hdd/app-data/bitcoin/bitcoin.conf 2>/dev/null || true
@@ -155,6 +156,8 @@ teardown_file() {
 # ---------------------------------------------------------------------------
 @test "install joinmarket-ng (on)" {
   run bash "${SCRIPT}" on
+  # Shown only when the test fails: the installer output names the failed step.
+  echo "$output"
   [ "$status" -eq 0 ]
 
   # User was created
@@ -271,6 +274,10 @@ EOF
   grep -q '^EnvironmentFile=-/run/joinmarket-ng/rpc.env' "${SERVICE_FILE}"
   ! grep -q '^ExecStartPre=+/home/admin/config.scripts/bonus.joinmarket-ng.sh' "${SERVICE_FILE}"
   grep -Fx "Environment=\"JOINMARKET_STAGED_CREDENTIALS_FILE=/home/${USER_JM}/.joinmarket-ng/.maker.env\"" "${SERVICE_FILE}"
+  # The legacy unit loaded the app-owned staging file as an EnvironmentFile.
+  run grep '^EnvironmentFile=.*/home/' "${SERVICE_FILE}"
+  [ "$status" -ne 0 ]
+  grep -Fx "ExecStart=/home/admin/config.scripts/bonus.joinmarket-ng.sh maker-exec" "${SERVICE_FILE}"
   grep -q '^SERVICE_HELPER="/usr/local/sbin/raspiblitz-joinmarket-ng-service"' "${menu}"
   grep -Fq "printf '%s\\n' \"\$password\" | \"\$BONUS_SCRIPT\" store-password" "${menu}"
   grep -q 'sudo "\$SERVICE_HELPER" start' "${menu}"
@@ -324,6 +331,28 @@ STUB
   [ -f "${SERVICE_FILE}" ]
 }
 
+# A failed first install (for example a pip network error) leaves the user,
+# the data link and the venv behind. A retry must run the installer again
+# instead of only reconciling the system integration.
+@test "on resumes a partial install instead of only reconciling" {
+  sudo -u "${USER_JM}" "/home/${USER_JM}/venv/bin/pip" uninstall -y jm-taker
+  [ ! -e "/home/${USER_JM}/venv/bin/jm-taker" ]
+  rm -f "${SERVICE_FILE}"
+  sed -i '/^joinmarketNG=/d' /mnt/hdd/app-data/raspiblitz.conf
+
+  run bash "${SCRIPT}" on
+  local install_status="$status"
+  local install_output="$output"
+  echo "${install_output}"
+
+  [ "${install_status}" -eq 0 ]
+  run grep 'already installed, reconciling system integration' <<<"${install_output}"
+  [ "$status" -ne 0 ]
+  [ -x "/home/${USER_JM}/venv/bin/jm-taker" ]
+  [ -f "${SERVICE_FILE}" ]
+  grep -q "joinmarketNG=on" /mnt/hdd/app-data/raspiblitz.conf
+}
+
 # ---------------------------------------------------------------------------
 # 2a. Installer enables Bitcoin Core wallet support (regression for
 # RaspiBlitz default 'disablewallet=1', which makes every wallet RPC fail
@@ -371,6 +400,47 @@ get_secp256k1()
   [ "$(stat -c '%U:%G %a' /run/joinmarket-ng/rpc.env)" = "root:root 600" ]
   grep -q '^BITCOIN__RPC_USER="testuser"$' /run/joinmarket-ng/rpc.env
   grep -q '^BITCOIN__RPC_PASSWORD="testpass"$' /run/joinmarket-ng/rpc.env
+}
+
+# Wallet, send and coinjoin commands run from the TUI as the app user, outside
+# the maker unit. They must reach Bitcoin Core with the node credentials
+# without the app user being able to replace the credential source.
+@test "interactive commands resolve Bitcoin RPC credentials as the app user" {
+  [ "$(stat -c '%U:%G %a' /etc/joinmarket-ng)" = "root:${USER_JM} 750" ]
+  [ "$(stat -c '%U:%G %a' /etc/joinmarket-ng/rpc.cookie)" = "root:${USER_JM} 640" ]
+  grep -Fx 'rpc_cookie_file = "/etc/joinmarket-ng/rpc.cookie"' "${CONFIG_TOML}"
+
+  run sudo -u "${USER_JM}" touch /etc/joinmarket-ng/probe
+  [ "$status" -ne 0 ]
+
+  run sudo -u "${USER_JM}" "/home/${USER_JM}/venv/bin/python" -c '
+from jmcore.settings import get_settings
+
+bitcoin = get_settings().bitcoin
+print("resolved", bitcoin.rpc_user, bitcoin.rpc_password.get_secret_value())
+'
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -Fx 'resolved testuser testpass'
+}
+
+# An explicit operator choice in config.toml wins over the managed cookie.
+@test "reconcile keeps explicitly configured Bitcoin RPC credentials" {
+  local config_backup
+  config_backup=$(mktemp)
+  cp -p "${CONFIG_TOML}" "${config_backup}"
+  sed -i '/^rpc_cookie_file = /d' "${CONFIG_TOML}"
+  sed -i 's|^# rpc_user = .*|rpc_user = "operator"|' "${CONFIG_TOML}"
+
+  run bash "${SCRIPT}" reconcile
+  local reconcile_status="$status"
+  run grep '^rpc_cookie_file' "${CONFIG_TOML}"
+  local cookie_status="$status"
+
+  cp -p "${config_backup}" "${CONFIG_TOML}"
+  rm -f "${config_backup}"
+
+  [ "${reconcile_status}" -eq 0 ]
+  [ "${cookie_status}" -ne 0 ]
 }
 
 # Systemd unit must declare a retry policy so the maker survives a slow
@@ -668,6 +738,12 @@ PYEOF
   echo "${update_block}" | grep -q 'MAKER_PASSWORD_MODE="temporary"'
   echo "${update_block}" | grep -q 'MAKER_PASSWORD_MODE="none"'
   echo "${update_block}" | grep -q 'TEMP_ENV_BACKUP=.*mktemp'
+  # Staging also carries the BIP39 passphrase and wallet binding, so it is
+  # preserved whenever it exists, independent of the password mode.
+  echo "${update_block}" | grep -q 'MAKER_STAGING_PRESENT=1'
+  echo "${update_block}" | grep -Fq '[ "${MAKER_WAS_RUNNING}" = "1" ] && [ "${MAKER_STAGING_PRESENT}" = "1" ]'
+  # A release name reported by the GitHub API must be a signed version tag.
+  echo "${update_block}" | grep -q 'GitHub reported an unexpected latest release tag'
   echo "${update_block}" | grep -q 'restore_temporary_maker_environment'
   echo "${update_block}" | grep -q 'restore_maker_after_update_failure'
   echo "${update_block}" | grep -q 'sudo "\${SERVICE_HELPER}" stop'
@@ -988,11 +1064,70 @@ PYEOF
   ! echo "${prestart_block}" | grep -q 'mnemonic_password'
 }
 
-@test "maker unit delivers the password via EnvironmentFile (.maker.env)" {
+@test "maker unit never loads the app-owned staging file as an EnvironmentFile" {
   [ -f "${SERVICE_FILE}" ]
-  grep -q 'EnvironmentFile=.*\.maker\.env' "${SERVICE_FILE}"
+  # The system manager reads EnvironmentFile paths with full privileges and
+  # applies them to the privileged ExecStartPre, so .maker.env must not be one.
+  run grep 'EnvironmentFile=.*\.maker\.env' "${SERVICE_FILE}"
+  [ "$status" -ne 0 ]
+  grep -Fx "ExecStart=/home/admin/config.scripts/bonus.joinmarket-ng.sh maker-exec" "${SERVICE_FILE}"
   # ExecStopPost must no longer call wipe-password (command removed).
-  ! grep -q 'wipe-password' "${SERVICE_FILE}"
+  run grep 'wipe-password' "${SERVICE_FILE}"
+  [ "$status" -ne 0 ]
+}
+
+@test "maker-exec passes only the staged wallet credentials to the maker" {
+  local maker="/home/${USER_JM}/venv/bin/jm-maker"
+  local staging="/home/${USER_JM}/.joinmarket-ng/.maker.env"
+  local maker_backup
+  maker_backup=$(mktemp)
+  cp -p "${maker}" "${maker_backup}"
+  cat > "${maker}" <<'STUB'
+#!/bin/bash
+printf 'args=%s\n' "$*"
+printf 'password=%s\n' "${MNEMONIC_PASSWORD-unset}"
+printf 'passphrase=%s\n' "${BIP39_PASSPHRASE-unset}"
+printf 'fingerprint=%s\n' "${EXPECTED_FINGERPRINT-unset}"
+printf 'bash_env=%s\n' "${BASH_ENV-unset}"
+printf 'ld_preload=%s\n' "${LD_PRELOAD-unset}"
+STUB
+  printf '%s\n' \
+    'MNEMONIC_PASSWORD="pa ss\"w\\ord$x"' \
+    'BIP39_PASSPHRASE="two words"' \
+    'EXPECTED_FINGERPRINT="0f056943"' \
+    'BASH_ENV=/tmp/untrusted.sh' \
+    'LD_PRELOAD=/tmp/untrusted.so' > "${staging}"
+  chown "${USER_JM}:${USER_JM}" "${staging}"
+  chmod 600 "${staging}"
+
+  run sudo -u "${USER_JM}" bash "${SCRIPT}" maker-exec
+  local exec_status="$status"
+  local exec_output="$output"
+
+  rm -f "${staging}"
+  run sudo -u "${USER_JM}" bash "${SCRIPT}" maker-exec
+  local missing_status="$status"
+  local missing_output="$output"
+
+  run bash "${SCRIPT}" maker-exec
+  local root_status="$status"
+
+  cp -p "${maker_backup}" "${maker}"
+  rm -f "${maker_backup}"
+
+  [ "${exec_status}" -eq 0 ]
+  echo "${exec_output}" | grep -Fx 'args=start'
+  echo "${exec_output}" | grep -Fx 'password=pa ss"w\ord$x'
+  echo "${exec_output}" | grep -Fx 'passphrase=two words'
+  echo "${exec_output}" | grep -Fx 'fingerprint=0f056943'
+  echo "${exec_output}" | grep -Fx 'bash_env=unset'
+  echo "${exec_output}" | grep -Fx 'ld_preload=unset'
+
+  # Without staging the maker still starts and decides on its own.
+  [ "${missing_status}" -eq 0 ]
+  echo "${missing_output}" | grep -Fx 'password=unset'
+
+  [ "${root_status}" -eq 1 ]
 }
 
 @test "TUI compatibility patch uses stdin and the fixed service helper" {
@@ -1077,13 +1212,22 @@ EOF
     capture && /^  fi$/ { exit }
   ' "${PASSWORD_SCRIPT}")
 
-  # A temporary wallet password (.maker.env) is deleted by ExecStopPost
-  # during the stop phase, so the rotation must back it up and restore it
+  # Staged wallet credentials (.maker.env) are deleted by ExecStopPost
+  # during the stop phase, so the rotation must back them up and restore them
   # between stop and start.
   echo "${joinmarket_password_block}" | grep -q 'JM_MAKER_ENV='
-  echo "${joinmarket_password_block}" | grep -q 'JM_ENV_BACKUP=\$(sudo mktemp'
+  echo "${joinmarket_password_block}" | grep -q 'JM_ENV_BACKUP=\$(sudo -u joinmarketng mktemp'
   echo "${joinmarket_password_block}" | grep -q 'systemctl stop \${JM_MAKER_SERVICE}'
   echo "${joinmarket_password_block}" | grep -q 'systemctl start \${JM_MAKER_SERVICE}'
+  # The staging path is app-owned: root must never read, write or chown
+  # through it. Every file operation on it runs as the app user.
+  run grep -E 'sudo (test|cp|mv|chown|chmod|cat|rm|mktemp) ' <<<"${joinmarket_password_block}"
+  [ "$status" -ne 0 ]
+  # The app account stays locked: rotation must not give it a login password.
+  run grep 'chpasswd' <<<"${joinmarket_password_block}"
+  [ "$status" -ne 0 ]
+  # Interactive commands read the regenerated root-owned credential file.
+  echo "${joinmarket_password_block}" | grep -q 'sudo "\${JM_SERVICE_HELPER}" prepare'
   # A failed reload must be surfaced, not hidden behind an OK result.
   echo "${joinmarket_password_block}" | grep -q 'jmRestartOK'
   echo "${joinmarket_password_block}" | grep -q 'passwordBReloadFailed=1'
@@ -1127,6 +1271,7 @@ EOF
   # Sudoers should be removed
   [ ! -f "${SUDOERS_FILE}" ]
   [ ! -e /run/joinmarket-ng ]
+  [ ! -e /etc/joinmarket-ng ]
 
   # Data directory should be PRESERVED (deliberate design choice)
   [ -d "${DATA_DIR}" ]
@@ -1165,6 +1310,8 @@ EOF
   echo '# MARKER_PRESERVED' >> "${CONFIG_TOML}"
 
   run bash "${SCRIPT}" on
+  # Shown only when the test fails: the installer output names the failed step.
+  echo "$output"
   [ "$status" -eq 0 ]
 
   # The marker should still be in config.toml (template not overwritten)

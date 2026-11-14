@@ -5,6 +5,9 @@ SERVICE_NAME="joinmarket-ng-maker.service"
 BITCOIN_CONFIG="/mnt/hdd/app-data/bitcoin/bitcoin.conf"
 RUNTIME_DIR="/run/joinmarket-ng"
 RUNTIME_ENV="${RUNTIME_DIR}/rpc.env"
+APP_GROUP="joinmarketng"
+CREDENTIALS_DIR="/etc/joinmarket-ng"
+RPC_COOKIE="${CREDENTIALS_DIR}/rpc.cookie"
 
 if [ "${EUID}" -ne 0 ]; then
   echo "# FAIL: This helper must run as root."
@@ -46,8 +49,33 @@ prepare_runtime_environment() {
     return 1
   fi
 
-  chown root:root "${temporary_env}" && chmod 600 "${temporary_env}" \
-    && mv -f "${temporary_env}" "${RUNTIME_ENV}"
+  if ! chown root:root "${temporary_env}" \
+    || ! chmod 600 "${temporary_env}" \
+    || ! mv -f "${temporary_env}" "${RUNTIME_ENV}"; then
+    return 1
+  fi
+
+  write_rpc_cookie "${rpc_user}" "${rpc_password}"
+}
+
+# Interactive jm-wallet, jm-taker and TUI commands run as the app user outside
+# the maker unit. They resolve the same credentials through
+# bitcoin.rpc_cookie_file. The directory and file stay root-owned, so the app
+# user can read the credentials but cannot replace or relink the path.
+write_rpc_cookie() {
+  local rpc_user="$1"
+  local rpc_password="$2"
+  local temporary_cookie
+
+  install -d -o root -g "${APP_GROUP}" -m 750 "${CREDENTIALS_DIR}" || return 1
+  temporary_cookie=$(mktemp "${RPC_COOKIE}.XXXXXX") || return 1
+  if ! printf '%s:%s\n' "${rpc_user}" "${rpc_password}" > "${temporary_cookie}" \
+    || ! chown "root:${APP_GROUP}" "${temporary_cookie}" \
+    || ! chmod 640 "${temporary_cookie}" \
+    || ! mv -f "${temporary_cookie}" "${RPC_COOKIE}"; then
+    rm -f "${temporary_cookie}"
+    return 1
+  fi
 }
 
 case "$1" in

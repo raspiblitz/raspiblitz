@@ -47,9 +47,11 @@ bitcoind_service=bitcoind
 systemd_unit_contents
 '
   [ "$status" -eq 0 ]
-  echo "$output" | grep -Fx 'EnvironmentFile=-/home/testmaker/.joinmarket-ng/.maker.env'
-  echo "$output" | grep -Fx 'Environment="JOINMARKET_STAGED_CREDENTIALS_FILE=/home/testmaker/.joinmarket-ng/.maker.env"'
-  echo "$output" | grep -Fx "ExecStart=/bin/bash -c 'exec jm-maker start'"
-  echo "$output" | grep -Fx "ExecStopPost=/bin/bash -c 'rm -f /home/testmaker/.joinmarket-ng/.maker.env'"
-  echo "$output" | grep -Fx 'Restart=on-failure'
+  local unit="$output"
+  run grep '^EnvironmentFile=.*/home/' <<<"${unit}"
+  [ "$status" -ne 0 ]
+  echo "${unit}" | grep -Fx 'Environment="JOINMARKET_STAGED_CREDENTIALS_FILE=/home/testmaker/.joinmarket-ng/.maker.env"'
+  echo "${unit}" | grep -Fx "ExecStart=/home/admin/config.scripts/bonus.joinmarket-ng.sh maker-exec"
+  echo "${unit}" | grep -Fx "ExecStopPost=/bin/bash -c 'rm -f /home/testmaker/.joinmarket-ng/.maker.env'"
+  echo "${unit}" | grep -Fx 'Restart=on-failure'
 }

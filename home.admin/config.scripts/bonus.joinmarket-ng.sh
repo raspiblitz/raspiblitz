@@ -49,6 +49,10 @@ DATA_DIR="/mnt/hdd/app-data/${APPID}"
 HOME_DATA_LINK="/home/${USER_JM}/.joinmarket-ng"
 SERVICE_FILE="/etc/systemd/system/${APPID}-maker.service"
 SUDOERS_FILE="/etc/sudoers.d/${USER_JM}-maker"
+# Root-owned Bitcoin RPC credentials for interactive app-user commands,
+# written by the service helper ('prepare').
+CREDENTIALS_DIR="/etc/joinmarket-ng"
+RPC_COOKIE="${CREDENTIALS_DIR}/rpc.cookie"
 TRUSTED_KEYRING="${SCRIPT_DIR}/joinmarket-ng-trusted-keys.asc"
 TRUSTED_FINGERPRINTS=(
   "1C53A412D11EF3051704419C44912E1E03005B31"
@@ -417,11 +421,14 @@ User=${USER_JM}
 Group=${USER_JM}
 Environment="PATH=/home/${USER_JM}/venv/bin:/home/${USER_JM}/.local/bin:/usr/local/bin:/usr/bin:/bin"
 EnvironmentFile=-/run/joinmarket-ng/rpc.env
-EnvironmentFile=-/home/${USER_JM}/.joinmarket-ng/.maker.env
 Environment="JOINMARKET_STAGED_CREDENTIALS_FILE=/home/${USER_JM}/.joinmarket-ng/.maker.env"
 ExecStartPre=+${SERVICE_HELPER} prepare
 ExecStartPre=/home/admin/config.scripts/bonus.${APPID}.sh prestart
-ExecStart=/bin/bash -c 'exec jm-maker start'
+# The staged wallet credentials (.maker.env) are app-owned, so they are never
+# an EnvironmentFile: the system manager would read that path with full
+# privileges and hand its variables to the privileged ExecStartPre above.
+# 'maker-exec' loads them as ${USER_JM} right before starting the maker.
+ExecStart=/home/admin/config.scripts/bonus.${APPID}.sh maker-exec
 ExecStopPost=/bin/bash -c 'rm -f /home/${USER_JM}/.joinmarket-ng/.maker.env'
 # Bitcoind on RaspiBlitz can take a long time to come up after boot
 # (IBD, mempool rebuild, ...). Retry forever with a 30s backoff instead
@@ -445,6 +452,56 @@ ${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} stop
 ${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} status
 ${USER_JM} ALL=(root) NOPASSWD: ${SERVICE_HELPER} enable
 EOF
+}
+
+# The install is complete only when every managed console script and the
+# config file exist. A partial install (failed pip or template download) must
+# run the full installer again instead of the reconcile shortcut.
+installation_is_complete() {
+  local entry_point
+
+  for entry_point in jm-ng jm-wallet jm-maker jm-taker; do
+    if [ ! -x "/home/${USER_JM}/venv/bin/${entry_point}" ]; then
+      return 1
+    fi
+  done
+  run_as_joinmarketng test -f "${DATA_DIR}/config.toml"
+}
+
+# Point bitcoin.rpc_cookie_file at the root-owned credential file unless the
+# config already names explicit RPC credentials or another cookie file.
+ensure_rpc_cookie_config() {
+  local CONFIG_FILE="${DATA_DIR}/config.toml"
+
+  if ! run_as_joinmarketng test -f "${CONFIG_FILE}"; then
+    return 0
+  fi
+  if ! run_as_joinmarketng "/home/${USER_JM}/venv/bin/python" - "${CONFIG_FILE}" "${RPC_COOKIE}" <<'PYEOF'
+import sys
+import tomllib
+from pathlib import Path
+
+from jmcore.config_file import set_config_value
+
+config_path = Path(sys.argv[1])
+try:
+    bitcoin = tomllib.loads(config_path.read_text(encoding="utf-8")).get("bitcoin", {})
+except (OSError, UnicodeError, tomllib.TOMLDecodeError) as exc:
+    # A config the operator has to repair by hand must not block the repair
+    # of the system integration.
+    print(f"# WARNING: config.toml could not be parsed ({exc}).")
+    print(f"# Set bitcoin.rpc_cookie_file = \"{sys.argv[2]}\" after fixing it.")
+    sys.exit(0)
+if not isinstance(bitcoin, dict):
+    bitcoin = {}
+if bitcoin.get("rpc_user") or bitcoin.get("rpc_password") or bitcoin.get("rpc_cookie_file"):
+    sys.exit(0)
+set_config_value(config_path, "bitcoin", "rpc_cookie_file", sys.argv[2])
+PYEOF
+  then
+    echo "# FAIL: Could not configure the Bitcoin RPC credential file."
+    return 1
+  fi
 }
 
 home_data_link_is_current() {
@@ -544,7 +601,14 @@ reconcile_system_integration() {
     || ! install_root_service_helper \
     || ! install_fixed_sudoers \
     || ! install_systemd_unit \
-    || ! patch_upstream_tui "/home/${USER_JM}/venv"; then
+    || ! patch_upstream_tui "/home/${USER_JM}/venv" \
+    || ! ensure_rpc_cookie_config; then
+    return 1
+  fi
+  # Refresh the root-owned RPC credentials so wallet and taker commands run
+  # from the TUI or the app shell can reach Bitcoin Core.
+  if ! sudo "${SERVICE_HELPER}" prepare; then
+    echo "# FAIL: Could not prepare the Bitcoin RPC credentials."
     return 1
   fi
   echo "# JoinMarket-NG system integration reconciled."
@@ -610,7 +674,9 @@ source /mnt/hdd/app-data/raspiblitz.conf
 # Usage: toml_has_wallet_password <config_file>
 toml_has_wallet_password() {
   local cfg="$1"
-  python3 - "${cfg}" <<'PYEOF'
+  # The config is app-owned and mode 0600: read it as the app user so an
+  # admin caller without root does not misreport "no password".
+  run_as_joinmarketng python3 - "${cfg}" <<'PYEOF'
 import sys, pathlib
 try:
     import tomllib
@@ -821,7 +887,9 @@ if [ "$1" = "prestart" ]; then
     exit 1
   fi
 
-  # Abort if no wallet is configured — prevents a useless restart loop
+  # Abort if no wallet is configured. systemd still retries every RestartSec,
+  # so the journal keeps showing this reason until a wallet is configured or
+  # the maker is stopped.
   MNEMONIC_FILE=$(grep '^mnemonic_file[[:space:]]*=' "${CONFIG_FILE}" 2>/dev/null | head -1 | sed 's/^mnemonic_file[[:space:]]*=[[:space:]]*//' | tr -d '"')
   if [ -z "${MNEMONIC_FILE}" ] || [ ! -f "${MNEMONIC_FILE}" ]; then
     echo "# PRESTART ERROR: No wallet configured (mnemonic_file not set or file missing)."
@@ -834,17 +902,54 @@ if [ "$1" = "prestart" ]; then
 fi
 
 ##########################
+# MAKER-EXEC
+# Called by systemd as ${USER_JM}. Loads the staged wallet credentials with
+# the upstream non-executing parser, which returns only MNEMONIC_PASSWORD,
+# BIP39_PASSPHRASE and EXPECTED_FINGERPRINT, then replaces itself with the
+# maker. jm-maker validates the declared staging file again on its own.
+##########################
+
+if [ "$1" = "maker-exec" ]; then
+  if [ "$(id -un)" != "${USER_JM}" ]; then
+    echo "# FAIL: maker-exec must run as ${USER_JM}."
+    exit 1
+  fi
+  exec "/home/${USER_JM}/venv/bin/python" - \
+    "/home/${USER_JM}/.joinmarket-ng/.maker.env" \
+    "/home/${USER_JM}/venv/bin/jm-maker" <<'PYEOF'
+import os
+import sys
+
+from jmcore.maker_env import parse_maker_env
+
+staging_path, maker = sys.argv[1], sys.argv[2]
+try:
+    with open(staging_path, "rb") as staging_file:
+        staged = parse_maker_env(staging_file.read().decode("utf-8"))
+except (OSError, UnicodeError, ValueError):
+    # Missing, unreadable or malformed staging: export nothing. jm-maker
+    # checks the declared staging file itself and logs why it refuses to start.
+    staged = {}
+os.environ.update(staged)
+os.execv(maker, [maker, "start"])
+PYEOF
+fi
+
+##########################
 # ON / INSTALL
 #########################
 
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  if [ "${isInstalled}" -eq 1 ] \
-    || validate_reconciliation_prerequisites >/dev/null 2>&1; then
+  # Reconcile only a complete install. A partial one (for example after a
+  # failed download) continues with the idempotent installer below.
+  if { [ "${isInstalled}" -eq 1 ] || validate_reconciliation_prerequisites >/dev/null 2>&1; } \
+    && installation_is_complete; then
     echo "# ${APPID} is already installed, reconciling system integration."
     if ! reconcile_system_integration; then
       exit 1
     fi
+    /home/admin/config.scripts/blitz.conf.sh set ${CONFIGKEY} "on"
     exit 0
   fi
 
@@ -891,7 +996,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # wallet inside Bitcoin Core, so wallet support MUST be enabled. We use
   # the existing 'network.wallet.sh on' helper, which is idempotent: it
   # rewrites 'disablewallet' to 0 in bitcoin.conf and restarts bitcoind
-  # only if the value actually changed.
+  # (the restart is skipped only while the node is recovering).
   echo "# Ensuring Bitcoin Core wallet support is enabled..."
   if ! sudo /home/admin/config.scripts/network.wallet.sh on; then
     echo "# FAIL - could not enable Bitcoin Core wallet support"
@@ -1007,9 +1112,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       local sed_value
       sed_value=$(printf '%s' "${value}" | sed -e 's/[&\\/|]/\\&/g')
 
-      if grep -q "^${key}[[:space:]]*=" "${file}"; then
+      if run_as_joinmarketng grep -q "^${key}[[:space:]]*=" "${file}"; then
         run_as_joinmarketng sed -i "s|^${key}[[:space:]]*=.*|${key} = ${sed_value}|" "${file}"
-      elif grep -q "^#[[:space:]]*${key}[[:space:]]*=" "${file}"; then
+      elif run_as_joinmarketng grep -q "^#[[:space:]]*${key}[[:space:]]*=" "${file}"; then
         run_as_joinmarketng sed -i "s|^#[[:space:]]*${key}[[:space:]]*=.*|${key} = ${sed_value}|" "${file}"
       else
         echo "# Warning: Could not find key '${key}' in ${file}"
@@ -1121,6 +1226,11 @@ if [ "$1" = "update" ]; then
     if [ -z "${UPDATE_TAG}" ]; then
       echo "# WARNING: Could not fetch latest version from GitHub, falling back to ${GITHUB_TAG}"
       UPDATE_TAG="${GITHUB_TAG}"
+    elif ! [[ "${UPDATE_TAG}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+      # Only an explicit operator argument may select the unsigned 'main'
+      # branch. A tag name reported by the API must be a signed release.
+      echo "# FAIL: GitHub reported an unexpected latest release tag."
+      exit 1
     else
       echo "# Latest version on GitHub: ${UPDATE_TAG}"
     fi
@@ -1132,11 +1242,17 @@ if [ "$1" = "update" ]; then
   MAKER_WAS_RUNNING=0
   MAKER_STOPPED=0
   MAKER_PASSWORD_MODE="none"
+  MAKER_STAGING_PRESENT=0
   TEMP_ENV_BACKUP=""
 
+  # Both files are app-owned and mode 0600, so inspect them as the app user.
+  if run_as_joinmarketng test -f "${ENV_FILE}"; then
+    MAKER_STAGING_PRESENT=1
+  fi
   if toml_has_wallet_password "/home/${USER_JM}/.joinmarket-ng/config.toml"; then
     MAKER_PASSWORD_MODE="stored"
-  elif [ -f "${ENV_FILE}" ] && grep -q '^MNEMONIC_PASSWORD=' "${ENV_FILE}"; then
+  elif [ "${MAKER_STAGING_PRESENT}" = "1" ] \
+    && run_as_joinmarketng grep -q '^MNEMONIC_PASSWORD=' "${ENV_FILE}"; then
     MAKER_PASSWORD_MODE="temporary"
   fi
 
@@ -1144,8 +1260,11 @@ if [ "$1" = "update" ]; then
     MAKER_WAS_RUNNING=1
   fi
 
+  # The staging file also carries the BIP39 passphrase and the wallet binding
+  # in stored and password-free modes. ExecStopPost deletes it on stop, so it
+  # is preserved whenever it exists, not only for a temporary password.
   restore_temporary_maker_environment() {
-    if [ "${MAKER_PASSWORD_MODE}" != "temporary" ]; then
+    if [ "${MAKER_STAGING_PRESENT}" != "1" ]; then
       return 0
     fi
     if [ -z "${TEMP_ENV_BACKUP}" ] || [ ! -f "${TEMP_ENV_BACKUP}" ]; then
@@ -1230,7 +1349,7 @@ if [ "$1" = "update" ]; then
     GIT_URL="git+${GITHUB_REPO}.git@${VERIFIED_COMMIT}"
   fi
 
-  if [ "${MAKER_WAS_RUNNING}" = "1" ] && [ "${MAKER_PASSWORD_MODE}" = "temporary" ]; then
+  if [ "${MAKER_WAS_RUNNING}" = "1" ] && [ "${MAKER_STAGING_PRESENT}" = "1" ]; then
     TEMP_ENV_BACKUP=$(run_as_joinmarketng mktemp "/tmp/${APPID}-maker-env.XXXXXX") || exit 1
     if ! run_as_joinmarketng cp "${ENV_FILE}" "${TEMP_ENV_BACKUP}" \
       || ! run_as_joinmarketng chmod 600 "${TEMP_ENV_BACKUP}"; then
@@ -1332,6 +1451,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/sudoers.d/joinmarketng-maker
   sudo rm -f "${SERVICE_HELPER}"
   sudo rm -rf /run/joinmarket-ng
+  sudo rm -rf "${CREDENTIALS_DIR}"
   sudo systemctl daemon-reload
 
   echo "# Removing user..."
