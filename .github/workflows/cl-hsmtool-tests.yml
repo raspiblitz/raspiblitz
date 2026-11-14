@@ -16,6 +16,7 @@ on:
       - 'home.admin/config.scripts/cl.install.sh'
       - 'home.admin/config.scripts/cl.install-service.sh'
       - 'home.admin/config.scripts/cl.backup.sh'
+      - 'home.admin/config.scripts/cl.monitor.sh'
       - 'home.admin/_provision.setup.sh'
       - 'test/test_cl_hsmsecret.py'
       - 'test/cl.hsmtool.hsmsecret.bats'
@@ -32,6 +33,7 @@ on:
       - 'home.admin/config.scripts/cl.install.sh'
       - 'home.admin/config.scripts/cl.install-service.sh'
       - 'home.admin/config.scripts/cl.backup.sh'
+      - 'home.admin/config.scripts/cl.monitor.sh'
       - 'home.admin/_provision.setup.sh'
       - 'test/test_cl_hsmsecret.py'
       - 'test/cl.hsmtool.hsmsecret.bats'
@@ -70,6 +72,7 @@ jobs:
           bash -n home.admin/config.scripts/cl.install.sh
           bash -n home.admin/config.scripts/cl.install-service.sh
           bash -n home.admin/config.scripts/cl.backup.sh
+          bash -n home.admin/config.scripts/cl.monitor.sh
           bash -n home.admin/_provision.setup.sh
           python3 -m py_compile home.admin/config.scripts/cl.hsmsecret.py
 

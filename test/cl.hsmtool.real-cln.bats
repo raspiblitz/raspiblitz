@@ -448,6 +448,10 @@ printf '%s\nTREZOR\n' "${ZOO_24}" | sudo -u bitcoin lightning-hsmtool generatehs
 type_is mnemonic-passphrase
 if bash config.scripts/cl.hsmtool.sh decrypt mainnet; then fail "decrypted a passphrase wallet"; fi
 if bash config.scripts/cl.hsmtool.sh encrypt mainnet x pw; then fail "encrypted a passphrase wallet"; fi
+echo "## hsm-type of a missing hsm_secret fails, still sourceable"
+rm -f "${hsm}"
+if out=$(bash config.scripts/cl.hsmtool.sh hsm-type mainnet 2>/dev/null); then fail "hsm-type of a missing file succeeded"; fi
+[ "$(echo "${out}" | grep -c "^hsmSecretType=''$")" -eq 1 ] || fail "hsm-type output: ${out}"
 echo "E2E FORMATS OK"
 EOF
   run docker run --rm -v "${REPO}:/repo:ro" -v "${WORK}/e2e-formats.sh:/e2e.sh:ro" \

@@ -214,6 +214,21 @@ systemd[1]: lightningd.service: Failed with result 'exit-code'."
   [[ "$output" == *"echo \"clStartError='\$(clHsmStartError \"\$(clStartJournal \${netprefix}lightningd)\")'\""* ]]
 }
 
+@test "script: hsm-type fails when the hsm_secret can not be read" {
+  run awk '/^elif \[ "\$1" = "hsm-type" \]; then$/ {f=1; next} f && /^elif / {exit} f' "${SCRIPT}"
+  echo "$output"
+  [[ "$output" == *'if ! hsmSecretType=$(getHsmSecretType); then'* ]]
+  [[ "$output" == *"echo \"hsmSecretType=''\""*"exit 1"* ]]
+}
+
+@test "script: the workflow runs the tests for every touched script" {
+  workflow="${REPO}/.github/workflows/cl-hsmtool-tests.yml"
+  for script in cl.hsmtool.sh cl.hsmsecret.py cl.install.sh cl.install-service.sh cl.backup.sh cl.monitor.sh; do
+    [ "$(grep -c "^      - 'home.admin/config.scripts/${script}'$" "${workflow}")" -eq 2 ]
+  done
+  [ "$(grep -c "^      - 'home.admin/_provision.setup.sh'$" "${workflow}")" -eq 2 ]
+}
+
 @test "script: no seed words are recovered from a lightningd wallet" {
   # a lightningd >= v25.12 wallet (mnemonic format) is derived from the full
   # BIP39 seed: its words restored with 'seed-force' (legacy format) would be

@@ -588,7 +588,14 @@ elif [ "$1" = "start-error" ]; then
 
 
 elif [ "$1" = "hsm-type" ]; then
-  echo "hsmSecretType='$(getHsmSecretType)'"
+  # callers source the output: always print the assignment, fail if the
+  # hsm_secret could not be read
+  if ! hsmSecretType=$(getHsmSecretType); then
+    echo "# ERROR: could not read ${hsmSecretPath}" >&2
+    echo "hsmSecretType=''"
+    exit 1
+  fi
+  echo "hsmSecretType='${hsmSecretType}'"
   exit 0
 
 
