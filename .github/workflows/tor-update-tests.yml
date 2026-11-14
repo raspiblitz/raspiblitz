@@ -1,12 +1,6 @@
 name: Tor update regression tests
 
 on:
-  push:
-    branches: [fix-tor-049-update-path, fix/tor-update-sunset]
-    paths:
-      - home.admin/config.scripts/tor.install.sh
-      - tests/tor-update/**
-      - .github/workflows/tor-update-tests.yml
   pull_request:
     paths:
       - home.admin/config.scripts/tor.install.sh

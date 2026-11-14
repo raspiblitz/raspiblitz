@@ -55,13 +55,22 @@ Snowflake installation and HDD/enable configuration are outside this suite.
 
 Rollback restores the Tor package and packaged executable, not every dependency,
 configuration side effect, or external effect of maintainer scripts. The exact
-previous package must still be downloadable from an authenticated configured
-APT repository. If it is unavailable, the update fails **before** touching the
-running Tor package/service. Failed updates retain the root-private recovery
-package and report its location; unsuccessful rollback/restart remains a failure
-requiring operator recovery. SIGKILL/power-loss recovery is not implemented.
+previous package is downloaded through authenticated APT when available, with
+an exact package/version/architecture-validated local cache fallback copied into
+the root-private stage. If neither is available, the updater warns and continues
+without package rollback. It still installs the authenticated configured APT
+candidate, with 0.4.9 as a minimum rather than a pinned target. Failed updates
+retain recovery files and report their location. Recovery restarts are attempted
+even without a backup, and unsuccessful installation/restart remains a failure.
+SIGKILL/power-loss recovery is not implemented.
 
-CI runs the same isolated suite for pushes to the existing PR branch
-`fix-tor-049-update-path`, the local `fix/tor-update-sunset` branch, matching PRs,
-and manual dispatch. Real Tor startup, cross-architecture Tor binaries, public
-repository availability and GitHub-hosted CI execution need separate verification.
+Latest-only signed-repository cases cover upgrades without an old package,
+cache fallback, corrupt or mismatched package/version/architecture rejection,
+no-backup installation/restart failures and a future 0.4.10 candidate. Legacy
+global trust is removed only after scoped trust and source writes succeed.
+The embedded root backup shell has independent line numbers and is checked by
+these outcome assertions rather than the outer script's xtrace site gate.
+
+CI runs the same isolated suite for matching PRs and manual dispatch, including
+manual runs on fork branches. Real Tor startup, cross-architecture Tor binaries
+and public repository availability need separate verification.

@@ -66,7 +66,9 @@ add_tor_sources(){
       rm -rf "${key_dir}"
       echo "deb [arch=${architecture} signed-by=/usr/share/keyrings/torproject.gpg] ${tor_deb_repo}/torproject.org ${distribution} main
  deb-src [arch=${architecture} signed-by=/usr/share/keyrings/torproject.gpg] ${tor_deb_repo}/torproject.org ${distribution} main" |
-        sudo tee /etc/apt/sources.list.d/tor.list
+        sudo tee /etc/apt/sources.list.d/tor.list || return 1
+      # Remove legacy global trust only after scoped trust and sources exist.
+      sudo rm -f /etc/apt/trusted.gpg.d/torproject.gpg
       return $?
     fi
   done
@@ -315,9 +317,8 @@ profile system_tor flags=(attach_disconnected) {
 fi
 
 if [ "${action}" = "update" ]; then
-  # Keep the installed package, not just /usr/bin/tor: rollback must restore
-  # package metadata and the other packaged files too. Fail closed if the old
-  # package is no longer available; do not stop the working service.
+  # Preserve the whole installed package when available. Repositories may
+  # retain only the newest version, so rollback cannot be an upgrade prerequisite.
   previous_version=$(dpkg-query -W -f='${Version}' tor) || exit 1
   update_stage=$(sudo mktemp -d /var/tmp/tor-update.XXXXXXXX) || exit 1
   install_attempted=0
@@ -327,12 +328,12 @@ if [ "${action}" = "update" ]; then
     local result=$?
     trap - EXIT
     if [ "${update_complete}" -eq 0 ]; then
-      if [ "${install_attempted}" -eq 1 ]; then
+      if [ "${install_attempted}" -eq 1 ] && sudo test -f "${update_stage}/previous.deb"; then
         sudo dpkg --force-confold -i "${update_stage}/previous.deb" ||
           echo "! FAIL: Package rollback failed; recovery package: ${update_stage}/previous.deb"
       fi
       if [ "${stop_attempted}" -eq 1 ]; then
-        restart_tor_service || echo "! FAIL: Unable to restart the previous Tor service"
+        restart_tor_service || echo "! FAIL: Unable to restart the Tor service"
       fi
       echo "! INFO: Recovery files retained in ${update_stage}"
     else
@@ -342,9 +343,34 @@ if [ "${action}" = "update" ]; then
   }
   trap finish_update EXIT
   trap 'exit 1' HUP INT TERM
-  sudo bash -c 'cd "$1" && apt download "tor=$2" &&
-    set -- ./*.deb && [ "$#" -eq 1 ] && mv -- "$1" previous.deb' \
-    bash "${update_stage}" "${previous_version}" || exit 1
+  # Download through authenticated APT first. Copy a matching cached package
+  # only as a fallback, validating metadata rather than trusting its filename.
+  if ! sudo bash -c '
+    cd "$1" || exit 1
+    valid_package(){
+      [ "$(dpkg-deb -f "$1" Package)" = tor ] &&
+      [ "$(dpkg-deb -f "$1" Version)" = "$2" ] &&
+      { [ "$(dpkg-deb -f "$1" Architecture)" = all ] ||
+        [ "$(dpkg-deb -f "$1" Architecture)" = "$3" ]; }
+    }
+    if apt download "tor=$2"; then
+      for package in ./*.deb; do
+        if valid_package "$package" "$2" "$3"; then
+          mv -- "$package" previous.deb && exit 0
+        fi
+      done
+    fi
+    for package in /var/cache/apt/archives/tor_*.deb; do
+      [ -f "$package" ] || continue
+      cp -- "$package" cached.deb || continue
+      if valid_package cached.deb "$2" "$3"; then
+        mv cached.deb previous.deb && exit 0
+      fi
+      rm -f cached.deb
+    done
+    exit 1' bash "${update_stage}" "${previous_version}" "${architecture}"; then
+    echo "! WARNING: Previous Tor package unavailable, continuing without package rollback"
+  fi
 
   case "$2" in
     source)

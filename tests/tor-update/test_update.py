@@ -24,12 +24,12 @@ def command(args, **kw):
     return p.stdout
 
 
-def package(version):
-    directory = FIXTURE / ('build-' + version)
+def package(version, name='tor', arch='all'):
+    directory = FIXTURE / ('build-' + version + ('-' + name + '-' + arch if (name, arch) != ('tor', 'all') else ''))
     (directory / 'DEBIAN').mkdir(parents=True)
     (directory / 'usr/bin').mkdir(parents=True)
     (directory / 'DEBIAN/control').write_text(
-        f'Package: tor\nVersion: {version}\nArchitecture: all\n'
+        f'Package: {name}\nVersion: {version}\nArchitecture: {arch}\n'
         'Maintainer: Test <test@example.invalid>\nDescription: Inert Tor fixture\n')
     binary = directory / 'usr/bin/tor'
     binary.write_text('#!/bin/sh\n[ "$1" = --version ] || exit 99\n'
@@ -37,7 +37,7 @@ def package(version):
                       f'echo "Tor version {version}."\n'
                       '[ "${FAULT:-}" != version-error ] || { touch "$CASE/reached"; exit 1; }\n')
     binary.chmod(0o755)
-    target = FIXTURE / f'tor_{version}_all.deb'
+    target = FIXTURE / f'{name}_{version}_{arch}.deb'
     command(['dpkg-deb', '--build', str(directory), str(target)])
 
 
@@ -59,8 +59,11 @@ def setup_module():
     command(['gpg', '--batch', '--passphrase', '', '--quick-generate-key',
              'Untrusted extra key <extra@example.invalid>', 'ed25519', 'sign', '0'])
     (FIXTURE / 'bundle.asc').write_text(command(['gpg', '--armor', '--export']))
-    for version in ('0.4.8.1', '0.4.9.1', '0.4.9.2'):
+    for version in ('0.4.8.1', '0.4.9.1', '0.4.9.2', '0.4.10.2'):
         package(version)
+    package('0.4.8.1', name='not-tor')
+    package('0.4.8.1', arch='i386')
+    package('0.4.8.1', arch='arm64')
     Path('/home/admin/download').mkdir(parents=True)
     Path('/usr/bin/snowflake-client').touch()
     Path('/usr/bin/snowflake-proxy').touch()
@@ -76,12 +79,13 @@ def setup_module():
 
 
 class Update(unittest.TestCase):
-    def run_case(self, fault='', source=False, arch='arm64', unit='tor@default', old='0.4.8.1', action='update'):
+    def run_case(self, fault='', source=False, arch='arm64', unit='tor@default', old='0.4.8.1', action='update', latest_only=False, cache='', latest='0.4.9.1'):
         case = CASES / self.id().split('.')[-1]
         case.mkdir()
         repo = case / 'repo'
         repo.mkdir()
-        for version in (('0.4.8.1', '0.4.9.1', '0.4.9.2') if old == '0.4.9.2' else ('0.4.8.1', '0.4.9.1')):
+        versions = [latest] if latest_only else list(dict.fromkeys([old, latest]))
+        for version in versions:
             shutil.copy(FIXTURE / f'tor_{version}_all.deb', repo)
         # dpkg-scanpackages reports warnings on stderr; only package records belong in Packages.
         packages = subprocess.check_output(['dpkg-scanpackages', '--multiversion', '.', '/dev/null'],
@@ -104,7 +108,17 @@ class Update(unittest.TestCase):
         command(['/usr/bin/dpkg', '-i', str(FIXTURE / f'tor_{old}_all.deb')])
         command(['/usr/bin/apt-get', 'update'],
                 env=dict(env, PATH='/usr/sbin:/usr/bin:/sbin:/bin'))
+        for cached in Path('/var/cache/apt/archives').glob('tor_*.deb'):
+            cached.unlink()
+        if cache:
+            target = Path('/var/cache/apt/archives/tor_cached.deb')
+            if cache == 'corrupt':
+                target.write_bytes(b'not a deb')
+            else:
+                shutil.copy(FIXTURE / cache, target)
         (case / 'service').write_text('running')
+        legacy = Path('/etc/apt/trusted.gpg.d/torproject.gpg')
+        legacy.write_text('legacy-global-key')
         Path('/usr/share/keyrings/torproject.gpg').write_text('previous-keyring')
         with (case / 'trace').open('w') as trace:
             env.update(BASH_XTRACEFD=str(trace.fileno()), BASH_ENV='/fixture/bash-env')
@@ -120,19 +134,19 @@ class Update(unittest.TestCase):
                 pass
         events = [json.loads(x) for x in (case / 'events').read_text().splitlines()]
         version = command(['/usr/bin/dpkg-query', '-W', '-f=${Version}', 'tor']).strip()
-        expected = 0 if not fault or fault == 'key-retry' else 1
+        expected = 0 if fault in ('', 'key-retry', 'backup-download') else 1
         self.assertEqual(p.returncode, expected, p.stdout)
         if fault:
             self.assertTrue((case / 'reached').exists(), 'fault not reached: ' + p.stdout)
         if expected == 0:
-            self.assertEqual(version, '0.4.9.1' if old != '0.4.9.2' else old)
+            self.assertEqual(version, max((latest, old), key=lambda v: tuple(map(int, v.split('.')))))
             self.assertEqual((case / 'service').read_text(), 'stopped' if action == 'install' else 'running')
             if not source:
                 sources = Path('/etc/apt/sources.list.d/tor.list').read_text()
                 self.assertIn(f'arch={arch} signed-by=/usr/share/keyrings/torproject.gpg', sources)
         elif action == 'install':
             self.assertIn('! FAIL:', p.stdout)
-        elif fault != 'rollback-failure':
+        elif fault != 'rollback-failure' and not latest_only:
             self.assertEqual(version, old, p.stdout)
             # Compare actual packaged executable bytes, not only the database.
             self.assertEqual(Path('/usr/bin/tor').read_bytes(),
@@ -147,14 +161,14 @@ class Update(unittest.TestCase):
             self.assertIn('Package rollback failed', p.stdout)
             self.assertEqual(version, '0.4.9.1')
         if fault == 'restart-permanent':
-            self.assertIn('Unable to restart the previous Tor service', p.stdout)
+            self.assertIn('Unable to restart the Tor service', p.stdout)
             self.assertEqual((case / 'service').read_text(), 'stopped')
         stages = re.findall(r'Recovery files retained in (\S+)', p.stdout)
         for stage in stages:
             directory = Path(stage)
             self.assertEqual(directory.stat().st_uid, 0)
             self.assertEqual(directory.stat().st_mode & 0o777, 0o700)
-            if fault != 'backup-download':
+            if fault != 'backup-download' and (not latest_only or cache in ('tor_0.4.8.1_all.deb', 'tor_0.4.8.1_arm64.deb')):
                 self.assertEqual((directory / 'previous.deb').read_bytes(),
                                  (FIXTURE / f'tor_{old}_all.deb').read_bytes())
         for event in events:
@@ -163,7 +177,42 @@ class Update(unittest.TestCase):
         if fault.startswith('key-') and fault != 'key-retry':
             self.assertEqual(Path('/usr/share/keyrings/torproject.gpg').read_text(), 'previous-keyring')
             self.assertEqual(sum(e[:2] == ['curl', '-fsS'] for e in events), 0 if fault == 'key-stage' else 2)
+        if not source:
+            self.assertEqual(legacy.exists(), fault.startswith('key-') and fault != 'key-retry' or
+                             fault in ('keyring-install', 'bundled-key', 'sources-write', 'update-stage', 'missing-package'))
+        if latest_only:
+            backup = cache in ('tor_0.4.8.1_all.deb', 'tor_0.4.8.1_arm64.deb')
+            self.assertEqual('continuing without package rollback' in p.stdout, not backup)
+            rollbacks = [e for e in events if e[0] == 'dpkg' and e[-1].endswith('previous.deb')]
+            self.assertEqual(bool(rollbacks), backup and expected != 0)
+            if expected != 0:
+                self.assertEqual(version, old if backup else latest)
+                self.assertGreaterEqual(sum(e[:2] == ['systemctl', 'restart'] for e in events),
+                                        2 if fault.startswith('restart') else 1)
+                self.assertEqual((case / 'service').read_text(),
+                                 'stopped' if fault == 'restart-permanent' else 'running')
         return case, events
+
+    def test_latest_only_upgrade(self):
+        self.run_case(latest_only=True)
+
+    def test_future_candidate(self):
+        self.run_case(latest_only=True, latest='0.4.10.2')
+
+    def test_cache_fallback(self):
+        self.run_case('apt-install', latest_only=True, cache='tor_0.4.8.1_all.deb')
+
+    def test_cache_actual_architecture(self):
+        self.run_case(latest_only=True, cache='tor_0.4.8.1_arm64.deb')
+
+    def test_no_backup_install_failure(self):
+        self.run_case('apt-install', latest_only=True)
+
+    def test_no_backup_restart_failure(self):
+        self.run_case('restart', latest_only=True)
+
+    def test_no_backup_permanent_restart_failure(self):
+        self.run_case('restart-permanent', latest_only=True)
 
     def test_install_success(self):
         self.run_case(action='install')
@@ -229,6 +278,14 @@ for fault in ('source-download', 'build-tools', 'build-dep', 'build', 'missing-b
     add_case('source_' + fault.replace('-', '_'), fault, True)
 
 
+for label, cache in [('package', 'not-tor_0.4.8.1_all.deb'),
+                     ('version', 'tor_0.4.9.1_all.deb'),
+                     ('architecture', 'tor_0.4.8.1_i386.deb'), ('corrupt', 'corrupt')]:
+    def invalid_cache(self, cache=cache):
+        self.run_case('apt-install', latest_only=True, cache=cache)
+    setattr(Update, 'test_invalid_cache_' + label, invalid_cache)
+
+
 def verify_command_sites():
     """Audit command/condition sites in the changed helpers/update block.
 
@@ -245,7 +302,13 @@ def verify_command_sites():
         spans.extend(range(first, last))
     pattern = re.compile(r'^(local |[a-z_]+=|for |if |curl |gpg |sudo |rm |echo |return |trap |exit |case |cd |apt |debuild |mkdir |set -- tor_|\[ )')
     required = set()
+    nested_start = lines.index("  if ! sudo bash -c '")
+    nested_end = next(i for i in range(nested_start, len(lines)) if lines[i].startswith("    exit 1' bash"))
     for i in spans:
+        # The embedded root shell has its own line numbers, not SCRIPT lines.
+        # Its outcomes are asserted by the signed-repository/cache cases.
+        if nested_start < i <= nested_end:
+            continue
         line = lines[i].strip()
         if not pattern.match(line):
             continue
