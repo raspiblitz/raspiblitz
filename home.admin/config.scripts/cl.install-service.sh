@@ -20,10 +20,17 @@ if [ $(sudo -u bitcoin cat ${CLCONF} | grep -c "^http-pass") -gt 0 ];then
   fi
 fi
 
-if [ $(sudo -u bitcoin cat ${CLCONF} | grep -c "^feeadjuster") -gt 0 ];then
-  if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py ];then
+# Retained CLN options must not override an explicitly disabled plugin.
+feeadjusterState=$(
+  source /mnt/hdd/app-data/raspiblitz.conf || exit 1
+  key="${netprefix}feeadjuster"
+  printf '%s' "${!key}"
+) || exit 1
+if [ "$feeadjusterState" != off ] &&
+   [ "$(sudo -u bitcoin cat "${CLCONF}" | grep -c "^feeadjuster")" -gt 0 ];then
+  if [ ! -f "/home/bitcoin/${netprefix}cl-plugins-enabled/feeadjuster.py" ];then
     echo "# The feeadjuster plugin is not present but in config"
-    /home/admin/config.scripts/cl-plugin.feeadjuster.sh on $CHAIN norestart
+    /home/admin/config.scripts/cl-plugin.feeadjuster.sh on "$CHAIN" norestart || exit 1
   fi
 fi
 
