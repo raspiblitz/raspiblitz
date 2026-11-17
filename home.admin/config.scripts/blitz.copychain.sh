@@ -415,6 +415,6 @@ if [ "$1" = "source" ]; then
   sudo systemctl start lightningd 2>/dev/null
 
   echo "# show final message"
-  whiptail --msgbox "OK - Copy Process Finished.\n\nNow check on the target RaspiBlitz if it was sucessful." 10 40 "" --title " DONE " --backtitle "RaspiBlitz - Copy Blockchain"
+  whiptail --msgbox "OK - Copy Process Finished.\n\nNow check on the target RaspiBlitz if it was successful." 10 40 "" --title " DONE " --backtitle "RaspiBlitz - Copy Blockchain"
 
 fi

@@ -558,7 +558,7 @@ if [ "$action" = "status" ]; then
                     bootFromSD=0
                 fi
 
-            # when seperate system drive is found - check size
+            # when separate system drive is found - check size
             else
 
                 # if there is a system drive but its smaller than systemMinGB - boot from storage
@@ -749,7 +749,7 @@ if [ "$action" = "status" ]; then
     elif [ ${#storageDevice} -eq 0 ]; then
         scenario="error:no-storage"
 
-    # ready: Proxmox VM with all seperated drives mounted
+    # ready: Proxmox VM with all separated drives mounted
     elif [ ${#storageMountedPath} -gt 0 ]  && [ ${#dataMountedPath} -gt 0 ] && [ ${#systemMountedPath} -gt 0 ]; then
         scenario="ready"
 
