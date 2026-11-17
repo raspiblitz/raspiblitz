@@ -4,7 +4,8 @@ APPID="publicpool"
 VERSION="0.1"
 GITHUB_REPO="https://github.com/benjamin-wilson/public-pool.git"
 GITHUB_REPO_UI="https://github.com/benjamin-wilson/public-pool-ui.git"
-GITHUB_TAG=""
+GITHUB_COMMIT="b971e9ce4ccd23ae98536d57dcf63657ade7919f"
+GITHUB_COMMIT_UI="1c0b2d93e3ce0a81d4faa7b1d444ace936e3f63d"
 
 PORT_API="3334"
 PORT_STRATUM="3333"
@@ -43,7 +44,8 @@ if [ "$1" = "status" ]; then
   echo "version='${VERSION}'"
   echo "githubRepo='${GITHUB_REPO}'"
   echo "githubRepoUI='${GITHUB_REPO_UI}'"
-  echo "githubVersion='${GITHUB_TAG}'"
+  echo "githubVersion='${GITHUB_COMMIT}'"
+  echo "githubVersionUI='${GITHUB_COMMIT_UI}'"
   echo "isInstalled=${isInstalled}"
   echo "isRunning=${isRunning}"
   if [ "${isInstalled}" == "1" ]; then
@@ -100,26 +102,63 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# Clone repositories"
   sudo -u ${APPID} git clone ${GITHUB_REPO} /home/${APPID}/${APPID}
+  sudo -u ${APPID} git -C /home/${APPID}/${APPID} checkout --detach ${GITHUB_COMMIT}
   sudo -u ${APPID} git clone ${GITHUB_REPO_UI} /home/${APPID}/${APPID}-ui
+  sudo -u ${APPID} git -C /home/${APPID}/${APPID}-ui checkout --detach ${GITHUB_COMMIT_UI}
 
   # check that the repos were cloned
-  if [ ! -d "/home/${APPID}/${APPID}" ] || [ ! -d "/home/${APPID}/${APPID}-ui" ]; then
+  if [ ! -d "/home/${APPID}/${APPID}" ] || [ ! -d "/home/${APPID}/${APPID}-ui" ] || \
+    [ "$(sudo -u ${APPID} git -C /home/${APPID}/${APPID} rev-parse HEAD 2>/dev/null)" != "${GITHUB_COMMIT}" ] || \
+    [ "$(sudo -u ${APPID} git -C /home/${APPID}/${APPID}-ui rev-parse HEAD 2>/dev/null)" != "${GITHUB_COMMIT_UI}" ]; then
     echo "# FAIL - Was not able to clone the GitHub repos."
     echo "# running uninstall script to clean up"
     /home/admin/config.scripts/bonus.publicpool.sh off
     exit 1
   fi 
 
-  # Modify the environment.prod.ts file of WebUI
+  # Configure the UI to use the API through the local Angular dev-server proxy.
   localIP=$(hostname -I | awk '{print $1}')
-  echo "# Updating environment.prod.ts with correct API and STRATUM URLs" 
+  echo "# Updating environment.ts with relative API and STRATUM URLs"
   sudo -u ${APPID} tee /home/${APPID}/${APPID}-ui/src/environments/environment.ts > /dev/null << EOL
 export const environment = {
-  production: true,
-  API_URL: 'http://${localIP}:${PORT_API}',
-  STRATUM_URL: '${localIP}:${PORT_STRATUM}'
+    production: false,
+    API_URL: '',
+    STRATUM_URL: '${localIP}:${PORT_STRATUM}'
 };
 EOL
+
+  sudo -u ${APPID} tee /home/${APPID}/${APPID}-ui/proxy.config.local.json > /dev/null << EOL
+{
+    "/api": {
+        "target": "http://127.0.0.1:${PORT_API}",
+        "secure": false,
+        "changeOrigin": false,
+        "logLevel": "debug"
+    }
+}
+EOL
+
+  # Allow the Pi hostname and -- if installed -- the Tailscale MagicDNS name in Angular's host check.
+  hostName=$(hostname)
+  tailscaleDNS=""
+  if command -v tailscale >/dev/null 2>&1; then
+    tailscaleDNS=$(sudo tailscale status --json 2>/dev/null | jq -r '.Self.DNSName // empty' 2>/dev/null | sed 's/\.$//')
+  fi
+  allowedHostsJson=$(printf '%s\n' "${hostName}" "${hostName}.local" "${tailscaleDNS}" | jq -Rsc 'split("\n") | map(select(length > 0)) | unique')
+  angularConfig="/home/${APPID}/${APPID}-ui/angular.json"
+  angularConfigTmp="${angularConfig}.tmp"
+  if ! (
+    set -o pipefail
+    sudo -u ${APPID} jq --argjson allowedHosts "${allowedHostsJson}" \
+      '.projects["public-pool-ui"].architect.serve.options.allowedHosts = $allowedHosts' \
+      "${angularConfig}" | sudo -u ${APPID} tee "${angularConfigTmp}" > /dev/null
+  ) || \
+    ! sudo -u ${APPID} mv "${angularConfigTmp}" "${angularConfig}"; then
+    echo "# FAIL - Was not able to configure the UI host allowlist."
+    echo "# running uninstall script to clean up"
+    /home/admin/config.scripts/bonus.publicpool.sh off
+    exit 1
+  fi
 
   echo "##### Install Backend"
   cd /home/${APPID}/${APPID}
@@ -195,7 +234,7 @@ After=${APPID}.service
 
 [Service]
 WorkingDirectory=/home/${APPID}/${APPID}-ui
-ExecStart=/usr/bin/ng serve --host 0.0.0.0 --port ${PORT_UI} --no-watch --poll 2000
+ExecStart=/usr/bin/ng serve --host 0.0.0.0 --port ${PORT_UI} --no-watch --poll 2000 --proxy-config proxy.config.local.json
 User=${APPID}
 Restart=always
 StandardOutput=null
