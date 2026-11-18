@@ -3,9 +3,9 @@
 # Based on: https://gist.github.com/normandmickey/3f10fc077d15345fb469034e3697d0d0
 
 # https://github.com/btcpayserver/NBXplorer/tags
-NBXplorerVersion="v2.6.10"
+NBXplorerVersion="v2.6.21"
 # https://github.com/btcpayserver/btcpayserver/releases
-BTCPayVersion="v2.4.2"
+BTCPayVersion="v2.4.7"
 
 # check who signed the release (person that published release)
 PGPsigner="nicolasdorier"
@@ -20,25 +20,40 @@ PGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
 # PGPpubkeyLink="https://github.com/web-flow.gpg"
 # PGPpubkeyFingerprint="B5690EEEBB952194"
 
+# verify the checked out commit in the current directory
+# accepts ${PGPsigner} or GitHub (web-flow) for commits merged on github.com
+function PGPverify() {
+  echo "# verify signature of ${PGPsigner}"
+  if ! sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}"; then
+    # try with webflow
+    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "web-flow" "https://github.com/web-flow.gpg" "B5690EEEBB952194" || exit 1
+  fi
+}
+
 function DotNetInstall() {
-  echo "# install .NET"
   # https://dotnet.microsoft.com/en-us/download/dotnet/10.0
+  # SHA512 checksums: https://builds.dotnet.microsoft.com/dotnet/release-metadata/10.0/releases.json
+  dotNetVersion="10.0.403"
+  if sudo -u btcpay /home/btcpay/dotnet/dotnet --list-sdks 2>/dev/null | grep -q "^${dotNetVersion} "; then
+    echo "# .NET SDK ${dotNetVersion} is already installed"
+    return 0
+  fi
+  echo "# install .NET SDK ${dotNetVersion}"
   sudo apt-get -y install libunwind8 gettext libssl-dev
   cpu=$(uname -m)
   if [ "${cpu}" = "aarch64" ]; then
     binaryVersion="arm64"
-    dotNetdirectLink="https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.300/dotnet-sdk-10.0.300-linux-arm64.tar.gz"
-    dotNetChecksum="b503fe0cac8f8748d1ae67af40bc9157456cc0f93c8264e3bc52cc52a12fbbbc3a16e905d8528214f29337d7349859bb08de99b1e1406da92723b071b3f45ce5"
+    dotNetChecksum="0966aa2b70f4677b8319be9df447a78a0dcd6164836425b55a68fd714f4023feb87b4cac21b9a996b79472ad54487cd0adcd2a9dfd570e2b2a1d26423a2baa9b"
   elif [ "${cpu}" = "x86_64" ]; then
     binaryVersion="x64"
-    dotNetdirectLink="https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.300/dotnet-sdk-10.0.300-linux-x64.tar.gz"
-    dotNetChecksum="a0c404c1a2f85d70e32392ce297eb388c0310c519521b538a031a895469444c67f347d4f9ca1f8441f525967a89c9b75e2cd1676da486f95118cf4025c38d904"
+    dotNetChecksum="b7b3d8461cf98b07d2552ce9199702fa3ad010ac2671a5f8cd5136f7534e50f6855ba7bbb02b11494563f1d04156276a31cda1103b900e5eecd0d9473dc7b9c5"
   else
     echo "# FAIL! CPU (${cpu}) not supported."
     echo "result='dotnet cpu not supported'"
     exit 1
   fi
-  dotNetName="dotnet-sdk-10.0.300-linux-${binaryVersion}.tar.gz"
+  dotNetName="dotnet-sdk-${dotNetVersion}-linux-${binaryVersion}.tar.gz"
+  dotNetdirectLink="https://builds.dotnet.microsoft.com/dotnet/Sdk/${dotNetVersion}/${dotNetName}"
   sudo rm -f /home/btcpay/dotnet-sdk-*.tar.gz 2>/dev/null
   sudo -u btcpay wget "${dotNetdirectLink}" -O "/home/btcpay/${dotNetName}"
   # check binary is was not manipulated (checksum test)
@@ -488,11 +503,7 @@ if [ "$1" = "install" ]; then
     cd NBXplorer
     sudo -u btcpay git reset --hard $NBXplorerVersion
   fi
-  # PGP verify
-  NBXPGPsigner="nicolasdorier"
-  NBXPGPpubkeyLink="https://keybase.io/nicolasdorier/pgp_keys.asc"
-  NBXPGPpubkeyFingerprint="AB4CFA9895ACA0DBE27F6B346618763EF09186FE"
-  sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${NBXPGPsigner}" "${NBXPGPpubkeyLink}" "${NBXPGPpubkeyFingerprint}" || exit 1
+  PGPverify
   echo "# Build NBXplorer $NBXplorerVersion"
   # from the build.sh with path
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
@@ -505,11 +516,7 @@ if [ "$1" = "install" ]; then
   cd btcpayserver || exit 1
   sudo -u btcpay git reset --hard $BTCPayVersion
 
-  echo "# verify signature of ${PGPsigner}"
-  if ! sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}"; then
-    # try with webflow
-    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "web-flow" "https://github.com/web-flow.gpg" "B5690EEEBB952194" || exit 1
-  fi
+  PGPverify
 
   echo "# Build BTCPayServer $BTCPayVersion"
   # from the build.sh with path
@@ -861,18 +868,10 @@ if [ "$1" = "update" ]; then
   fi
   echo "# Reset NBXplorer to release tag: $NBXplorerVersion"
   sudo -u btcpay git reset --hard "$NBXplorerVersion"
-  sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh \
-    "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
+  PGPverify
 
   echo "# Build NBXplorer $NBXplorerVersion"
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release NBXplorer/NBXplorer.csproj || exit 1
-
-  # whitelist localhost in bitcoind
-  if ! sudo grep -Eq "^whitelist=127.0.0.1" /mnt/hdd/app-data/bitcoin/bitcoin.conf; then
-    echo "whitelist=127.0.0.1" | sudo tee -a /mnt/hdd/app-data/bitcoin/bitcoin.conf
-    echo "# Restarting bitcoind"
-    sudo systemctl restart bitcoind
-  fi
 
   NBXplorerConfig
   sudo systemctl start nbxplorer
@@ -897,11 +896,7 @@ if [ "$1" = "update" ]; then
   echo "# Reset BTCPayServer to release tag: $BTCPayVersion"
   sudo -u btcpay git reset --hard "$BTCPayVersion"
 
-  echo "# verify signature of ${PGPsigner}"
-  if ! sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}"; then
-    # try with webflow
-    sudo -u btcpay /home/admin/config.scripts/blitz.git-verify.sh "web-flow" "https://github.com/web-flow.gpg" "B5690EEEBB952194" || exit 1
-  fi
+  PGPverify
 
   echo "# Build BTCPayServer $BTCPayVersion"
   sudo -u btcpay /home/btcpay/dotnet/dotnet build -c Release /home/btcpay/btcpayserver/BTCPayServer/BTCPayServer.csproj || exit 1
