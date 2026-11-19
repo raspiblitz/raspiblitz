@@ -64,9 +64,7 @@ Instructions to run a RaspiBlitz as a VM on a Linux host machine.
 The process is similar if you want to run RaspiBlitz on the bare metal.
 
 Tested with:
-* Debian image in VirtualBox and linux virt-manager / [cockpit-machines](https://github.com/cockpit-project/cockpit-machines)
-* Ubuntu image in VirtualBox and linux virt-manager / [cockpit-machines](https://github.com/cockpit-project/cockpit-machines)
-* Debian image in VirtualBox https://github.com/rootzoll/raspiblitz/issues/2756#issuecomment-983532237
+* Debian and Ubuntu VMs with virt-manager or [cockpit-machines](https://github.com/cockpit-project/cockpit-machines)
 * TrueNAS (FreeBSD bhyve) with an Ubuntu VM: https://github.com/rootzoll/raspiblitz/issues/2104#issuecomment-917444238
 * [QEMU+UTM](https://github.com/rootzoll/raspiblitz/blob/dev/alternative.platforms/QEMU/raspiblitz-on-qemu.md)
 
@@ -74,8 +72,6 @@ Tested with:
 * Download and install the base OS on an at least 32GB drive
 * Debian is the most tested and is closest to the RaspberryOS: <https://www.debian.org/distrib/>
 * Ubuntu should work, but less tested
-* To just experiment can load a virtualbox image from: <https://www.osboxes.org/debian/> or <https://www.osboxes.org/ubuntu>.
-These not need installation, password: `osboxes.org`
 
 ### Building the Raspiblitz scripts
 * Run the build script in the terminal of the base OS (with sudo access):

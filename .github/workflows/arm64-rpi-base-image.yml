@@ -87,7 +87,10 @@ jobs:
       - name: Upload the base image and checksum
         uses: actions/upload-artifact@v4
         with:
-          name: raspiblitz-arm64-rpi-base-image-${{ env.BUILD_VERSION }}
+          name: >-
+            ${{ github.event_name == 'pull_request' &&
+            format('UNTRUSTED-PR-{0}-{1}-', github.event.pull_request.number,
+            github.event.pull_request.head.repo.owner.login) || '' }}raspiblitz-arm64-rpi-base-image-${{ env.BUILD_VERSION }}
           path: |
             ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-base.img.sha256
             ${{ github.workspace }}/ci/arm64-rpi/raspiblitz-arm64-rpi-base.img

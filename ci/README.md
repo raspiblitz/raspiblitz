@@ -4,12 +4,14 @@
 <details>
 <summary>Table of Contents</summary>
 
+- [Download a development image](#download-a-development-image)
 - [Ready made images for arm64-rpi](#ready-made-images-for-arm64-rpi)
 - [Ready made images for amd64 (x86)](#ready-made-images-for-amd64-x86)
   - [Write the image to a disk connected with USB](#write-the-image-to-a-disk-connected-with-usb)
     - [Prepare the disk](#prepare-the-disk)
-    - [Option 1 - rite the .qcow2 file directly to disk with `qemu-image dd`](#option-1---rite-the-qcow2-file-directly-to-disk-with-qemu-image-dd)
+    - [Option 1 - write the .qcow2 file directly to disk with `qemu-img dd`](#option-1---write-the-qcow2-file-directly-to-disk-with-qemu-img-dd)
     - [Option 2 - convert the .qcow2 volume to a raw disk image](#option-2---convert-the-qcow2-volume-to-a-raw-disk-image)
+    - [Write a raw disk image](#write-a-raw-disk-image)
   - [The first boot](#the-first-boot)
     - [Lean image with Gnome desktop (default image)](#lean-image-with-gnome-desktop-default-image)
     - [Extend the root partition (optional - recommended)](#extend-the-root-partition-optional---recommended)
@@ -31,32 +33,47 @@
 
 </details>
 
-## Ready made images for arm64-rpi
-* The images are built in GitHub actions
-* To see the downloadable artifacts will need to log in to GitHub
-* Find the latest successful build of the default arm64 image:
-https://github.com/raspiblitz/raspiblitz/actions/workflows/arm64-rpi-lean-image.yml?query=workflow%3Aarm64-rpi-lean-image-build+is%3Asuccess+branch%3Adev
-* unpack the artifact to the same directory
-  ```
-  unzip ./raspiblitz-arm64-rpi-image-*.zip
-  ```
-* The resulting `raspiblitz-arm64-rpi-lean.img.gz` can be written to an SDcard directly with Balena Etcher
+## Download a development image
 
+Sign in to GitHub and open the latest successful `dev` push build for your platform
+that still has an image under **Artifacts**. If a push artifact is unavailable, use
+a manual `dev` build started by a maintainer.
+
+| Platform | Push builds | Manual builds |
+| --- | --- | --- |
+| ARM64 (Raspberry Pi) | [Push builds](https://github.com/raspiblitz/raspiblitz/actions/workflows/arm64-rpi-lean-image.yml?query=branch%3Adev+is%3Asuccess+event%3Apush) | [Manual builds](https://github.com/raspiblitz/raspiblitz/actions/workflows/arm64-rpi-lean-image.yml?query=branch%3Adev+is%3Asuccess+event%3Aworkflow_dispatch) |
+| AMD64 (x86) | [Push builds](https://github.com/raspiblitz/raspiblitz/actions/workflows/amd64-lean-image.yml?query=branch%3Adev+is%3Asuccess+event%3Apush) | [Manual builds](https://github.com/raspiblitz/raspiblitz/actions/workflows/amd64-lean-image.yml?query=branch%3Adev+is%3Asuccess+event%3Aworkflow_dispatch) |
+
+Before downloading, confirm that the run is in `raspiblitz/raspiblitz` and that
+GitHub shows branch `dev` and the expected event (`push` or `workflow_dispatch`).
+Pull request artifacts are for testing, even if their branch or artifact name
+looks familiar. If neither list has a downloadable image, [build locally](#local-build).
+
+## Ready made images for arm64-rpi
+
+Extract the downloaded ZIP into a fresh directory and verify the compressed image.
+
+```sh
+unzip ./raspiblitz-arm64-rpi-image-*.zip
+sha256sum -c raspiblitz-arm64-rpi-lean.img.gz.sha256
+```
+
+Write `raspiblitz-arm64-rpi-lean.img.gz` to a microSD card with [Balena Etcher](https://www.balena.io/etcher/).
 
 ## Ready made images for amd64 (x86)
-* The images are built in GitHub actions
-* To see the downloadable artifacts will need to log in to GitHub
-* Find the latest successful build of the default amd64 image:
-https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?query=workflow%3Aamd64-lean-image-build+branch%3Adev+is%3Asuccess++
-  ```
-  # unpack the artifact to the same directory
-  unzip ./raspiblitz-amd64-image-*.zip
-  # unpack the image
-  gzip -dkv raspiblitz-amd64-debian-lean.qcow2.gz
-  # install qemu-utils
-  sudo apt install -y qemu-utils
-  ```
-###  Write the image to a disk connected with USB
+
+Extract the downloaded ZIP into a fresh directory and verify the compressed raw image.
+
+```sh
+unzip ./raspiblitz-amd64-image-*.zip
+sha256sum -c raspiblitz-amd64-debian-lean.img.gz.sha256
+```
+
+Write `raspiblitz-amd64-debian-lean.img.gz` with [Balena Etcher](https://www.balena.io/etcher/),
+or decompress it with `gzip -dkv raspiblitz-amd64-debian-lean.img.gz`, [prepare the disk](#prepare-the-disk)
+and [write the raw image](#write-a-raw-disk-image) on Linux.
+
+### Write the image to a disk connected with USB
 
 #### Prepare the disk
 * identify the connected disk with `lsblk` e.g., `/dev/sdk`
@@ -75,7 +92,10 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   sudo wipefs --all ${disk}
   ```
 
-#### Option 1 - write the .qcow2 file directly to disk with `qemu-image dd`
+For locally built `.qcow2` images, install `qemu-utils` with `sudo apt install -y qemu-utils`
+and choose one of the following options.
+
+#### Option 1 - write the .qcow2 file directly to disk with `qemu-img dd`
 * requires less disk space - the .qcow2 volume is 8.1 GB
   ```
   sudo qemu-img dd if=./raspiblitz-amd64-debian-lean.qcow2 of=${disk} bs=4M
@@ -87,6 +107,9 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   # convert
   qemu-img convert ./raspiblitz-amd64-debian-lean.qcow2 ./raspiblitz-amd64-debian-lean.img
   ```
+
+#### Write a raw disk image
+
 * identify the connected disk with `lsblk` e.g., `/dev/sdk`
 * use [Balena Etcher](https://www.balena.io/etcher/)
 * or `dd` to write the .img to disk
@@ -147,7 +170,7 @@ https://github.com/rootzoll/raspiblitz/actions/workflows/amd64-lean-image.yml?qu
   ```
 
 ## Local build
-with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
+with the [Makefile](../Makefile)
 * needs ~20 GB free space
 * tested on:
   * Ubuntu Live (jammy)
@@ -161,7 +184,7 @@ with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
   # install git and make
   apt update && apt install -y git make
   # download the repo (or your fork)
-  git clone https://github.com/rootzoll/raspiblitz
+  git clone https://github.com/raspiblitz/raspiblitz
   cd raspiblitz
   # checkout the desired branch
   git checkout dev
@@ -224,9 +247,12 @@ with the [Makefile](https://github.com/rootzoll/raspiblitz/blob/dev/Makefile)
   * open: http://RaspiBlitz_IP
 
 ## Workflow notes
-The github workflow files are the equivalent of the Makefile commands run locally.
-The local repo owner (`GITHUB_ACTOR`) and branch (`GITHUB_HEAD_REF`) is picked up.
-The build_sdcard.sh is downloaded from the source branch and built with the options pack=[lean|fatpack] to set fatpack=[0|1].
+
+The GitHub workflows use the repository owner and selected ref for push and
+manual builds. Pull request builds use the PR head repository owner and branch
+and label their artifacts with `UNTRUSTED-PR-<number>-<owner>`. Local Makefile
+builds take the owner from `origin` and the branch from the checkout.
+The build downloads `build_sdcard.sh` from the selected source.
 
 The github workflow is running the job in an ubuntu-22.04 image.
 

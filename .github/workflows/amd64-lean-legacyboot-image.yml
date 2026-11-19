@@ -76,7 +76,10 @@ jobs:
       - name: Upload the image and checksums
         uses: actions/upload-artifact@v4
         with:
-          name: raspiblitz-amd64-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}
+          name: >-
+            ${{ github.event_name == 'pull_request' &&
+            format('UNTRUSTED-PR-{0}-{1}-', github.event.pull_request.number,
+            github.event.pull_request.head.repo.owner.login) || '' }}raspiblitz-amd64-image-${{env.BUILD_DATE}}-${{env.BUILD_VERSION}}
           path: |
             ${{github.workspace}}/ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2.sha256
             ${{github.workspace}}/ci/amd64/builds/raspiblitz-amd64-debian-lean-qemu/raspiblitz-amd64-debian-lean.qcow2.gz
