@@ -562,7 +562,8 @@ if [ "${scenario}" != "ready" ] && [ "${baseimage}" = "raspios_arm64" ]; then
     echo "updating Firmware" >> $logFile
     echo "RaspberryPi 5 detected with old firmware (${firmwareBuildNumber}) ... do update." >> $logFile
     apt-get update -y
-    apt-get upgrade -y
+    # Allow new kernel ABI dependencies without allowing package removals.
+    apt-get upgrade --with-new-pkgs -y
     apt-get install -y rpi-eeprom
     rpi-eeprom-update -a
     systemInitReboot=1
