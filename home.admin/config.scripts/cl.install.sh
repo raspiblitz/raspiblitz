@@ -51,8 +51,8 @@ function installDependencies() {
 
   # rust deps for cln-grpc and clnrest plugins
   echo "# Install Rust to /opt/rust/"
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
-    sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust sh -s -- --no-modify-path -y
+  (set -o pipefail; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust sh -s -- --no-modify-path -y) || exit 1
   echo "# Set /opt/rust write access for rust group"
   if ! getent group rust >/dev/null 2>&1; then
     sudo groupadd rust
@@ -78,14 +78,22 @@ function installDependencies() {
   # Install uv for Python dependency management (replaces poetry in CLN 25.x+)
   echo "# Installing uv for Python dependency management"
   if ! command -v uv &>/dev/null; then
-    sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust cargo install --locked uv || exit 1
+    sudo RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust cargo install --locked --version 0.13.6 uv || exit 1
     # Ensure uv is symlinked into /usr/local/bin
     sudo ln -sf /opt/rust/bin/uv /usr/local/bin/uv
   fi
 
+  # uv bundles its own TLS trust; updating Debian's CA store alone is not enough.
+  # https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62
+  uvVersion=$(sudo -u bitcoin uv --version | cut -d ' ' -f 2)
+  if [[ ! "${uvVersion}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || ! dpkg --compare-versions "${uvVersion}" ge 0.13.4; then
+    echo "# ERROR: eMudhra SSL certificate fix requires uv >= 0.13.4; update uv before continuing"
+    exit 1
+  fi
+
   # Sync Python dependencies with uv
   cd /home/bitcoin/lightning || exit 1
-  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust uv sync --all-extras --all-groups --frozen
+  sudo -u bitcoin RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/rust uv sync --all-extras --all-groups --frozen || exit 1
 
   sudo apt-get install -y protobuf-compiler
 
