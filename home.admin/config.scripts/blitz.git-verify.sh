@@ -34,6 +34,32 @@ PGPpubkeyFingerprint="$3"
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+# GitHub exposes SSH signing keys separately from PGP keys.
+if [ $# -eq 4 ] && git cat-file tag "$4" 2>/dev/null | grep -q "BEGIN SSH SIGNATURE"; then
+  allowedSigners="$(mktemp -p /dev/shm/)"
+  trap 'rm -f "$allowedSigners"' EXIT
+  signerEmail="$(git for-each-ref "refs/tags/$4" --format='%(taggeremail)' | tr -d '<>')"
+
+  if ! curl --fail --silent --show-error "https://api.github.com/users/${PGPsigner}/ssh_signing_keys" |
+    jq -r --arg principal "${signerEmail}" '.[] | "\($principal) \(.key)"' >"${allowedSigners}" ||
+    [ ! -s "${allowedSigners}" ]; then
+    echo "# ERROR --> failed to download SSH signing keys for ${PGPsigner}" >&2
+    exit 6
+  fi
+
+  if ! git -c gpg.ssh.allowedSignersFile="${allowedSigners}" verify-tag "$4"; then
+    echo "# BUILD FAILED --> SSH verification not OK"
+    exit 1
+  fi
+
+  echo
+  echo "##########################################################################"
+  echo "# OK --> the SSH signature of the checked out $4 tag is correct"
+  echo "##########################################################################"
+  echo
+  exit 0
+fi
+
 wget -O /var/cache/raspiblitz/pgp_keys_${PGPsigner}.asc "${PGPpubkeyLink}"
 
 # in the case the wget above fails, try to use curl instead
