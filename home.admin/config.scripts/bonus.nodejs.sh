@@ -14,7 +14,7 @@ fi
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if Node.js was installed
-  if node -v 2>/dev/null | grep "${VERSION}"; then
+  if node -v 2>/dev/null | grep -q "^v${VERSION}\."; then
     echo "Node.js $VERSION is already installed"
   else
     # install prerequisites
@@ -41,6 +41,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
   fi
 
+  # Existing majors and newly installed packages must meet the same offline baseline.
+  # The trust helper never calls this installer (no recursive upgrade loop).
+  /home/admin/config.scripts/blitz.trust.sh check ||
+    /home/admin/config.scripts/blitz.trust.sh update || exit 1
   exit 0
 fi
 

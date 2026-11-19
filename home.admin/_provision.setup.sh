@@ -9,6 +9,9 @@ fi
 # this provision file is just executed on fresh setups
 # not on recoveries or updates
 
+# Fresh setup does not pass through _provision.update.sh.
+/home/admin/config.scripts/blitz.trust.sh update || exit 1
+
 # LOGFILE - store debug logs of bootstrap
 logFile="/home/admin/raspiblitz.log"
 
