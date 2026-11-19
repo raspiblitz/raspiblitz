@@ -50,16 +50,10 @@ fi
 #############################################
 # get active network device (eth0 or wlan0) & traffic
 networkDevice=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
-# get network traffic
-# ifconfig does not show eth0 on Armbian or in a VM - get first traffic info
-isArmbian=$(cat /etc/os-release 2>/dev/null | grep -c 'Debian')
-if [ ${isArmbian} -gt 0 ] || [ ! -d "/sys/class/thermal/thermal_zone0/" ]; then
-  network_rx=$(ifconfig 2>/dev/null | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig 2>/dev/null | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-else
-  network_rx=$(ifconfig ${networkDevice} 2>/dev/null | grep 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-  network_tx=$(ifconfig ${networkDevice} 2>/dev/null | grep 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
-fi
+# get traffic for the detected interface, including non-eth0 names on Armbian/VMs
+# Leave the argument empty if no active interface was found, preserving the fallback.
+network_rx=$(ifconfig ${networkDevice} 2>/dev/null | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
+network_tx=$(ifconfig ${networkDevice} 2>/dev/null | grep -m1 'TX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
 
 #############################################
 # get local IP (from different sources)
