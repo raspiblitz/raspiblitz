@@ -14,3 +14,5 @@ tpos = "tpos"
 ba = "ba"
 tne = "tne"
 HD = "HD"
+# Python CA-bundle package name, not a misspelling of "certify".
+certifi = "certifi"

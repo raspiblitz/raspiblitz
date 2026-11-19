@@ -77,6 +77,9 @@ echo "prechecks OK"  >> ${logFile}
 # this is the place if on a future version change
 # a conversion of config data or app data is needed
 
+# After vendor trust refresh, repair pip before upgrade hooks download Python packages.
+/home/admin/config.scripts/blitz.python-trust.sh system-pip /usr/bin/python3 >> ${logFile} 2>&1 || exit 1
+
 # if old bitcoin.conf exists ...
 configExists=$(sudo ls /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep -c '.conf')
 if [ ${configExists} -eq 1 ]; then

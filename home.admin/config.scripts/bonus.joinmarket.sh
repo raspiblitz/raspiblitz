@@ -7,6 +7,15 @@
 
 # https://github.com/openoms/joininbox/tags
 JBTAG="v0.9.0" # installs JoinMarket v0.9.12 https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.12
+
+# Preserve download policy at both the owner installer and post-install hook.
+pip_sudo=(sudo -u joinmarket)
+while IFS= read -r name; do
+  case "$name" in
+    PIP_*|REQUESTS_CA_BUNDLE|CURL_CA_BUNDLE|SSL_CERT_FILE|SSL_CERT_DIR)
+      pip_sudo+=(--preserve-env="$name") ;;
+  esac
+done < <(compgen -e)
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "JoinMarket install script to install and switch JoinMarket on or off"
@@ -82,6 +91,24 @@ if [ "$1" = "install" ]; then
     sudo -u joinmarket cp /home/joinmarket/joininbox/scripts/.* /home/joinmarket/ 2>/dev/null
     sudo chmod +x /home/joinmarket/*.sh
 
+    # The late pip posthook cannot secure an old owner's first pip download.
+    # Bind copied files to the verified tag: reset --hard leaves untracked
+    # helpers behind, so file presence alone is not a release capability gate.
+    if ! (
+      set -o pipefail
+      for file in install.joinmarket.sh joinmarket-python-trust.py joinmarket-python-trust.patch; do
+        [ -s "/home/joinmarket/${file}" ] || exit 1
+        sudo -u joinmarket git -C /home/joinmarket/joininbox show "${JBTAG}:scripts/${file}" |
+          cmp -s - "/home/joinmarket/${file}" || exit 1
+      done
+      grep -Fqx '  "${trust_sudo[@]}" python3 "${trust_scripts}/joinmarket-python-trust.py" prerequisites || exit 1' /home/joinmarket/install.joinmarket.sh &&
+        grep -Fqx '  "${trust_sudo[@]}" patch --batch --forward --fuzz=0 -p1 < "${trust_scripts}/joinmarket-python-trust.patch" || exit 1' /home/joinmarket/install.joinmarket.sh &&
+        grep -Fqx '  sudo -u "${user}" cp "${trust_scripts}/joinmarket-python-trust.py" install-python-trust.py || exit 1' /home/joinmarket/install.joinmarket.sh
+    ); then
+      echo "error='A maintained signed JoininBox release containing the Python bootstrap fix is required; refusing to run the owner installer'" >&2
+      exit 1
+    fi
+
     echo "# Set ssh access off with the joinmarket user"
     sudo /home/joinmarket/set.ssh.sh off
 
@@ -127,7 +154,7 @@ if [ "$1" = "install" ]; then
       # no qtgui on arm
       qtgui=false
     fi
-    if sudo -u joinmarket /home/joinmarket/install.joinmarket.sh -i install -q $qtgui; then
+    if "${pip_sudo[@]}" /home/joinmarket/install.joinmarket.sh -i install -q $qtgui; then
       echo "# Installed JoinMarket"
       echo "# Run: 'sudo /home/admin/config.scripts/bonus.joinmarket.sh on' to configure and switch on"
     else
@@ -135,6 +162,9 @@ if [ "$1" = "install" ]; then
       exit 1
     fi
   fi
+  # JoinMarket's Twisted runtime uses OS roots, but its pip has a separate bundle.
+  "${pip_sudo[@]}" /home/admin/config.scripts/blitz.python-trust.sh pip \
+    /home/joinmarket/joinmarket-clientserver/jmvenv/bin/python || exit 1
   exit 0
 fi
 
