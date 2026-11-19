@@ -28,6 +28,16 @@ fi
 source $RASPIBLITZ_INFO
 source $RASPIBLITZ_CONF 2>/dev/null
 
+# determine the correct bitcoind service name based on chain
+# chain from raspiblitz.conf: main|test|sig
+if [ "${chain}" = "test" ]; then
+  bitcoind_service="tbitcoind"
+elif [ "${chain}" = "sig" ]; then
+  bitcoind_service="sbitcoind"
+else
+  bitcoind_service="bitcoind"
+fi
+
 # check if already installed & active
 isInstalled=$(compgen -u | grep -c ${USERNAME})
 isActive=$(sudo ls /etc/systemd/system/joinmarket-api.service 2>/dev/null | grep -c 'joinmarket-api.service')
@@ -210,6 +220,8 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
 [Unit]
 Description=JoinMarket API daemon
+Wants=${bitcoind_service}.service
+After=${bitcoind_service}.service
 
 [Service]
 WorkingDirectory=/home/joinmarket/joinmarket-clientserver/scripts/

@@ -302,6 +302,15 @@ ${color_gray}  ◎=◎=◎=◎=◎    ${color_gray}$JMstatsL4"
   fi
 fi
 
+if [ "${joinmarketNG}" = "on" ]; then
+  # show JoinMarket-NG maker status if it's running
+  if systemctl is-active --quiet joinmarket-ng-maker 2>/dev/null; then
+    lastLine="\
+${color_gray}
+${color_gray}  JoinMarket-NG  ${color_green}Maker running${color_gray}"
+  fi
+fi
+
 if [ "${lightning}" == "cl" ]; then
   LNline="CLN ${color_green}${ln_version} ${ln_baseInfo}"
 elif [ "${lightning}"  == "lnd" ]; then

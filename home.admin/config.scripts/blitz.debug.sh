@@ -444,6 +444,19 @@ else
   echo "- PUBLICPOOL is OFF by config"
 fi
 
+if [ "${joinmarketNG}" == "on" ]; then
+  echo
+  echo "*** JOINMARKET-NG MAKER SERVICE STATUS ***"
+  sudo systemctl status joinmarket-ng-maker -n2 --no-pager
+  echo
+  echo "*** LAST 20 JOINMARKET-NG MAKER LOGS ***"
+  echo "sudo journalctl -u joinmarket-ng-maker -b --no-pager -n20"
+  sudo journalctl -u joinmarket-ng-maker -b --no-pager -n20
+  echo
+else
+  echo "- JoinMarket-NG is OFF by config"
+fi
+
 echo
 echo "*** MOUNTED DRIVES ***"
 echo "df -T -h"
