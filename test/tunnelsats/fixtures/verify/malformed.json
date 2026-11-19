@@ -1,0 +1,1 @@
+{"contract":1,"command":"verify","tool_version":"3.2","ok":false,"exit_code":5,"errors":[{"code":"E_LN_MEMBERSHIP","class":"degraded","message":"lnd.service is activating"}],"verdict":"degraded","clearnet_blocked":true,"emergency_block":false,"emergency_state":"none","managed":true,"install_state":"

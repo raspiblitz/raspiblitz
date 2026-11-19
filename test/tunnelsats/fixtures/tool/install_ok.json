@@ -1,0 +1,1 @@
+{"contract":1,"command":"install","tool_version":"3.2","ok":true,"exit_code":0,"errors":[],"managed":true,"profile":"raspiblitz","impl":"lnd","unit":"lnd.service","node_user":"bitcoin","uid_backstop":false,"iface":"tunnelsatsv2","slice":"tunnelsats.slice","tunnel_started":true,"ln_was_active":true,"ln_restarted":true,"node_config":"clean","other_ln_units":[]}

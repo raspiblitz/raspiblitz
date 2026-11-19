@@ -1,0 +1,1 @@
+{"contract":1,"command":"uninstall","tool_version":"3.2","ok":true,"exit_code":0,"errors":[],"managed":true,"unit":"lnd.service","remaining":[],"ln_was_active":true,"ln_started":true,"ln_disabled":false,"node_config":"clean","action_required":null,"announce_cleanup":"removed","warnings":[]}

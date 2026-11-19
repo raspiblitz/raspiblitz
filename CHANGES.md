@@ -4,6 +4,7 @@
 - Update: Bitcoin Core v29.5 (security fixes) [details](https://bitcoincore.org/en/releases/29.5/)
 - Update: Bitcoin Core v32.1 (optional tested update) [details](https://bitcoincore.org/en/releases/32.1/)
 - Update: LND v0.21.8-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.21.8-beta)
+- New: TunnelSats VPN subscription in SSH menu > SUBSCRIBE: buy, renew, bandwidth reset (via QR or node payment), config backup/export, import or adopt an existing subscription, status, connection check, notifications and removal. Lightning stays Tor-only until the tunnel is verified, and TunnelSats is restored automatically after an SD-card update. Uses tunnelsats.sh 3.2, pinned at Tunnelsats/tunnelsats 24b1846 [details](https://github.com/Tunnelsats/tunnelsats/blob/24b184620a715825148cf50d0e537870943d1a94/docs/managed-mode.md)
 
 ## What's new in Version 1.12.1 of RaspiBlitz?
 
