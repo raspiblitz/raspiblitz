@@ -1,0 +1,21 @@
+name: Tor update regression tests
+
+on:
+  pull_request:
+    paths:
+      - home.admin/config.scripts/tor.install.sh
+      - tests/tor-update/**
+      - .github/workflows/tor-update-tests.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-regressions:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exercise production Tor update paths without network or host mounts
+        run: bash tests/tor-update/run.sh
