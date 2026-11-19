@@ -200,7 +200,7 @@ This is just a quick patch release for v1.11.1
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
 
-- New: Automated disk image build for amd64 (VM, laptop, desktop, server) and arm64-rpi (Raspberry Pi) [details](https://github.com/rootzoll/raspiblitz/tree/dev/ci/README.md)
+- New: Automated disk image build for amd64 (VM, laptop, desktop, server) and arm64-rpi (Raspberry Pi) [details](ci/README.md#download-a-development-image)
 - New: Fatpack & Minimal sd card builds [details](SECURITY.md#minimal-sd-card-build)
 - New: I2P support for Bitcoin Core (i2pacceptincoming=1) [details](https://github.com/rootzoll/raspiblitz/issues/2413)
 - New: CLN Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
