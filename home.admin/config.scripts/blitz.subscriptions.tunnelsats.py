@@ -449,7 +449,7 @@ def x25519(scalar, u_coord):
         z_3 = x_1 * (da - cb) * (da - cb) % _P
         x_2 = aa * bb % _P
         z_2 = e * (aa + _A24 * e) % _P
-    if swap:
+    if swap:  # pragma: no cover - RFC 7748 clamping clears bit 0 so swap is 0 after t=0
         x_2, x_3, z_2, z_3 = x_3, x_2, z_3, z_2
     return (x_2 * pow(z_2, _P - 2, _P) % _P).to_bytes(32, "little")
 
@@ -506,7 +506,7 @@ def bolt11_amount_sats(invoice):
     value = int(match.group(1))
     unit = (match.group(2) or "").lower()
     msat_per_unit = {"": 100_000_000_000, "m": 100_000_000, "u": 100_000, "n": 100, "p": 0.1}.get(unit)
-    if msat_per_unit is None:
+    if msat_per_unit is None:  # pragma: no cover - BOLT11_AMOUNT_RE restricts unit to [munp] or empty
         return None
     msats = round(value * msat_per_unit)
     if msats <= 0 or msats % 1000 != 0:
@@ -529,7 +529,7 @@ def decode_bolt11(bolt11):
         raise ModuleError("E_INVOICE_MISMATCH", "invalid_response",
                           "invoice does not carry a positive whole-satoshi amount", EXIT_INVALID_API)
     sep = inv.rfind("1")
-    if sep < 4:
+    if sep < 4:  # pragma: no cover - bolt11_amount_sats already requires lnbc<digits>1
         raise ModuleError("E_INVOICE_MISMATCH", "invalid_response", "invoice has no Bech32 separator", EXIT_INVALID_API)
     hrp = inv[:sep]
     data_part = inv[sep + 1:]
@@ -833,7 +833,7 @@ def api_status(deps, public_key):
     confirmed, unknown_key (404, definitive), failed (network, timeout, 5xx, 429), invalid
     (validation failed) or migration (the key must be migrated on the website first). Response
     bodies are never logged."""
-    for attempt in (1, 2):
+    for attempt in (1, 2):  # pragma: no branch - always returns or breaks on attempt 2
         try:
             status, headers, raw = deps.http(API_STATUS_URL, {"wgPublicKey": public_key})
         except Exception:  # network, TLS, timeout: never the body
@@ -1662,7 +1662,7 @@ def iso(dt):
 def _api_json_request(deps, url, payload=None):
     """Performs a GET (payload=None) or POST JSON request to the TunnelSats API with one 503 retry.
     Returns (status, headers, doc, error_code) or raises ModuleError on transport/size failure."""
-    for attempt in (1, 2):
+    for attempt in (1, 2):  # pragma: no branch - always raises or breaks on attempt 2
         try:
             status, headers, raw = deps.http(url, payload)
         except Exception:
@@ -2753,7 +2753,7 @@ def _parse_last_json(text):
             break
         try:
             doc, end = decoder.raw_decode(text, idx)
-            if isinstance(doc, dict):
+            if isinstance(doc, dict):  # pragma: no branch - idx starts at '{' so raw_decode yields dict
                 last_doc = doc
                 pos = max(idx + 1, end)
                 continue
@@ -4595,7 +4595,7 @@ def cmd_tick(deps, args, result):
                         if entry["outcome"] == "handed_off":
                             nstate["verdict_warning_handed_off"] = True
                         state_dirty = True
-                elif live_verdict == "protected":
+                elif live_verdict == "protected":  # pragma: no branch - _tick_live_verdict returns only protected/degraded/unsafe
                     if prev_verdict != "protected":
                         nstate["verdict_seq"] = int(nstate.get("verdict_seq") or 0) + 1
                         nstate["last_verdict"] = "protected"
@@ -5157,5 +5157,5 @@ def main(argv=None, deps=None, out=None):
     return result.exit_code
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - CLI entrypoint
     sys.exit(main())

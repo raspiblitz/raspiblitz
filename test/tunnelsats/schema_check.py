@@ -71,7 +71,11 @@ def main(argv):
         schema = json.load(f)
     failed = False
     for name in argv[2:]:
-        text = sys.stdin.read() if name == "-" else open(name, encoding="utf-8").read()
+        if name == "-":
+            text = sys.stdin.read()
+        else:
+            with open(name, encoding="utf-8") as handle:
+                text = handle.read()
         try:
             doc = json.loads(text)
         except ValueError as exc:
@@ -84,5 +88,5 @@ def main(argv):
     return 1 if failed else 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - CLI entrypoint
     sys.exit(main(sys.argv))

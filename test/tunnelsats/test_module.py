@@ -3496,6 +3496,59 @@ class TestSchemaCheck(unittest.TestCase):
         self.assertEqual(["$: expected True"], schema_check.validate(1, {"const": True}))
         self.assertEqual(["$: 0 not in [False, True]"], schema_check.validate(0, {"enum": [False, True]}))
 
+    def test_validate_and_cli_cover_all_error_and_success_paths(self):
+        schema = {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["name", "count"],
+            "properties": {
+                "name": {"type": "string", "pattern": "^[a-z]+$"},
+                "count": {"type": ["integer", "null"], "minimum": 1, "maximum": 10},
+                "ratio": {"type": "number"},
+                "tags": {"type": "array", "items": {"type": "string"}},
+            },
+        }
+        self.assertEqual([], schema_check.validate({"name": "ok", "count": 5, "ratio": 1.5, "tags": ["a"]}, schema))
+        self.assertEqual([], schema_check.validate({"name": "ok", "count": None}, schema))
+        self.assertEqual(["$: type str not in ['object']"], schema_check.validate("bad", schema))
+        self.assertEqual(["$.name: does not match ^[a-z]+$"], schema_check.validate({"name": "123", "count": 1}, schema))
+        self.assertEqual(["$.count: below 1"], schema_check.validate({"name": "ok", "count": 0}, schema))
+        self.assertEqual(["$.count: above 10"], schema_check.validate({"name": "ok", "count": 11}, schema))
+        self.assertEqual(["$: missing count"], schema_check.validate({"name": "ok"}, schema))
+        self.assertEqual(["$: unexpected extra"], schema_check.validate({"name": "ok", "count": 1, "extra": 1}, schema))
+        self.assertEqual(["$.tags[0]: type int not in ['string']"],
+                         schema_check.validate({"name": "ok", "count": 1, "tags": [1]}, schema))
+        self.assertEqual([], schema_check.validate({"extra": 1}, {"type": "object", "properties": {}}))
+
+        with tempfile.TemporaryDirectory() as tmp:
+            schema_path = os.path.join(tmp, "s.json")
+            good_path = os.path.join(tmp, "good.json")
+            bad_json_path = os.path.join(tmp, "bad.json")
+            invalid_path = os.path.join(tmp, "invalid.json")
+            with open(schema_path, "w", encoding="utf-8") as handle:
+                json.dump(schema, handle)
+            with open(good_path, "w", encoding="utf-8") as handle:
+                json.dump({"name": "ok", "count": 2}, handle)
+            with open(bad_json_path, "w", encoding="utf-8") as handle:
+                handle.write("{broken")
+            with open(invalid_path, "w", encoding="utf-8") as handle:
+                json.dump({"name": "BAD", "count": 2}, handle)
+
+            stderr = io.StringIO()
+            with mock.patch.object(sys, "stderr", stderr):
+                self.assertEqual(2, schema_check.main(["schema_check.py", schema_path]))
+            self.assertIn("Usage:", stderr.getvalue())
+
+            stdout = io.StringIO()
+            with mock.patch.object(sys, "stdout", stdout):
+                self.assertEqual(0, schema_check.main(["schema_check.py", schema_path, good_path]))
+                self.assertEqual(1, schema_check.main(["schema_check.py", schema_path, bad_json_path, invalid_path]))
+            self.assertIn("not JSON", stdout.getvalue())
+            self.assertIn("does not match", stdout.getvalue())
+
+            with mock.patch.object(sys, "stdin", io.StringIO('{"name": "ok", "count": 3}')):
+                self.assertEqual(0, schema_check.main(["schema_check.py", schema_path, "-"]))
+
 
 if __name__ == "__main__":
     unittest.main()
