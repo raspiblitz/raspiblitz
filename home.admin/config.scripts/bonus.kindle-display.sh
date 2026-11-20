@@ -10,7 +10,10 @@ CONFIG_FILE=$APP_DATA_DIR/.env
 APP_ROOT_DIR=$HOME_DIR/kindle-display
 APP_SERVER_DIR=$APP_ROOT_DIR/server
 CRON_FILE=$APP_SERVER_DIR/cron.sh
-APP_VERSION=0.5.3
+APP_VERSION=1.1.1
+
+# pinned checksum of the released tarball; update together with APP_VERSION
+SHA256=48a54ae42d4d88cfe52834c2765379ef5ed2bfd9b41090d408e6e8118bd6e8e9
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -20,8 +23,89 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  exit 1
 fi
 
+# checks the downloaded tarball was not manipulated (checksum test)
+verifyKindleTarball() {
+  local tarball="$1"
+  [ "$(sha256sum "$tarball" | cut -d " " -f1)" = "${SHA256}" ]
+}
+
 source /home/admin/raspiblitz.info
 source <(/home/admin/_cache.sh get state)
+
+# detects and returns the local mempool instance URL
+# (empty when there is no local instance running)
+mempoolBaseURL() {
+  local localIP localMempoolURL mempoolActive
+  localMempoolURL=""
+  source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
+  if [ "${mempoolExplorer}" = "on" ]; then
+    mempoolActive=$(sudo systemctl is-active mempool 2>/dev/null)
+    if [ "${mempoolActive}" = "active" ]; then
+      localIP=$(hostname -I | awk '{print $1}')
+      if [ -n "${localIP}" ]; then
+        localMempoolURL="http://${localIP}:4080"
+      fi
+    fi
+  fi
+  echo "${localMempoolURL}"
+}
+
+# renders the kindle-display env file
+# usage: kindleDisplayEnv <DISPLAY_RATE1> <DISPLAY_RATE2> <DISPLAY_THEME>
+kindleDisplayEnv() {
+  local mempoolLine mempoolURL
+  mempoolURL=$(mempoolBaseURL)
+  if [ -n "${mempoolURL}" ]; then
+    mempoolLine="MEMPOOL_BASE_URL=\"${mempoolURL}\""
+  else
+    mempoolLine="# MEMPOOL_BASE_URL=\"https://mempool.space\""
+  fi
+  cat <<EOF
+# Server port
+DISPLAY_SERVER_PORT=$SERVER_PORT
+
+# Local Mempool instance to use for data fetching.
+# When unset, the public mempool.space is used.
+${mempoolLine}
+
+# Exchange rates to show.
+# Supported currencies: USD, EUR, GBP, CHF, CAD, AUD, JPY
+DISPLAY_RATE1="$1"
+DISPLAY_RATE2="$2"
+
+# Display settings: plain (default), onchain, lightning, mining, random
+DISPLAY_THEME="$3"
+EOF
+}
+
+# removes kindle-display service units on setup failure
+cleanupKindleDisplayServices() {
+  sudo systemctl stop kindle-display-server.service 2>/dev/null
+  sudo systemctl stop kindle-display-update.timer 2>/dev/null
+  sudo systemctl disable kindle-display-server.service 2>/dev/null
+  sudo systemctl disable kindle-display-update.timer 2>/dev/null
+  sudo rm -f /etc/systemd/system/kindle-display-server.service
+  sudo rm -f /etc/systemd/system/kindle-display-update.service
+  sudo rm -f /etc/systemd/system/kindle-display-update.timer
+  sudo systemctl daemon-reload
+  /home/admin/config.scripts/blitz.conf.sh set kindleDisplay "off" 2>/dev/null
+}
+
+# polls whether the kindle-display server service is failing after start
+# (unit uses Restart=on-failure with a burst limit of 2 restarts in 600s)
+# usage: systemdPollServerHealth (returns 0 when not failed)
+systemdPollServerHealth() {
+  local i
+  for i in $(seq 1 10); do
+    if [ "$(sudo systemctl is-failed kindle-display-server.service 2>/dev/null)" = "failed" ]; then
+      return 1
+    fi
+    if [ "$(sudo systemctl is-active kindle-display-server.service 2>/dev/null)" = "active" ]; then
+      return 0
+    fi
+    sleep 2
+  done
+}
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -31,7 +115,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   if [ ${isInstalled} -eq 0 ]; then
     # install dependencies
     sudo apt update
-    sudo apt install -y firefox-esr pngcrush jo jq torsocks
+    sudo apt install -y firefox-esr pngcrush
 
     # install nodeJS
     /home/admin/config.scripts/bonus.nodejs.sh on
@@ -43,6 +127,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# install .."
     cd $HOME_DIR
     sudo -u $USERNAME wget https://github.com/dennisreimann/kindle-display/archive/v$APP_VERSION.tar.gz
+    if ! verifyKindleTarball "v$APP_VERSION.tar.gz"; then
+      echo "# FAIL # Downloaded kindle-display tarball not matching SHA256 checksum: ${SHA256}"
+      exit 1
+    fi
     sudo -u $USERNAME tar -xzf v$APP_VERSION.tar.gz kindle-display-$APP_VERSION/server
     sudo -u $USERNAME mv kindle-display{-$APP_VERSION,}
     sudo -u $USERNAME rm v$APP_VERSION.tar.gz
@@ -54,9 +142,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     fi
 
     # setup kindle-display config
-    RPC_USER=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcuser | cut -c 9-)
-    RPC_PASS=$(sudo cat /mnt/hdd/app-data/${network}/${network}.conf | grep rpcpassword | cut -c 13-)
-
     sudo mkdir -p $APP_DATA_DIR
     sudo chown $USERNAME:$USERNAME $APP_DATA_DIR
 
@@ -65,33 +150,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       configFile=/home/admin/kindle-display.env
       touch $configFile
       sudo chmod 600 $configFile || exit 1
-      cat > $configFile <<EOF
-# Server port
-DISPLAY_SERVER_PORT=$SERVER_PORT
-
-# Require Tor for outside API calls
-DISPLAY_FORCE_TOR=true
-
-# Bitcoin RPC credentials for getting the blockcount.
-# Omit these setting to use blockchain.info as a fallback.
-DISPLAY_BITCOIN_RPC_USER="$RPC_USER"
-DISPLAY_BITCOIN_RPC_PASS="$RPC_PASS"
-
-# Exchange rates to show.
-# Use identifiers supported by BTCPay/Kraken, e.g. EUR, CHF
-DISPLAY_RATE1="USD"
-DISPLAY_RATE2="EUR"
-
-# BTCPay Settings for rate fetching.
-# Generate API via Store > Access Tokens > Legacy API Keys
-# Omit these setting to use Kraken as a fallback.
-# BTCPAY_HOST="https://my.btcpayserver.com"
-# BTCPAY_API_TOKEN="myBtcPayLegacyApiKey"
-
-# Shall the fallbacks be used?
-DISPLAY_FALLBACK_BLOCK=false
-DISPLAY_FALLBACK_RATES=true
-EOF
+      kindleDisplayEnv "USD" "EUR" "random" > $configFile
       sudo mv $configFile $CONFIG_FILE
     fi
 
@@ -100,21 +159,15 @@ EOF
     # link config to app
     sudo -u $USERNAME ln -s $CONFIG_FILE $APP_SERVER_DIR/.env
 
-    # generate initial data
-    echo "# run data.sh"
-    sudo -u $USERNAME $APP_SERVER_DIR/data.sh
-
     # open firewall
     echo "# firewall kindle-display service"
     sudo ufw allow $SERVER_PORT comment 'kindle-display HTTP'
 
-    # install service
-    echo "# prepare kindle-display service"
-    cat > /home/admin/kindle-display.service <<EOF
-# systemd unit for kindle-display
-
+    # install services
+    echo "# prepare kindle-display services"
+    cat > /home/admin/kindle-display-server.service <<EOF
 [Unit]
-Description=kindle-display
+Description=Kindle Display Server
 Wants=${network}d.service
 After=${network}d.service
 
@@ -137,28 +190,51 @@ PrivateDevices=true
 [Install]
 WantedBy=multi-user.target
 EOF
-    sudo mv /home/admin/kindle-display.service /etc/systemd/system/kindle-display.service
+    cat > /home/admin/kindle-display-update.service <<EOF
+[Unit]
+Description=Kindle Display Update
+After=kindle-display-server.service
+Requires=kindle-display-server.service
 
-    echo "# enable kindle-display service"
-    sudo systemctl enable kindle-display
+[Service]
+Type=oneshot
+WorkingDirectory=${APP_SERVER_DIR}
+User=$USERNAME
+ExecStart=${CRON_FILE}
+EOF
+    cat > /home/admin/kindle-display-update.timer <<EOF
+[Unit]
+Description=Kindle Display Update Timer
 
-    # https://github.com/rootzoll/raspiblitz/issues/1375
-    if [ "${state}" == "ready" ]; then
-      echo "# starting kindle-display service"
-      sudo systemctl start kindle-display
+[Timer]
+OnCalendar=*:0/2
+Persistent=true
 
-      # generate initial screenshot
-      echo "# run cronfile"
-      sudo -u $USERNAME $CRON_FILE
+[Install]
+WantedBy=timers.target
+EOF
+    sudo mv /home/admin/kindle-display-server.service /etc/systemd/system/kindle-display-server.service
+    sudo mv /home/admin/kindle-display-update.service /etc/systemd/system/kindle-display-update.service
+    sudo mv /home/admin/kindle-display-update.timer /etc/systemd/system/kindle-display-update.timer
+
+    echo "# enable kindle-display services"
+    if ! sudo systemctl enable kindle-display-server.service || ! sudo systemctl enable kindle-display-update.timer; then
+      echo "# FAIL # kindle-display service enable failed"
+      cleanupKindleDisplayServices
+      exit 1
     fi
 
-    # set cronjob
-    echo "# setting cronbjob for kindle-display (default: every 5 minutes)"
-    echo "# /etc/cron.d/kindle-display
-SHELL=/bin/bash
-PATH=/bin:/usr/bin:/usr/local/bin
-# m h dom mon dow user-name command to be executed
-*/5 * * * * $USERNAME $CRON_FILE >/dev/null 2>&1" | sudo tee /etc/cron.d/kindle-display >/dev/null
+    # https://github.com/raspiblitz/raspiblitz/issues/1375
+    if [ "${state}" == "ready" ]; then
+      echo "# starting kindle-display service"
+      sudo systemctl start kindle-display-server.service
+      sudo systemctl start kindle-display-update.timer
+      if ! systemdPollServerHealth; then
+        echo "# FAIL # kindle-display service failed to start"
+        cleanupKindleDisplayServices
+        exit 1
+      fi
+    fi
 
     echo "OK - the KINDLE-DISPLAY script is now installed."
     echo ""
@@ -186,8 +262,13 @@ if [ "$1" = "update" ]; then
       exit 0
     fi
 
-    sudo systemctl stop kindle-display
+    sudo systemctl stop kindle-display-server.service
+    sudo systemctl stop kindle-display-update.timer
     sudo -u $USERNAME wget https://github.com/dennisreimann/kindle-display/archive/v$APP_VERSION.tar.gz
+    if ! verifyKindleTarball "v$APP_VERSION.tar.gz"; then
+      echo "# FAIL # Downloaded kindle-display tarball not matching SHA256 checksum: ${SHA256}"
+      exit 1
+    fi
     sudo -u $USERNAME tar -xzf v$APP_VERSION.tar.gz kindle-display-$APP_VERSION/server
     sudo -u $USERNAME mv kindle-display{,-backup}
     sudo -u $USERNAME mv kindle-display{-$APP_VERSION,}
@@ -198,13 +279,33 @@ if [ "$1" = "update" ]; then
         echo "FAIL - npm install did not run correctly, aborting"
         exit 1
     fi
+
+    # migrate config file
+    echo "# migrate config file"
+    rate1=$(grep -m1 '^DISPLAY_RATE1=' $CONFIG_FILE 2>/dev/null | cut -d'"' -f2)
+    rate1=${rate1:-USD}
+    rate2=$(grep -m1 '^DISPLAY_RATE2=' $CONFIG_FILE 2>/dev/null | cut -d'"' -f2)
+    rate2=${rate2:-EUR}
+    theme=$(grep -m1 '^DISPLAY_THEME=' $CONFIG_FILE 2>/dev/null | cut -d'"' -f2)
+    theme=${theme:-random}
+    sudo -u $USERNAME cp $CONFIG_FILE ${CONFIG_FILE}.backup 2>/dev/null
+    configFile=/home/admin/kindle-display.env
+    touch $configFile
+    sudo chmod 600 $configFile || exit 1
+    kindleDisplayEnv "$rate1" "$rate2" "$theme" > $configFile
+    sudo mv $configFile $CONFIG_FILE
+    sudo chown $USERNAME:$USERNAME $CONFIG_FILE
+
     # link config to app
     sudo -u $USERNAME ln -s $CONFIG_FILE $APP_SERVER_DIR/.env
-    # generate initial data
-    echo "# run data.sh"
-    sudo -u $USERNAME $APP_SERVER_DIR/data.sh
     cd -
-    sudo systemctl start kindle-display
+    sudo systemctl start kindle-display-server.service
+    sudo systemctl start kindle-display-update.timer
+    if ! systemdPollServerHealth; then
+      echo "# FAIL # kindle-display service failed to start"
+      cleanupKindleDisplayServices
+      exit 1
+    fi
     sudo -u $USERNAME rm -rf kindle-display-backup
 
     echo "*** KINDLE-DISPLAY UPDATED to $APP_VERSION ***"
@@ -227,10 +328,13 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     /home/admin/config.scripts/blitz.conf.sh set kindleDisplay "off"
 
     # uninstall service
-    sudo systemctl stop kindle-display
-    sudo systemctl disable kindle-display
-    sudo rm /etc/systemd/system/kindle-display.service
-    sudo rm -f /etc/cron.d/kindle-display
+    sudo systemctl stop kindle-display-server.service
+    sudo systemctl stop kindle-display-update.timer
+    sudo systemctl disable kindle-display-server.service
+    sudo systemctl disable kindle-display-update.timer
+    sudo rm /etc/systemd/system/kindle-display-server.service
+    sudo rm /etc/systemd/system/kindle-display-update.service
+    sudo rm /etc/systemd/system/kindle-display-update.timer
 
     # close port on firewall
     sudo ufw deny $SERVER_PORT
