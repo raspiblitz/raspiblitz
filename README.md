@@ -1,6 +1,6 @@
 # ![RaspiBlitz](pictures/raspilogo_tile_400px.png)
 
-_Build your own Bitcoin & Lightning Fullnode on a RaspberryPi with an optional Display._ ([API](https://github.com/fusion44/blitz_api)|[WebUI](https://github.com/raspiblitz/raspiblitz-web))
+_Build your own Bitcoin & Lightning Fullnode on a RaspberryPi with an optional Display._ ([API](https://github.com/raspiblitz/raspiblitz-api)|[WebUI](https://github.com/raspiblitz/raspiblitz-web))
 
 ![RaspiBlitz](pictures/raspiblitz.jpg)
 
@@ -32,7 +32,7 @@ RaspiBlitz is mainly targeted for learning how to run your own node decentralize
 This is main RaspiBlitz repo containing the **bash & python** scripts to build the RaspiBlitz software. It it complimented by the following side repos:
 
 - [WebUI](https://github.com/raspiblitz/raspiblitz-web) (React & Tailwind)
-- [API](https://github.com/fusion44/blitz_api) (Python FastAPI)
+- [API](https://github.com/raspiblitz/raspiblitz-api) (Python FastAPI)
 - [Documentation](https://github.com/raspiblitz/raspiblitz-docs) (Docusaurus)
 
 To get started with RaspiBlitz Development check the [Community Development](CONTRIBUTING.md) notes.

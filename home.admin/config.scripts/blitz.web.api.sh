@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# main repo: https://github.com/fusion44/blitz_api
+# main repo: https://github.com/raspiblitz/raspiblitz-api
 
 # restart the systemd `blitzapi` when credentials of lnd or bitcoind are changed and it will
 # excute the `update-config` automatically before restarting
@@ -288,7 +288,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   cd /home/blitzapi || exit 1
 
-  # git clone https://github.com/fusion44/blitz_api.git /home/blitzapi/blitz_api
+  # git clone https://github.com/raspiblitz/raspiblitz-api.git /home/blitzapi/blitz_api
   echo "# clone github: ${GITHUB_USER}/${GITHUB_REPO}"
   if ! sudo -u blitzapi git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git blitz_api; then
     echo "error='git clone failed'"
