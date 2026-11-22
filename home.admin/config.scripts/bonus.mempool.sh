@@ -2,7 +2,7 @@
 
 # https://github.com/mempool/mempool
 
-pinnedVersion="v3.2.1"
+pinnedVersion="v3.3.2"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -13,9 +13,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-PGPsigner="wiz"
-PGPpubkeyLink="https://github.com/wiz.gpg"
-PGPpubkeyFingerprint="A394E332255A6173"
+PGPsigner="mononaut"
+PGPpubkeyLink="https://github.com/mononaut.gpg"
+PGPpubkeyFingerprint="BFD16BE592A9CD8D"
 
 source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
@@ -149,11 +149,8 @@ if [ "$1" = "install" ]; then
 
   cd frontend || exit 1
 
-  # patch to fix #5122 - remove on next mempool update because they fixed it
-  sudo -u mempool sed -i '/^function download(filename, url) {/a\  if (!url) return;' sync-assets.js
-  # end patch
-
-  if ! sudo -u mempool NG_CLI_ANALYTICS=false npm ci; then
+  # the v3.3 frontend lockfile needs npm 11 (Node 22 ships npm 10)
+  if ! sudo -u mempool NG_CLI_ANALYTICS=false npx -y npm@11 ci; then
     echo "FAIL - npm install did not run correctly, aborting"
     exit 1
   fi
@@ -460,7 +457,10 @@ if [ "$1" = "update" ]; then
     sudo cp backend/mempool-config.json /home/admin
 
     sudo -u mempool git fetch
-    sudo -u mempool git checkout $updateVersion
+    # drop the old install-time sync-assets.js patch (#5122), it blocks the checkout
+    sudo -u mempool git checkout -- frontend/sync-assets.js
+    sudo -u mempool git checkout $updateVersion || exit 1
+    sudo -u mempool /home/admin/config.scripts/blitz.git-verify.sh "${PGPsigner}" "${PGPpubkeyLink}" "${PGPpubkeyFingerprint}" || exit 1
 
     echo "# npm install for mempool explorer (backend)"
 
@@ -480,7 +480,8 @@ if [ "$1" = "update" ]; then
     echo "# npm install for mempool explorer (frontend)"
 
     cd ../frontend || exit 1
-    if ! sudo -u mempool NG_CLI_ANALYTICS=false npm ci; then
+    # the v3.3 frontend lockfile needs npm 11 (Node 22 ships npm 10)
+    if ! sudo -u mempool NG_CLI_ANALYTICS=false npx -y npm@11 ci; then
       echo "FAIL - npm install did not run correctly, aborting"
       exit 1
     fi
