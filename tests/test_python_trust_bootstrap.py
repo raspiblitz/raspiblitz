@@ -1,28 +1,29 @@
 #!/usr/bin/env python3
-"""Real isolated pip installs. Requires Python >=3.10 and HTTPS access to PyPI.
+"""Real isolated pip installs plus production shell blocks with inert fixtures.
 
-Run with Python 3.10 or 3.11 (pip 23.0.1 predates Python 3.12):
-python3.11 -m unittest discover -s tests -p 'test_python_trust_bootstrap.py' -v
-No services, SSH, or system package writes in this suite. The separate
-python-trust-system.py test requires the disposable Debian Docker fixture.
+Requires Python 3.10/3.11 and HTTPS access to PyPI. See python-trust-README.md.
+No services, SSH, or system package writes in this suite.
 """
 import contextlib
 import http.server
 import json
-import ssl
-import threading
 import os
 from pathlib import Path
-import shutil
 import shlex
+import shutil
+import socket
+import ssl
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 HELPER = ROOT / 'home.admin/config.scripts/blitz.python-trust.sh'
+API = 'home.admin/config.scripts/blitz.web.api.sh'
+CA_SOURCES = ('REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'PIP_CERT', 'config', 'SSL_CERT_FILE')
 
 
 def clean_environment():
@@ -33,6 +34,25 @@ def clean_environment():
 
 def policy_prefix(source):
     return source[source.index('pip_sudo=('):source.index('done < <(compgen -e)') + len('done < <(compgen -e)')]
+
+
+def read(path):
+    return (ROOT / path).read_text()
+
+
+def between(text, start, end):
+    return text.split(start, 1)[1].split(end, 1)[0]
+
+
+def bash(script, *args, env=None):
+    return subprocess.run(['bash', '-c', script, *args], env=env, text=True, capture_output=True)
+
+
+def api_update_block(source, path):
+    block = source[source.index('if [ "$1" = "update-code" ]; then'):]
+    block = block[:block.index('\n###################')]
+    return (block.replace('/home/blitzapi/blitz_api', str(path))
+            .replace('ls /etc/systemd/system/blitzapi.service', 'printf blitzapi.service'))
 
 
 def reset_sudo(path, policy, probe=False):
@@ -52,7 +72,7 @@ def reset_sudo(path, policy, probe=False):
                     "    assert os.environ[name] == expected[name], 'Download policy value differs'\n" +
                     '    env[name] = os.environ[name]\n' +
                     "assert not any(name in env for name in ('PYTHONPATH', 'PYTHONHOME', 'BASH_ENV', 'UNRELATED_SECRET'))\n" +
-                    'sys.exit(subprocess.call(' + ("[\'/usr/bin/true\']" if probe else 'args') + ', env=env))\n')
+                    'sys.exit(subprocess.call(' + ("['/usr/bin/true']" if probe else 'args') + ', env=env))\n')
     return f'{shlex.quote(sys.executable)} -E {shlex.quote(str(shim))}'
 
 
@@ -65,12 +85,8 @@ class Bootstrap(unittest.TestCase):
         cls.env.update(PIP_CONFIG_FILE=os.devnull, PIP_DISABLE_PIP_VERSION_CHECK='1', PIP_NO_CACHE_DIR='1')
         cls.wheels = cls.base / 'wheels'
         cls.wheels.mkdir()
-        for version in ('23.0.1', '26.0.1', '26.2.2'):
-            cls.run_cmd([sys.executable, '-m', 'pip', 'download', '--no-deps',
-                         '--dest', str(cls.wheels), 'pip==' + version])
-        for version in ('2025.4.26', '2026.10.19'):
-            cls.run_cmd([sys.executable, '-m', 'pip', 'download', '--no-deps',
-                         '--dest', str(cls.wheels), 'certifi==' + version])
+        for spec in ('pip==23.0.1', 'pip==26.0.1', 'pip==26.2.2', 'certifi==2025.4.26', 'certifi==2026.10.19'):
+            cls.run_cmd([sys.executable, '-m', 'pip', 'download', '--no-deps', '--dest', str(cls.wheels), spec])
         cls.ca = cls.base / 'clean.pem'
         cls.bad_ca = cls.base / 'affected.pem'
         for version, dest in (('26.2.2', cls.ca), ('26.0.1', cls.bad_ca)):
@@ -90,83 +106,130 @@ class Bootstrap(unittest.TestCase):
         return proc
 
     def venv(self, version):
-        path = self.base / self.id().split('.')[-1]
-        self.run_cmd([sys.executable, '-m', 'venv', str(path)])
+        """Fresh venv with the given pip version (None: without pip)."""
+        path = Path(tempfile.mkdtemp(dir=self.base, prefix='venv-'))
+        self.run_cmd([sys.executable, '-m', 'venv', *(['--without-pip'] if version is None else []), str(path)])
         python = path / 'bin/python'
-        self.run_cmd([str(python), '-m', 'pip', 'install', 'pip==' + version])
+        if version:
+            self.run_cmd([str(python), '-m', 'pip', 'install', 'pip==' + version])
         return python
 
     def helper(self, python, ca=None, env=None, mode='pip'):
-        return self.run_cmd(['bash', str(HELPER), mode, str(python), str(ca or self.ca)],
-                            env=env, ok=False)
+        return self.run_cmd(['bash', str(HELPER), mode, str(python), str(ca or self.ca)], env=env, ok=False)
 
-    def test_missing_pip_fails_before_download(self):
-        path = self.base / 'without-pip'
-        self.run_cmd([sys.executable, '-m', 'venv', '--without-pip', str(path)])
-        result = self.helper(path / 'bin/python')
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("No module named 'pip'", result.stderr)
-        self.assertNotIn('Collecting', result.stdout)
+    def pip_version(self, python):
+        return self.run_cmd([str(python), '-m', 'pip', '--version']).stdout
 
-    def test_download_transport_failure(self):
-        python = self.venv('23.0.1')
+    def pip_wrapper(self, python, name, on_pip):
+        """Wrap python so `-m pip` runs on_pip first (exec real python otherwise)."""
+        wrapper = python.parent / name
+        wrapper.write_text('#!/bin/bash\nif [ "$1" = -m ] && [ "$2" = pip ]; then\n' + on_pip +
+                           '\nfi\nexec ' + shlex.quote(str(python)) + ' "$@"\n')
+        wrapper.chmod(0o755)
+        return wrapper
+
+    def install_certifi(self, python, version):
+        # Standalone wheel: vendored certifi.core refers back to pip's resources.
+        site = Path(self.run_cmd([str(python), '-c', 'import sysconfig; print(sysconfig.get_path("purelib"))']).stdout.strip())
+        with zipfile.ZipFile(self.wheels / f'certifi-{version}-py3-none-any.whl') as wheel:
+            for name in wheel.namelist():
+                if name.startswith('certifi/') and not name.endswith('/'):
+                    dest = site / name
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    dest.write_bytes(wheel.read(name))
+
+    def ca_policy(self, env, source, path, name):
+        """Point one CA source (env var or pip config cert) at path."""
+        policy = dict(env)
+        if source == 'config':
+            config = self.base / name
+            config.write_text('[global]\ncert = ' + str(path) + '\n')
+            policy['PIP_CONFIG_FILE'] = str(config)
+        else:
+            policy[source] = str(path)
+        return policy
+
+    def test_real_pip_upgrades(self):
+        # Fresh pip 23 (Debian bookworm) and modern pip 26, from local wheels and real PyPI HTTPS.
+        online = {k: v for k, v in self.env.items() if k not in ('PIP_NO_INDEX', 'PIP_FIND_LINKS')}
+        for version in ('23.0.1', '26.0.1'):
+            for source, env in (('wheels', None), ('pypi', online)):
+                with self.subTest(version=version, source=source):
+                    python = self.venv(version)
+                    result = self.helper(python, env=env)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    if env is None:
+                        self.assertIn('26.2.2', self.pip_version(python))
+
+    def test_helper_fails_closed(self):
+        stale = self.base / 'stale'
+        stale.mkdir()
+        shutil.copy(self.wheels / 'pip-23.0.1-py3-none-any.whl', stale)
+        constraint = self.base / 'constraints.txt'
+        constraint.write_text('pip==26.0.1\n')
+        venvs = {}
         # A bound but non-listening local socket guarantees no external contact.
-        import socket
         with socket.socket() as sock:
             sock.bind(('127.0.0.1', 0))
-            env = dict(self.env, PIP_FIND_LINKS=f'https://127.0.0.1:{sock.getsockname()[1]}/pip-26.2.2-py3-none-any.whl',
-                       PIP_RETRIES='0', PIP_TIMEOUT='1', NO_PROXY='127.0.0.1')
-            result = self.helper(python, env=env)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('Connection refused', result.stdout + result.stderr)
-        self.assertIn('23.0.1', self.run_cmd([str(python), '-m', 'pip', '--version']).stdout)
-
-    def test_insecure_download_policy_refused(self):
-        python = self.venv('26.0.1')
-        for policy, message in (({'PIP_TRUSTED_HOST': 'localhost'}, 'trusted-host'),
-                                ({'PIP_FIND_LINKS': 'http://127.0.0.1:1/pip.whl'}, 'requires HTTPS'),
-                                ({'PIP_NO_INDEX': '0', 'PIP_INDEX_URL': 'http://127.0.0.1:1/simple'}, 'requires HTTPS'),
-                                ({'PIP_NO_INDEX': '0', 'PIP_EXTRA_INDEX_URL': 'http://127.0.0.1:1/simple'}, 'requires HTTPS')):
-            with self.subTest(policy=policy):
-                result = self.helper(python, env=dict(self.env, **policy))
-                self.assertNotEqual(result.returncode, 0)
-                self.assertIn(message, result.stderr)
-                self.assertNotIn('Collecting', result.stdout)
+            refused = dict(PIP_FIND_LINKS=f'https://127.0.0.1:{sock.getsockname()[1]}/pip-26.2.2-py3-none-any.whl',
+                           PIP_RETRIES='0', PIP_TIMEOUT='1', NO_PROXY='127.0.0.1')
+            # (case, pip version, env overrides, helper kwargs, expected message, pip must not download)
+            cases = [
+                ('missing pip', None, {}, {}, "No module named 'pip'", True),
+                ('transport failure', '23.0.1', refused, {}, 'Connection refused', False),
+                ('trusted host', '26.0.1', {'PIP_TRUSTED_HOST': 'localhost'}, {}, 'trusted-host', True),
+                ('http find-links', '26.0.1', {'PIP_FIND_LINKS': 'http://127.0.0.1:1/pip.whl'}, {}, 'requires HTTPS', True),
+                ('http index', '26.0.1', {'PIP_NO_INDEX': '0', 'PIP_INDEX_URL': 'http://127.0.0.1:1/simple'}, {}, 'requires HTTPS', True),
+                ('http extra index', '26.0.1', {'PIP_NO_INDEX': '0', 'PIP_EXTRA_INDEX_URL': 'http://127.0.0.1:1/simple'}, {}, 'requires HTTPS', True),
+                ('constraint conflict', '26.0.1', {'PIP_CONSTRAINT': str(constraint)}, {}, None, False),
+                ('stale index', '23.0.1', {'PIP_FIND_LINKS': str(stale)}, {}, None, False),
+                ('affected bootstrap CA', '26.0.1', {}, {'ca': self.bad_ca}, 'Affected emSign anchor', False),
+                ('old opt-in truststore', '23.0.1', {'PIP_USE_FEATURE': 'truststore'}, {}, 'opt-in truststore', False),
+                ('system-pip on venv', '26.0.1', {}, {'mode': 'system-pip'}, 'system-pip requires Debian system Python', False),
+                ('unchanged affected pip', '26.0.1', {}, {'wrapper': 'exit 0'}, 'Affected emSign anchor', False),
+            ]
+            for case, version, overrides, kwargs, message, no_download in cases:
+                with self.subTest(case=case):
+                    # Refusals leave pip unchanged (asserted), so venvs are shared per version.
+                    if version not in venvs:
+                        venvs[version] = self.venv(version)
+                    python = venvs[version]
+                    kwargs = dict(kwargs)
+                    if 'wrapper' in kwargs:
+                        target = self.pip_wrapper(python, 'no-op-installer', kwargs.pop('wrapper'))
+                    else:
+                        target = python
+                    result = self.helper(target, env=dict(self.env, **overrides), **kwargs)
+                    output = result.stdout + result.stderr
+                    self.assertNotEqual(result.returncode, 0, output)
+                    if message:
+                        self.assertIn(message, output if case == 'transport failure' else result.stderr)
+                    self.assertNotIn('Successfully installed', result.stdout)
+                    if no_download:
+                        self.assertNotIn('Collecting', result.stdout)
+                    if version:
+                        self.assertIn(version, self.pip_version(python))
 
     def test_app_missing_and_affected_certifi(self):
         python = self.venv('26.2.2')
         result = self.helper(python, mode='app')
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("No module named 'certifi'", result.stderr)
-        site = Path(self.run_cmd([str(python), '-c', 'import sysconfig; print(sysconfig.get_path("purelib"))']).stdout.strip())
-        with zipfile.ZipFile(self.wheels / 'certifi-2025.4.26-py3-none-any.whl') as wheel:
-            for name in wheel.namelist():
-                if name.startswith('certifi/') and not name.endswith('/'):
-                    dest = site / name
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    dest.write_bytes(wheel.read(name))
+        self.install_certifi(python, '2025.4.26')
         result = self.helper(python, mode='app')
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('Affected emSign anchor', result.stderr)
 
-    def test_actual_pip23_fresh_venv(self):
-        python = self.venv('23.0.1')
-        result = self.helper(python)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('26.2.2', self.run_cmd([str(python), '-m', 'pip', '--version']).stdout)
-
     def test_standalone_helper_trust_gate(self):
-        source = (ROOT / 'build_sdcard.sh').read_text()
-        gate = source.split("/usr/bin/python3 - <<'PY' || exit 1\n", 1)[1].split('\nPY\n', 1)[0]
+        gate = between(read('build_sdcard.sh'), "/usr/bin/python3 - <<'PY' || exit 1\n", '\nPY\n')
         for bundle, accepted in ((self.ca, True), (self.bad_ca, False)):
             code = gate.replace('"/etc/ssl/certs/ca-certificates.crt"', repr(str(bundle)))
             result = self.run_cmd([sys.executable, '-c', code], ok=False)
             self.assertEqual(result.returncode == 0, accepted, result.stderr)
 
     def test_rich_toolkit_override_preserves_configured_policy(self):
-        source = (ROOT / 'home.admin/config.scripts/blitz.web.api.sh').read_text()
-        line = next(line for line in source.splitlines() if 'rich-toolkit==0.14.6' in line)
-        tokens = shlex.split(line)
+        source = read(API)
+        tokens = shlex.split(next(line for line in source.splitlines() if 'rich-toolkit==0.14.6' in line))
         overrides = {}
         for token in tokens[tokens.index('env') + 1:]:
             if '=' not in token:
@@ -191,44 +254,23 @@ class Bootstrap(unittest.TestCase):
         effective = dict(env, **overrides)
         options = json.loads(self.run_cmd([str(python), '-c', probe], env=effective).stdout)
         self.assertEqual(options, ['https://pypi.org/simple', [], [str(constraints)], str(self.ca)])
-        result = self.run_cmd([str(python), '-m', 'pip', 'install', '--no-index',
-                               '--find-links', str(self.wheels), 'pip==26.2.2'],
-                              env=effective, ok=False)
+        result = self.run_cmd([str(python), '-m', 'pip', 'install', '--no-index', '--find-links',
+                               str(self.wheels), 'pip==26.2.2'], env=effective, ok=False)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('conflict', (result.stdout + result.stderr).lower())
         restored = json.loads(self.run_cmd([str(python), '-c', probe], env=env).stdout)
-        self.assertEqual(restored[:2], ['https://mirror.example.invalid/simple',
-                                       ['https://www.piwheels.org/simple']])
+        self.assertEqual(restored[:2], ['https://mirror.example.invalid/simple', ['https://www.piwheels.org/simple']])
         self.assertEqual(config.read_text(), content)
-        start = source.index('  # Keep the rich-toolkit PyPI workaround')
-        end = source.index('  if ! "${pip_sudo[@]}" ./venv/bin/pip install --no-cache-dir -r requirements.txt', start)
-        block = source[start:end]
+        block = source[source.index('  # Keep the rich-toolkit PyPI workaround'):
+                       source.index('  if ! "${pip_sudo[@]}" ./venv/bin/pip install --no-cache-dir -r requirements.txt')]
         self.assertNotIn('/etc/pip.conf', block)
-        failure = self.run_cmd(['bash', '-c', 'pip_sudo=(sudo)\nsudo() { return 1; }\n' +
-                                block + '\necho NEXT_PACKAGE\n'], ok=False)
+        failure = bash('pip_sudo=(sudo)\nsudo() { return 1; }\n' + block + '\necho NEXT_PACKAGE\n')
         self.assertEqual(failure.returncode, 1)
         self.assertNotIn('NEXT_PACKAGE', failure.stdout)
 
-    def test_actual_modern_pip26(self):
-        result = self.helper(self.venv('26.0.1'))
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-
-    def test_https_bootstrap_pip23(self):
-        python = self.venv('23.0.1')
-        env = {k: v for k, v in self.env.items() if k not in ('PIP_NO_INDEX', 'PIP_FIND_LINKS')}
-        result = self.helper(python, env=env)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-
-    def test_https_bootstrap_modern(self):
-        python = self.venv('26.0.1')
-        env = {k: v for k, v in self.env.items() if k not in ('PIP_NO_INDEX', 'PIP_FIND_LINKS')}
-        result = self.helper(python, env=env)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-
     @contextlib.contextmanager
     def https_wheel(self):
-        path = self.base / (self.id().split('.')[-1] + '-https')
-        path.mkdir()
+        path = Path(tempfile.mkdtemp(dir=self.base, prefix='https-'))
         config = path / 'openssl.cnf'
         config.write_text('[req]\ndistinguished_name=dn\nx509_extensions=ext\nprompt=no\n'
                           '[dn]\nCN=localhost\n[ext]\nbasicConstraints=critical,CA:TRUE\n'
@@ -260,7 +302,7 @@ class Bootstrap(unittest.TestCase):
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
         env = dict(self.env, PIP_FIND_LINKS=f'https://localhost:{server.server_port}/{wheel.name}',
-                   PIP_NO_CACHE_DIR='1', NO_PROXY='localhost', no_proxy='localhost')
+                   NO_PROXY='localhost', no_proxy='localhost')
         try:
             yield cert, env, requests
         finally:
@@ -284,87 +326,59 @@ class Bootstrap(unittest.TestCase):
                         config.write_text('[global]\ncert = ' + str(cert if selected == 'config' else self.ca) + '\n')
                         policy = dict(env, PIP_CONFIG_FILE=str(config))
                         if selected in ('REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'PIP_CERT'):
-                            policy[selected] = str(cert)
-                            policy['SSL_CERT_FILE'] = str(self.ca)
+                            # Lower-precedence sources point at the wrong (public) bundle.
+                            policy.update({selected: str(cert), 'SSL_CERT_FILE': str(self.ca)})
                             if selected == 'CURL_CA_BUNDLE':
                                 policy['REQUESTS_CA_BUNDLE'] = ''
+                            if selected == 'REQUESTS_CA_BUNDLE':
+                                policy['CURL_CA_BUNDLE'] = str(self.ca)
                         elif selected in ('SSL_CERT_FILE', 'argument'):
                             config.write_text('[global]\n')
                             if selected == 'SSL_CERT_FILE':
-                                policy[selected] = str(cert)
-                                policy.update(REQUESTS_CA_BUNDLE='', CURL_CA_BUNDLE='', PIP_CERT='')
-                        if selected == 'REQUESTS_CA_BUNDLE':
-                            policy['CURL_CA_BUNDLE'] = str(self.ca)
+                                policy.update(SSL_CERT_FILE=str(cert), REQUESTS_CA_BUNDLE='', CURL_CA_BUNDLE='', PIP_CERT='')
                         before = len(requests)
                         result = self.helper(python, ca=cert if selected == 'argument' else self.ca, env=policy)
                         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                         self.assertGreater(len(requests), before)
-                        self.assertIn('26.2.2', self.run_cmd([str(python), '-m', 'pip', '--version']).stdout)
+                        self.assertIn('26.2.2', self.pip_version(python))
 
     def test_explicit_unsafe_ca_refused_before_https(self):
         python = self.venv('26.0.1')
         malformed = self.base / 'broken-ca.pem'
         malformed.write_text('not a certificate\n')
         marker = python.parent / 'pip-download-invoked'
-        wrapper = python.parent / 'precheck-python'
-        wrapper.write_text('#!/bin/bash\nif [ "$1" = -m ] && [ "$2" = pip ]; then\n'
-                           'touch ' + shlex.quote(str(marker)) + '\nfi\nexec ' +
-                           shlex.quote(str(python)) + ' "$@"\n')
-        wrapper.chmod(0o755)
+        wrapper = self.pip_wrapper(python, 'precheck-python', 'touch ' + shlex.quote(str(marker)))
         with self.https_wheel() as (cert, env, requests):
-            for source in ('REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'PIP_CERT', 'config', 'SSL_CERT_FILE'):
+            for source in CA_SOURCES:
                 for bad in (self.bad_ca, malformed, self.base / 'missing-ca.pem', self.base):
                     with self.subTest(source=source, bad=bad):
-                        policy = dict(env, REQUESTS_CA_BUNDLE=str(cert))
-                        if source == 'config':
-                            config = self.base / 'bad-cert.conf'
-                            config.write_text('[global]\ncert = ' + str(bad) + '\n')
-                            policy['PIP_CONFIG_FILE'] = str(config)
-                        else:
-                            policy[source] = str(bad)
+                        policy = self.ca_policy(dict(env, REQUESTS_CA_BUNDLE=str(cert)), source, bad, 'bad-cert.conf')
                         marker.unlink(missing_ok=True)
                         result = self.helper(wrapper, env=policy)
                         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
                         self.assertFalse(marker.exists(), 'pip download invoked before CA refusal')
                         self.assertEqual(requests, [])
-                        self.assertIn('26.0.1', self.run_cmd([str(python), '-m', 'pip', '--version']).stdout)
+                        self.assertIn('26.0.1', self.pip_version(python))
 
     def test_explicit_ca_postconditions(self):
         python = self.venv('26.2.2')
-        # Use the standalone wheel: vendored certifi.core refers back to pip's
-        # package resources even when copied to a top-level certifi directory.
-        site = Path(self.run_cmd([str(python), '-c', 'import sysconfig; print(sysconfig.get_path("purelib"))']).stdout.strip())
-        with zipfile.ZipFile(self.wheels / 'certifi-2026.10.19-py3-none-any.whl') as wheel:
-            for name in wheel.namelist():
-                if name.startswith('certifi/') and not name.endswith('/'):
-                    dest = site / name
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    dest.write_bytes(wheel.read(name))
+        self.install_certifi(python, '2026.10.19')
         clean_app = self.helper(python, mode='app')
         self.assertEqual(clean_app.returncode, 0, clean_app.stdout + clean_app.stderr)
         override = self.base / 'postcheck.pem'
-        for source in ('REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'PIP_CERT', 'config', 'SSL_CERT_FILE'):
+        payload = self.base / 'postcheck-input.pem'
+        # Mutation at the install boundary forces the actual pip postcheck
+        # (not merely the pre-download validation) to reject the file.
+        wrapper = self.pip_wrapper(python, 'postcheck-python',
+                                   f'cp {shlex.quote(str(payload))} {shlex.quote(str(override))}\nexit $?')
+        for source in CA_SOURCES:
             for bad in (self.bad_ca.read_text(), 'broken certificate\n'):
                 for mode in ('app', 'pip'):
                     with self.subTest(source=source, bad=bad[:20], mode=mode):
-                        policy = dict(self.env)
-                        if source == 'config':
-                            config = self.base / 'postcheck.conf'
-                            config.write_text('[global]\ncert = ' + str(override) + '\n')
-                            policy['PIP_CONFIG_FILE'] = str(config)
-                        else:
-                            policy[source] = str(override)
-                        wrapper = python.parent / 'postcheck-python'
+                        policy = self.ca_policy(self.env, source, override, 'postcheck.conf')
                         if mode == 'pip':
                             override.write_bytes(self.ca.read_bytes())
-                            # Mutation at install boundary forces the actual pip postcheck
-                            # (not merely the pre-download validation) to reject the file.
-                            payload = self.base / 'postcheck-input.pem'
                             payload.write_text(bad)
-                            wrapper.write_text('#!/bin/bash\nif [ "$1" = -m ] && [ "$2" = pip ]; then\n'
-                                               'cp ' + shlex.quote(str(payload)) + ' ' + shlex.quote(str(override)) +
-                                               '\nexit $?\nfi\nexec ' + shlex.quote(str(python)) + ' "$@"\n')
-                            wrapper.chmod(0o755)
                         else:
                             override.write_text(bad)
                         result = self.helper(wrapper if mode == 'pip' else python, env=policy, mode=mode)
@@ -373,51 +387,49 @@ class Bootstrap(unittest.TestCase):
                         self.assertIn('Affected emSign anchor' if 'BEGIN CERTIFICATE' in bad
                                       else 'No trust anchors found', result.stderr)
 
-    def test_postcondition_rejects_unchanged_affected_pip(self):
-        python = self.venv('26.0.1')
-        wrapper = python.parent / 'no-op-installer'
-        wrapper.write_text('#!/bin/bash\nif [ "$1" = -m ] && [ "$2" = pip ]; then exit 0; fi\nexec '
-                           + repr(str(python)) + ' "$@"\n')
-        wrapper.chmod(0o755)
-        result = self.helper(wrapper)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('Affected emSign anchor', result.stderr)
-
     def test_debian_scheme_selection(self):
-        source = HELPER.read_text().split('local_packages=$("$python" - <<\'PY\'\n', 1)[1].split('\nPY', 1)[0]
+        source = between(HELPER.read_text(), 'local_packages=$("$python" - <<\'PY\'\n', '\nPY')
+        dist = f'/usr/local/lib/python{sys.version_info.major}.{sys.version_info.minor}/dist-packages'
         # Exercise production scheme selection without touching Linux or /usr/local.
         prefix = ('import sys, pathlib; sys.platform="linux"; sys.prefix=sys.base_prefix; '
-                  'sys.path.insert(0, f"/usr/local/lib/python{sys.version_info.major}.{sys.version_info.minor}/dist-packages"); '
+                  f'sys.path.insert(0, {dist!r}); '
                   'pathlib.Path.is_file=lambda self: str(self)=="/etc/debian_version";\n')
         result = self.run_cmd([sys.executable, '-c', prefix + source])
-        self.assertEqual(result.stdout.strip(), f'/usr/local/lib/python{sys.version_info.major}.{sys.version_info.minor}/dist-packages')
-        self.assertNotIn('/usr/local/local/', result.stdout)
+        self.assertEqual(result.stdout.strip(), dist)
 
-    def test_constraint_fails_closed(self):
-        python = self.venv('26.0.1')
-        constraint = self.base / 'constraints.txt'
-        constraint.write_text('pip==26.0.1\n')
-        result = self.helper(python, env=dict(self.env, PIP_CONSTRAINT=str(constraint)))
+    def test_unsupported_python(self):
+        # Run the actual production version guard under a synthetic old version.
+        source = between(HELPER.read_text(), '  "$python" - <<\'PY\'\n', '\nPY')
+        result = self.run_cmd([sys.executable, '-c', 'import sys; sys.version_info=(3,9,0);\n' + source], ok=False)
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn('26.0.1', self.run_cmd([str(python), '-m', 'pip', '--version']).stdout)
+        self.assertIn('Python >=3.10', result.stderr)
+
+    def test_target_preserves_existing_pip_and_generates_entrypoints(self):
+        python = self.venv('23.0.1')
+        target = self.base / 'local/lib/python3/dist-packages'
+        # Same installation primitive as production, isolated from /usr/local.
+        self.run_cmd([str(python), '-m', 'pip', 'install', '--upgrade', '--target', str(target), 'pip>=26.2.2'])
+        self.assertIn('23.0.1', self.pip_version(python))
+        self.assertTrue((target / 'bin/pip3').is_file())
+        result = self.run_cmd([str(python), '-c', 'import pip; print(pip.__version__)'],
+                              env=dict(self.env, PYTHONPATH=str(target)))
+        self.assertEqual(result.stdout.strip(), '26.2.2')
+        helper = HELPER.read_text()
+        self.assertNotIn('--prefix=', helper.split('target=(')[-1])
+        self.assertNotIn('--break-system-packages', helper)
 
     def test_outer_update_constraints_stop_restart(self):
         python = self.venv('26.0.1')
         path = python.parent.parent
-        source = (ROOT / 'home.admin/config.scripts/blitz.web.api.sh').read_text()
-        block = source[source.index('if [ "$1" = "update-code" ]; then'):]
-        block = block[:block.index('\n###################')]
-        block = block.replace('/home/blitzapi/blitz_api', str(path))
-        block = block.replace('ls /etc/systemd/system/blitzapi.service', 'printf blitzapi.service')
-        block = block.replace('/home/admin/config.scripts/blitz.python-trust.sh',
-                              'bash ' + shlex.quote(str(HELPER)))
+        source = read(API)
+        block = api_update_block(source, path)
+        block = block.replace('/home/admin/config.scripts/blitz.python-trust.sh', 'bash ' + shlex.quote(str(HELPER)))
         block = block.replace('./venv/bin/python', './venv/bin/python ' + shlex.quote(str(self.ca)))
         block = block.replace('./venv/bin/', shlex.quote(str(python.parent)) + '/')
         constraint = path / 'constraint.txt'
         policy = {k: v for k, v in self.env.items() if k.startswith('PIP_')}
         policy.update(PIP_CONSTRAINT=str(constraint), REQUESTS_CA_BUNDLE=str(self.ca),
                       CURL_CA_BUNDLE=str(self.ca), SSL_CERT_FILE=str(self.ca), SSL_CERT_DIR=str(path))
-        runner = reset_sudo(path, policy)
         header = '''
 systemctl() { echo "service $*"; }
 sudo() {
@@ -428,75 +440,27 @@ sudo() {
     fi
     return 0
   fi
-  ''' + runner + ''' "$@"
+  ''' + reset_sudo(path, policy) + ''' "$@"
 }
 '''
         # Real helper conflict, then successful helper and real requirements conflict.
         for helper_failure in (True, False):
-            (path / 'marker').unlink(missing_ok=True)
-            constraint.write_text('pip==26.0.1\n' if helper_failure else 'pip==26.2.2\n')
-            (path / 'requirements.txt').write_text('pip==26.0.1\n')
-            result = subprocess.run(['bash', '-c', header + policy_prefix(source) + '\n' + block,
-                                     'test', 'update-code', 'main'],
-                                    env=dict(clean_environment(), **policy, UNRELATED_SECRET='do-not-forward'),
-                                    text=True, capture_output=True)
-            self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertIn('ResolutionImpossible', result.stdout + result.stderr)
-            self.assertIn('service stop ', result.stdout)
-            self.assertNotIn('service start ', result.stdout)
-            self.assertEqual('Code changed, updating dependencies' in result.stdout, not helper_failure)
-
-    def test_stale_index_fails_closed(self):
-        python = self.venv('23.0.1')
-        stale = self.base / 'stale'
-        stale.mkdir()
-        shutil.copy(self.wheels / 'pip-23.0.1-py3-none-any.whl', stale)
-        result = self.helper(python, env=dict(self.env, PIP_FIND_LINKS=str(stale)))
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('23.0.1', self.run_cmd([str(python), '-m', 'pip', '--version']).stdout)
-
-    def test_affected_bootstrap_refused(self):
-        result = self.helper(self.venv('26.0.1'), ca=self.bad_ca)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('Affected emSign anchor', result.stderr)
-        self.assertNotIn('Successfully installed', result.stdout)
-
-    def test_old_opt_in_truststore_refused(self):
-        result = self.helper(self.venv('23.0.1'), env=dict(self.env, PIP_USE_FEATURE='truststore'))
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('opt-in truststore', result.stderr)
-
-    def test_unsupported_python(self):
-        # Run the actual production version guard under a synthetic old version.
-        source = HELPER.read_text().split('  "$python" - <<\'PY\'\n', 1)[1].split('\nPY', 1)[0]
-        result = self.run_cmd([sys.executable, '-c',
-                               'import sys; sys.version_info=(3,9,0);\n' + source], ok=False)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('Python >=3.10', result.stderr)
-
-    def test_system_mode_rejects_venv(self):
-        result = self.helper(self.venv('26.0.1'), mode='system-pip')
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('system-pip requires Debian system Python', result.stderr)
-
-    def test_target_preserves_existing_pip_and_generates_entrypoints(self):
-        python = self.venv('23.0.1')
-        target = self.base / 'local/lib/python3/dist-packages'
-        # Same installation primitive as production, isolated from /usr/local.
-        self.run_cmd([str(python), '-m', 'pip', 'install', '--upgrade', '--target', str(target), 'pip>=26.2.2'])
-        self.assertIn('23.0.1', self.run_cmd([str(python), '-m', 'pip', '--version']).stdout)
-        self.assertTrue((target / 'bin/pip3').is_file())
-        result = self.run_cmd([str(python), '-c', 'import pip; print(pip.__version__)'],
-                              env=dict(self.env, PYTHONPATH=str(target)))
-        self.assertEqual(result.stdout.strip(), '26.2.2')
-        helper = HELPER.read_text()
-        self.assertNotIn('--prefix=', helper.split('target=(')[-1])
-        self.assertNotIn('--break-system-packages', helper)
+            with self.subTest(helper_failure=helper_failure):
+                (path / 'marker').unlink(missing_ok=True)
+                constraint.write_text('pip==26.0.1\n' if helper_failure else 'pip==26.2.2\n')
+                (path / 'requirements.txt').write_text('pip==26.0.1\n')
+                result = bash(header + policy_prefix(source) + '\n' + block, 'test', 'update-code', 'main',
+                              env=dict(clean_environment(), **policy, UNRELATED_SECRET='do-not-forward'))
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn('ResolutionImpossible', result.stdout + result.stderr)
+                self.assertIn('service stop ', result.stdout)
+                self.assertNotIn('service start ', result.stdout)
+                self.assertEqual('Code changed, updating dependencies' in result.stdout, not helper_failure)
 
 
 class RestartPaths(unittest.TestCase):
     def test_joininbox_verified_release_gate_before_owner(self):
-        source = (ROOT / 'home.admin/config.scripts/bonus.joinmarket.sh').read_text()
+        source = read('home.admin/config.scripts/bonus.joinmarket.sh')
         start = source.index('    # The late pip posthook')
         end = source.index('    echo "# Set ssh access off', start)
         self.assertLess(source.index('"${PGPpubkeyFingerprint}" "${JBTAG}" || exit 1'), start)
@@ -522,17 +486,12 @@ class RestartPaths(unittest.TestCase):
                 if not legacy:
                     (scripts / names[1]).write_text('# mock owner helper\n')
                     (scripts / names[2]).write_text('# mock archived installer backport\n')
-
-                def git(*args):
-                    result = subprocess.run(['git', '-c', 'user.name=Trust Fixture',
-                                             '-c', 'user.email=fixture@example.invalid', *args],
-                                            cwd=repo, text=True, capture_output=True)
-                    self.assertEqual(result.returncode, 0, result.stderr)
-
-                git('init', '-q')
-                git('add', 'scripts')
-                git('commit', '-qm', 'Synthetic release gate fixture')
-                git('tag', 'v0.9.0')
+                for args in (('init', '-q'), ('add', 'scripts'),
+                             ('commit', '-qm', 'Synthetic release gate fixture'), ('tag', 'v0.9.0')):
+                    git = subprocess.run(['git', '-c', 'user.name=Trust Fixture',
+                                          '-c', 'user.email=fixture@example.invalid', *args],
+                                         cwd=repo, text=True, capture_output=True)
+                    self.assertEqual(git.returncode, 0, git.stderr)
                 if case in ('untracked-helpers', 'untracked-new-installer'):
                     (scripts / names[1]).write_text('# stale untracked helper\n')
                     (scripts / names[2]).write_text('# stale untracked backport\n')
@@ -544,12 +503,10 @@ class RestartPaths(unittest.TestCase):
                     (home / names[1]).write_text('# different helper\n')
                 elif case == 'missing-copy':
                     (home / names[2]).unlink()
+                # Signature verification is an earlier owner boundary; this tests
+                # the real gate using real Git refs and copied files.
                 gate = source[start:end].replace('/home/joinmarket', str(home))
-                # Existing signature verification is an earlier owner boundary;
-                # this tests the real gate using real Git refs and copied files.
-                header = 'JBTAG=v0.9.0\nsudo() { shift 2; "$@"; }\n'
-                result = subprocess.run(['bash', '-c', header + gate + '\necho OWNER_INVOKED\n'],
-                                        text=True, capture_output=True)
+                result = bash('JBTAG=v0.9.0\nsudo() { shift 2; "$@"; }\n' + gate + '\necho OWNER_INVOKED\n')
                 accepted = case == 'reviewed'
                 self.assertEqual(result.returncode == 0, accepted, result.stdout + result.stderr)
                 self.assertEqual('OWNER_INVOKED' in result.stdout, accepted)
@@ -558,16 +515,16 @@ class RestartPaths(unittest.TestCase):
 
     def test_download_policy_at_every_outer_boundary(self):
         with tempfile.TemporaryDirectory() as temp:
-            path = Path(temp)
             policy = {name: 'policy with spaces\nand punctuation=;'
                       for name in ('PIP_CONSTRAINT', 'PIP_BUILD_CONSTRAINT', 'PIP_CERT',
                                    'PIP_FUTURE_SETTING', 'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE',
                                    'SSL_CERT_FILE', 'SSL_CERT_DIR')}
-            runner = reset_sudo(path, policy, probe=True)
-            for file, expected in (('build_sdcard.sh', 5),
-                                   ('home.admin/config.scripts/blitz.web.api.sh', 8),
+            header = 'sudo() { ' + reset_sudo(Path(temp), policy, probe=True) + ' "$@"; }\n'
+            env = dict(clean_environment(), **policy, PYTHONPATH='not-forwarded',
+                       PYTHONHOME='not-forwarded', UNRELATED_SECRET='not-forwarded')
+            for file, expected in (('build_sdcard.sh', 5), (API, 8),
                                    ('home.admin/config.scripts/bonus.joinmarket.sh', 2)):
-                source = (ROOT / file).read_text()
+                source = read(file)
                 # Run every production prefix invocation; command side effects
                 # alone are replaced. Sudo's reset strips all non-policy vars.
                 lines = [line for line in source.splitlines() if '"${pip_sudo[@]}"' in line]
@@ -575,23 +532,16 @@ class RestartPaths(unittest.TestCase):
                 self.assertNotRegex(source, r'sudo -(?:u (?:blitzapi|joinmarket)|H) (?:[^\n]*blitz.python-trust|[^\n]* -m pip|\./venv/bin/pip|/home/joinmarket/install.joinmarket)')
                 for line in lines:
                     command = line[line.index('"${pip_sudo[@]}"'):].split('; then', 1)[0].split(' ||', 1)[0].split(' >', 1)[0].rstrip('\\; ')
-                    header = 'sudo() { ' + runner + ' "$@"; }\n'
-                    result = subprocess.run(['bash', '-c', header + policy_prefix(source) + '\n' + command],
-                                            env=dict(clean_environment(), **policy, PYTHONPATH='not-forwarded',
-                                                     PYTHONHOME='not-forwarded', UNRELATED_SECRET='not-forwarded'),
-                                            capture_output=True, text=True)
+                    result = bash(header + policy_prefix(source) + '\n' + command, env=env)
                     self.assertEqual(result.returncode, 0, file + ': ' + result.stdout + result.stderr)
                     self.assertNotIn('policy with spaces', result.stdout + result.stderr)
 
     def test_update_paths(self):
         # Execute the production update block, replacing external state only.
-        source = (ROOT / 'home.admin/config.scripts/blitz.web.api.sh').read_text()
-        block = source[source.index('if [ "$1" = "update-code" ]; then'):]
-        block = block[:block.index('\n###################')]
+        source = read(API)
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp)
-            block = block.replace('/home/blitzapi/blitz_api', temp)
-            block = block.replace('ls /etc/systemd/system/blitzapi.service', 'printf blitzapi.service')
+            block = api_update_block(source, path)
             header = '''
 currentBranch=main
 systemctl() {
@@ -625,30 +575,30 @@ sudo() {
   return 0
 }
 '''
-            cases = [(branch, failure, change, install, starts, '')
-                     for branch, failure, change, install, starts in (
-                         (1, '', 0, 0, False), (0, 'pip', 0, 0, False),
-                         (0, 'app', 0, 0, False), (0, '', 0, 0, True),
-                         (0, '', 1, 1, False), (0, 'app', 1, 0, False),
-                         (0, '', 1, 0, True))]
+            script = header + policy_prefix(source) + '\n' + block
+            marker = path / 'rev-parse-called'
+
+            def run(command='', branch=0, failure='', change=0, install=0, script=script, ref='main'):
+                marker.unlink(missing_ok=True)
+                env = dict(os.environ, BRANCH_STATUS=str(branch), FAIL_CHECK=failure, COMMIT='unchanged',
+                           INSTALL_STATUS=str(install), CHANGE=str(change), MARKER=str(marker), FAIL_COMMAND=command)
+                return bash(script, 'test', 'update-code', ref, env=env)
+
+            # (missing branch, failed check, commit changed, requirements status, services start, failed command)
+            cases = [(1, '', 0, 0, False, ''), (0, 'pip', 0, 0, False, ''), (0, 'app', 0, 0, False, ''),
+                     (0, '', 0, 0, True, ''), (0, '', 1, 1, False, ''), (0, 'app', 1, 0, False, ''),
+                     (0, '', 1, 0, True, ''), (0, '', 1, 0, False, 'rev-parse-new')]
             cases += [(0, '', 0, 0, command == 'start', command)
                       for command in ('stop', 'fetch', 'reset', 'rev-parse', 'start')]
-            cases.append((0, '', 1, 0, False, 'rev-parse-new'))
-            for branch, failure, change, install_status, starts, command in cases:
+            for branch, failure, change, install, starts, command in cases:
                 with self.subTest(branch=branch, failure=failure, change=change, command=command):
-                    marker = path / 'rev-parse-called'
-                    marker.unlink(missing_ok=True)
-                    env = dict(os.environ, BRANCH_STATUS=str(branch), FAIL_CHECK=failure,
-                               COMMIT='unchanged', INSTALL_STATUS=str(install_status),
-                               CHANGE=str(change), MARKER=str(marker), FAIL_COMMAND=command)
-                    result = subprocess.run(['bash', '-c', header + policy_prefix(source) + '\n' + block, 'test', 'update-code', 'main'],
-                                            env=env, capture_output=True, text=True)
-                    self.assertEqual('service start ' in result.stdout, starts, result.stdout + result.stderr)
-                    self.assertEqual(result.returncode == 0, starts and not command, result.stdout + result.stderr)
+                    result = run(command, branch, failure, change, install)
+                    output = result.stdout + result.stderr
+                    self.assertEqual('service start ' in result.stdout, starts, output)
+                    self.assertEqual(result.returncode == 0, starts and not command, output)
                     self.assertIn('service stop blitzapi blitzapi-celery-worker blitzapi-celery-beat', result.stdout)
                     if command:
-                        self.assertIn('service ' + command if command in ('stop', 'start') else 'git ' + command,
-                                      result.stdout + result.stderr)
+                        self.assertIn('service ' + command if command in ('stop', 'start') else 'git ' + command, output)
                     if command == 'stop':
                         self.assertNotIn('git ', result.stderr)
                         self.assertNotIn('check ', result.stdout)
@@ -656,31 +606,30 @@ sudo() {
                         self.assertLess(result.stdout.index('check pip'), result.stdout.index('check app'))
                         self.assertLess(result.stdout.index('check app'), result.stdout.index('service start'))
                         self.assertEqual('dependencies' in result.stdout, bool(change))
-            # Cover absent service and branch inference without fabricating an
-            # active installation or silently defaulting to an arbitrary branch.
-            env = dict(os.environ, BRANCH_STATUS='0', FAIL_CHECK='', COMMIT='unchanged',
-                       INSTALL_STATUS='0', CHANGE='0', MARKER=str(path / 'inferred'), FAIL_COMMAND='')
+            # Branch inference without silently defaulting to an arbitrary branch.
+            inferred = script.replace('currentBranch=main', 'currentBranch=', 1)
             for command in ('', 'rev-parse'):
-                env['FAIL_COMMAND'] = command
-                result = subprocess.run(['bash', '-c', header.replace('currentBranch=main', 'currentBranch=') +
-                                         policy_prefix(source) + '\n' + block, 'test', 'update-code', ''],
-                                        env=env, text=True, capture_output=True)
-                self.assertEqual(result.returncode, int(bool(command)), result.stdout + result.stderr)
-                if not command:
-                    self.assertIn('# BRANCH ---> unchanged', result.stdout)
-                else:
-                    self.assertNotIn('git fetch', result.stderr)
-            result = subprocess.run(['bash', '-c', header + policy_prefix(source) + '\n' +
-                                     block.replace('printf blitzapi.service', 'true'), 'test', 'update-code', 'main'],
-                                    env=env, text=True, capture_output=True)
+                with self.subTest(inferred_branch=True, command=command):
+                    result = run(command, script=inferred, ref='')
+                    self.assertEqual(result.returncode, int(bool(command)), result.stdout + result.stderr)
+                    if command:
+                        self.assertNotIn('git fetch', result.stderr)
+                    else:
+                        self.assertIn('# BRANCH ---> unchanged', result.stdout)
+            # Absent service: no fabricated installation, nothing stopped or checked.
+            result = run(script=script.replace('printf blitzapi.service', 'true'))
             self.assertEqual(result.returncode, 1)
             self.assertIn('blitzapi not active', result.stdout)
             self.assertNotIn('service stop', result.stdout)
             self.assertNotIn('check ', result.stdout)
 
     def test_image_checkout_and_standalone_fail_closed(self):
-        source = (ROOT / 'build_sdcard.sh').read_text()
+        source = read('build_sdcard.sh')
         block = source[source.index('# Refresh through signed APT'):source.index('"${pip_sudo[@]}" python3 -m pip install grpcio')]
+        # No pip package download before the bootstrap boundary; the helper runs as system-pip.
+        commands = '\n'.join(line.split('#', 1)[0] for line in source[:source.index('# Refresh through signed APT')].splitlines())
+        self.assertNotRegex(commands, r'\b(?:pip[23]?\s+install|python[23]?\s+-m\s+pip\s+install)\b')
+        self.assertIn('system-pip /usr/bin/python3 || exit 1', block)
         block = block.replace("/usr/bin/python3 - <<", "python3 - <<")
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -714,84 +663,55 @@ mktemp() {
 }
 '''
             script.write_text(header + block + '\necho next-download\n')
+            steps = ('INDEX', 'APT', 'REFRESH', 'CA', 'HELPER', 'FETCH', 'TEMP')
             for checkout in (True, False):
                 if checkout:
                     helper.touch()
                 else:
                     helper.unlink(missing_ok=True)
-                failures = ('', 'INDEX', 'APT', 'REFRESH', 'CA', 'HELPER')
-                if not checkout:
-                    failures += ('FETCH', 'TEMP')
-                for failure in failures:
+                for failure in ('', *steps[:5], *(() if checkout else steps[5:])):
                     with self.subTest(checkout=checkout, failure=failure):
-                        statuses = {name + '_STATUS': str(int(name == failure))
-                                    for name in ('INDEX', 'APT', 'REFRESH', 'CA', 'HELPER', 'FETCH', 'TEMP')}
+                        statuses = {name + '_STATUS': str(int(name == failure)) for name in steps}
                         result = subprocess.run(['bash', str(script)], text=True, capture_output=True,
                                                 env=dict(os.environ, **statuses, TMPDIR=temp))
                         self.assertEqual(result.returncode == 0, not failure, result.stdout + result.stderr)
                         self.assertEqual('next-download' in result.stdout, not failure, result.stdout + result.stderr)
                         self.assertEqual(list(root.glob('tmp.*')), [], 'standalone helper temporary file leaked')
-                        if failure in ('INDEX', 'APT', 'REFRESH', 'CA', 'FETCH', 'TEMP'):
+                        if failure and failure != 'HELPER':
                             self.assertNotIn('helper-invoked', result.stdout)
-                        if failure in ('INDEX', 'APT', 'REFRESH', 'CA'):
+                        if failure in steps[:4]:
                             self.assertNotIn('helper-fetched', result.stdout)
                         if not failure:
                             events = ['apt-index', 'apt-ca', 'bundle-refresh', 'bundle-verified']
-                            if not checkout:
-                                events.append('helper-fetched')
-                            events += ['helper-invoked', 'next-download']
-                            self.assertEqual(result.stdout.splitlines(), events)
+                            events += [] if checkout else ['helper-fetched']
+                            self.assertEqual(result.stdout.splitlines(), events + ['helper-invoked', 'next-download'])
 
     def test_vendor_provision_ordering(self):
-        source = (ROOT / 'home.admin/_provision.update.sh').read_text()
-        comments = '# a conversion of config data or app data is needed'
+        source = read('home.admin/_provision.update.sh')
         python_hook = '/home/admin/config.scripts/blitz.python-trust.sh'
         vendor_hook = '/home/admin/config.scripts/blitz.trust.sh update'
-        self.assertLess(source.index(comments), source.index(python_hook))
+        self.assertLess(source.index('# a conversion of config data or app data is needed'), source.index(python_hook))
         self.assertLess(source.index(python_hook), source.index('# if old bitcoin.conf exists'))
-        # The same regression exercises the real combined source in the merge
-        # worktree, or the companion insertion at its exact upstream anchor.
+        # Exercise the real combined source in a merge worktree, or the companion
+        # insertion at its exact upstream anchor.
         if vendor_hook not in source:
             anchor = 'echo "prechecks OK"  >> ${logFile}\n'
             source = source.replace(anchor, anchor + '\n' + vendor_hook + ' >> "${logFile}" 2>&1 || exit 1\n')
         self.assertLess(source.index(vendor_hook), source.index(python_hook))
         block = source[source.index('echo "prechecks OK"'):source.index('# if old bitcoin.conf exists')]
-        block = block.replace('/home/admin/config.scripts/blitz.trust.sh', 'vendor')
-        block = block.replace(python_hook, 'python_trust')
+        block = block.replace('/home/admin/config.scripts/blitz.trust.sh', 'vendor').replace(python_hook, 'python_trust')
+        header = ('vendor() { echo vendor; return "$VENDOR_STATUS"; }\n'
+                  'python_trust() { echo "python $*"; return "$HELPER_STATUS"; }\n')
         with tempfile.TemporaryDirectory() as temp:
             log = Path(temp) / 'log'
-            header = '''
-vendor() { echo vendor; return "$VENDOR_STATUS"; }
-python_trust() { echo python; return "$HELPER_STATUS"; }
-'''
             for vendor, helper in ((0, 0), (1, 0), (0, 1)):
-                result = subprocess.run(['bash', '-c', header + block + '\necho next-hook'],
-                                        env=dict(os.environ, logFile=str(log),
-                                                 VENDOR_STATUS=str(vendor), HELPER_STATUS=str(helper)),
-                                        text=True, capture_output=True)
-                events = log.read_text().splitlines()
-                self.assertEqual(events, ['prechecks OK', 'vendor'] + ([] if vendor else ['python']))
-                self.assertEqual(result.returncode == 0, not (vendor or helper))
-                self.assertEqual('next-hook' in result.stdout, not (vendor or helper))
-                log.unlink()
-
-    def test_image_and_upgrade_gate(self):
-        image = (ROOT / 'build_sdcard.sh').read_text()
-        events = ('sudo apt-get -o APT::Update::Error-Mode=any update || exit 1',
-                  'sudo apt-get install --only-upgrade -y ca-certificates || exit 1',
-                  'sudo update-ca-certificates --fresh || exit 1',
-                  "/usr/bin/python3 - <<'PY' || exit 1", 'trust_helper=',
-                  'wget --no-config --https-only --ca-certificate=',
-                  '"${pip_sudo[@]}" python3 -m pip install grpcio')
-        positions = [image.index(event) for event in events]
-        self.assertEqual(positions, sorted(positions))
-        # No pip package download is allowed before the bootstrap boundary.
-        commands = '\n'.join(line.split('#', 1)[0] for line in image[:positions[0]].splitlines())
-        self.assertNotRegex(commands, r'\b(?:pip[23]?\s+install|python[23]?\s+-m\s+pip\s+install)\b')
-        self.assertLess(image.index('system-pip /usr/bin/python3'), image.index('pip install grpcio'))
-        self.assertIn('system-pip /usr/bin/python3 || exit 1', image)
-        update = (ROOT / 'home.admin/_provision.update.sh').read_text()
-        self.assertIn('system-pip /usr/bin/python3 >> ${logFile} 2>&1 || exit 1', update)
+                with self.subTest(vendor=vendor, helper=helper):
+                    log.unlink(missing_ok=True)
+                    result = bash(header + block + '\necho next-hook', env=dict(
+                        os.environ, logFile=str(log), VENDOR_STATUS=str(vendor), HELPER_STATUS=str(helper)))
+                    self.assertEqual(log.read_text().splitlines(), ['prechecks OK', 'vendor'] + ([] if vendor else ['python system-pip /usr/bin/python3']))
+                    self.assertEqual(result.returncode == 0, not (vendor or helper))
+                    self.assertEqual('next-hook' in result.stdout, not (vendor or helper))
 
 
 if __name__ == '__main__':

@@ -81,22 +81,6 @@ sudo() {
                         self.assertEqual('posthook' in result.stdout.splitlines(), existing or not owner)
                         self.assertEqual(result.returncode, int(bool(helper or (owner and not existing))), result.stdout + result.stderr)
 
-    def test_provision_actual_python_hook(self):
-        # Do not synthesize the companion vendor hook: this is this PR's actual
-        # hook and its log redirection, independently of merge-order testing.
-        source = (ROOT / 'home.admin/_provision.update.sh').read_text()
-        line = next(line for line in source.splitlines() if 'blitz.python-trust.sh system-pip' in line)
-        line = line.replace('/home/admin/config.scripts/blitz.python-trust.sh', 'python_trust')
-        with tempfile.TemporaryDirectory() as temp:
-            log = Path(temp) / 'log'
-            for status in (0, 1):
-                log.unlink(missing_ok=True)
-                result = subprocess.run(['bash', '-c', 'python_trust() { echo "$*"; return "$STATUS"; }\n' + line + '\necho NEXT'],
-                                        env=dict(os.environ, logFile=str(log), STATUS=str(status)), text=True, capture_output=True)
-                self.assertEqual(log.read_text(), 'system-pip /usr/bin/python3\n')
-                self.assertEqual(result.returncode, status)
-                self.assertEqual('NEXT' in result.stdout, not status)
-
 
 if __name__ == '__main__':
     unittest.main()
