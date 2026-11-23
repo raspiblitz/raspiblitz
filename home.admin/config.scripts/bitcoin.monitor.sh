@@ -67,10 +67,21 @@ get_connection_count() {
 }
 
 get_established_peer_count() {
+  # A failed probe is unknown, not zero peers: only count output from a
+  # socket listing that exited successfully.
+  local sockets
   if command -v ss >/dev/null 2>&1; then
-    ss -Htan state established "( sport = :${bitcoin_p2p_port} or dport = :${bitcoin_p2p_port} )" 2>/dev/null | wc -l | tr -cd '[[:digit:]]'
+    sockets=$(ss -Htan state established "( sport = :${bitcoin_p2p_port} or dport = :${bitcoin_p2p_port} )" 2>/dev/null) || return 1
   elif command -v netstat >/dev/null 2>&1; then
-    netstat -tan 2>/dev/null | grep -E "[.:]${bitcoin_p2p_port}[[:space:]].*ESTABLISHED|ESTABLISHED.*[.:]${bitcoin_p2p_port}[[:space:]]" | wc -l | tr -cd '[[:digit:]]'
+    sockets=$(netstat -tan 2>/dev/null) || return 1
+    sockets=$(echo "${sockets}" | grep -E "[.:]${bitcoin_p2p_port}[[:space:]].*ESTABLISHED|ESTABLISHED.*[.:]${bitcoin_p2p_port}[[:space:]]")
+  else
+    return 1
+  fi
+  if [ -z "${sockets}" ]; then
+    echo "0"
+  else
+    echo "${sockets}" | wc -l | tr -cd '[[:digit:]]'
   fi
 }
 
@@ -184,7 +195,7 @@ if [ "$2" = "network" ]; then
   fi
 
   if [ "${btc_peers}" == "" ]; then
-    btc_peers=$(get_established_peer_count)
+    btc_peers=$(get_established_peer_count) || btc_peers=""
   fi
 
   if [ "${btc_peers}" == "" ]; then

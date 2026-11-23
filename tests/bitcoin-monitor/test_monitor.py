@@ -243,6 +243,39 @@ class MonitorTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0)
                 self.assertEqual(values['btc_peers'], '2')
 
+    def with_ss(self, script):
+        ss = Path('/usr/local/bin/ss')
+        original = ss.read_text()
+        ss.write_text(script)
+        self.addCleanup(ss.write_text, original)
+
+    def test_network_all_sources_fail_reports_error(self):
+        # A failing socket probe is unknown, never a factual zero peer count.
+        for script in ('#!/bin/sh\nexit 1\n', '#!/bin/sh\necho partial\nexit 2\n'):
+            with self.subTest(script=script):
+                self.with_ss(script)
+                self.modes(getnetworkinfo={'code': 1, 'out': ''},
+                           getconnectioncount={'code': 1, 'out': ''})
+                result, values, _ = self.run_monitor('network')
+                self.assertEqual(result.returncode, 1, result)
+                self.assertEqual(values, {'error': 'no network data'})
+                # Callers source the output and skip caching when error is set.
+                sourced = subprocess.run(
+                    ['bash', '-c', 'error=""; btc_peers=; source <(bash "$1" mainnet network); '
+                     '[[ "$error" = "no network data" && -z "$btc_peers" ]]', 'test', str(MONITOR)],
+                    capture_output=True, text=True, timeout=6,
+                    env={**os.environ, 'BITCOIN_MONITOR_RPC_TIMEOUT': '0.5'})
+                self.assertEqual(sourced.returncode, 0, sourced)
+
+    def test_network_socket_probe_zero_peers(self):
+        self.with_ss('#!/bin/sh\nexit 0\n')
+        self.modes(getnetworkinfo={'code': 1, 'out': ''},
+                   getconnectioncount={'code': 1, 'out': ''})
+        result, values, _ = self.run_monitor('network')
+        self.assertEqual(result.returncode, 0, result)
+        self.assertEqual(values['btc_peers'], '0')
+        self.assertNotIn('error', values)
+
     def test_info_success(self):
         for progress in (0, 0.5, 1e-8, 1):
             with self.subTest(progress=progress):
