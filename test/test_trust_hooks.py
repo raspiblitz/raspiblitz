@@ -102,6 +102,15 @@ readlink() {{ echo /usr/lib/jvm/fixture/bin/java; }}
                 if config:
                     self.assertNotIn('GATE', result.stderr)
 
+    def test_os_bundle_check_uses_same_incident_anchors_as_java_helper(self):
+        import re
+        shell = (ROOT / 'home.admin/config.scripts/blitz.trust.sh').read_text()
+        java = (ROOT / 'home.admin/config.scripts/blitz.trust.java.py').read_text()
+        java_denied = java[java.index('DENIED'):java.index('}', java.index('DENIED'))]
+        digests = lambda text: set(re.findall(r'[0-9a-f]{64}', text))
+        self.assertEqual(len(digests(java_denied)), 2)
+        self.assertEqual(digests(shell), digests(java_denied))
+
 
 if __name__ == '__main__':
     unittest.main()

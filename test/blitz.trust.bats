@@ -16,6 +16,9 @@ setup() {
   export NODE_FILE="$BATS_TEST_TMPDIR/node-version"
   export OS_FILE="$BATS_TEST_TMPDIR/os-release"
   printf 'ID=debian\nVERSION_ID=12\n' > "$OS_FILE"
+  # Default OS bundle: ISRG Root X1 only (third fixture certificate).
+  export BUNDLE_FILE="$BATS_TEST_TMPDIR/ca-certificates.crt"
+  awk '/BEGIN CERT/{n++} n==3' "$BATS_TEST_DIRNAME/fixtures/java-trust-anchors.pem" > "$BUNDLE_FILE"
   export SCRIPT="$BATS_TEST_TMPDIR/blitz.trust.sh"
   export INSTALLER="$BATS_TEST_TMPDIR/bonus.nodejs.sh"
   export PROVISION="$BATS_TEST_TMPDIR/_provision.setup.sh"
@@ -27,6 +30,7 @@ text = pathlib.Path(root, 'home.admin/config.scripts/blitz.trust.sh').read_text(
 text = text.replace('/home/admin/config.scripts/blitz.trust.java.py', helper + '.java.py')
 # Do not let the test host's unrelated Java installation affect image fixtures.
 text = text.replace('command -v java >/dev/null 2>&1', '[ \"${MOCK_JAVA_PRESENT:-0}\" = 1 ]')
+text = text.replace('/etc/ssl/certs/ca-certificates.crt', os.environ['BUNDLE_FILE'])
 pathlib.Path(helper).write_text(text.replace('/etc/os-release', os.environ['OS_FILE']))
 pathlib.Path(helper + '.java.py').write_text('import os, sys\nwith open(os.environ["TRUST_LOG"], "a") as f: f.write("java-helper " + sys.argv[1] + "\\n")\nsys.exit(int(os.environ["JAVA_FAIL"]))\n')
 for source, target in [('home.admin/config.scripts/bonus.nodejs.sh', installer),
@@ -145,16 +149,46 @@ MOCK
   [ "$status" -eq 0 ]
 }
 
-@test "missing CA and unreviewed OS fail offline" {
+@test "missing CA and unreviewed OS with incident anchors fail offline" {
   export CA_STATUS=config-files
   run bash "$SCRIPT" check
   [ "$status" -ne 0 ]
   [[ "$output" == *'ca-certificates is not installed'* ]]
   export CA_STATUS=installed
   printf 'ID=debian\nVERSION_ID=11\n' > "$OS_FILE"
+  cp "$BATS_TEST_DIRNAME/fixtures/java-trust-anchors.pem" "$BUNDLE_FILE"
   run bash "$SCRIPT" check
   [ "$status" -ne 0 ]
-  [[ "$output" == *'No reviewed CA package baseline'* ]]
+  [[ "$output" == *'still trusts an incident anchor'* ]]
+  : > "$BUNDLE_FILE"
+  run bash "$SCRIPT" check
+  [ "$status" -ne 0 ]
+  [ ! -e "$TRUST_LOG" ]
+}
+
+@test "Ubuntu 24.04 identity is accepted by bundle content, not rejected" {
+  printf 'ID=ubuntu\nID_LIKE=debian\nVERSION_ID="24.04"\n' > "$OS_FILE"
+  export CA_VERSION='20260816ubuntu0.24.04.2'
+  run bash "$SCRIPT" update
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'No reviewed CA package baseline for ubuntu 24.04; OS bundle excludes'* ]]
+  grep -q 'update-ca-certificates --fresh' "$TRUST_LOG"
+  run bash "$SCRIPT" check
+  [ "$status" -eq 0 ]
+  cp "$BATS_TEST_DIRNAME/fixtures/java-trust-anchors.pem" "$BUNDLE_FILE"
+  run bash "$SCRIPT" check
+  [ "$status" -ne 0 ]
+  # Node and Java gates still apply on Ubuntu.
+  awk '/BEGIN CERT/{n++} n==3' "$BATS_TEST_DIRNAME/fixtures/java-trust-anchors.pem" > "$BUNDLE_FILE"
+  export NODE_VERSION=v22.23.1
+  run bash "$SCRIPT" check
+  [ "$status" -ne 0 ]
+}
+
+@test "system without APT/dpkg trust layout warns and skips" {
+  run env PATH="$BATS_TEST_TMPDIR/empty" /bin/bash "$SCRIPT" update
+  [ "$status" -eq 0 ]
+  [[ "$output" == *'vendor trust refresh skipped'* ]]
   [ ! -e "$TRUST_LOG" ]
 }
 
