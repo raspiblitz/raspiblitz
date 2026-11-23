@@ -1,0 +1,67 @@
+name: Python trust regressions
+
+on:
+  push:
+    branches: [fix/independent-python-ca-trust]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap-and-shell:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.11']
+    container: python:${{ matrix.python }}-bookworm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check changed shell syntax
+        shell: bash
+        run: |
+          for script in build_sdcard.sh home.admin/_provision.update.sh \
+            home.admin/config.scripts/blitz.python-trust.sh \
+            home.admin/config.scripts/blitz.web.api.sh \
+            home.admin/config.scripts/bonus.joinmarket.sh; do
+            bash -n "$script"
+          done
+      - name: Isolated real pip upgrades and shell failure matrix
+        shell: bash
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -o pipefail
+          python -m unittest discover -s tests -p 'test_python_trust_*.py' -v 2>&1 | tee python-trust.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: python-trust-${{ matrix.python }}
+          path: python-trust.log
+          if-no-files-found: warn
+  debian-system:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build disposable Debian fixture
+        run: docker build -f tests/python-trust.Dockerfile -t python-trust-system .
+      - name: System mode with no network, capabilities or host mounts
+        shell: bash
+        run: |
+          set -o pipefail
+          docker run --rm --network=none --cap-drop=ALL --security-opt=no-new-privileges \
+            python-trust-system 2>&1 | tee python-trust-system.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: python-trust-debian-system
+          path: python-trust-system.log
+          if-no-files-found: warn
