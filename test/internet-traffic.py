@@ -43,7 +43,7 @@ ifconfig() {
   [ "$fixture_empty" = 0 ] || return 0
   case "${1:-all}" in
     all|eth0) printf 'eth0: flags=4099<UP,BROADCAST,MULTICAST> mtu 1500\n    RX packets 0 bytes 0 (0.0 B)\n    TX packets 0 bytes 0 (0.0 B)\n' ;;
-    wlan0|ens18) printf '%s: flags=4163<UP,BROADCAST,RUNNING,MULTICAST> mtu 1500\n    RX packets 42 bytes 12582912 (12.0 MiB)\n    TX packets 21 bytes 3145728 (3.0 MiB)\n' "$1" ;;
+    wlan0|ens18|veth0) printf '%s: flags=4163<UP,BROADCAST,RUNNING,MULTICAST> mtu 1500\n    RX packets 42 bytes 12582912 (12.0 MiB)\n    TX packets 21 bytes 3145728 (3.0 MiB)\n' "$1" ;;
     *) return 1 ;;
   esac
   if [ "${1:-all}" = all ]; then
@@ -62,6 +62,10 @@ ifconfig() {
 
     def test_wifi_traffic_not_idle_ethernet(self):
         self.assertEqual(self.run_block("wlan0"), ["wlan0", "12.0MiB", "3.0MiB"])
+
+    def test_peer_suffix_stripped(self):
+        # ip addr lists veth/VLAN links as name@peer; ifconfig needs the bare name.
+        self.assertEqual(self.run_block("veth0@if5"), ["veth0", "12.0MiB", "3.0MiB"])
 
     def test_vm_non_eth_interface(self):
         self.assertEqual(self.run_block("ens18"), ["ens18", "12.0MiB", "3.0MiB"])

@@ -49,7 +49,7 @@ fi
 
 #############################################
 # get active network device (eth0 or wlan0) & traffic
-networkDevice=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | head -n 1)
+networkDevice=$(ip addr | grep -v "lo:" | grep 'state UP' | tr -d " " | cut -d ":" -f2 | cut -d "@" -f1 | head -n 1)
 # get traffic for the detected interface, including non-eth0 names on Armbian/VMs
 # Leave the argument empty if no active interface was found, preserving the fallback.
 network_rx=$(ifconfig ${networkDevice} 2>/dev/null | grep -m1 'RX packets' | awk '{ print $6$7 }' | sed 's/[()]//g')
