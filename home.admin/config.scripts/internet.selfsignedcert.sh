@@ -27,6 +27,15 @@ create_self_signed_cert() {
   echo "# Create a self signed SSL certificate"
   localip=$(hostname -I | awk '{print $1}')
 
+  # IP addresses must be listed as IP entries, not DNS names,
+  # or clients reject the certificate when opened by IP address
+  altNames="DNS.1   = localhost
+IP.1    = 127.0.0.1"
+  if [ -n "${localip}" ] && [ "${localip}" != "127.0.0.1" ]; then
+    altNames="${altNames}
+IP.2    = ${localip}"
+  fi
+
   sudo -u bitcoin openssl genrsa -out selfsigned.key 2048
   #https://www.humankode.com/ssl/create-a-selfsigned-certificate-for-nginx-in-5-minutes
   #https://stackoverflow.com/questions/8075274/is-it-possible-making-openssl-skipping-the-country-common-name-prompts
@@ -56,9 +65,7 @@ subjectAltName = @alt_names
 subjectAltName = @alt_names
 
 [alt_names]
-DNS.1   = localhost
-DNS.2   = 127.0.0.1
-DNS.3   = $localip
+${altNames}
 " | sudo -u bitcoin tee localhost.conf
 
   sudo -u bitcoin openssl req -new -x509 -sha256 -key selfsigned.key \
