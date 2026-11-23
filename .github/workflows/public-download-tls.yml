@@ -1,0 +1,24 @@
+name: Public download TLS
+
+on:
+  push:
+    branches:
+      - fix/public-download-ssl-verification
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tls-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU wget and test tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends wget openssl python3 shellcheck
+      - name: Bash syntax, static checks and real wget TLS regressions
+        run: bash test/public-download-tls.sh
