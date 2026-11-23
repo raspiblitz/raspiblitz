@@ -7,7 +7,6 @@ Run test/public-download-tls.sh for syntax/static checks as well.
 import http.server
 import os
 from pathlib import Path
-import re
 import shlex
 import ssl
 import subprocess
@@ -134,20 +133,6 @@ downloadDir={shlex.quote(str(self.directory))}
                             if 'sudo -u admin wget' in line and 'pgp_keys.asc' in line]
                 self.assertEqual(len(commands), 1)
                 self.check_download(commands[0], self.directory / 'pgp_keys.asc')
-
-    def test_packer_download(self):
-        text = (ROOT / 'alternative.platforms/amd64/packer/scripts/init.sh').read_text()
-        match = re.search(r'^wget .*?authorized_keys[^\n]*', text, re.M | re.S)
-        self.assertIsNotNone(match)
-        assert match is not None
-        command = match.group()
-        original_url = 'https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub'
-        self.assertIn(original_url, command)
-        # Substitute the fixture variable, not the URL after the TLS options.
-        command = command.replace(original_url, '"${PGPpkeys}"')
-        output = self.directory / 'authorized_keys'
-        command = command.replace('/home/vagrant/.ssh/authorized_keys', str(output))
-        self.check_download(command, output)
 
     def test_sphinx_all_modes(self):
         text = (SCRIPTS / 'bonus.sphinxrelay.sh').read_text()

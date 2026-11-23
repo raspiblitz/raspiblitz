@@ -1,0 +1,38 @@
+name: BTCPay Server Script Tests
+
+concurrency:
+  group: btcpayserver-script-tests-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['dev', 'v1.10', 'v1.11']
+    paths:
+      - '.github/workflows/btcpayserver-script-tests.yml'
+      - 'home.admin/config.scripts/bonus.btcpayserver.sh'
+      - 'test/bonus.btcpayserver.bats'
+  pull_request:
+    branches: ['dev', 'v1.10', 'v1.11']
+    paths:
+      - '.github/workflows/btcpayserver-script-tests.yml'
+      - 'home.admin/config.scripts/bonus.btcpayserver.sh'
+      - 'test/bonus.btcpayserver.bats'
+
+jobs:
+  bats:
+    name: bonus.btcpayserver.sh unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install bats
+        run: sudo apt-get update && sudo apt-get install -y bats
+
+      - name: Syntax check
+        run: bash -n home.admin/config.scripts/bonus.btcpayserver.sh
+
+      - name: Run tests
+        run: bats --print-output-on-failure test/bonus.btcpayserver.bats

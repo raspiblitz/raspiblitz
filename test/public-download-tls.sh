@@ -4,7 +4,6 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 
 scripts=(
-  alternative.platforms/amd64/packer/scripts/init.sh
   home.admin/config.scripts/lnd.install.sh
   home.admin/config.scripts/lnd.update.sh
   home.admin/config.scripts/bonus.pool.sh

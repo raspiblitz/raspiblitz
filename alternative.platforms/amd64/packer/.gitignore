@@ -1,7 +1,0 @@
-# Cache objects
-packer_cache/
-output-virtualbox-iso/
-output-vmware-iso/
-
-# For built boxes
-*.box

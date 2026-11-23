@@ -1,6 +1,9 @@
 ## What's new in Version 1.12.2 of RaspiBlitz?
 
 - Update: BTCPayServer v2.3.9 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.3.9)
+- Update: Bitcoin Core v29.5 (security fixes) [details](https://bitcoincore.org/en/releases/29.5/)
+- Update: Bitcoin Core v32.1 (optional tested update) [details](https://bitcoincore.org/en/releases/32.1/)
+- Update: LND v0.21.8-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.21.8-beta)
 
 ## What's new in Version 1.12.1 of RaspiBlitz?
 
@@ -197,7 +200,7 @@ This is just a quick patch release for v1.11.1
 
 ## What's new in Version 1.9.0 of RaspiBlitz?
 
-- New: Automated disk image build for amd64 (VM, laptop, desktop, server) and arm64-rpi (Raspberry Pi) [details](https://github.com/rootzoll/raspiblitz/tree/dev/ci/README.md)
+- New: Automated disk image build for amd64 (VM, laptop, desktop, server) and arm64-rpi (Raspberry Pi) [details](ci/README.md#download-a-development-image)
 - New: Fatpack & Minimal sd card builds [details](SECURITY.md#minimal-sd-card-build)
 - New: I2P support for Bitcoin Core (i2pacceptincoming=1) [details](https://github.com/rootzoll/raspiblitz/issues/2413)
 - New: CLN Watchtower (The Eye of Satoshi) [details](https://github.com/talaia-labs/rust-teos/tree/master/watchtower-plugin)
