@@ -55,14 +55,18 @@ if [ "$1" == "redact" ]; then
 fi
 
 
-# load code software version
-source /home/admin/_version.info
-codeCommit=$(git -C /home/admin/raspiblitz rev-parse --short HEAD)
-
 ## get basic info (its OK if not set yet)
 source /home/admin/raspiblitz.info 2>/dev/null
 source <(/home/admin/_cache.sh get state setupPhase)
 source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
+
+# The API service can read the installed revision without opening the admin checkout.
+installedCodeCommit=
+source /home/admin/_version.info 2>/dev/null || installedCodeCommit=
+codeCommit=unknown
+if [[ $installedCodeCommit =~ ^[0-9a-f]{4,64}$ ]]; then
+  codeCommit=$installedCodeCommit
+fi
 
 # for old nodes
 if [ ${#network} -eq 0 ]; then

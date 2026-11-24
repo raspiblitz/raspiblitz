@@ -15,7 +15,12 @@ fi
 
 source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
-cd /home/admin/raspiblitz
+if [[ $1 != info ]]; then
+  # Keep checkout changes, deployment and its recorded revision together.
+  exec 9</home/admin || exit 1
+  flock -x 9 || exit 1
+fi
+cd /home/admin/raspiblitz || exit 1
 
 # gather info
 activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config 2>/dev/null | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
@@ -97,11 +102,11 @@ if [ ${#wantedBranch} -gt 0 ]; then
         exit 1
       fi
       echo "# checkout/changing branch .."
-      git fetch
-      git checkout -b ${wantedBranch} origin/${wantedBranch}
+      git fetch 9<&- || exit 1
+      git checkout -b "${wantedBranch}" "origin/${wantedBranch}" 9<&- || exit 1
     else
       echo "# changing branch .."
-      git checkout ${wantedBranch}
+      git checkout "${wantedBranch}" 9<&- || exit 1
     fi
 
     activeBranch=$(git branch | grep \* | cut -d ' ' -f2)
@@ -121,39 +126,52 @@ if [ $? -eq 0 ]; then
   echo "# OK - git config pull.rebase true"
 else
   echo "# FAIL - git config pull.rebase true"
-  exit
+  exit 1
 fi
 if [[ ${activeBranch} != pr* ]]; then
-  git pull 1>&2
+  git pull 1>&2 9<&-
   if [ $? -eq 0 ]; then
     echo "# OK - git pull"
   else
     echo "# FAIL - git pull"
-    exit
+    exit 1
   fi
 else
   echo "# SKIP - git pull on PR-Branches"
 fi
-cd ..
+cd /home/admin || exit 1
+# Publish the revision only after all installed scripts come from this checkout.
+set -e
+sourceAdmin=/home/admin/raspiblitz/home.admin
 echo "# COPYING from GIT-Directory to /home/admin/"
 echo "# - basic admin files"
+# Start with the target's unstamped version, including when upgrading from an older node.
+if [ -f "$sourceAdmin/_version.info" ]; then
+  sudo -u admin install -m 0644 "$sourceAdmin/_version.info" /home/admin/_version.info
+fi
 sudo rm -f *.sh
-sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
-sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin 2>/dev/null
+if [ -f "$sourceAdmin/.tmux.conf" ]; then
+  sudo -u admin cp "$sourceAdmin/.tmux.conf" /home/admin
+fi
+sudo -u admin find "$sourceAdmin" -maxdepth 1 -name '*.*' ! -name '.*' ! -name '_version.info' ! -type d -exec cp -t /home/admin -- {} +
 sudo -u admin chmod 755 *.sh
 echo "# - asset directory"
 sudo rm -rf assets
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/assets /home/admin/assets
+sudo -u admin cp -R "$sourceAdmin/assets" /home/admin/assets
 echo "# - config.scripts directory"
 sudo rm -rf /home/admin/config.scripts
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/config.scripts 
+sudo -u admin cp -R "$sourceAdmin/config.scripts" /home/admin/config.scripts
 sudo -u admin chmod 755 /home/admin/config.scripts/*.sh
-sudo -u admin chmod 755 /home/admin/config.scripts/*.py
+sudo -u admin find /home/admin/config.scripts -maxdepth 1 -type f -name '*.py' -exec chmod 755 -- {} +
 echo "# - setup.scripts directory"
 sudo rm -rf /home/admin/setup.scripts
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/setup.scripts
-sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh
-sudo -u admin chmod 755 /home/admin/config.scripts/*.py
+if [ -d "$sourceAdmin/setup.scripts" ]; then
+  sudo -u admin cp -R "$sourceAdmin/setup.scripts" /home/admin/setup.scripts
+  sudo -u admin find /home/admin/setup.scripts -maxdepth 1 -type f -name '*.sh' -exec chmod 755 -- {} +
+fi
+if [ -f /home/admin/config.scripts/blitz.installed-revision.sh ]; then
+  sudo -u admin /home/admin/config.scripts/blitz.installed-revision.sh /home/admin/raspiblitz /home/admin/_version.info
+fi
 echo "# ******************************************"
 echo "# OK - shell scripts and assets are synced"
 echo "# Reboot recommended"

@@ -703,6 +703,8 @@ chown admin:admin /home/admin/raspiblitz.info
 echo -e "\n*** SHELL SCRIPTS & ASSETS ***"
 # copy raspiblitz repo from github
 cd /home/admin/ || exit 1
+exec 9</home/admin || exit 1
+flock -x 9 || exit 1
 sudo -u admin git config --global user.name "${github_user}" || exit 1
 sudo -u admin git config --global user.email "johndoe@example.com" || exit 1
 sudo -u admin git config --global http.postBuffer 524288000 || exit 1
@@ -716,6 +718,10 @@ sudo -u admin cp -r /home/admin/raspiblitz/home.admin/config.scripts /home/admin
 sudo -u admin chmod +x /home/admin/config.scripts/*.sh || exit 1
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/ || exit 1
 sudo -u admin chmod +x /home/admin/setup.scripts/*.sh || exit 1
+if [ -f /home/admin/raspiblitz/home.admin/config.scripts/blitz.installed-revision.sh ]; then
+  sudo -u admin /home/admin/config.scripts/blitz.installed-revision.sh /home/admin/raspiblitz /home/admin/_version.info || exit 1
+fi
+exec 9<&-
 sudo -u admin git config --global --add safe.directory /home/admin/raspiblitz
 # Also configure safe.directory for root user in case root processes need to access the repo
 git config --global --add safe.directory /home/admin/raspiblitz
