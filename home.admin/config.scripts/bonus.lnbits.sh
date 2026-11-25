@@ -129,7 +129,8 @@ function lockLnbitsData() {
 function holdLnbitsService() {
   # The service account can run the probe even when the admin home is private.
   sudo install -o root -g root -m 0644 /home/admin/config.scripts/bonus.lnbits.sh "${trialStart%/*}/check-start" || return 1
-  if ! sudo test -f "$updateDropIn"; then
+  # Refresh older holds on retry, including their original resume policy.
+  if ! sudo grep -qsFx 'ExecStartPost=/bin/bash /run/raspiblitz-lnbits/check-start check-start' "$updateDropIn"; then
     sudo mkdir -p "${updateDropIn%/*}" || return 1
     {
       printf '# resume=%s\n# operation=%s\n' "$resumeService" "${holdOperation:-update}"
@@ -928,6 +929,10 @@ case "$1" in
   backup|restore)
     backupWasActive=0
     restoreHeld=0
+    if [ "$1" = restore ] && sudo test -f "$updateDropIn"; then
+      # After a restore the old executable would see a different database.
+      sudo sed -i '/^# restartable=/d' "$updateDropIn" || exit 1
+    fi
     if sudo test -f /etc/systemd/system/lnbits.service; then
       if systemctl is-active --quiet lnbits; then backupWasActive=1; fi
       if [ "$1" = restore ] && { ! sudo test -f "$updateDropIn" || sudo grep -qx '# operation=restore' "$updateDropIn"; }; then
@@ -1544,12 +1549,25 @@ if [ "$1" = "restore" ]; then
   readBackupBackend || exit 1
   if [ "${LNBitsDB}" == "PostgreSQL" ]; then
     echo "# Restore PostgreSQL database"
-    if [ "$2" != "" ]; then
-      backup_file=$2
-      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz "${backup_file}" || exit 1
-    else
-      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz || exit 1
-    fi
+    # Use only the login name from the recognized local DSN. The password
+    # stays in the existing private configuration throughout the restore.
+    pgUser=$(sudo python3 - "$lnbitsConfig" <<'PY'
+from pathlib import Path
+import sys
+from urllib.parse import unquote, urlsplit
+
+path = Path(sys.argv[1])
+values = [line.split("=", 1)[1].strip().strip("'\"") for line in path.read_text().splitlines()
+          if line.startswith("LNBITS_DATABASE_URL=")] if path.exists() else []
+if len(values) > 1:
+    raise SystemExit("Ambiguous LNbits database configuration")
+user = unquote(urlsplit(values[0]).username or "") if values and values[0] else "lnbits_user"
+if not user or not user.isprintable():
+    raise SystemExit("Invalid LNbits PostgreSQL login name")
+print(user)
+PY
+    ) || exit 1
+    sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db "$pgUser" "" "${2:-}" || exit 1
   else
     backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
     if [ ! -d $backup_target ]; then

@@ -321,6 +321,30 @@ def stopped_update(old_head):
     wait_wallet()
 
 
+def pending_restore(backend):
+    assert installed_head() == TARGET
+    wallet_check()
+    call(UPDATER, "backup", stdout=subprocess.DEVNULL)
+    wait_wallet()
+    hold = Path("/etc/systemd/system/lnbits.service.d/50-raspiblitz-update.conf")
+    hold.parent.mkdir(parents=True, exist_ok=True)
+    call("systemctl", "stop", "lnbits")
+    with hold.open("x") as out:
+        out.write("# resume=1\n# operation=update\n# restartable=" + TARGET +
+                  "\n[Unit]\nConditionPathExists=/run/raspiblitz-lnbits/start-once\n")
+    call("systemctl", "daemon-reload")
+    directory = Path("/mnt/hdd/app-data/backup") / ("lnbits_db" if backend == "postgres" else "lnbits_sqlite")
+    archive = max(directory.glob("*.sql" if backend == "postgres" else "*.tar"), key=lambda p: p.stat().st_mtime_ns)
+    restored = call(UPDATER, "restore", str(archive), capture_output=True)
+    assert "remains stopped" in restored.stdout and not service_active()
+    assert "# restartable=" not in hold.read_text() and "# resume=1" in hold.read_text()
+    with blocked_fetch(True):
+        update = subprocess.run([UPDATER, "update"], capture_output=True)
+        assert update.returncode and "ExecStartPost=" in hold.read_text()
+    call(UPDATER, "update", stdout=subprocess.DEVNULL)
+    wait_wallet()
+
+
 def restore(backend):
     wallet_check()
     source = Path("/mnt/hdd/app-data/backup")
@@ -388,7 +412,8 @@ def restore(backend):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("case", choices=["prepare", "wallet", "update", "previous", "keep-stopped",
-                                         "retry", "failed-start", "stopped", "custom-unit", "interrupted", "postgres-restore", "sqlite-restore"])
+                                         "retry", "failed-start", "stopped", "custom-unit", "interrupted", "postgres-restore", "sqlite-restore",
+                                         "postgres-pending", "sqlite-pending"])
     parser.add_argument("--from-commit", default=V170)
     args = parser.parse_args()
     if (os.getuid() != 0 or not DATA.is_dir() or DATA.is_symlink() or DATA.stat().st_uid != 0
@@ -404,6 +429,8 @@ if __name__ == "__main__":
         stopped_update(args.from_commit)
     elif args.case.endswith("-restore"):
         restore(args.case.split("-")[0])
+    elif args.case.endswith("-pending"):
+        pending_restore(args.case.split("-")[0])
     else:
         {"prepare": prepare, "wallet": wallet_check, "custom-unit": custom_unit, "interrupted": interrupted_trial}[args.case]()
     print("PASS", args.case)

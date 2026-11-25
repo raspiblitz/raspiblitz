@@ -264,7 +264,8 @@ fi
 
 # Restore into a separate database first. A failed import or a live connection
 # to the destination must leave the current database available for a retry.
-if [ "$command" = restore ] && [ "$db_name" = lnbits_db ] && [ "$db_user" = lnbits_user ] && [ -n "$db_user_pw" ]; then
+if [ "$command" = restore ] && [ "$db_name" = lnbits_db ]; then
+  [ -n "$db_user" ] || { echo "# Missing LNbits PostgreSQL login name"; exit 1; }
   backup_file=$db_backupfile
   if [ -z "$backup_file" ]; then
     backup_file=$(ls -t -- "$backup_target"/*.sql 2>/dev/null | head -n1)
