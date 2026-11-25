@@ -2,12 +2,12 @@
 
 setup() {
   source <(sed '/^# command info$/q' "$BATS_TEST_DIRNAME/../home.admin/config.scripts/bonus.lnbits.sh")
-  previousCommit=aaeff9a62a9310d9d14c22cc188bbd21c347577d
+  previousCommit=$tagCommit
   previousActive=1
   beforeCheckout=1
   gitHead=$previousCommit
   fakeChanges=""
-  runtime=1.7.0
+  runtime=1.7.1
   unitCommand="{ path=$lnbitsBin ; argv[]=$lnbitsBin --port 5000 ; }"
   transfer=0
   fakeResponse=$'{"server_time":1,"up_time":2}\n200'
@@ -28,7 +28,7 @@ setup() {
 
 @test "only an active verified runtime before checkout may be explicitly resumed" {
   run previousLnbitsIsSafe; [ "$status" = 0 ]
-  for condition in inactive mutated unrelated dirty runtime unit old; do
+  for condition in inactive mutated unrelated dirty runtime unit old v170; do
     run bash_check_previous "$condition"
     [ "$status" != 0 ]
   done
@@ -43,6 +43,7 @@ bash_check_previous() {
     runtime) runtime=1.2.1 ;;
     unit) unitCommand='{ path=/usr/bin/poetry ; }' ;;
     old) previousCommit=unverified ;;
+    v170) previousCommit=aaeff9a62a9310d9d14c22cc188bbd21c347577d; gitHead=$previousCommit; runtime=1.7.0 ;;
   esac
   previousLnbitsIsSafe
 }

@@ -274,11 +274,13 @@ if [ "$command" = restore ] && [ "$db_name" = lnbits_db ] && [ "$db_user" = lnbi
   suffix=$(cat /proc/sys/kernel/random/uuid) || exit 1
   stage="rb_restore_${suffix//-/}"
   previous="rb_previous_${suffix//-/}"
-  # Reuse an existing role and its credentials, also when other databases use it.
-  sudo -u postgres psql -Xq -v ON_ERROR_STOP=1 -v usr="$db_user" -v pw="$db_user_pw" <<'SQL' || exit 1
-SELECT format('CREATE ROLE %I LOGIN PASSWORD %L', :'usr', :'pw')
-WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = :'usr') \gexec
+  # The persisted connection string belongs to the installation. Never create
+  # a new cluster login from the helper's default password while reading a dump.
+  role=$(sudo -u postgres psql -XAtq -v ON_ERROR_STOP=1 -v usr="$db_user" <<'SQL'
+SELECT 1 FROM pg_roles WHERE rolname = :'usr' AND rolcanlogin;
 SQL
+  ) || exit 1
+  [ "$role" = 1 ] || { echo "# Configure the original LNbits PostgreSQL login before restoring"; exit 1; }
   sudo -u postgres psql -Xq -v ON_ERROR_STOP=1 -v db="$db_name" -v stage="$stage" -v usr="$db_user" <<'SQL' || exit 1
 SELECT coalesce(
   (SELECT format('CREATE DATABASE %I TEMPLATE template0 OWNER %I ENCODING %L LC_COLLATE %L LC_CTYPE %L %s',

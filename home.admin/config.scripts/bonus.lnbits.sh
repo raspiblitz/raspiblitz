@@ -7,9 +7,6 @@ tag="v1.7.1"
 VERSION="${tag}"
 # LNbits does not sign tags or commits: the code of ${VERSION} has to be this commit
 tagCommit="4fa70f338d274e14fc82746a83fba5c2c658211f"
-# Previously released version eligible for an operator-confirmed restart.
-# https://github.com/lnbits/lnbits/releases/tag/v1.7.0
-previousSafeCommit="aaeff9a62a9310d9d14c22cc188bbd21c347577d"
 
 # uv installs the dependencies from the uv.lock of the LNbits release
 # (poetry is legacy upstream and cannot install LNbits on Python 3.13)
@@ -90,7 +87,21 @@ function verifyCommit() {
 
 # installs made with LNbits up to v1.2.1 start with 'poetry run lnbits'
 function supportedLnbitsUnit() {
-  sudo grep -Eq "^ExecStart=(/home/lnbits/lnbits/\.venv/bin/lnbits( .*)?|/bin/sh -c 'cd /home/lnbits/lnbits && poetry run lnbits --port 5000 --host [[:alnum:].:-]+')$" /etc/systemd/system/lnbits.service
+  local configured effective host args cmd
+  configured=$(sudo sed -n 's/^ExecStart=//p' /etc/systemd/system/lnbits.service) || return 1
+  effective=$(systemctl show lnbits --property=ExecStart --value) || return 1
+  [ "$(systemctl show lnbits --property=User --value)" = lnbits ] || return 1
+  for host in 127.0.0.1 0.0.0.0; do
+    args="--port 5000 --host $host"
+    case "$configured" in
+      "$lnbitsBin $args") cmd="$configured" ;;
+      "/bin/sh -c 'cd $lnbitsCodeDir && poetry run lnbits $args'") cmd="/bin/sh -c cd $lnbitsCodeDir && poetry run lnbits $args" ;;
+      *) continue ;;
+    esac
+    # Compare the effective command too: a drop-in can replace the one on disk.
+    [[ "$effective" == "{ path=${cmd%% *} ; argv[]=$cmd ; ignore_errors=no ;"* ]] && return 0
+  done
+  return 1
 }
 
 function setServiceExecStart() {
@@ -109,16 +120,26 @@ trialStart=/run/raspiblitz-lnbits/start-once
 
 function lockLnbitsData() {
   local dir=/run/raspiblitz-lnbits
-  sudo install -d -o root -g admin -m 0750 "$dir" || return 1
+  sudo install -d -o root -g admin -m 0751 "$dir" || return 1
   # Nested calls (on -> install/switch, for example) inherit the same lock.
   if ! [ "/proc/$$/fd/9" -ef "$dir" ]; then exec 9<"$dir" || return 1; fi
   flock -n 9
 }
 
 function holdLnbitsService() {
+  # The service account can run the probe even when the admin home is private.
+  sudo install -o root -g root -m 0644 /home/admin/config.scripts/bonus.lnbits.sh "${trialStart%/*}/check-start" || return 1
   if ! sudo test -f "$updateDropIn"; then
     sudo mkdir -p "${updateDropIn%/*}" || return 1
-    printf '# resume=%s\n# operation=%s\n[Unit]\nConditionPathExists=%s\n' "$resumeService" "${holdOperation:-update}" "$trialStart" |
+    {
+      printf '# resume=%s\n# operation=%s\n' "$resumeService" "${holdOperation:-update}"
+      if [ "${previousActive:-0}" = 1 ] && [ "${previousCommit:-}" = "$tagCommit" ]; then
+        echo "# restartable=$tagCommit"
+      fi
+      printf '[Unit]\nConditionPathExists=%s\n[Service]\n' "$trialStart"
+      printf 'ExecStartPre=+/usr/bin/rm -f -- %s\n' "$trialStart"
+      printf 'TimeoutStartSec=6min\nExecStartPost=/bin/bash %s/check-start check-start\n' "${trialStart%/*}"
+    } |
       sudo tee "$updateDropIn.new" >/dev/null &&
       sudo chmod 644 "$updateDropIn.new" &&
       sudo mv -T -- "$updateDropIn.new" "$updateDropIn" || return 1
@@ -129,12 +150,11 @@ function holdLnbitsService() {
 }
 
 function releaseLnbitsService() {
-  sudo rm -f -- "$updateDropIn" "$updateDropIn.new" "$trialStart" && sudo systemctl daemon-reload
+  sudo rm -f -- "$updateDropIn" "$updateDropIn.new" "$trialStart" "${trialStart%/*}/check-start" && sudo systemctl daemon-reload
 }
 
-function lnbitsHealthy() {
+function lnbitsHttpReady() {
   local response
-  systemctl is-active --quiet lnbits || return 1
   response=$(curl --noproxy '*' --fail --silent --max-time 4 --write-out '\n%{http_code}' \
     http://127.0.0.1:5000/api/v1/health) || return 1
   [ "${response##*$'\n'}" = 200 ] &&
@@ -142,36 +162,31 @@ function lnbitsHealthy() {
       <<<"${response%$'\n'*}" >/dev/null
 }
 
-function waitForLnbits() {
-  local deadline=$((SECONDS + 300))
-  while ! lnbitsHealthy; do
-    if (( SECONDS >= deadline )) || ! systemctl is-active --quiet lnbits; then return 1; fi
-    sleep 1
-  done
+function lnbitsHealthy() {
+  systemctl is-active --quiet lnbits && lnbitsHttpReady
 }
 
 function startCheckedLnbits() {
   local started=0
-  sudo touch "$trialStart" || return 1
+  # Only this live operation permits a single start. systemd consumes the
+  # permit and verifies HTTP itself even if the menu or updater disappears.
+  sudo ln -sT "/proc/$$/fd/9" "$trialStart" || return 1
   if sudo systemctl start lnbits; then started=1; fi
   sudo rm -f -- "$trialStart" || return 1
-  [ "$started" = 1 ] && waitForLnbits && releaseLnbitsService
+  [ "$started" = 1 ] && lnbitsHealthy && releaseLnbitsService
 }
 
 # Only releases verified from the publisher and actually running at entry are
 # eligible for the operator's explicit restart before any checkout/migration.
 function previousLnbitsIsSafe() {
   [ "$previousActive" = 1 ] && [ "$beforeCheckout" = 1 ] || return 1
-  local expected actual commandLine head changes
-  case "$previousCommit" in
-    "$tagCommit") expected=${tag#v} ;;
-    "$previousSafeCommit") expected=1.7.0 ;;
-    *) return 1 ;;
-  esac
+  # v1.7.1 is itself a mandatory security patch for v1.7.0.
+  [ "$previousCommit" = "$tagCommit" ] || return 1
+  local actual commandLine head changes
   commandLine=$(systemctl show lnbits --property=ExecStart --value) || return 1
   [[ "$commandLine" == *"path=$lnbitsBin ; argv[]=$lnbitsBin "* ]] || return 1
   actual=$(sudo -u lnbits "$lnbitsCodeDir/.venv/bin/python" -I -c 'from importlib.metadata import version; print(version("lnbits"))') || return 1
-  [ "$actual" = "$expected" ] || return 1
+  [ "$actual" = "${tag#v}" ] || return 1
   head=$(sudo -u lnbits git -C "$lnbitsCodeDir" rev-parse HEAD) &&
     [ "$head" = "$previousCommit" ] &&
     changes=$(sudo -u lnbits git -C "$lnbitsCodeDir" status --porcelain) && [ -z "$changes" ]
@@ -225,6 +240,15 @@ function securityNotice() {
 }
 
 # command info
+if [ "${1:-}" = check-start ]; then
+  deadline=$((SECONDS + 300))
+  until lnbitsHttpReady; do
+    (( SECONDS < deadline )) || exit 1
+    sleep 1
+  done
+  exit 0
+fi
+
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "Config script to switch LNbits on or off."
   echo "Installs the version ${VERSION} by default."
@@ -952,10 +976,8 @@ if [ "$1" = "install" ]; then
   # install from GitHub
   echo "# get the github code user(${githubUser}) branch(${tag})"
   sudo rm -r /home/lnbits/lnbits 2>/dev/null
-  cd /home/lnbits || exit 1
-  sudo -u lnbits git clone https://github.com/${githubUser}/lnbits lnbits
-  cd /home/lnbits/lnbits || exit 1
-  sudo -u lnbits git checkout ${tag} || exit 1
+  sudo -u lnbits git -C /home/lnbits clone -- "https://github.com/${githubUser}/lnbits" lnbits || exit 1
+  sudo -u lnbits git -C "$lnbitsCodeDir" checkout "$tag" || exit 1
   # the default version has to be the pinned commit (not checked for an own repo, branch or tag)
   if [ "${githubUser}" = "lnbits" ] && [ "${tag}" = "${VERSION}" ]; then
     verifyCommit HEAD || exit 1
@@ -1025,6 +1047,7 @@ if [ "$1" = update ]; then
         failLnbitsUpdate "Finish the pending database restore before updating"
       fi
       if sudo grep -qx '# resume=1' "$updateDropIn"; then resumeService=1; fi
+      if sudo grep -qx "# restartable=$tagCommit" "$updateDropIn"; then previousActive=1; fi
     else
       state=$(systemctl show lnbits --property=ActiveState --value) || failLnbitsUpdate "Cannot read the service state"
       case "$state" in
@@ -1037,10 +1060,8 @@ if [ "$1" = update ]; then
   fi
 
   beforeCheckout=1
-  showSecurityNotice=1
-  case "$previousCommit" in "$tagCommit"|"$previousSafeCommit") showSecurityNotice=0 ;; esac
   legacy=0
-  if sudo -u lnbits test -d /home/lnbits/.cache/pypoetry; then legacy=1; showSecurityNotice=1; fi
+  if sudo -u lnbits test -d /home/lnbits/.cache/pypoetry; then legacy=1; fi
 
   # Keep the pre-upgrade backup on retries, including after a partial migration.
   if [ "$previousCommit" != "$tagCommit" ] || [ "$legacy" = 1 ]; then
@@ -1055,6 +1076,9 @@ if [ "$1" = update ]; then
   verifyCommit "refs/tags/$tag" || failLnbitsUpdate "Release verification failed"
   # A failed checkout may itself have changed files.
   beforeCheckout=0
+  if [ "$serviceInstalled" = 1 ]; then
+    sudo sed -i '/^# restartable=/d' "$updateDropIn" || failLnbitsUpdate "Cannot record the release change"
+  fi
   sudo -u lnbits git -C "$lnbitsCodeDir" checkout "$tagCommit" || failLnbitsUpdate "Cannot check out the verified release"
   setServiceExecStart || failLnbitsUpdate "Cannot configure the updated service"
   installDependencies || failLnbitsUpdate "Installation of the release dependencies failed"
@@ -1071,7 +1095,8 @@ if [ "$1" = update ]; then
       echo "# LNbits $tag is installed. The previously stopped service remains stopped."
     fi
   fi
-  if [ "$showSecurityNotice" = 1 ]; then securityNotice; fi
+  # A retry may already be at the target revision when first reaching success.
+  securityNotice
   echo "result='OK'"
   exit 0
 fi
@@ -1579,11 +1604,17 @@ PY
         sudo rm -rf -- "$staging"
         exit 1
       fi
-      sudo mv -T /mnt/hdd/app-data/LNBits "$staging/previous" || exit 1
-      if ! sudo mv -T "$staging/LNBits" /mnt/hdd/app-data/LNBits; then
-        sudo mv -T "$staging/previous" /mnt/hdd/app-data/LNBits
-        exit 1
-      fi
+      # Publish and preserve the old directory in one Linux filesystem operation.
+      # Both an interruption and an unsupported filesystem leave a live directory.
+      sudo mv -T "$staging/LNBits" "$staging/previous" || exit 1
+      sudo python3 - /mnt/hdd/app-data/LNBits "$staging/previous" <<'PY' || exit 1
+import ctypes, os, sys
+libc = ctypes.CDLL(None, use_errno=True)
+at_fdcwd, rename_exchange = -100, 2
+if libc.renameat2(at_fdcwd, os.fsencode(sys.argv[1]), at_fdcwd, os.fsencode(sys.argv[2]), rename_exchange):
+    err = ctypes.get_errno()
+    raise OSError(err, os.strerror(err))
+PY
       echo "# Previous data retained in $staging/previous until you verify the restored wallet"
 
       echo "OK - Apply backup data successful"
@@ -1598,6 +1629,8 @@ PY
       echo "# Restored application failed its health check. LNbits has been stopped."
       exit 1
     fi
+  elif sudo test -f "$updateDropIn"; then
+    echo "# Wallet data restored. LNbits remains stopped; retry the pending update in the Update menu."
   fi
   exit 0
 fi

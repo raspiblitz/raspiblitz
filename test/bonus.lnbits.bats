@@ -25,6 +25,17 @@ setup() {
   FAKE_LNBITS_BIN="1"    # 1 = the lnbits binary exists after uv sync
   FAKE_UNIT="1"          # 1 = the systemd service is set up
   FAKE_COMMIT=""         # what git rev-parse returns
+  OVERRIDE_COMMAND=""
+  systemctl() {
+    case "$*" in
+      *--property=User*) echo lnbits ;;
+      *--property=ExecStart*)
+        local cmd
+        cmd=$(sed -n 's/^ExecStart=//p' "$UNIT" | tr -d "'")
+        cmd=${OVERRIDE_COMMAND:-$cmd}
+        echo "{ path=${cmd%% *} ; argv[]=$cmd ; ignore_errors=no ; }" ;;
+    esac
+  }
 
   # the functions change into directories that only exist on a RaspiBlitz
   cd() { echo "cd $*" >>"${CALLS}"; }
@@ -46,7 +57,7 @@ setup() {
       "tee /home/lnbits/.uv/requirements.txt") cat >"${REQUIREMENTS}" && [ -z "${FAKE_TEE_FAILS}" ] ;;
       "test -x") [ -n "${FAKE_LNBITS_BIN}" ] ;;
       "test -f") [ -n "${FAKE_UNIT}" ] ;;
-      "grep -Eq") grep -Eq "$3" "$UNIT" ;;
+      "sed -n") sed -n "$3" "$UNIT" ;;
       # run the real sed, but on the unit file of the test
       "sed -i") sed -i.bak "$3" "${UNIT}" ;;
       *) return 0 ;;
@@ -58,9 +69,9 @@ called() { grep -qF -- "$1" "${CALLS}"; }
 # bats does not fail a test on a "!"-negated command, so negate explicitly
 not_called() { if called "$1"; then echo "unexpected call: $1"; return 1; fi; }
 
-@test "the script pins LNbits v1.7.0 or newer (critical security fixes)" {
+@test "the script pins LNbits v1.7.1 or newer (security update)" {
   [ "${VERSION}" = "${tag}" ]
-  [ "$(printf '%s\n' "v1.7.0" "${tag}" | sort -V | head -n1)" = "v1.7.0" ]
+  [ "$(printf '%s\n' "v1.7.1" "${tag}" | sort -V | head -n1)" = "v1.7.1" ]
 }
 
 @test "the pinned commit is the commit of the pinned tag on GitHub" {
@@ -233,6 +244,14 @@ EOF
   run setServiceExecStart
   [ "$status" -ne 0 ]
   grep -Fxq 'ExecStart=/usr/local/bin/custom-service' "${UNIT}"
+}
+
+@test "decline an overridden listener before editing the service" {
+  echo "ExecStart=$lnbitsExecStart" >"$UNIT"
+  OVERRIDE_COMMAND="$lnbitsBin --port 5011 --host 127.0.0.1"
+  run setServiceExecStart
+  [ "$status" -ne 0 ]
+  not_called "root: sed -i"
 }
 
 @test "securityNotice lists the steps of the upstream guidance" {

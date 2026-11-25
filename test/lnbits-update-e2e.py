@@ -20,7 +20,7 @@ DATA = Path("/run/raspiblitz-lnbits-e2e")
 CONFIG = Path("/mnt/hdd/app-data/LNBits/data/.env")
 UPDATER = "/home/admin/config.scripts/bonus.lnbits.sh"
 TARGET = "4fa70f338d274e14fc82746a83fba5c2c658211f"
-SAFE_OLD = "aaeff9a62a9310d9d14c22cc188bbd21c347577d"
+V170 = "aaeff9a62a9310d9d14c22cc188bbd21c347577d"
 LEGACY = "88b01e60795c488ae9fd8c2e634f3d218b901aaa"
 TITLE = "RaspiBlitz release test"
 
@@ -168,23 +168,42 @@ def failed_start(enabled):
         remove()
 
 
+@contextmanager
+def blocked_fetch(enabled):
+    if not enabled:
+        yield
+        return
+    git = ["sudo", "-u", "lnbits", "git", "-C", "/home/lnbits/lnbits", "config", "--local"]
+    assert subprocess.run(git + ["--get", "protocol.https.allow"], capture_output=True).returncode == 1
+    call(*git, "protocol.https.allow", "never")
+    try:
+        yield
+    finally:
+        call(*git, "--unset", "protocol.https.allow")
+
+
 def menu_update(case, old_head):
-    assert re.fullmatch(r"[a-f0-9]{40}", old_head) and old_head != TARGET
+    assert re.fullmatch(r"[a-f0-9]{40}", old_head)
+    assert (old_head == TARGET) == (case == "previous")
     assert installed_head() == old_head, "Restore the pre-update fixture before the menu run"
     wallet_check()
     menu = Menu()
     try:
-        with blocked_backup(case in ("previous", "keep-stopped", "retry")) as repair, failed_start(case == "failed-start") as fix_start:
+        with blocked_backup(case in ("keep-stopped", "retry")) as repair, \
+                failed_start(case == "failed-start") as fix_start, blocked_fetch(case == "previous"):
             menu.open()
             if case != "update":
                 if case == "failed-start":
                     dialog = menu.wait("did not pass its health check", timeout=600)
                     assert installed_head() == TARGET
+                elif case == "previous":
+                    dialog = menu.wait("Download of the LNbits release failed. Service:")
                 else:
                     dialog = menu.wait("Database backup failed. Service: inactive")
+                dialog = menu.wait("Retry the update")
                 assert not service_active()
                 previous_offered = "Start the previous verified version" in dialog
-                assert previous_offered == (old_head == SAFE_OLD and case != "failed-start")
+                assert previous_offered == (case == "previous")
                 if case == "previous":
                     assert previous_offered
                     menu.keys("Down", "Down", "Enter")
@@ -206,12 +225,31 @@ def menu_update(case, old_head):
                 end = time.monotonic() + 8
                 while "LNbits update failed" in menu.screen() and time.monotonic() < end:
                     time.sleep(0.15)
-            menu.wait("PRESS ENTER to continue", timeout=600)
+            success = menu.wait("PRESS ENTER to continue", timeout=600)
+            assert "reset all wallet keys" in success
             assert installed_head() == TARGET
             wait_wallet()
             menu.keys("Enter")
     finally:
         menu.close()
+
+
+def custom_unit():
+    wallet_check()
+    old_head = installed_head()
+    dropin = Path("/run/systemd/system/lnbits.service.d/91-raspiblitz-e2e-port.conf")
+    dropin.parent.mkdir(parents=True, exist_ok=True)
+    with dropin.open("x") as out:
+        out.write("[Service]\nExecStart=\nExecStart=/home/lnbits/lnbits/.venv/bin/lnbits --port 5011 --host 127.0.0.1\n")
+    try:
+        call("systemctl", "daemon-reload")
+        result = subprocess.run([UPDATER, "update"], text=True, capture_output=True)
+        assert result.returncode and "Custom LNbits service command" in result.stdout
+        assert installed_head() == old_head and service_active()
+        wallet_check()
+    finally:
+        dropin.unlink()
+        call("systemctl", "daemon-reload")
 
 
 def health_available():
@@ -223,6 +261,54 @@ def health_available():
 
 def service_active():
     return subprocess.run(["systemctl", "is-active", "--quiet", "lnbits"]).returncode == 0
+
+
+def interrupted_trial():
+    assert installed_head() == TARGET
+    wallet_check()
+    permit = Path("/run/raspiblitz-lnbits/start-once")
+    dropin = Path("/run/systemd/system/lnbits.service.d/95-raspiblitz-e2e-interrupt.conf")
+    dropin.parent.mkdir(parents=True, exist_ok=True)
+    with dropin.open("x") as out:
+        out.write("[Service]\nExecStartPre=/bin/sleep 8\nExecStartPost=/bin/false\n")
+    process = None
+    try:
+        call("systemctl", "daemon-reload")
+        process = subprocess.Popen([UPDATER, "update"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        deadline = time.monotonic() + 240
+        while time.monotonic() < deadline:
+            pid = call("systemctl", "show", "lnbits", "-P", "ControlPID", capture_output=True).stdout.strip()
+            try:
+                waiting = Path("/proc", pid, "cmdline").read_bytes().rstrip(b"\0") == b"/bin/sleep\0" + b"8"
+            except FileNotFoundError:
+                waiting = False
+            if waiting:
+                break
+            assert process.poll() is None, "Updater exited before the startup trial"
+            time.sleep(0.15)
+        else:
+            raise AssertionError("Trial never reached its controlled interruption point")
+        assert not os.path.lexists(permit), "The startup permit must be consumed before the application starts"
+        process.kill()
+        process.wait(timeout=5)
+        deadline = time.monotonic() + 75
+        while time.monotonic() < deadline:
+            state = call("systemctl", "show", "lnbits", "-P", "ActiveState", capture_output=True).stdout.strip()
+            if state in ("failed", "inactive"):
+                break
+            time.sleep(0.3)
+        else:
+            raise AssertionError("An interrupted, unsuccessful trial remained active")
+        call("systemctl", "start", "lnbits")
+        assert not service_active()
+    finally:
+        if process is not None and process.poll() is None:
+            process.kill()
+            process.wait()
+        dropin.unlink()
+        call("systemctl", "daemon-reload")
+    call(UPDATER, "update", stdout=subprocess.DEVNULL)
+    wait_wallet()
 
 
 def stopped_update(old_head):
@@ -302,8 +388,8 @@ def restore(backend):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("case", choices=["prepare", "wallet", "update", "previous", "keep-stopped",
-                                         "retry", "failed-start", "stopped", "postgres-restore", "sqlite-restore"])
-    parser.add_argument("--from-commit", default=SAFE_OLD)
+                                         "retry", "failed-start", "stopped", "custom-unit", "interrupted", "postgres-restore", "sqlite-restore"])
+    parser.add_argument("--from-commit", default=V170)
     args = parser.parse_args()
     if (os.getuid() != 0 or not DATA.is_dir() or DATA.is_symlink() or DATA.stat().st_uid != 0
             or DATA.stat().st_mode & 0o077
@@ -313,11 +399,11 @@ if __name__ == "__main__":
     if not __debug__:
         parser.error("Run with Python assertions enabled")
     if args.case in ("update", "previous", "keep-stopped", "retry", "failed-start"):
-        menu_update(args.case, args.from_commit)
+        menu_update(args.case, TARGET if args.case == "previous" else args.from_commit)
     elif args.case == "stopped":
         stopped_update(args.from_commit)
     elif args.case.endswith("-restore"):
         restore(args.case.split("-")[0])
     else:
-        {"prepare": prepare, "wallet": wallet_check}[args.case]()
+        {"prepare": prepare, "wallet": wallet_check, "custom-unit": custom_unit, "interrupted": interrupted_trial}[args.case]()
     print("PASS", args.case)
