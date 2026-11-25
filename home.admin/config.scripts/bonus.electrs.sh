@@ -110,42 +110,44 @@ if [ "$1" = "status-sync" ]; then
   echo "serviceRunning=${serviceRunning}"
   if [ ${serviceRunning} -eq 1 ]; then
 
-    # check if initial sync was done, by setting a file as once electrs is the first time responding on port 50001
-    electrumResponding=$(echo '{"jsonrpc":"2.0","method":"server.ping","params":[],"id":"electrs-check"}' | netcat -w 2 127.0.0.1 50001 | grep -c "result")
-    if [ ${electrumResponding} -gt 1 ]; then
-      electrumResponding=1
-    fi
-    echo "electrumResponding=${electrumResponding}"
-
+    # A responsive Electrum server can still be indexing. Read the indexed header.
+    marker=/mnt/hdd/app-storage/electrs/initial-sync.verified
+    header=$(printf '%s\n' '{"id":1,"method":"blockchain.headers.subscribe","params":[]}' |
+      timeout 4 nc -w 2 -q 1 127.0.0.1 50001 2>/dev/null |
+      jq -c 'select(.id == 1 and .error == null) | .result |
+        select((.height | type) == "number" and .height == (.height | floor) and .height >= 0 and .height <= 2147483647)' 2>/dev/null | head -n1)
     blockheight=0
     blockheightPercent=0
-    if [ ${electrumResponding} -eq 0 ]; then
-
-      # get the synced blockheight
-      syncedBlock=$(echo '{"id": 1, "method": "blockchain.headers.subscribe", "params": []}' | nc -w 20 -q 1 localhost 50001 | jq '.result.height')
-      if [ "$syncedBlock" -eq "$syncedBlock" ] 2>/dev/null; then
-        blockheight=${syncedBlock}
-
-        # calculate the progress
-        source <(/home/admin/_cache.sh get btc_mainnet_blocks_verified)
-        if [ "$btc_mainnet_blocks_verified" -eq "$btc_mainnet_blocks_verified" ] 2>/dev/null; then
-          blockheightPercent=$(echo "scale=2; $syncedBlock / $btc_mainnet_blocks_verified * 100" | bc)
-          blockheightPercent=$(printf "%.0f\n" $blockheightPercent)
+    electrumResponding=0
+    if [ -n "$header" ]; then
+      electrumResponding=1
+      blockheight=$(jq -r '.height | floor' <<< "$header")
+      bitcoincli=(sudo -u bitcoin /usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcclienttimeout=3)
+      chain=$(timeout 5 "${bitcoincli[@]}" getblockchaininfo 2>/dev/null)
+      tip=$(jq -er '.blocks | numbers | select(. > 0 and . <= 2147483647 and . == floor) | floor' <<< "$chain" 2>/dev/null)
+      if [ -n "$tip" ]; then
+        blockheightPercent=$((100 * blockheight / tip))
+        if [ "$blockheightPercent" -ge 100 ]; then
+          blockheightPercent=99
         fi
-
+        if [ "$blockheight" -eq "$tip" ] && jq -e '.initialblockdownload == false and .headers == .blocks' <<< "$chain" >/dev/null; then
+          bestHash=$(jq -er '.bestblockhash | strings | select(test("^[0-9a-f]{64}$"))' <<< "$chain")
+          indexedHeader=$(jq -er '.hex | strings | select(test("^[0-9a-f]{160}$"))' <<< "$header" 2>/dev/null)
+          if [ -n "$indexedHeader" ] && [ -n "$bestHash" ] &&
+             [ "$(timeout 5 "${bitcoincli[@]}" getblockheader "$bestHash" false 2>/dev/null)" = "$indexedHeader" ]; then
+            blockheightPercent=100
+            if ! sudo -u electrs test -f "$marker"; then
+              sudo -u electrs touch -- "$marker"
+            fi
+          fi
+        fi
       fi
     fi
+    echo "electrumResponding=${electrumResponding}"
     echo "blockheight='${blockheight}'"
     echo "blockheightPercent='${blockheightPercent}'"
 
-    fileFlagExists=$(sudo ls /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
-    if [ ${fileFlagExists} -eq 0 ] && [ ${electrumResponding} -gt 0 ]; then
-      # set file flag for the future
-      sudo touch /mnt/hdd/app-storage/electrs/initial-sync.done
-      sudo chmod 544 /mnt/hdd/app-storage/electrs/initial-sync.done
-      fileFlagExists=1
-    fi
-    if [ ${fileFlagExists} -eq 0 ]; then
+    if ! sudo -u electrs test -f "$marker"; then
       echo "initialSynced=0"
       if [ "${blockheightPercent}" != "0" ]; then
         echo "infoSync='Building Index ${blockheightPercent}% (please wait)'"
@@ -270,7 +272,7 @@ Check 'sudo nginx -t' for a detailed error message.
     sudo systemctl stop electrs
     echo "# deleting index"
     sudo rm -r /mnt/hdd/app-storage/electrs/db
-    sudo rm /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null
+    sudo rm -f /mnt/hdd/app-storage/electrs/initial-sync.{done,verified}
     echo "# starting service"
     sudo systemctl start electrs
     echo "# ok"
