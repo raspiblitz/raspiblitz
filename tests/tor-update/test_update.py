@@ -156,7 +156,7 @@ class Update(unittest.TestCase):
         if fault == 'checksum':
             self.assertIn('Hash Sum mismatch', p.stdout)
         if fault == 'signature':
-            self.assertIn('BADSIG', p.stdout)
+            self.assertRegex(p.stdout, r'BADSIG|Verifying signature:\s+Message has been manipulated')
         if fault == 'rollback-failure':
             self.assertIn('Package rollback failed', p.stdout)
             self.assertEqual(version, '0.4.9.1')
