@@ -165,7 +165,7 @@ if [ "${mode}" = "verified" ]; then
   echo
   echo "# check binary was not manipulated (checksum test)"
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndUpdateVersion}/manifest-${PGPauthor}-v${lndUpdateVersion}.sig
-  sudo -u admin wget --no-check-certificate -N -O "${downloadDir}/pgp_keys.asc" ${lndUpdatePGPpkeys}
+  sudo -u admin wget -N -O "${downloadDir}/pgp_keys.asc" "${lndUpdatePGPpkeys}" || exit 1
   binaryChecksum=$(sha256sum ${binaryName} | cut -d " " -f1)
   echo "# binary chdecksum: ${binaryChecksum}"
   echo "# lndSHA256: ${lndSHA256}"

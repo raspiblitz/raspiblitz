@@ -259,14 +259,14 @@ Do you really want to update LND now?
         echo "# cancel update"
         exit 0
       fi
-      # if loop is installed remove
-      if [ "${loop}" == "on" ]; then
-        sudo -u admin /home/admin/config.scripts/bonus.loop.sh off
-      fi
       sudo -u admin /home/admin/config.scripts/lnd.update.sh verified
       if [ $? -ne 0 ]; then
         whiptail --title "ERROR" --msgbox "LND update failed" 8 30
       else
+        # Apply the compatibility change only after the verified update succeeds.
+        if [ "${loop}" = "on" ]; then
+          sudo -u admin /home/admin/config.scripts/bonus.loop.sh off
+        fi
         whiptail \
          --title " LND update " \
          --yes-button "Reboot" \
