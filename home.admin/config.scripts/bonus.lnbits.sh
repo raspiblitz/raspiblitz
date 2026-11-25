@@ -7,6 +7,9 @@ tag="v1.7.1"
 VERSION="${tag}"
 # LNbits does not sign tags or commits: the code of ${VERSION} has to be this commit
 tagCommit="4fa70f338d274e14fc82746a83fba5c2c658211f"
+# Previously released version eligible for an operator-confirmed restart.
+# https://github.com/lnbits/lnbits/releases/tag/v1.7.0
+previousSafeCommit="aaeff9a62a9310d9d14c22cc188bbd21c347577d"
 
 # uv installs the dependencies from the uv.lock of the LNbits release
 # (poetry is legacy upstream and cannot install LNbits on Python 3.13)
@@ -34,7 +37,6 @@ function installUv() {
   fi
 
   echo "# install uv ${uvVersion}"
-  cd /home/lnbits || return 1
   sudo -u lnbits rm -rf ${lnbitsUvDir}
   sudo -u lnbits python3 -m venv ${lnbitsUvDir} || return 1
   # pip only accepts a wheel that matches one of the pinned checksums
@@ -56,12 +58,11 @@ function installUv() {
 function installDependencies() {
   installUv || return 1
   echo "# installing application dependencies"
-  cd ${lnbitsCodeDir} || return 1
   # --frozen: exactly the versions from the uv.lock of the release
   # --no-dev: without the development tools
   # --no-python-downloads: only use the Python of the system
   # (no extras: the 'migration' extra would make tools/conv.py work, see the migrate command)
-  if ! sudo -u lnbits ${lnbitsUvDir}/bin/uv sync --frozen --no-dev --no-python-downloads; then
+  if ! sudo -u lnbits ${lnbitsUvDir}/bin/uv sync --frozen --no-dev --no-python-downloads --directory "$lnbitsCodeDir"; then
     echo "# FAIL: uv sync failed (see above)"
     return 1
   fi
@@ -88,11 +89,115 @@ function verifyCommit() {
 }
 
 # installs made with LNbits up to v1.2.1 start with 'poetry run lnbits'
+function supportedLnbitsUnit() {
+  sudo grep -Eq "^ExecStart=(/home/lnbits/lnbits/\.venv/bin/lnbits( .*)?|/bin/sh -c 'cd /home/lnbits/lnbits && poetry run lnbits --port 5000 --host [[:alnum:].:-]+')$" /etc/systemd/system/lnbits.service
+}
+
 function setServiceExecStart() {
   if sudo test -f /etc/systemd/system/lnbits.service; then
-    sudo sed -i "s|^ExecStart=.*|ExecStart=${lnbitsExecStart}|" /etc/systemd/system/lnbits.service
+    supportedLnbitsUnit || return 1
+    # Keep the configured bind address, including a loopback-only installation.
+    sudo sed -i "s|^ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && poetry run lnbits \(--port 5000 --host [[:alnum:].:-]\+\)'$|ExecStart=${lnbitsBin} \1|" /etc/systemd/system/lnbits.service || return 1
     sudo systemctl daemon-reload
   fi
+}
+
+# A failed update must stay stopped across a reboot. Keep existing enablement
+# and remember whether a successful retry should bring this service back.
+updateDropIn=/etc/systemd/system/lnbits.service.d/50-raspiblitz-update.conf
+trialStart=/run/raspiblitz-lnbits/start-once
+
+function lockLnbitsData() {
+  local dir=/run/raspiblitz-lnbits
+  sudo install -d -o root -g admin -m 0750 "$dir" || return 1
+  # Nested calls (on -> install/switch, for example) inherit the same lock.
+  if ! [ "/proc/$$/fd/9" -ef "$dir" ]; then exec 9<"$dir" || return 1; fi
+  flock -n 9
+}
+
+function holdLnbitsService() {
+  if ! sudo test -f "$updateDropIn"; then
+    sudo mkdir -p "${updateDropIn%/*}" || return 1
+    printf '# resume=%s\n# operation=%s\n[Unit]\nConditionPathExists=%s\n' "$resumeService" "${holdOperation:-update}" "$trialStart" |
+      sudo tee "$updateDropIn.new" >/dev/null &&
+      sudo chmod 644 "$updateDropIn.new" &&
+      sudo mv -T -- "$updateDropIn.new" "$updateDropIn" || return 1
+  fi
+  sudo rm -f -- "$trialStart" && sudo systemctl daemon-reload && sudo systemctl stop lnbits &&
+    sudo systemctl reset-failed lnbits &&
+    [ "$(systemctl show lnbits --property=ActiveState --value)" = inactive ]
+}
+
+function releaseLnbitsService() {
+  sudo rm -f -- "$updateDropIn" "$updateDropIn.new" "$trialStart" && sudo systemctl daemon-reload
+}
+
+function lnbitsHealthy() {
+  local response
+  systemctl is-active --quiet lnbits || return 1
+  response=$(curl --noproxy '*' --fail --silent --max-time 4 --write-out '\n%{http_code}' \
+    http://127.0.0.1:5000/api/v1/health) || return 1
+  [ "${response##*$'\n'}" = 200 ] &&
+    jq -e 'type == "object" and (.server_time | type == "number") and (.up_time != null)' \
+      <<<"${response%$'\n'*}" >/dev/null
+}
+
+function waitForLnbits() {
+  local deadline=$((SECONDS + 300))
+  while ! lnbitsHealthy; do
+    if (( SECONDS >= deadline )) || ! systemctl is-active --quiet lnbits; then return 1; fi
+    sleep 1
+  done
+}
+
+function startCheckedLnbits() {
+  local started=0
+  sudo touch "$trialStart" || return 1
+  if sudo systemctl start lnbits; then started=1; fi
+  sudo rm -f -- "$trialStart" || return 1
+  [ "$started" = 1 ] && waitForLnbits && releaseLnbitsService
+}
+
+# Only releases verified from the publisher and actually running at entry are
+# eligible for the operator's explicit restart before any checkout/migration.
+function previousLnbitsIsSafe() {
+  [ "$previousActive" = 1 ] && [ "$beforeCheckout" = 1 ] || return 1
+  local expected actual commandLine head changes
+  case "$previousCommit" in
+    "$tagCommit") expected=${tag#v} ;;
+    "$previousSafeCommit") expected=1.7.0 ;;
+    *) return 1 ;;
+  esac
+  commandLine=$(systemctl show lnbits --property=ExecStart --value) || return 1
+  [[ "$commandLine" == *"path=$lnbitsBin ; argv[]=$lnbitsBin "* ]] || return 1
+  actual=$(sudo -u lnbits "$lnbitsCodeDir/.venv/bin/python" -I -c 'from importlib.metadata import version; print(version("lnbits"))') || return 1
+  [ "$actual" = "$expected" ] || return 1
+  head=$(sudo -u lnbits git -C "$lnbitsCodeDir" rev-parse HEAD) &&
+    [ "$head" = "$previousCommit" ] &&
+    changes=$(sudo -u lnbits git -C "$lnbitsCodeDir" status --porcelain) && [ -z "$changes" ]
+}
+
+function failLnbitsUpdate() {
+  local reason=$1 choice state
+  echo "# FAIL: $reason" >&2
+  echo "error='$reason'"
+  [ "$updateMenu" = 1 ] || exit 1
+  state=$(systemctl show lnbits --property=ActiveState --value 2>/dev/null) || state=unknown
+  local choices=(BACK "Return to the menu" RETRY "Retry the update")
+  if previousLnbitsIsSafe; then choices+=(START "Start the previous verified version"); fi
+  choice=$(whiptail --title "LNbits update failed" --menu "$reason. Service: ${state:-unknown}." \
+    16 72 3 "${choices[@]}" 3>&1 1>&2 2>&3) || exit 1
+  case "$choice" in
+    RETRY) exit 20 ;; # the menu invokes a new attempt after releasing the lock
+    START)
+      if previousLnbitsIsSafe && startCheckedLnbits; then
+        whiptail --title "LNbits" --msgbox "The previous version is running. The update is still pending." 9 66
+      else
+        if holdLnbitsService; then state=stopped; else state="unknown; check systemctl status lnbits"; fi
+        whiptail --title "LNbits" --msgbox "Could not restart the previous version. Service: $state." 10 68
+      fi ;;
+  esac
+  exit 1
 }
 
 # what to do after an update from a LNbits version before v1.7.0
@@ -145,6 +250,15 @@ source /mnt/hdd/app-data/raspiblitz.conf
 
 lnbitsDataDir="/mnt/hdd/app-data/LNBits/data"
 lnbitsConfig="${lnbitsDataDir}/.env"
+
+case "$1" in
+  update|on|1|off|0|install|uninstall|backup|restore|switch|migrate|sync|repo)
+    if ! lockLnbitsData; then
+      beforeCheckout=0; previousActive=0; updateMenu=0
+      if [ "$1" = update ] && [ "${2:-}" = --menu ]; then updateMenu=1; fi
+      failLnbitsUpdate "Another LNbits operation is in progress or the lock is unavailable"
+    fi ;;
+esac
 
 function postgresConfig() {
 
@@ -238,8 +352,7 @@ function revertMigration() {
   fi
 }
 
-# backup the database (the caller has to restart the service)
-function backupDatabase() {
+function readBackupBackend() {
   # Prefer the persisted backend to the cache. Check the active DSN without logging credentials.
   if [ -z "${LNBitsDB:-}" ]; then source <(/home/admin/_cache.sh get LNBitsDB); fi
   if sudo grep -Eq '^[[:space:]]*LNBITS_DATABASE_URL=.+[^[:space:]]' "$lnbitsConfig"; then
@@ -251,6 +364,11 @@ function backupDatabase() {
     fi
   fi
   case "${LNBitsDB:-SQLite}" in PostgreSQL|SQLite) ;; *) echo "error='Unknown LNbits backup backend'"; return 1 ;; esac
+}
+
+# The caller keeps the service stopped throughout backup or restore.
+function backupDatabase() {
+  readBackupBackend || return 1
   echo "# Start Backup LNBits ${LNBitsDB} database"
   # older SQLite backups contain the LNbits config with the credentials of the funding source
   sudo chmod 600 /mnt/hdd/app-data/backup/lnbits_sqlite/*.tar /mnt/hdd/app-data/LNBits_sqlitedb_backup.tar* 2>/dev/null
@@ -425,11 +543,12 @@ ${toraddress}"
   BACKUP)
     clear
     /home/admin/config.scripts/bonus.lnbits.sh backup
+    backupResult=$?
     echo
-    echo "Backup done"
+    if [ "$backupResult" = 0 ]; then echo "Backup done"; else echo "LNbits backup failed"; fi
     echo "PRESS ENTER to continue"
     read key
-    exit 0
+    exit "$backupResult"
     ;;
   ADMINUI)
     clear
@@ -472,7 +591,7 @@ ${toraddress}"
   RESTORE)
     clear
     # check if backup exist
-    source <(/home/admin/_cache.sh get LNBitsDB)
+    readBackupBackend || exit 1
     if [ "${LNBitsDB}" == "PostgreSQL" ]; then
       backup_target="/mnt/hdd/app-data/backup/lnbits_db"
       backup_file=$(ls -t $backup_target/*.sql | head -n1)
@@ -512,10 +631,12 @@ ${toraddress}"
       if [ "$CHOICE_RESTORE" != "" ]; then
         backup_file=${backup_target}/${OPTIONS_RESTORE[$(($CHOICE_RESTORE * 2 - 1))]}
         /home/admin/config.scripts/bonus.lnbits.sh restore "${backup_file}"
+        restoreResult=$?
         echo
-        echo "Restore done"
+        if [ "$restoreResult" = 0 ]; then echo "Restore done"; else echo "LNbits restore failed"; fi
         echo "PRESS ENTER to continue"
         read key
+        exit "$restoreResult"
       fi
       exit 0
     fi
@@ -776,8 +897,27 @@ if [ "$1" = "sync" ] || [ "$1" = "repo" ]; then
   exit 0
 fi
 
-# stop service
-sudo systemctl stop lnbits 2>/dev/null
+# Update records the previous state before stopping. An already configured
+# service also remains running when 'on' reports that it is already active.
+case "$1" in
+  update|on|1) ;;
+  backup|restore)
+    backupWasActive=0
+    restoreHeld=0
+    if sudo test -f /etc/systemd/system/lnbits.service; then
+      if systemctl is-active --quiet lnbits; then backupWasActive=1; fi
+      if [ "$1" = restore ] && { ! sudo test -f "$updateDropIn" || sudo grep -qx '# operation=restore' "$updateDropIn"; }; then
+        holdOperation=restore
+        resumeService=$backupWasActive
+        if sudo grep -qsx '# resume=1' "$updateDropIn"; then resumeService=1; fi
+        holdLnbitsService || exit 1
+        restoreHeld=1
+      else
+        sudo systemctl stop lnbits || exit 1
+      fi
+    fi ;;
+  *) sudo systemctl stop lnbits 2>/dev/null ;;
+esac
 
 # install (code & compile)
 if [ "$1" = "install" ]; then
@@ -846,6 +986,7 @@ if [ "$1" = "uninstall" ]; then
 
   echo "# *** UNINSTALL LNBITS ***"
 
+  if sudo test -f "$updateDropIn"; then releaseLnbitsService || exit 1; fi
   # always delete user and home directory
   sudo userdel -rf lnbits
 
@@ -853,152 +994,101 @@ if [ "$1" = "uninstall" ]; then
 fi
 
 # update an existing install to the LNbits version of this script
-if [ "$1" = "update" ]; then
+if [ "$1" = update ]; then
+  updateMenu=0
+  if [ "${2:-}" = --menu ]; then updateMenu=1; fi
+  beforeCheckout=0
+  previousActive=0
+  resumeService=0
+  previousCommit=""
+  echo "# *** UPDATE LNBITS to $tag ***"
 
-  echo "# *** UPDATE LNBITS to ${tag} ***"
-
-  if ! sudo -u lnbits test -d ${lnbitsCodeDir}/.git; then
-    echo "# FAIL: LNbits is not installed"
-    echo "error='not installed'"
-    exit 1
-  fi
-
-  # the service got stopped above - it is only started again if it is set up
-  serviceInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
-
-  cd ${lnbitsCodeDir} || exit 1
-  installedVersion=$(sudo -u lnbits git describe --tags 2>/dev/null)
-  echo "# installed version: ${installedVersion}"
-  # only compare versions like v1.2.1 or v1.2.1-5-g1234567 (not an own tag)
-  installedNumber=""
-  if [[ "${installedVersion}" =~ ^v?[0-9]+\.[0-9] ]]; then
-    installedNumber="${installedVersion#v}"
-    # a release candidate is older than its release
-    installedNumber="${installedNumber/-rc/~rc}"
-  fi
-
-  # LNbits before v1.7.0 is affected by the security incident of November 2026
-  vulnerableVersion=0
-  if [ "${installedNumber}" = "" ] || dpkg --compare-versions "${installedNumber}" lt "1.7.0"; then
-    vulnerableVersion=1
-  fi
-  # the poetry venv is still there if an earlier update stopped after the checkout
-  showSecurityNotice=${vulnerableVersion}
-  if sudo -u lnbits test -d /home/lnbits/.cache/pypoetry; then
-    showSecurityNotice=1
-  fi
-
-  # the installed version cannot run if an earlier update stopped after the checkout:
-  # then the service already uses the venv but the dependencies are missing
-  startable=0
-  if [ "${serviceInstalled}" = "1" ]; then
-    if sudo grep -q "poetry run lnbits" /etc/systemd/system/lnbits.service || sudo -u lnbits test -x ${lnbitsBin}; then
-      startable=1
+  sudo -u lnbits test -d "$lnbitsCodeDir/.git" || failLnbitsUpdate "LNbits is not installed"
+  previousCommit=$(sudo -u lnbits git -C "$lnbitsCodeDir" rev-parse --verify HEAD) || failLnbitsUpdate "Cannot read the installed revision"
+  installedVersion=$(sudo -u lnbits git -C "$lnbitsCodeDir" describe --tags --always)
+  echo "# Installed version: $installedVersion"
+  # Keep customised installs intact and refuse a downgrade after a newer migration.
+  if [[ "$installedVersion" =~ ^v?([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+    installedNumber=${BASH_REMATCH[1]}
+    if dpkg --compare-versions "${installedNumber/-rc/~rc}" gt "${tag#v}"; then
+      failLnbitsUpdate "Installed release is newer than the update target"
     fi
   fi
-
-  # as long as the code is unchanged the installed version gets started again
-  function abortUpdate() {
-    echo "# FAIL: $1 - LNbits is not updated"
-    if [ "${startable}" = "1" ]; then
-      sudo systemctl start lnbits
-      echo "# the installed version ${installedVersion} is started again"
-      if [ "${vulnerableVersion}" = "1" ]; then
-        echo "# WARNING: this version is affected by the vulnerability of LNbits before v1.7.0"
-        echo "# to stop it until the update works: sudo systemctl stop lnbits"
+  changes=$(sudo -u lnbits git -C "$lnbitsCodeDir" status --porcelain --untracked-files=no) || failLnbitsUpdate "Cannot check the working tree"
+  [ -z "$changes" ] || failLnbitsUpdate "Installed LNbits has local changes"
+  serviceInstalled=0
+  if sudo test -f /etc/systemd/system/lnbits.service; then
+    serviceInstalled=1
+    supportedLnbitsUnit || failLnbitsUpdate "Custom LNbits service command needs a manual update"
+    if sudo test -f "$updateDropIn"; then
+      if sudo grep -qx '# operation=restore' "$updateDropIn"; then
+        failLnbitsUpdate "Finish the pending database restore before updating"
       fi
-    elif [ "${serviceInstalled}" = "1" ]; then
-      echo "# LNbits stays stopped: an earlier update did not finish"
-    fi
-    echo "error='$1'"
-    exit 1
-  }
-
-  # never go back to an older version: the database is already migrated
-  if [ "${installedNumber}" != "" ] && dpkg --compare-versions "${installedNumber}" gt "${tag#v}"; then
-    abortUpdate "installed version ${installedVersion} is newer than ${tag}"
-  fi
-
-  # a changed tracked file could survive the checkout (untracked files are not checked)
-  if [ "$(sudo -u lnbits git status --porcelain --untracked-files=no)" != "" ]; then
-    sudo -u lnbits git status --short --untracked-files=no
-    abortUpdate "changed files in ${lnbitsCodeDir}"
-  fi
-
-  # backup first: the database migrations of a new version cannot be reverted
-  # - also if LNbits is switched off but the data was kept
-  # - not when the pinned release is already installed (code on the pinned commit and the
-  #   poetry venv replaced): it may have migrated the database already, and repeated updates
-  #   would rotate out the backup from before the update
-  releaseInstalled=0
-  if [ "$(sudo -u lnbits git rev-parse HEAD 2>/dev/null)" = "${tagCommit}" ] &&
-    ! sudo -u lnbits test -d /home/lnbits/.cache/pypoetry; then
-    releaseInstalled=1
-  fi
-  if sudo test -f ${lnbitsConfig} && [ "${releaseInstalled}" = "0" ]; then
-    backupDatabase || abortUpdate "database backup failed"
-  fi
-
-  echo "# get the code of ${tag}"
-  cd ${lnbitsCodeDir} || abortUpdate "missing ${lnbitsCodeDir}"
-  # always from the LNbits repo (the install can use a fork) and compared with the pinned commit
-  sudo -u lnbits git fetch https://github.com/lnbits/lnbits "+refs/tags/${tag}:refs/tags/${tag}" || abortUpdate "git fetch of ${tag} failed"
-  verifyCommit "refs/tags/${tag}" || abortUpdate "${tag} is not the pinned commit"
-  sudo -u lnbits git checkout ${tagCommit} || abortUpdate "git checkout of ${tag} failed"
-
-  # from here on the code is updated: the service must not start it with the old
-  # poetry environment, and LNbits stays stopped if the dependencies fail
-  setServiceExecStart
-  if ! installDependencies; then
-    echo "# FAIL: LNbits stays stopped because the dependencies of ${tag} are not installed"
-    echo "# check the internet connection and run again: /home/admin/config.scripts/bonus.lnbits.sh update"
-    echo "error='install of dependencies failed'"
-    exit 1
-  fi
-
-  startFailed=0
-  if [ "${serviceInstalled}" = "1" ]; then
-    echo "# starting LNbits ${tag} (the first start migrates the database)"
-    if sudo systemctl start lnbits; then
-      # systemd reports the start before LNbits is up: wait until it answers
-      waitMax=300
-      waitStart=${SECONDS}
-      waitReported=0
-      while ! curl -s -o /dev/null --max-time 5 http://127.0.0.1:5000/; do
-        waited=$((SECONDS - waitStart))
-        if [ ${waited} -ge ${waitMax} ]; then
-          startFailed=1
-          break
-        fi
-        if [ $((waited - waitReported)) -ge 10 ]; then
-          echo "# waiting for LNbits to answer (${waited}s/${waitMax}s)"
-          waitReported=${waited}
-        fi
-        sleep 1
-      done
+      if sudo grep -qx '# resume=1' "$updateDropIn"; then resumeService=1; fi
     else
-      startFailed=1
+      state=$(systemctl show lnbits --property=ActiveState --value) || failLnbitsUpdate "Cannot read the service state"
+      case "$state" in
+        active) resumeService=1; if lnbitsHealthy; then previousActive=1; fi ;;
+        inactive|failed) ;;
+        *) failLnbitsUpdate "The service is changing state. Retry when it has settled" ;;
+      esac
+    fi
+    holdLnbitsService || failLnbitsUpdate "Could not stop LNbits safely"
+  fi
+
+  beforeCheckout=1
+  showSecurityNotice=1
+  case "$previousCommit" in "$tagCommit"|"$previousSafeCommit") showSecurityNotice=0 ;; esac
+  legacy=0
+  if sudo -u lnbits test -d /home/lnbits/.cache/pypoetry; then legacy=1; showSecurityNotice=1; fi
+
+  # Keep the pre-upgrade backup on retries, including after a partial migration.
+  if [ "$previousCommit" != "$tagCommit" ] || [ "$legacy" = 1 ]; then
+    if sudo test -f "$lnbitsConfig"; then
+      backupDatabase || failLnbitsUpdate "Database backup failed"
+    elif [ "$serviceInstalled" = 1 ]; then
+      failLnbitsUpdate "The configured service has no readable LNbits configuration"
     fi
   fi
-  echo "# OK - the code and dependencies of LNbits are updated to ${tag}"
+  sudo -u lnbits git -C "$lnbitsCodeDir" fetch https://github.com/lnbits/lnbits "+refs/tags/${tag}:refs/tags/${tag}" ||
+    failLnbitsUpdate "Download of the LNbits release failed"
+  verifyCommit "refs/tags/$tag" || failLnbitsUpdate "Release verification failed"
+  # A failed checkout may itself have changed files.
+  beforeCheckout=0
+  sudo -u lnbits git -C "$lnbitsCodeDir" checkout "$tagCommit" || failLnbitsUpdate "Cannot check out the verified release"
+  setServiceExecStart || failLnbitsUpdate "Cannot configure the updated service"
+  installDependencies || failLnbitsUpdate "Installation of the release dependencies failed"
 
-  if [ "${showSecurityNotice}" = "1" ]; then
-    securityNotice
+  if [ "$serviceInstalled" = 1 ]; then
+    if [ "$resumeService" = 1 ]; then
+      if ! startCheckedLnbits; then
+        holdLnbitsService || failLnbitsUpdate "Health check failed and the service could not be stopped"
+        failLnbitsUpdate "The updated LNbits did not pass its health check"
+      fi
+      echo "# LNbits $tag is running and healthy."
+    else
+      releaseLnbitsService || failLnbitsUpdate "Cannot release the service after installation"
+      echo "# LNbits $tag is installed. The previously stopped service remains stopped."
+    fi
   fi
-
-  if [ "${startFailed}" = "1" ]; then
-    echo "# FAIL: LNbits ${tag} does not answer on port 5000 - check: sudo journalctl -u lnbits -n 100"
-    echo "error='update done but LNbits did not start'"
-    exit 1
-  fi
-
-  # needed for API/WebUI as signal that the update ran thru
+  if [ "$showSecurityNotice" = 1 ]; then securityNotice; fi
   echo "result='OK'"
   exit 0
 fi
 
 # on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
+
+  # A fresh system can have a funded data disk but no service or lnbits user.
+  # Secure the persisted backend before installation can migrate it.
+  if sudo test -f "$lnbitsConfig" && ! sudo test -f /etc/systemd/system/lnbits.service; then
+    readBackupBackend || exit 1
+    if [ "$LNBitsDB" = PostgreSQL ] && ! sudo -u postgres pg_isready -q &&
+       sudo test -d /mnt/hdd/app-data/postgresql; then
+      sudo /home/admin/config.scripts/bonus.postgresql.sh on || exit 1
+    fi
+    backupDatabase || { echo "error='Database backup failed; setup cancelled before reinstall'"; exit 1; }
+  fi
 
   # check if already installed
   if compgen -u | grep -w lnbits; then
@@ -1010,15 +1100,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
       if sudo test -f "$lnbitsConfig"; then
         showSecurityNotice=1
         # the database migrations of the new version cannot be reverted
-        wasRunning=0
-        if systemctl is-active --quiet lnbits; then
-          wasRunning=1
-          sudo systemctl stop lnbits || exit 1
-        fi
-        if ! backupDatabase; then
-          if [ "$wasRunning" = 1 ]; then sudo systemctl start lnbits; fi
-          echo "error='Database backup failed; reinstall cancelled'"
-          exit 1
+        if sudo test -f /etc/systemd/system/lnbits.service; then
+          # A configured legacy installation uses the same guarded update path.
+          exec /home/admin/config.scripts/bonus.lnbits.sh update
         fi
       fi
       /home/admin/config.scripts/bonus.lnbits.sh off --keep-data || exit 1
@@ -1112,9 +1196,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
     # config update
     # example: postgres://<user>:<password>@<host>/<database>
-    sudo sed -i "/^LNBITS_DATABASE_URL=/d" $lnbitsConfig 2>/dev/null
     sudo sed -i "/^LNBITS_DATA_FOLDER=/d" $lnbitsConfig 2>/dev/null
-    sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://postgres:postgres@localhost:5432/lnbits_db' >> ${lnbitsConfig}"
+    if ! sudo grep -q '^LNBITS_DATABASE_URL=.' "$lnbitsConfig"; then
+      sudo sed -i '/^LNBITS_DATABASE_URL=/d' "$lnbitsConfig"
+      sudo bash -c "echo 'LNBITS_DATABASE_URL=postgres://postgres:postgres@localhost:5432/lnbits_db' >> ${lnbitsConfig}"
+    fi
     sudo bash -c "echo 'LNBITS_DATA_FOLDER=/mnt/hdd/app-data/LNBits/data' >> ${lnbitsConfig}"
 
   else
@@ -1374,14 +1460,14 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "*** REMOVING LNbits ***"
 
   isInstalled=$(sudo ls /etc/systemd/system/lnbits.service 2>/dev/null | grep -c 'lnbits.service')
-  if [ ${isInstalled} -eq 1 ] || [ "${LNBits}" == "on" ]; then
-    sudo systemctl stop lnbits
-    sudo systemctl disable lnbits
-    sudo rm /etc/systemd/system/lnbits.service
+  if [ ${isInstalled} -eq 1 ]; then
+    sudo systemctl stop lnbits && sudo systemctl disable lnbits &&
+      sudo rm /etc/systemd/system/lnbits.service || exit 1
     echo "# OK lnbits.service removed."
   else
     echo "# lnbits.service is not installed."
   fi
+  if sudo test -f "$updateDropIn"; then releaseLnbitsService || exit 1; fi
 
   echo "# Cleaning up LNbits install ..."
   sudo ufw delete allow 5000
@@ -1424,20 +1510,20 @@ fi
 if [ "$1" = "backup" ]; then
   backupDatabase
   backupResult=$?
-  sudo systemctl start lnbits || exit 1
+  if [ "$backupWasActive" = 1 ]; then sudo systemctl start lnbits || exit 1; fi
   exit "$backupResult"
 fi
 
 # restore
 if [ "$1" = "restore" ]; then
-  source <(/home/admin/_cache.sh get LNBitsDB)
+  readBackupBackend || exit 1
   if [ "${LNBitsDB}" == "PostgreSQL" ]; then
     echo "# Restore PostgreSQL database"
     if [ "$2" != "" ]; then
       backup_file=$2
-      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz "${backup_file}"
+      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz "${backup_file}" || exit 1
     else
-      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz
+      sudo /home/admin/config.scripts/bonus.postgresql.sh restore lnbits_db lnbits_user raspiblitz || exit 1
     fi
   else
     backup_target="/mnt/hdd/app-data/backup/lnbits_sqlite"
@@ -1446,10 +1532,10 @@ if [ "$1" = "restore" ]; then
       exit 1
     else
       echo "# Restore SQLite database"
-      cd $backup_target
+      cd "$backup_target" || exit 1
 
       if [ "$2" != "" ]; then
-        if [ -e $2 ]; then
+        if [ -f "$2" ]; then
           backup_file=$2
         else
           echo "ABORT - File not found (${2})"
@@ -1462,26 +1548,57 @@ if [ "$1" = "restore" ]; then
 
       echo "Start restore from backup ${backup_file}"
 
-      # unpack backup file
-      sudo tar -xf $backup_file || exit 1
-      echo "Unpack backup successful, backup current db now ..."
+      staging=$(sudo mktemp -d /mnt/hdd/app-data/.lnbits-restore.XXXXXXXX) || exit 1
+      if ! sudo python3 - "$backup_file" "$staging" <<'PY'
+from pathlib import Path, PurePosixPath
+import sqlite3, sys, tarfile
 
-      # backup current db
-      /home/admin/config.scripts/bonus.lnbits.sh backup
-
-      # apply backup data
-      sudo rm -R /mnt/hdd/app-data/LNBits/
-      sudo chown -R lnbits:lnbits LNBits/
-      sudo mv LNBits/ /mnt/hdd/app-data/
-
-      echo "Remove restored backup file"
-      sudo rm -f $backup_file
+root = Path(sys.argv[2])
+with tarfile.open(sys.argv[1]) as archive:
+    for member in archive:
+        parts = PurePosixPath(member.name).parts
+        if not parts or parts[0] != "LNBits" or ".." in parts or not (member.isfile() or member.isdir()):
+            raise SystemExit("Unsupported member in LNbits backup")
+        archive.extract(member, root, filter="data")
+app = root / "LNBits"
+if not (app / "data" / ".env").is_file():
+    raise SystemExit("Missing LNbits configuration in backup")
+db = next((p for p in (app / "database.sqlite3", app / "data" / "database.sqlite3") if p.is_file()), None)
+if db is None:
+    raise SystemExit("Missing LNbits database in backup")
+with sqlite3.connect(db.as_uri() + "?mode=ro", uri=True) as conn:
+    conn.execute("SELECT id, name FROM wallets LIMIT 0")
+    if conn.execute("PRAGMA quick_check").fetchall() != [("ok",)]:
+        raise SystemExit("SQLite integrity check failed")
+PY
+      then
+        sudo rm -rf -- "$staging"
+        exit 1
+      fi
+      if ! sudo chown -R lnbits:lnbits "$staging/LNBits" || ! backupDatabase; then
+        sudo rm -rf -- "$staging"
+        exit 1
+      fi
+      sudo mv -T /mnt/hdd/app-data/LNBits "$staging/previous" || exit 1
+      if ! sudo mv -T "$staging/LNBits" /mnt/hdd/app-data/LNBits; then
+        sudo mv -T "$staging/previous" /mnt/hdd/app-data/LNBits
+        exit 1
+      fi
+      echo "# Previous data retained in $staging/previous until you verify the restored wallet"
 
       echo "OK - Apply backup data successful"
     fi
   fi
 
-  sudo systemctl start lnbits
+  if [ "$restoreHeld" = 1 ]; then
+    if [ "$resumeService" = 0 ]; then
+      releaseLnbitsService || exit 1
+    elif ! startCheckedLnbits; then
+      holdLnbitsService || { echo "# Failed to stop LNbits after restore"; exit 1; }
+      echo "# Restored application failed its health check. LNbits has been stopped."
+      exit 1
+    fi
+  fi
   exit 0
 fi
 

@@ -12,12 +12,20 @@ on:
       - '.github/workflows/lnbits-script-tests.yml'
       - 'home.admin/config.scripts/bonus.lnbits.sh'
       - 'test/bonus.lnbits.bats'
+      - 'test/lnbits-update-policy.bats'
+      - 'test/lnbits-update-e2e.py'
+      - 'home.admin/99updateMenu.sh'
+      - 'home.admin/config.scripts/bonus.postgresql.sh'
   pull_request:
     branches: ['dev', 'v1.10', 'v1.11', 'v1.12']
     paths:
       - '.github/workflows/lnbits-script-tests.yml'
       - 'home.admin/config.scripts/bonus.lnbits.sh'
       - 'test/bonus.lnbits.bats'
+      - 'test/lnbits-update-policy.bats'
+      - 'test/lnbits-update-e2e.py'
+      - 'home.admin/99updateMenu.sh'
+      - 'home.admin/config.scripts/bonus.postgresql.sh'
 
 jobs:
   bats:
@@ -32,7 +40,11 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y bats
 
       - name: Syntax check
-        run: bash -n home.admin/config.scripts/bonus.lnbits.sh
+        run: |
+          bash -n home.admin/config.scripts/bonus.lnbits.sh
+          bash -n home.admin/config.scripts/bonus.postgresql.sh
+          bash -n home.admin/99updateMenu.sh
+          python3 -m py_compile test/lnbits-update-e2e.py
 
       - name: Run tests
-        run: bats --print-output-on-failure test/bonus.lnbits.bats
+        run: bats --print-output-on-failure test/bonus.lnbits.bats test/lnbits-update-policy.bats

@@ -681,10 +681,16 @@ case $CHOICE in
     /home/admin/config.scripts/bonus.btcpayserver.sh update
     ;;
   LNBITS)
-    /home/admin/config.scripts/bonus.lnbits.sh update
-    echo
-    echo "PRESS ENTER to continue"
-    read key
+    while true; do
+      /home/admin/config.scripts/bonus.lnbits.sh update --menu
+      result=$?
+      [ "$result" = 20 ] && continue
+      if [ "$result" = 0 ]; then
+        echo "PRESS ENTER to continue"
+        read -r key
+      fi
+      break
+    done
     ;;
   SPHINX)
     /home/admin/config.scripts/bonus.sphinxrelay.sh update

@@ -46,6 +46,7 @@ setup() {
       "tee /home/lnbits/.uv/requirements.txt") cat >"${REQUIREMENTS}" && [ -z "${FAKE_TEE_FAILS}" ] ;;
       "test -x") [ -n "${FAKE_LNBITS_BIN}" ] ;;
       "test -f") [ -n "${FAKE_UNIT}" ] ;;
+      "grep -Eq") grep -Eq "$3" "$UNIT" ;;
       # run the real sed, but on the unit file of the test
       "sed -i") sed -i.bak "$3" "${UNIT}" ;;
       *) return 0 ;;
@@ -161,8 +162,7 @@ not_called() { if called "$1"; then echo "unexpected call: $1"; return 1; fi; }
   FAKE_UV_VERSION="${uvVersion}"
   run installDependencies
   [ "$status" -eq 0 ]
-  called "cd /home/lnbits/lnbits"
-  called "lnbits: /home/lnbits/.uv/bin/uv sync --frozen --no-dev --no-python-downloads"
+  called "lnbits: /home/lnbits/.uv/bin/uv sync --frozen --no-dev --no-python-downloads --directory /home/lnbits/lnbits"
   # no extras: psycopg2 from the 'migration' extra would make the broken migrate command run
   not_called "--extra"
   called "lnbits: test -x /home/lnbits/lnbits/.venv/bin/lnbits"
@@ -212,7 +212,7 @@ EOF
   # the other lines are untouched
   grep -qx "ExecStartPre=/home/admin/config.scripts/bonus.lnbits.sh prestart" "${UNIT}"
   [ "$(wc -l <"${UNIT}")" -eq 5 ]
-  called "root: sed -i s|^ExecStart=.*|ExecStart=/home/lnbits/lnbits/.venv/bin/lnbits --port 5000 --host 0.0.0.0| /etc/systemd/system/lnbits.service"
+  called "root: sed -i"
   called "root: systemctl daemon-reload"
 }
 
@@ -222,6 +222,17 @@ EOF
   [ "$status" -eq 0 ]
   not_called "sed -i"
   not_called "daemon-reload"
+}
+
+@test "updating the unit preserves a loopback listener and refuses an unrelated launcher" {
+  echo "ExecStart=/bin/sh -c 'cd /home/lnbits/lnbits && poetry run lnbits --port 5000 --host 127.0.0.1'" >"${UNIT}"
+  run setServiceExecStart
+  [ "$status" -eq 0 ]
+  grep -Fxq "ExecStart=${lnbitsBin} --port 5000 --host 127.0.0.1" "${UNIT}"
+  echo 'ExecStart=/usr/local/bin/custom-service' >"${UNIT}"
+  run setServiceExecStart
+  [ "$status" -ne 0 ]
+  grep -Fxq 'ExecStart=/usr/local/bin/custom-service' "${UNIT}"
 }
 
 @test "securityNotice lists the steps of the upstream guidance" {

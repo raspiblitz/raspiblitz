@@ -262,6 +262,64 @@ if [ "$command" = "backup" ] && [ "$db_name" != "" ]; then
   exit 0
 fi
 
+# Restore into a separate database first. A failed import or a live connection
+# to the destination must leave the current database available for a retry.
+if [ "$command" = restore ] && [ "$db_name" = lnbits_db ] && [ "$db_user" = lnbits_user ] && [ -n "$db_user_pw" ]; then
+  backup_file=$db_backupfile
+  if [ -z "$backup_file" ]; then
+    backup_file=$(ls -t -- "$backup_target"/*.sql 2>/dev/null | head -n1)
+  fi
+  [ -f "$backup_file" ] && [ -s "$backup_file" ] || { echo "# No readable database backup found"; exit 1; }
+
+  suffix=$(cat /proc/sys/kernel/random/uuid) || exit 1
+  stage="rb_restore_${suffix//-/}"
+  previous="rb_previous_${suffix//-/}"
+  # Reuse an existing role and its credentials, also when other databases use it.
+  sudo -u postgres psql -Xq -v ON_ERROR_STOP=1 -v usr="$db_user" -v pw="$db_user_pw" <<'SQL' || exit 1
+SELECT format('CREATE ROLE %I LOGIN PASSWORD %L', :'usr', :'pw')
+WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = :'usr') \gexec
+SQL
+  sudo -u postgres psql -Xq -v ON_ERROR_STOP=1 -v db="$db_name" -v stage="$stage" -v usr="$db_user" <<'SQL' || exit 1
+SELECT coalesce(
+  (SELECT format('CREATE DATABASE %I TEMPLATE template0 OWNER %I ENCODING %L LC_COLLATE %L LC_CTYPE %L %s',
+    :'stage', pg_get_userbyid(datdba), pg_encoding_to_char(encoding), datcollate, datctype,
+    CASE to_jsonb(d)->>'datlocprovider'
+      WHEN 'i' THEN format('LOCALE_PROVIDER icu ICU_LOCALE %L', coalesce(to_jsonb(d)->>'datlocale', to_jsonb(d)->>'daticulocale'))
+      WHEN 'b' THEN format('LOCALE_PROVIDER builtin BUILTIN_LOCALE %L', to_jsonb(d)->>'datlocale')
+      ELSE '' END)
+   FROM pg_database d WHERE datname = :'db'),
+  format('CREATE DATABASE %I TEMPLATE template0 OWNER %I', :'stage', :'usr')) \gexec
+SQL
+  trap 'sudo -u postgres dropdb --if-exists "$stage" >/dev/null' EXIT
+  sudo -u postgres psql -Xq --set=ON_ERROR_STOP=1 --single-transaction --dbname="$stage" \
+    <"$backup_file" >/dev/null || { echo "# Import failed; existing database was kept"; exit 1; }
+  sudo -u postgres psql -Xq -v ON_ERROR_STOP=1 --dbname="$stage" -c 'SELECT id, name FROM public.wallets LIMIT 0' >/dev/null ||
+    { echo "# Backup does not contain the LNbits wallet schema"; exit 1; }
+
+  # Rename both databases in one transaction. PostgreSQL refuses the swap
+  # when a client is still using the destination.
+  sudo -u postgres psql -Xq -v ON_ERROR_STOP=1 -v db="$db_name" -v old="$previous" -v stage="$stage" <<'SQL' || exit 1
+BEGIN;
+SELECT format('REVOKE ALL ON DATABASE %I FROM PUBLIC', :'stage')
+FROM pg_database WHERE datname = :'db' \gexec
+SELECT format('GRANT %s ON DATABASE %I TO %s %s', a.privilege_type, :'stage',
+  CASE WHEN a.grantee = 0 THEN 'PUBLIC' ELSE quote_ident(pg_get_userbyid(a.grantee)) END,
+  CASE WHEN a.is_grantable THEN 'WITH GRANT OPTION' ELSE '' END)
+FROM pg_database d CROSS JOIN LATERAL aclexplode(coalesce(d.datacl, acldefault('d',d.datdba))) a
+WHERE d.datname = :'db' \gexec
+SELECT format('ALTER DATABASE %I RENAME TO %I', :'db', :'old')
+WHERE EXISTS (SELECT FROM pg_database WHERE datname = :'db') \gexec
+SELECT format('ALTER DATABASE %I ALLOW_CONNECTIONS false', :'old')
+WHERE EXISTS (SELECT FROM pg_database WHERE datname = :'old') \gexec
+ALTER DATABASE :"stage" RENAME TO :"db";
+COMMIT;
+SQL
+  trap - EXIT
+  echo "# A previously existing database is retained as $previous until you verify the restored wallet"
+  echo "# OK - database $db_name restored"
+  exit 0
+fi
+
 # restore
 if [ "$command" = "restore" ] && [ "$db_name" != "" ] && [ "$db_user" != "" ] && [ "$db_user_pw" != "" ]; then
   echo "*** RESTORE POSTGRESQL $db_name ***"
