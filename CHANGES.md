@@ -1,5 +1,6 @@
 ## What's new in Version 1.12.2 of RaspiBlitz?
 
+- Update LNbits to v1.7.1. A failed update keeps the service stopped and offers a retry in the SSH menu. Only an already running installation of the verified target version can be resumed explicitly before its code or database changes. After upgrading from an affected release, rotate wallet keys and funding credentials. [Release notes](https://github.com/lnbits/lnbits/releases/tag/v1.7.1) · [Operator guidance](https://news.lnbits.com/news/lnbits-1-7-0-security-update)
 - Update: BTCPayServer v2.3.9 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.3.9)
 
 ## What's new in Version 1.12.1 of RaspiBlitz?
