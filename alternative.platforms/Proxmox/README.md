@@ -7,9 +7,9 @@ This guide here will help you to set up a completely new Raspiblitz with Proxmox
 ### What is needed?
 
 - Proxmox installation on an Intel NUC, laptop or server
-- at least 1TB SSD
+- a 2 TB SSD for an unpruned mainnet node; reserve additional space for indexers and VM snapshots
 
-You have several options for the SSD: Either you install the 1TB SSD in the system and install your Proxmox host on it or (as I did) you have an internal SSD (in my case 500GB M2 SSD) where the host operating system is located. I connected the 1TB SSD via SATA to my Intel NUC. This is used exclusively for storing the blockchain and Lightning Node.
+You have several options for the SSD: Either you install the data SSD in the system and install your Proxmox host on it or (as I did) you have an internal SSD (in my case 500GB M2 SSD) where the host operating system is located. I connected the data SSD via SATA to my Intel NUC. This is used exclusively for storing the blockchain and Lightning Node.
 
 ## Create Debian VM
 
@@ -92,71 +92,37 @@ Now to install Raspiblitz on this new VM we need to do 2 things: Connect the har
 
 Now connect the hard drive to the host system using SATA or USB. In my example here I use a USB hard disk, which I connected via USB 3.1 to the Intel NUC. The best thing to do now is to shutdown the Raspiblitz VM.
 
-Now you need to log in to the console on the Proxmox host system and do the following:
+On the Proxmox host, inspect the VM's existing disks with `qm config VMID` and identify the dedicated physical disk with `lsblk -d -o NAME,SIZE,MODEL,SERIAL` and `ls -l /dev/disk/by-id/`. Check that the host and other guests are not using it. With the VM stopped, attach the disk by its persistent ID in an unused slot. For example, after replacing VMID and DISK-ID and confirming that scsi1 is free:
 
-https://www.youtube.com/watch?v=U-UTMuhmC1U
-
-The commands from the video here again to copy:
-
-```
-ls -n /dev/disk/by-id/
-/sbin/qm set [VM-ID] -virtio2 /dev/disk/by-id/[DISK-ID]
+```bash
+qm set VMID --scsi1 /dev/disk/by-id/DISK-ID
 ```
 
-It is important here that the hard disk is passed through by ID. If something changes in the dev sda order in the future, the correct hard disk is still connected to the VM.
+[Proxmox VM disk options](https://pve.proxmox.com/pve-docs/qm.1.html)
 
 ### Variant 2: Use internal storage
 
-If you have enough space on the host operating system, you do not have to use an external hard disk. You can simply add a second hard disk to the VM under "Hardware -> Add -> Hard Disk". I would recommend at least 1TB as storage size.
+If you have enough space on the host operating system, you do not have to use an external hard disk. You can simply add a second hard disk to the VM under "Hardware -> Add -> Hard Disk". Reserve the actual data capacity on the storage pool, including room for snapshots.
 
 * * *
 
-Regardless of whether variant 1 or 2 was executed, the VM should now have 2 hard disks connected in the hardware overview: A smaller one (e.g. 32GB) where the operating system of Raspiblitz will be installed and run and a larger one (e.g. 1TB or more) where all the blockchain data will be stored later.
+Regardless of whether variant 1 or 2 was executed, the VM should now have 2 hard disks connected in the hardware overview: A smaller one (e.g. 32GB) where the operating system of Raspiblitz will be installed and run and a larger one (e.g. 2 TB) where all the blockchain data will be stored later.
 
 ![](images/2022-09-21_21-04.png)
 
 ### Verify the data disk mount inside the VM
 
-RaspiBlitz services expect the large data disk to be available at `/mnt/hdd`. Before starting the RaspiBlitz setup or any services, verify that `/mnt/hdd` is really the large disk and not just an empty directory on the VM root filesystem:
+At first setup, select the intended data disk by its size and identity. After setup or a reboot, verify where the service paths resolve inside the guest:
 
 ```bash
-lsblk -f
-mountpoint /mnt/hdd
-df -h /mnt/hdd
+lsblk -o NAME,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINTS
+for path in /mnt/hdd/app-data /mnt/hdd/app-storage; do
+  resolved=$(readlink -e "$path") || { echo "Missing: $path"; continue; }
+  findmnt -T "$resolved" -o TARGET,SOURCE,FSTYPE
+done
 ```
 
-The `df` output should show the large blockchain disk mounted on `/mnt/hdd`. If your Debian/Proxmox setup mounted the disk somewhere else, for example `/mnt/disk_storage`, either mount it directly at `/mnt/hdd` or add a bind mount:
-
-```bash
-sudo mkdir -p /mnt/hdd
-sudo mount --bind /mnt/disk_storage /mnt/hdd
-mountpoint /mnt/hdd
-df -h /mnt/hdd
-```
-
-To make a bind mount persistent after reboot, add it to `/etc/fstab`:
-
-```fstab
-/mnt/disk_storage /mnt/hdd none bind 0 0
-```
-
-Then test it:
-
-```bash
-sudo mount -a
-mountpoint /mnt/hdd
-df -h /mnt/hdd
-```
-
-Do not start `bitcoind`, `electrs`, `lnd`, or `nginx` until `/mnt/hdd` points to the large data disk. If services start while `/mnt/hdd` is not mounted, files such as `/mnt/hdd/app-data/nginx/tls.cert` or `/mnt/hdd/app-storage/electrs/db` may be created on the small root filesystem instead. Those files become hidden after the real disk is mounted at `/mnt/hdd`.
-
-If that happened, stop the services first before inspecting or cleaning up anything under `/mnt/hdd`:
-
-```bash
-sudo systemctl stop electrs lnd bitcoind nginx
-```
-
-Only then inspect the root filesystem copy of `/mnt/hdd` or unmount/bind-mount paths as needed. Never unmount `/mnt/hdd` while RaspiBlitz services are running.
+RaspiBlitz can put application data and blockchain storage on different filesystems. Compare both resolved devices with the intended layout. If the blockchain path resolves to the OS disk unexpectedly, stop there and check the guest disk assignments before starting a sync.
 
 ## Install Raspiblitz
 
@@ -168,16 +134,12 @@ apt upgrade -y
 apt install sudo
 ```
 
-Now we need to download the Build SDCard Script from Rootzoll. The version can be customized as you like. The latest version (as of block time 768745) is the 1.9.
+Use the installer from the official RaspiBlitz release branch on the fresh Debian VM:
 
-```
-wget https://raw.githubusercontent.com/rootzoll/raspiblitz/v1.9/build_sdcard.sh
-```
-
-And run:
-
-```
-sudo bash build_sdcard.sh
+```bash
+installer=$(mktemp) &&
+  wget -O "$installer" https://raw.githubusercontent.com/raspiblitz/raspiblitz/v1.12/build_sdcard.sh &&
+  sudo bash "$installer" --github-user raspiblitz --branch v1.12 --fatpack 0 --wifi-region off --display headless
 ```
 
 The script now shows you information from your system. If all this is correct, start with "yes".

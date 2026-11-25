@@ -20,6 +20,14 @@ https://dietpi.com/survey/#benchmark
 * 5V/2.5A DC power input
 * Power-over-Ethernet (PoE) support (requires separate PoE HAT)
 
+### Raspberry Pi 5
+
+* Broadcom BCM2712, quad-core 64-bit Arm Cortex-A76.
+* The PCIe 2.0 ×1 connector can attach an M.2 NVMe SSD through a compatible adapter such as the Pimoroni NVMe Base. A USB or microSD system disk can be used alongside the NVMe blockchain data disk.
+* The RaspiBlitz hardware guide recommends a 2 TB SSD. Identify the system and data devices separately during setup.
+
+[Raspberry Pi 5 specifications](https://www.raspberrypi.com/products/raspberry-pi-5/) · [Pimoroni NVMe Base](https://shop.pimoroni.com/products/nvme-base) · [RaspiBlitz hardware guide](https://docs.raspiblitz.org/docs/setup/get-hardware)
+
 ### Raspberry Pi 4
 
 * SoC: Broadcom BCM2711B0 quad-core A72 (ARMv8-A) 64-bit @ 1.5GHz
