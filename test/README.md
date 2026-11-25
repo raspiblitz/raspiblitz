@@ -9,4 +9,5 @@ sudo apt install bats
 ```
 bats --verbose-run ./bonus.postgresql-13.bats
 bats --verbose-run ./bonus.postgresql-15.bats
+bats --verbose-run ./bonus.lnbits.bats
 ```

@@ -250,7 +250,11 @@ fi
 # https://www.postgresql.org/docs/current/backup-dump.html
 if [ "$command" = "backup" ] && [ "$db_name" != "" ]; then
   echo "*** BACKUP POSTGRESQL $db_name ***"
-  sudo -u postgres pg_dump $db_name >$backup_target/${backup_file}.sql || exit 1
+  tmp=$(mktemp "$backup_target/.pgdump.XXXXXXXX") || exit 1
+  trap 'rm -f -- "$tmp"' EXIT
+  backup_file="${backup_file}_${tmp##*.}"
+  sudo -u postgres pg_dump --dbname="$db_name" >"$tmp" && test -s "$tmp" &&
+    mv -T "$tmp" "$backup_target/${backup_file}.sql" || exit 1
   # Delete old backups (keep last 3 backups)
   sudo chown -R admin:admin $backup_target
   ls -tp $backup_target/*.sql | grep -v '/$' | tail -n +4 | tr '\n' '\0' | xargs -0 rm -- 2>/dev/null

@@ -1,5 +1,6 @@
 ## What's new in Version 1.12.2 of RaspiBlitz?
 
+- Update LNbits to v1.7.1. After updating, rotate wallet keys and funding credentials. [Upstream security update](https://news.lnbits.com/news/lnbits-1-7-0-security-update)
 - Update: BTCPayServer v2.3.9 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.3.9)
 
 ## What's new in Version 1.12.1 of RaspiBlitz?
