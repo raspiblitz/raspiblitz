@@ -446,6 +446,12 @@ always-use-proxy=true
   else
     echo "# The file ${CLCONF} is already present"
   fi
+  # honor clPublicPeers=off - remove announced/public addresses (outbound-only node)
+  if [ "${clPublicPeers}" == "off" ]; then
+    echo "# clPublicPeers=off -> remove announced/public addresses from ${CLCONF}"
+    sudo sed -i "/^addr=statictor/d" ${CLCONF}
+    sudo sed -i "/^announce-addr/d" ${CLCONF}
+  fi
   sudo chown -R bitcoin:bitcoin /mnt/hdd/app-data/.lightning
   sudo chown -R bitcoin:bitcoin /home/bitcoin/
 

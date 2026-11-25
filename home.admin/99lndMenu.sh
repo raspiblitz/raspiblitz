@@ -32,6 +32,12 @@ fi
 
 OPTIONS+=(NAME "Change Name/Alias of Node")
 
+if [ "${lndPublicPeers}" == "off" ]; then
+  OPTIONS+=(PUBPEERS "Public Peer Connectivity: OFF")
+else
+  OPTIONS+=(PUBPEERS "Public Peer Connectivity: ON")
+fi
+
 openChannels=$($lncli_alias listchannels 2>/dev/null | jq '.[] | length')
 if [ ${#openChannels} -gt 0 ] && [ ${openChannels} -gt 0 ]; then
   OPTIONS+=(SUEZ "Visualize channels")
@@ -111,6 +117,29 @@ case $CHOICE in
         sudo /home/admin/config.scripts/blitz.shutdown.sh reboot
         exit 0
       fi
+      ;;
+  PUBPEERS)
+      clear
+      echo
+      if [ "${lndPublicPeers}" == "off" ]; then
+        # enable public peer connectivity (default)
+        /home/admin/config.scripts/blitz.conf.sh set lndPublicPeers "on"
+        echo "# Public peer connectivity ENABLED"
+        echo "# The node is reachable and announced to the network over Tor."
+      else
+        # disable public peer connectivity - outbound-only node
+        /home/admin/config.scripts/blitz.conf.sh set lndPublicPeers "off"
+        echo "# Public peer connectivity DISABLED"
+        echo "# The node is now outbound-only: not reachable and not announced."
+        echo "# Existing channels keep working over the outbound connections."
+        echo "# New inbound channels cannot be opened TO this node."
+      fi
+      echo
+      echo "# Restarting LND to apply the change ..."
+      sudo systemctl restart ${netprefix}lnd
+      echo
+      echo "Press ENTER to return to main menu."
+      read key
       ;;
   SUEZ)
       clear

@@ -34,6 +34,22 @@ if [ "$1" == "prestart" ]; then
     sed -i "/^announce-addr=127.0.0.1/d" ${CLCONF}
   fi
 
+  # enforce/disable public peer connectivity (inbound connections)
+  # clPublicPeers=off in raspiblitz.conf -> node is outbound-only (not reachable, not announced)
+  if [ "${clPublicPeers}" == "off" ]; then
+    echo "# clPublicPeers=off -> remove announced/public addresses (outbound-only node)"
+    sed -i "/^addr=statictor/d" ${CLCONF}
+    sed -i "/^announce-addr/d" ${CLCONF}
+  else
+    # default: public peer connectivity over Tor enabled - restore announced address if missing
+    if [ "${runBehindTor}" == "on" ]; then
+      if [ $(grep -c "^addr=statictor" <${CLCONF}) -eq 0 ]; then
+        echo "# clPublicPeers is not off -> restore the announced Tor address"
+        echo "addr=statictor:127.0.0.1:9051/torport=${portprefix}9736" | tee -a ${CLCONF}
+      fi
+    fi
+  fi
+
   if [ $(grep -c "^clboss" <${CLCONF}) -gt 0 ]; then
     if [ ! -f /home/bitcoin/${netprefix}cl-plugins-enabled/clboss ] || [ "$(eval echo \$${netprefix}clboss)" != "on" ]; then
       echo "# The clboss plugin is not present but in config"
