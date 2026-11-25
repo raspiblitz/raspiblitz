@@ -228,6 +228,7 @@ EOF
     else
       echo "# Tor was not updated"
       tor --version
+      exit 1
     fi
   ;;
 
