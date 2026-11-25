@@ -554,6 +554,28 @@ By default a reboot is advised.
   esac
 }
 
+albyhubUpdate() {
+  whiptail --title " Update Alby Hub " \
+  --yes-button "Update" \
+  --no-button "Cancel" \
+  --yesno "Update Alby Hub to the latest upstream release now?" 9 62
+  if [ "$?" != "0" ]; then
+    exit 0
+  fi
+
+  clear
+  if /home/admin/config.scripts/bonus.albyhub.sh update; then
+    echo
+    echo "OK Alby Hub update done."
+  else
+    echo
+    echo "FAIL Alby Hub update failed."
+  fi
+  echo "PRESS ENTER to continue"
+  read key
+  exit 0
+}
+
 # quick call by parameter
 if [ "$1" == "github" ]; then
   patch all
@@ -606,6 +628,10 @@ fi
 
 if [ "${BTCPayServer}" == "on" ]; then
   OPTIONS+=(BTCPAY "Update BTCPayServer")
+fi
+
+if [ "${albyhub}" == "on" ]; then
+  OPTIONS+=(ALBYHUB "Update Alby Hub")
 fi
 
 if [ "${sphinxrelay}" == "on" ]; then
@@ -675,6 +701,9 @@ case $CHOICE in
     ;;
   BTCPAY)
     /home/admin/config.scripts/bonus.btcpayserver.sh update
+    ;;
+  ALBYHUB)
+    albyhubUpdate
     ;;
   SPHINX)
     /home/admin/config.scripts/bonus.sphinxrelay.sh update
