@@ -18,7 +18,7 @@ The only place RaspiBlitz generates wallet seed entropy itself (outside standard
 
 The only notable findings lie outside the entropy path:
 
-- a fail-closed interface break with pinned CLN ≥ v25.12 (wallet creation aborts — no weak wallet is ever produced)
+- a fail-closed interface break with pinned CLN ≥ v25.12 (wallet creation aborts — no weak wallet is ever produced). Fixed: `cl.hsmtool.sh` writes the `hsm_secret` itself with `cl.hsmsecret.py` in the legacy 32-byte format, byte-identical to `generatehsm` before v25.12, so seed words restore the same on-chain wallet on every CLN version, and checks it with the installed `lightning-hsmtool checkhsm`
 - an unverified runtime PyPI install of the entropy library
 - temporary plaintext seed files
 
