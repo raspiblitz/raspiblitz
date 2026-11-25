@@ -1,0 +1,40 @@
+Package: linux-image-rpi-test
+Status: install ok installed
+Priority: optional
+Section: kernel
+Architecture: all
+Version: 1.0
+Depends: linux-image-test-old (= 1.0)
+Description: Synthetic kernel metapackage for offline solver testing
+
+Package: linux-image-test-old
+Status: install ok installed
+Priority: optional
+Section: kernel
+Architecture: all
+Version: 1.0
+Description: Synthetic already installed kernel ABI
+
+Package: keep-me
+Status: install ok installed
+Priority: optional
+Section: misc
+Architecture: all
+Version: 1.0
+Description: Synthetic package that must not be removed
+
+Package: ordinary-update
+Status: install ok installed
+Priority: optional
+Section: misc
+Architecture: all
+Version: 1.0
+Description: Synthetic ordinary update
+
+Package: openssh-server
+Status: install ok installed
+Priority: optional
+Section: net
+Architecture: all
+Version: 1.0
+Description: Synthetic installed SSH package for the release upgrade argv

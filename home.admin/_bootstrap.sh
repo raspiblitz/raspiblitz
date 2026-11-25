@@ -561,11 +561,15 @@ if [ "${scenario}" != "ready" ] && [ "${baseimage}" = "raspios_arm64" ]; then
   if [ "${raspberryPiVersion}" != "" ] && [ ${raspberryPiVersion} -gt 4 ] && [ ${firmwareBuildNumber} -lt 1741626637 ]; then # Mon Mar 10 05:10:37 PM UTC 2025 (1741626637)
     echo "updating Firmware" >> $logFile
     echo "RaspberryPi 5 detected with old firmware (${firmwareBuildNumber}) ... do update." >> $logFile
-    apt-get update -y
-    apt-get upgrade -y
-    apt-get install -y rpi-eeprom
-    rpi-eeprom-update -a
-    systemInitReboot=1
+    # Request a firmware reboot only after APT and EEPROM staging both succeed.
+    if apt-get -o APT::Update::Error-Mode=any update -y &&
+       apt-get upgrade --no-remove --with-new-pkgs -y &&
+       apt-get --no-remove install -y rpi-eeprom &&
+       rpi-eeprom-update -a; then
+      systemInitReboot=1
+    else
+      echo "Firmware update failed; retry after checking APT and EEPROM status." >> "$logFile"
+    fi
   else
     echo "RaspberryPi Firmware no need for update." >> $logFile
   fi

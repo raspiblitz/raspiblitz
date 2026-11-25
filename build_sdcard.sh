@@ -382,10 +382,11 @@ for SOURCE in "${REQUIRED_SOURCES[@]}"; do
 done
 
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -y
-apt-get upgrade -f -y \
+apt-get -o APT::Update::Error-Mode=any update -y || exit 1
+# Allow new kernel ABI dependencies without allowing package removals.
+apt-get upgrade --no-remove --with-new-pkgs -f -y \
   -o Dpkg::Options::="--force-confdef" \
-  -o Dpkg::Options::="--force-confold"
+  -o Dpkg::Options::="--force-confold" || exit 1
 
 echo -e "\n*** SOFTWARE UPDATE ***"
 # based on https://raspibolt.org/system-configuration.html#system-update

@@ -88,10 +88,11 @@ echo "OK"
 if [ "$1" != "-quick" ]; then
   echo
   echo "update OS ..."
-  sudo apt-get update -y
-  sudo apt-get upgrade -o Dir::Etc::SourceList=/etc/apt/sources.list.d/security.list -y
-  sudo apt-get upgrade openssh-server -y
-  sudo dpkg --configure -a
+  sudo apt-get -o APT::Update::Error-Mode=any update -y || exit 1
+  # Allow new kernel ABI dependencies without allowing package removals.
+  sudo apt-get upgrade --no-remove --with-new-pkgs -o Dir::Etc::SourceList=/etc/apt/sources.list.d/security.list -y || exit 1
+  sudo apt-get upgrade --no-remove --with-new-pkgs openssh-server -y || exit 1
+  sudo dpkg --configure -a || exit 1
 else
   echo
   echo "skipping OS update ..."
