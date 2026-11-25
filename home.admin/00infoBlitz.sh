@@ -367,8 +367,7 @@ else
   appInfoLine=""
 
   # Electrum Server - electrs
-  fileFlagExists=$(sudo ls /mnt/hdd/app-storage/electrs/initial-sync.done 2>/dev/null | grep -c 'initial-sync.done')
-  if [ "${ElectRS}" == "on" ] && [ $fileFlagExists -eq 0 ]; then
+  if [ "${ElectRS}" = "on" ] && ! sudo -u electrs test -f /mnt/hdd/app-storage/electrs/initial-sync.verified; then
     error=""
     source <(/home/admin/config.scripts/bonus.electrs.sh status-sync 2>/dev/null)
     if [ ${#infoSync} -gt 0 ]; then
