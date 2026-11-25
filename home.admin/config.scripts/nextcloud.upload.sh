@@ -70,14 +70,16 @@ upload() {
   local remoteDirUrl="$nextcloudBackupServer/remote.php/dav/files/$nextcloudBackupUser/raspiblitz/"
   
   # checking if remote directory exists
-  local response
-  response=$(curl "${remoteDirUrl}" \
+  local httpcode
+  httpcode=$(curl "${remoteDirUrl}" \
     --user "${nextcloudBackupUser}:${nextcloudBackupPassword}" \
     --request PROPFIND \
-    --silent)
+    --silent \
+    --output /dev/null \
+    --write-out "%{http_code}")
 
   # if remote directory doesn't exist, we need to create it
-  if [[ "${response}" = *DAV\\Exception\\NotFound* ]]; then
+  if [[ "${httpcode}" != "207" ]]; then
     curl "${remoteDirUrl}" \
       --user "${nextcloudBackupUser}:${nextcloudBackupPassword}" \
       --request MKCOL \
@@ -87,9 +89,10 @@ upload() {
   if curl "${remoteDirUrl}" \
     --user "${nextcloudBackupUser}:${nextcloudBackupPassword}" \
     --upload-file "${filepath}" \
-    --silent;
+    --silent \
+    --fail;
   then
-    echo "File ${filepath} has been uploaded"
+    echo "uploadMsg='File ${filepath} has been uploaded'"
     echo "upload=1"
   else
     echo "err='File upload failed'"
