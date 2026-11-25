@@ -2,7 +2,7 @@
 
 # https://github.com/mempool/mempool
 
-pinnedVersion="v3.2.1"
+pinnedVersion="v3.3.0"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -13,9 +13,9 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-PGPsigner="wiz"
-PGPpubkeyLink="https://github.com/wiz.gpg"
-PGPpubkeyFingerprint="A394E332255A6173"
+PGPsigner="mononaut"
+PGPpubkeyLink="https://github.com/mononaut.gpg"
+PGPpubkeyFingerprint="BFD16BE592A9CD8D"
 
 source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
