@@ -1,0 +1,25 @@
+name: Bitcoin monitor RPC regressions
+on:
+  push:
+    branches: [v1.12]
+    paths: &monitor_paths
+      - home.admin/config.scripts/bitcoin.monitor.sh
+      - tests/bitcoin-monitor/**
+      - .github/workflows/test-bitcoin-monitor.yml
+  pull_request:
+    paths: *monitor_paths
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check shell syntax
+        run: |
+          bash -n home.admin/config.scripts/bitcoin.monitor.sh
+          bash -n tests/bitcoin-monitor/run.sh
+      - name: Exercise production monitor with local RPC processes
+        run: tests/bitcoin-monitor/run.sh
