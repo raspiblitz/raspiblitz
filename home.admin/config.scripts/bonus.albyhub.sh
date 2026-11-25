@@ -152,43 +152,60 @@ if [ "$1" = "install" ]; then
 
   echo "# Installing ${APPID} ..."
 
-  echo "# create user"
-  sudo adduser --system --group --shell /bin/bash --home /home/${APPID} ${APPID} || exit 1
-  sudo -u ${APPID} cp -r /etc/skel/. /home/${APPID}/
+  case "${cpu}" in
+    aarch64) arch=aarch64; digest=cabb3cc33bf69ebf2c43f79e39ba5b7f8a87121ffeaa4b668fdc063f2902091e ;;
+    x86_64) arch=x86_64; digest=3282b605d0a69669649525fd189b89c1660f3d77e4b57c16cd5a0a60923d3bb4 ;;
+    *) echo "error='Unsupported Alby Hub architecture'"; exit 1 ;;
+  esac
+  asset="albyhub-Server-Linux-${arch}.tar.bz2"
+  release="https://github.com/getAlby/hub/releases/download/v${VERSION}"
+  signer=5D92185938E6DBF893DCCC5BA5EABD8835092B08
+  stage=$(mktemp -d) || exit 1
+  trap 'rm -rf -- "$stage"' EXIT
+  cd "$stage" || exit 1
+  mkdir -m 700 gnupg || exit 1
+  get() { wget --https-only --timeout=30 --tries=2 -O "$1" "$2"; }
 
-  echo "# add use to special groups"
-  sudo /usr/sbin/usermod --append --groups lndadmin ${APPID}
-
-  # use new app user home as install directory
-  cd /home/${APPID}
-
-  # download Alby Hub
-  if [ ${cpu} == "aarch64" ]; then
-    echo "# Downloading Alby Hub for aarch64"
-    sudo wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v$VERSION/albyhub-Server-Linux-aarch64.tar.bz2
-  else
-    echo "# Downloading Alby Hub for x86"
-    sudo wget -O albyhub-server.tar.bz2 https://github.com/getAlby/hub/releases/download/v$VERSION/albyhub-Server-Linux-x86_64.tar.bz2
-  fi
-
-  # extract archives
-  sudo tar -xvf albyhub-server.tar.bz2
-  if [[ $? -ne 0 ]]; then
-    echo "# Failed to download & unpack Alby Hub"
-    echo "error='download & unpack failed'"
+  if ! get publisher.asc "https://raw.githubusercontent.com/getAlby/hub/v${VERSION}/scripts/keys/rolznz.asc" ||
+     ! get manifest.txt "$release/manifest.txt" || ! get manifest.txt.asc "$release/manifest.txt.asc" ||
+     ! gpg --homedir "$stage/gnupg" --batch --import publisher.asc ||
+     ! gpg --homedir "$stage/gnupg" --batch --status-fd 1 --verify manifest.txt.asc manifest.txt > signature.status ||
+     ! awk -v fp="$signer" '$1 == "[GNUPG:]" && $2 ~ /^(NEWSIG|EXPSIG|EXPKEYSIG|REVKEYSIG|BADSIG|ERRSIG)$/ { good=0 }
+       $1 == "[GNUPG:]" && $2 == "GOODSIG" { good=1 }
+       $1 == "[GNUPG:]" && $2 == "VALIDSIG" && good && ($3 == fp || $NF == fp) { ok=1 }
+       END { exit !ok }' signature.status ||
+     ! awk -v name="./$asset" -v hash="$digest" '$2 == name { count++; matched=($1 == hash) } END { exit !(count == 1 && matched) }' manifest.txt ||
+     ! get "$asset" "$release/$asset" ||
+     ! printf '%s  %s\n' "$digest" "$asset" | sha256sum --check --status; then
+    echo "error='Alby Hub release verification failed'"
     exit 1
   fi
 
-  # cleanup
-  sudo rm -f albyhub-server.tar.bz2
+  # Install only the two regular files shipped in the signed Linux archive.
+  tar -xOjf "$asset" ./lib/libldk_node.so > libldk_node.so &&
+    tar -xOjf "$asset" ./bin/albyhub > albyhub &&
+    test -s libldk_node.so && test -s albyhub || exit 1
 
-  # set permissions
-  sudo chmod -R 755 /home/${APPID}/lib
-  sudo chown -R root:root /home/${APPID}/lib
-
-  # make libs available
-  echo "/home/${APPID}/lib" | sudo tee /etc/ld.so.conf.d/${APPID}.conf
-  sudo ldconfig
+  if ! id -u "$APPID" >/dev/null 2>&1; then
+    sudo adduser --system --group --shell /bin/bash --home "/home/$APPID" "$APPID" || exit 1
+    sudo -u "$APPID" cp -r /etc/skel/. "/home/$APPID/" || exit 1
+  fi
+  sudo /usr/sbin/usermod --append --groups lndadmin "$APPID" || exit 1
+  # Stage on the destination filesystem so the binary and library appear together.
+  installDir=$(sudo mktemp -d /opt/.albyhub-install.XXXXXXXX) || exit 1
+  trap 'rm -rf -- "$stage"; sudo rm -rf -- "$installDir"' EXIT
+  sudo install -d -m 0755 "$installDir/bin" "$installDir/lib" &&
+    sudo install -m 0644 libldk_node.so "$installDir/lib/libldk_node.so" &&
+    sudo install -m 0755 albyhub "$installDir/bin/albyhub" &&
+    sudo chmod 0755 "$installDir" || exit 1
+  if ! sudo mv -T "$installDir" "/opt/$APPID" 2>/dev/null; then
+    # A completed installation of this same release can be retried safely.
+    if ! sudo cmp -s albyhub "/opt/$APPID/bin/albyhub" ||
+       ! sudo cmp -s libldk_node.so "/opt/$APPID/lib/libldk_node.so"; then
+      echo "error='Existing Alby Hub installation differs from the verified release'"
+      exit 1
+    fi
+  fi
 
   echo "# Install ${APPID} done"
   exit 0
@@ -214,10 +231,14 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   fi
 
   # check if code is already installed
-  isInstalled=$(compgen -u | grep -c ${APPID})
-  if [ "${isInstalled}" == "0" ]; then
-    echo "# Installing code base & dependencies first .."
+  # An older fatpack may already have the application in its service home.
+  if [ -x "/opt/$APPID/bin/albyhub" ] && [ -f "/opt/$APPID/lib/libldk_node.so" ]; then
+    appDir="/opt/$APPID"
+  elif [ -x "/home/$APPID/bin/albyhub" ] && [ -f "/home/$APPID/lib/libldk_node.so" ]; then
+    appDir="/home/$APPID"
+  else
     /home/admin/config.scripts/bonus.albyhub.sh install || { echo "error='install failed'"; exit 1; }
+    appDir="/opt/$APPID"
   fi
 
   echo "# ACTIVATE Alby-Hub"
@@ -255,9 +276,10 @@ RestartSec=1
 User=${APPID}
 ExecStartPre=-/home/admin/config.scripts/bonus.${APPID}.sh prestart
 EnvironmentFile=${ENVFILE}
-ExecStart=/home/${APPID}/bin/${APPID}
+Environment=LD_LIBRARY_PATH=${appDir}/lib
+ExecStart=${appDir}/bin/${APPID}
 # Hack to ensure Alby Hub never uses more than 90% CPU
-CPUQuota=90%sudo
+CPUQuota=90%
 
 [Install]
 WantedBy=multi-user.target
@@ -403,15 +425,18 @@ fi
 
 if [ "$1" = "uninstall" ]; then
 
-  isActive=$(sudo ls /etc/systemd/system/${APPID}.service 2>/dev/null | grep -c '${APPID}.service')
+  isActive=$(sudo ls /etc/systemd/system/${APPID}.service 2>/dev/null | grep -c "${APPID}.service")
   if [ "${isActive}" != "0" ]; then
     echo "# cannot uninstall if still 'on'"
     exit 1
   fi
 
   # remove libraries again
-  sudo rm /etc/ld.so.conf.d/albyhub.conf
-  sudo ldconfig
+  if [ -f /etc/ld.so.conf.d/albyhub.conf ]; then
+    sudo rm /etc/ld.so.conf.d/albyhub.conf && sudo ldconfig || exit 1
+  fi
+  sudo rm -f /opt/albyhub/bin/albyhub /opt/albyhub/lib/libldk_node.so
+  sudo rmdir --ignore-fail-on-non-empty /opt/albyhub/bin /opt/albyhub/lib /opt/albyhub 2>/dev/null || true
 
   # nuke user
   sudo userdel -rf ${APPID} 2>/dev/null
