@@ -100,7 +100,7 @@ if [ "$1" = "install" ] ; then
 
   # check if checksums are signed by lnd dev team
   sudo -u admin wget -N https://github.com/lightningnetwork/lnd/releases/download/v${lndVersion}/manifest-${PGPauthor}-v${lndVersion}.sig
-  sudo -u admin wget --no-check-certificate -N -O "pgp_keys.asc" ${PGPpkeys}
+  sudo -u admin wget -N -O "pgp_keys.asc" "${PGPpkeys}" || exit 1
   gpg --import --import-options show-only ./pgp_keys.asc
   fingerprint=$(sudo gpg --show-keys "pgp_keys.asc" 2>/dev/null | grep "${PGPcheck}" -c)
   if [ ${fingerprint} -lt 1 ]; then
