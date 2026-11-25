@@ -385,6 +385,11 @@ if [ "${scenario}" != "ready" ] ; then
 
 fi
 
+# Apply restored interface DNS settings before the first network check.
+if [ -x /sbin/resolvconf ] && [ "$(readlink -f /etc/resolv.conf)" = /run/resolvconf/resolv.conf ]; then
+  /sbin/resolvconf -u >> "${logFile}" 2>&1 || echo "resolvconf update failed; continuing network setup" >> "${logFile}"
+fi
+
 ###################################
 # WAIT LOOP: LOCALNET / INTERNET
 # after HDD > can contain WIFI conf
