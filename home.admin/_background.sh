@@ -234,13 +234,15 @@ do
   # check every 1min
   recheckSync=$(($counter % 60))
   if [ ${recheckSync} -eq 1 ] && [ "${chain}" == "main" ]; then
+    btc_peers_source=""
+    btc_peers_i2p=""
     source <(/home/admin/config.scripts/bitcoin.monitor.sh mainnet network)
     echo "Blockchain Sync Monitoring: peers=${btc_peers}"
-    if [ "${btc_peers}" == "0" ] && [ "${btc_running}" == "1" ]; then
+    if [ "${btc_peers_source}" = rpc ] && [ "${btc_peers}" == "0" ] && [ "${btc_running}" == "1" ]; then
       echo "Blockchain Sync Monitoring: ZERO PEERS DETECTED .. doing out-of-band kickstart"
       /home/admin/config.scripts/bitcoin.monitor.sh mainnet peer-kickstart
     fi
-    if [ "${i2pd}" == "on" ] && [ "${btc_peers_i2p}" == "0" ] && [ "${btc_running}" == "1" ]; then
+    if [ "${btc_peers_source}" = rpc ] && [ "${i2pd}" == "on" ] && [ "${btc_peers_i2p}" == "0" ] && [ "${btc_running}" == "1" ]; then
       echo "Blockchain Sync Monitoring: IP2TOR 0 peers .. doing out-of-band kickstart"
       /home/admin/config.scripts/bitcoin.monitor.sh mainnet peer-kickstart i2p
     fi
