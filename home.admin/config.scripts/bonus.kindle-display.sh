@@ -10,10 +10,10 @@ CONFIG_FILE=$APP_DATA_DIR/.env
 APP_ROOT_DIR=$HOME_DIR/kindle-display
 APP_SERVER_DIR=$APP_ROOT_DIR/server
 CRON_FILE=$APP_SERVER_DIR/cron.sh
-APP_VERSION=1.1.1
+APP_VERSION=1.3.0
 
 # pinned checksum of the released tarball; update together with APP_VERSION
-SHA256=48a54ae42d4d88cfe52834c2765379ef5ed2bfd9b41090d408e6e8118bd6e8e9
+SHA256=5b7c8dedf3eeafa3781a97ffa7243d84161110eb47e3912e4e5ca4ae75202b1a
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
