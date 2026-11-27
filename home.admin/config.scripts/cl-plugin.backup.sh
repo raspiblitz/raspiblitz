@@ -27,6 +27,30 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 plugin="backup"
 plugindir="/home/bitcoin/cl-plugins-available/plugins"
+dbPath="/home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3"
+backupPath="/home/bitcoin/${netprefix}lightningd.sqlite3.backup"
+
+# The plugin creates an independent snapshot beside the backup. Check that
+# filesystem rather than assuming the live database is on the same device.
+function check_backup_space() {
+  local destination="$1" availableKiB dbBytes=0 minimumKiB message
+  availableKiB=$(LC_ALL=C sudo df -Pk -- "${destination}" | awk 'NR==2 {print $4}')
+  if sudo test -f "${dbPath}"; then
+    dbBytes=$(sudo stat -Lc %s -- "${dbPath}") || return 1
+  fi
+  if ! [[ "${availableKiB}" =~ ^[0-9]+$ ]]; then
+    echo "Cannot determine available CLN backup space on ${destination}." >&2
+    return 1
+  fi
+  # Keep at least one database snapshot plus 200 MiB of operating headroom.
+  minimumKiB=$(( (dbBytes + 1023) / 1024 + 200 * 1024 ))
+  if (( availableKiB < minimumKiB )); then
+    message="Low CLN backup space on ${destination}: ${availableKiB} KiB available, need at least ${minimumKiB} KiB. Free space while preserving the recovery backup."
+    echo "${message}" >&2
+    logger -t raspiblitz-cl-backup -- "${message}"
+    return 1
+  fi
+}
 
 function install() {
   if [ ! -f "${plugindir}/${plugin}/${plugin}.py" ]; then
@@ -68,6 +92,8 @@ function install() {
 
 if [ "$1" = on ]; then
 
+  # Initialization moves an existing backup aside and creates a new file here.
+  check_backup_space "${backupPath%/*}" || exit 1
   install
 
   echo "# Stop the ${netprefix}lightningd.service"
@@ -168,10 +194,8 @@ elif
   [ "$1" = backup-compact ]
 then
   # https://github.com/lightningd/plugins/tree/master/backup#performing-backup-compaction
-  dbPath="/home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3"
-  backupPath="/home/bitcoin/${netprefix}lightningd.sqlite3.backup"
-
   if sudo ls "${dbPath}" >/dev/null; then
+    check_backup_space "${backupPath}" || exit 1
     dbSize=$(sudo du -m "${dbPath}" | awk '{print $1}')
     echo "$dbSize MB $dbPath"
     backupSize=$(sudo du -m "${backupPath}" | awk '{print $1}')
