@@ -113,7 +113,7 @@ SH
 }
 
 @test "a Deb822 source pointing at the archive is preserved" {
-  echo 'URIs: https://repo.i2pd.xyz/debian' >"$box/apt/sources.list.d/existing.sources"
+  printf 'Types: deb\nURIs:\n https://repo.i2pd.xyz/debian\nSuites: trixie\n' >"$box/apt/sources.list.d/existing.sources"
   run bash "$box/installer" install
   [ "$status" -ne 0 ]
   [[ "$output" == *existing.sources* ]]

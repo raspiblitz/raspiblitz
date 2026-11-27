@@ -87,7 +87,15 @@ function add_repo (
   local other
   for other in /etc/apt/sources.list /etc/apt/sources.list.d/*.{list,sources}; do
     [ -f "$other" ] && [ "$other" != "$list" ] || continue
-    if grep -Eiq '^[[:space:]]*(deb(-src)?[[:space:]]|URIs:).*https?://repo\.i2pd\.xyz([/:[:space:]]|$)' "$other"; then
+    if awk '
+      /^[[:space:]]*#/ {next}
+      {
+        line=tolower($0)
+        if (line !~ /^[[:space:]]/) uris=(line ~ /^uris:/)
+        if ((uris || line ~ /^[[:space:]]*deb(-src)?[[:space:]]/) && line ~ /https?:\/\/repo\.i2pd\.xyz([\/:[:space:]]|$)/) found=1
+      }
+      END {exit !found}
+    ' "$other"; then
       echo "# Existing i2pd APT entry in $other. Verify it manually to avoid conflicting Signed-By values." >&2
       return 1
     fi
