@@ -403,6 +403,15 @@ if [ "$action" = "status" ]; then
                         echo "#    * WIFI config copied to RAMDISK"
                     fi
 
+                    # The legacy format needs interactive NetworkManager setup. Only expose its presence.
+                    if [ -f "${mountPath}/app-data/wpa_supplicant.conf" ] && [ -s "${mountPath}/app-data/wpa_supplicant.conf" ] &&
+                       [ ! -L "${mountPath}/app-data/wpa_supplicant.conf" ] &&
+                       [ -z "$(find "${mountPath}/app-data/wifi" -maxdepth 1 -type f -print -quit 2>/dev/null)" ]; then
+                        touch /var/cache/raspiblitz/hdd-inspect/legacy-wifi
+                    else
+                        rm -f /var/cache/raspiblitz/hdd-inspect/legacy-wifi
+                    fi
+
                     # make copy of SSH keys to RAMDISK (if available)
                     cp -a ${mountPath}/app-data/sshd /var/cache/raspiblitz/hdd-inspect 2>/dev/null
                     cp -a ${mountPath}/app-data/ssh-root /var/cache/raspiblitz/hdd-inspect 2>/dev/null

@@ -364,11 +364,11 @@ if [ "${scenario}" != "ready" ] ; then
   # from former RaspiBlitz
 
   # check if there is a WIFI configuration to backup or restore
-  if [ -d "/var/cache/raspiblitz/hdd-inspect/wifi" ]; then
-    echo "WIFI RESTORE from /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf" >> $logFile
+  if [ -d "/var/cache/raspiblitz/hdd-inspect/wifi" ] || [ -f "/var/cache/raspiblitz/hdd-inspect/legacy-wifi" ]; then
+    echo "Checking inspected Wi-Fi settings" >> $logFile
     /home/admin/config.scripts/internet.wifi.sh backup-restore >> $logFile
   else
-    echo "No WIFI RESTORE because no /var/cache/raspiblitz/hdd-inspect/wpa_supplicant.conf" >> $logFile
+    echo "No Wi-Fi backup found during disk inspection" >> $logFile
   fi
 
   ################################

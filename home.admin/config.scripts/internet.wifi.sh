@@ -107,7 +107,8 @@ if [ "$1" == "backup-restore" ]; then
   fi
   echo "memRestoreConfigAvailable=${memRestoreConfigAvailable}"
 
-  if [ ${wifiIsSet} -eq 1 ]; then
+  restorePending=/etc/NetworkManager/system-connections/.raspiblitz-restore-pending
+  if [ ${wifiIsSet} -eq 1 ] && [ ! -f "$restorePending" ]; then
     # BACKUP latest wifi settings to HDD if available
     if [ ${hddBackupLocationAvailable} -eq 1 ]; then
       sudo cp -a /etc/NetworkManager/system-connections/* /mnt/hdd/app-data/wifi
@@ -118,32 +119,45 @@ if [ "$1" == "backup-restore" ]; then
       echo "wifiBackup=0"
     fi
     exit 0
-  elif [ ${hddRestoreConfigAvailable} -eq 1 ]; then
-    # RESTORE backuped wifi settings from HDD to RaspiBlitz
-    echo "# restoring old wifi settings from HDD ... wait 15 secounds to connect"
-    sudo cp -a /mnt/hdd/app-data/wifi/* /etc/NetworkManager/system-connections/
-    sudo chmod 600 /etc/NetworkManager/system-connections/*
-    sudo nmcli radio wifi on
+  elif [ ${hddRestoreConfigAvailable} -eq 1 ] || [ ${memRestoreConfigAvailable} -eq 1 ]; then
+    restoreFrom=/var/cache/raspiblitz/hdd-inspect/wifi
+    if [ ${hddRestoreConfigAvailable} -eq 1 ]; then
+      restoreFrom=/mnt/hdd/app-data/wifi
+    fi
+    if ! sudo python3 /home/admin/config.scripts/internet.wifi.restore.py "$restoreFrom" ||
+       ! sudo nmcli radio wifi on; then
+      echo "wifiRestore=0"
+      echo "wifiBackup=0"
+      exit 1
+    fi
     sleep 10
-    sudo systemctl restart NetworkManager
+    if ! sudo systemctl restart NetworkManager; then
+      echo "wifiRestore=0"
+      echo "wifiBackup=0"
+      exit 1
+    fi
     sleep 4
+    if LC_ALL=C nmcli -t -f TYPE,STATE device status | grep -Fxq 'wifi:connected'; then
+      echo "wifiActive=1"
+    else
+      echo "wifiActive=0"
+    fi
     echo "wifiRestore=1"
     echo "wifiBackup=0"
     exit 0
-  elif [ ${memRestoreConfigAvailable} -eq 1 ]; then
-    # RESTORE backuped wifi settings from MEMCOPY to RaspiBlitz
-    echo "# restoring old wifi settings from MEMCOPY ... wait 15 secounds to connect"
-    sudo cp -a /var/cache/raspiblitz/hdd-inspect/wifi/* /etc/NetworkManager/system-connections/
-    sudo chmod 600 /etc/NetworkManager/system-connections/*
-    sudo nmcli radio wifi on
-    sleep 10
-    sudo systemctl restart NetworkManager
-    sleep 4
-    echo "wifiRestore=1"
+  elif [ -f "$restorePending" ]; then
+    echo "wifiRestore=0"
     echo "wifiBackup=0"
-    exit 0
+    echo "# Wi-Fi restore was interrupted. Reconnect the original backup and retry."
+    exit 1
   else
-    # noting to backup or restore
+    # Old releases saved wpa_supplicant settings, which NetworkManager cannot load as a keyfile.
+    if [ -f /var/cache/raspiblitz/hdd-inspect/legacy-wifi ] ||
+       { [ -f /mnt/hdd/app-data/wpa_supplicant.conf ] && [ -s /mnt/hdd/app-data/wpa_supplicant.conf ] && [ ! -L /mnt/hdd/app-data/wpa_supplicant.conf ]; }; then
+      echo "wifiRestoreNeedsSetup=1"
+      echo "# Legacy Wi-Fi backup found. Connect Ethernet or run sudo nmtui on the local console."
+      echo "# Check the WLAN country if the adapter is unavailable."
+    fi
     echo "wifiRestore=0"
     echo "wifiBackup=0"
     exit 0

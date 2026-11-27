@@ -257,6 +257,12 @@ elif [ "${eventID}" == "shutdown" ]; then
 Shutting down - please wait.
 " 5 35
 
+elif [[ "$eventID" = noDHCP || "$eventID" = noIP-LAN || "$eventID" = noIP-WIFI ]] &&
+     [ -f /var/cache/raspiblitz/hdd-inspect/legacy-wifi ]; then
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "An older Wi-Fi backup was found.
+Connect Ethernet, or log in on the local console and run sudo nmtui to configure Wi-Fi.
+If the radio is unavailable, check the WLAN country." 9 56
+
 elif [ "${eventID}" == "noDHCP" ]; then
 
     # this event is mostly for LCD/HDMI display
