@@ -352,12 +352,12 @@ if [ "${lndNode}" != "${choice}" ]; then
       whiptail --title "LND Wallet" --msgbox "Wallet setup failed. Check the LND service log before retrying." 8 65
       exit 1
     fi
-    sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet delete
+    sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet delete || exit 1
     if [ "${testnet}" == "on" ]; then
-      /home/admin/config.scripts/lnd.install.sh on testnet initwallet
+      /home/admin/config.scripts/lnd.install.sh on testnet initwallet || exit 1
     fi
     if [ "${signet}" == "on" ]; then
-      /home/admin/config.scripts/lnd.install.sh on signet initwallet
+      /home/admin/config.scripts/lnd.install.sh on signet initwallet || exit 1
     fi
   else
     echo "# turning OFF"
@@ -504,8 +504,8 @@ if [ "${testnet}" != "${choice}" ] || \
     /home/admin/config.scripts/bitcoin.install.sh on testnet
     /home/admin/config.scripts/bitcoin.install.sh on signet
     if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
-      /home/admin/config.scripts/lnd.install.sh on testnet initwallet
-      /home/admin/config.scripts/lnd.install.sh on signet initwallet
+      /home/admin/config.scripts/lnd.install.sh on testnet initwallet || exit 1
+      /home/admin/config.scripts/lnd.install.sh on signet initwallet || exit 1
     fi
     if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
       /home/admin/config.scripts/cl.install.sh on testnet

@@ -286,11 +286,11 @@ if [ "${lightning}" == "lnd" ]; then
     echo "# WALLET --> NEW" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (NEW)"
     unset err errMore seedwords seedwords6x4
-    if walletInfo=$(/home/admin/config.scripts/lnd.initwallet.py new mainnet "${passwordC}"); then
+    if walletInfo=$(/home/admin/config.scripts/lnd.initwallet.py new mainnet "${passwordC}" --stage-seed); then
       source /dev/stdin <<< "${walletInfo}"
     fi
     if [[ -z ${seedwords} || -z ${seedwords6x4} ]]; then
-      err="LND did not return a successful wallet creation result"
+      err="Wallet creation failed. Check LND and preserve any seedwords-mainnet.pending on the data drive."
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-new" "lnd.initwallet.py new returned error" "/home/admin/config.scripts/lnd.initwallet.py new mainnet ... --> ${err} + ${errMore}" ${logFile}
       /home/admin/_cache.sh set state "error"
       /home/admin/_cache.sh set message "setup: lnd wallet NEW failed"
@@ -303,8 +303,8 @@ if [ "${lightning}" == "lnd" ]; then
 
     # write created seedwords into SETUPFILE to be displayed to user on final setup later
     echo "# writing seed info to setup file" >> ${logFile}
-    echo "seedwordsNEW='${seedwords}'" >> ${setupFile}
-    echo "seedwords6x4NEW='${seedwords6x4}'" >> ${setupFile}
+    printf "seedwordsNEW='%s'\nseedwords6x4NEW='%s'\n" "${seedwords}" "${seedwords6x4}" >> "${setupFile}" &&
+      sync -f "${setupFile}" && rm -- /mnt/hdd/app-data/lnd/seedwords-mainnet.pending || exit 13
 
   fi
 

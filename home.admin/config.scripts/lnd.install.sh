@@ -426,20 +426,20 @@ alias ${netprefix}lndconf=\"sudo nano /mnt/hdd/app-data/lnd/${netprefix}lnd.conf
       else
         passwordC="raspiblitz"
       fi
-      if ! walletInfo=$(sudo /home/admin/config.scripts/lnd.initwallet.py new "${CHAIN}" "${passwordC}"); then
-        echo "# LND ${CHAIN} wallet creation failed. Check the LND service log." >&2
-        exit 1
-      fi
-      unset seedwords seedwords6x4
-      source /dev/stdin <<< "${walletInfo}"
-      if [[ -z ${seedwords} || -z ${seedwords6x4} ]]; then
-        echo "# LND did not return recovery words." >&2
-        exit 1
-      fi
       seedDir="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}"
-      sudo mkdir -p "${seedDir}" || exit 1
-      printf "seedwords='%s'\nseedwords6x4='%s'\n" "${seedwords}" "${seedwords6x4}" |
-        sudo install -m 600 /dev/stdin "${seedDir}/seedwords.info" || exit 1
+      pendingSeed="/mnt/hdd/app-data/lnd/seedwords-${CHAIN}.pending"
+      if sudo test -e "${seedDir}/seedwords.info" || sudo test -L "${seedDir}/seedwords.info"; then
+        echo "# Recovery words already exist. Check the wallet backup before retrying." >&2
+        exit 1
+      fi
+      if ! sudo /home/admin/config.scripts/lnd.initwallet.py new "${CHAIN}" "${passwordC}" --stage-seed >/dev/null; then
+        echo "# Wallet setup failed. Check the LND service log. Preserve ${pendingSeed} if it exists." >&2
+        exit 1
+      fi
+      sudo -u bitcoin mkdir -p "${seedDir}" || exit 1
+      # Publish the fsynced record without replacing an existing backup.
+      sudo ln -T -- "${pendingSeed}" "${seedDir}/seedwords.info" &&
+        sudo sync -f "${seedDir}" && sudo rm -- "${pendingSeed}" || exit 1
   fi
 
   if [ "${CHAIN}" != "mainnet" ]; then
@@ -520,7 +520,9 @@ if [ "$1" = "display-seed" ]; then
   seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
   echo "# seedwordFileExists(${seedwordFileExists})"
   if [ "${seedwordFileExists}" == "1" ]; then
-    source ${seedwordFile}
+    # Older versions wrote the same two quoted fields. Read them as data.
+    seedwords=$(sed -n "s/^seedwords='\([a-z ,]*\)'$/\1/p" "${seedwordFile}")
+    seedwords6x4=$(sed -n "/^seedwords6x4='/,\$p" "${seedwordFile}" | sed "1s/^seedwords6x4='//;\$s/'\$//")
   fi
   if [ "${seedwords}" != "" ]; then
     #echo "# seedwords(${seedwords})"
