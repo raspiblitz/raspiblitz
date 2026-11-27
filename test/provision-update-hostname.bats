@@ -8,7 +8,15 @@ setup() {
   setupFile="$root/setup"
   : > "$setupFile"
   export PATH="$root/bin:$PATH"
-  printf '#!/bin/sh\necho "%s"\n' "$root/disk_data" > "$root/bin/findmnt"
+  cat > "$root/bin/findmnt" <<EOF
+#!/bin/sh
+case "\$*" in
+  *"output FSROOT"*) echo / ;;
+  *"output SOURCE"*) echo /dev/fixture ;;
+  *) echo "$root/disk_data" ;;
+esac
+EOF
+  printf '#!/bin/sh\necho "%s"\n' "$(stat -c '%Hd:%Ld' "$conf")" > "$root/bin/lsblk"
   printf '#!/bin/sh\necho "$2" >&2\n' > "$root/helpers/blitz.error.sh"
   printf '#!/bin/sh\nexec "$@"\n' > "$root/bin/sudo"
   printf '#!/bin/sh\nexit 0\n' > "$root/cache"
@@ -78,4 +86,12 @@ precheck() {
   [ "$status" -ne 0 ]
   [[ "$output" == *data-not-mounted* ]]
   [ "$(cat "$root/outside")" = 'lnd=on' ]
+}
+
+@test "a different device mounted at the correct path is refused" {
+  printf '#!/bin/sh\necho 99:1234\n' > "$root/bin/lsblk"
+  run precheck
+  [ "$status" -ne 0 ]
+  [[ "$output" == *wrong-data-device* ]]
+  [ "$(cat "$conf")" = '# Existing node settings' ]
 }

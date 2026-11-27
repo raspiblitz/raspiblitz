@@ -45,6 +45,16 @@ if [ -z "${dataMount}" ] || [ "${resolvedConfig}" != "${dataMount}/app-data/rasp
   /home/admin/config.scripts/blitz.error.sh _provision.update.sh "data-not-mounted" "Check the DATA mount for ${configFile}" "" ${logFile}
   exit 1
 fi
+# blitz.data.sh records the selected block device in fstab. Verify that the
+# file really lives on that device, including when another mount covers it.
+expectedSource=$(findmnt --fstab --evaluate --first-only --noheadings --output SOURCE --mountpoint "${dataMount}")
+expectedDevice=$(lsblk --nodeps --noheadings --raw --output MAJ:MIN -- "${expectedSource}" 2>/dev/null)
+configDevice=$(stat -L -c '%Hd:%Ld' -- "${resolvedConfig}")
+fsRoot=$(findmnt --first-only --noheadings --output FSROOT --target "${resolvedConfig}")
+if [ -z "${expectedDevice}" ] || [ "${configDevice}" != "${expectedDevice}" ] || [ "${fsRoot}" != "/" ]; then
+  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "wrong-data-device" "Check the configured and mounted DATA device at ${dataMount}" "" ${logFile}
+  exit 1
+fi
 configFile="${resolvedConfig}"
 
 # Read the saved name separately from the setup session's proposed name.
