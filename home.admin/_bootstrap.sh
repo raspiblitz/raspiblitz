@@ -389,6 +389,7 @@ fi
 # WAIT LOOP: LOCALNET / INTERNET
 # after HDD > can contain WIFI conf
 ###################################
+waiting_for_dns=0
 while true; do
 
   # get latest network info directly
@@ -413,6 +414,17 @@ while true; do
       /home/admin/_cache.sh set state "noIP-WIFI"
       /home/admin/_cache.sh set message "WIFI Settings not working"
     fi
+  elif [ "${scenario}" != "ready" ] &&
+       { [ "$waiting_for_dns" = 1 ] || {
+           [ -L /etc/resolv.conf ] && [ "$(readlink -m /etc/resolv.conf)" = /run/resolvconf/resolv.conf ] &&
+           ! grep -Eq '^[[:space:]]*nameserver[[:space:]]+[^#;[:space:]]+' /etc/resolv.conf 2>/dev/null;
+         }; } &&
+       ! timeout 3 getent ahosts deb.debian.org >/dev/null; then
+    # Numeric probes can pass while APT cannot resolve hosts. After detecting this,
+    # retry the lookup so an unusable nameserver cannot clear the setup warning.
+    waiting_for_dns=1
+    /home/admin/_cache.sh set state "noInternet"
+    /home/admin/_cache.sh set message "Check resolvconf DNS settings"
   elif [ "${online}" = "0" ]; then
     # display user that internet is missing (needed for firmware updates)
     echo "Waiting for internet ..." >> $logFile
