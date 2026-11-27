@@ -162,8 +162,9 @@ elif [ "${eventID}" == "walletlocked" ] && [ "${mode}" == "lcd" ]; then
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Lightning Wallet Locked
 ssh admin@${internet_localip}
-Use your Password A
-" 7 41
+Log in with Password A.
+Unlock the wallet with Password C.
+" 8 41
 
 elif [ "${eventID}" == "copytarget" ] && [ "${mode}" == "lcd" ]; then
 
