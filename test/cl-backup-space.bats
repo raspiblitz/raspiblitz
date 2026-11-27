@@ -20,8 +20,20 @@ SH
   cat >bin/df <<'SH'
 #!/bin/bash
 echo "${!#}" >>df-target
+if [[ ${!#} = /tmp ]]; then AVAILABLE=${TEMP_AVAILABLE:-$AVAILABLE}; fi
+if [[ -f installed ]]; then AVAILABLE=3072; fi
 printf 'Filesystem 1024-blocks Used Available Capacity Mounted on\n'
 printf 'fixture 1048576 1000 %s 50%% /\n' "$AVAILABLE"
+SH
+  cat >bin/stat <<'SH'
+#!/bin/bash
+if [[ $2 = %d ]]; then
+  if [[ ${!#} = /tmp ]]; then echo "${TEMP_DEVICE:-2}"; else echo 1; fi
+elif [[ ${DENY_STAT:-0} = 1 ]]; then
+  exit 1
+else
+  exec /usr/bin/stat "$@"
+fi
 SH
   cat >bin/du <<'SH'
 #!/bin/bash
@@ -71,4 +83,51 @@ SH
   run bash backup.sh backup-compact mainnet
   [ "$status" -eq 0 ]
   [ "$(cat rpc)" = backup-compact ]
+}
+
+@test "compaction refuses a full temporary device and simultaneous copies on a shared device" {
+  export BACKUP_MIB=202 AVAILABLE=205824 TEMP_AVAILABLE=3072
+  run bash backup.sh backup-compact mainnet
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"Low CLN backup space on /tmp"* ]]
+  export TEMP_DEVICE=1
+  run bash backup.sh backup-compact mainnet
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"need at least 206848 KiB"* ]]
+  [ "$(cat bitcoin/lightningd.sqlite3.backup)" = 'recovery fixture' ]
+  [ ! -e rpc ]
+}
+
+@test "an unreadable database size never falls back to the empty-database threshold" {
+  export AVAILABLE=205000 DENY_STAT=1
+  run bash backup.sh on mainnet
+  [ "$status" -eq 1 ]
+  [ ! -e df-target ]
+  [ ! -e unexpected ]
+  run bash backup.sh backup-compact mainnet
+  [ "$status" -eq 1 ]
+  [ ! -e df-target ]
+}
+
+@test "an archived disabled backup is skipped and an active missing backup is reported" {
+  mv bitcoin/lightningd.sqlite3.backup bitcoin/lightningd.sqlite3.backup.archived
+  run bash backup.sh backup-compact mainnet
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"No active CLN file backup"* ]]
+  touch bitcoin/.lightning/bitcoin/backup.lock
+  run bash backup.sh backup-compact mainnet
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"recovery file is missing"* ]]
+  [ "$(cat bitcoin/lightningd.sqlite3.backup.archived)" = 'recovery fixture' ]
+}
+
+@test "an installation that consumes the available space is stopped before backup rotation" {
+  export AVAILABLE=300000
+  sed '/^function install() {/,/^}/c\function install() { touch installed; }' backup.sh >install-fixture.sh
+  run bash install-fixture.sh on mainnet
+  [ "$status" -eq 1 ]
+  [ -e installed ]
+  [[ "$output" == *"Low CLN backup space"* ]]
+  [ "$(cat bitcoin/lightningd.sqlite3.backup)" = 'recovery fixture' ]
+  [ ! -e unexpected ]
 }
