@@ -134,26 +134,29 @@ if [[ ${activeBranch} != pr* ]]; then
 else
   echo "# SKIP - git pull on PR-Branches"
 fi
-cd ..
+cd /home/admin || exit 1
 echo "# COPYING from GIT-Directory to /home/admin/"
 echo "# - basic admin files"
-sudo rm -f *.sh
-sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
-sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin 2>/dev/null
-sudo -u admin chmod 755 *.sh
+sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin || exit 1
+sudo -u admin find /home/admin/raspiblitz/home.admin -maxdepth 1 -type f \
+  -name '*.*' ! -name '.*' -exec cp -t /home/admin -- {} + || exit 1
+for script in *.sh; do
+  if [ ! -f "/home/admin/raspiblitz/home.admin/$script" ]; then
+    sudo rm -f -- "$script" || exit 1
+  fi
+done
+sudo -u admin chmod 755 -- *.sh || exit 1
 echo "# - asset directory"
-sudo rm -rf assets
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/assets /home/admin/assets
+sudo rm -rf assets || exit 1
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/assets /home/admin/assets || exit 1
 echo "# - config.scripts directory"
-sudo rm -rf /home/admin/config.scripts
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/config.scripts 
-sudo -u admin chmod 755 /home/admin/config.scripts/*.sh
-sudo -u admin chmod 755 /home/admin/config.scripts/*.py
+sudo rm -rf /home/admin/config.scripts || exit 1
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/config.scripts || exit 1
+sudo -u admin chmod 755 /home/admin/config.scripts/*.sh /home/admin/config.scripts/*.py || exit 1
 echo "# - setup.scripts directory"
-sudo rm -rf /home/admin/setup.scripts
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/setup.scripts
-sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh
-sudo -u admin chmod 755 /home/admin/config.scripts/*.py
+sudo rm -rf /home/admin/setup.scripts || exit 1
+sudo -u admin cp -R /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/setup.scripts || exit 1
+sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh || exit 1
 echo "# ******************************************"
 echo "# OK - shell scripts and assets are synced"
 echo "# Reboot recommended"

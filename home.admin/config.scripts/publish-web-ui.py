@@ -5,6 +5,7 @@ import os
 from html.parser import HTMLParser
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 from urllib.parse import unquote, urlsplit
@@ -63,10 +64,10 @@ def publish(source, live):
         # hidden entries without following links to other locations.
         for entry in live.glob(".*"):
             target = staged / entry.name
-            if not entry.is_symlink() and entry.is_dir():
-                shutil.copytree(entry, target, symlinks=True)
-            else:
-                shutil.copy2(entry, target, follow_symlinks=False)
+            subprocess.run(["cp", "-a", "--", entry, target], check=True)
+        old_stat = live.stat()
+        os.chown(staged, old_stat.st_uid, old_stat.st_gid)
+        shutil.copystat(live, staged)
         # Linux renameat2(RENAME_EXCHANGE) leaves the old directory in the
         # staging area for cleanup. Even a failed swap leaves the live UI intact.
         libc = ctypes.CDLL(None, use_errno=True)
@@ -78,6 +79,20 @@ def publish(source, live):
 
 if __name__ == "__main__":
     try:
-        publish(Path(sys.argv[1]), Path(sys.argv[2]))
-    except (OSError, ValueError, AttributeError) as error:
+        live = Path(sys.argv[2])
+        publish(Path(sys.argv[1]), live)
+        if len(sys.argv) == 5:
+            # Flush the tree and directory exchange before recording the commit.
+            subprocess.run(["sync", "-f", live.parent], check=True)
+            marker = Path(sys.argv[3])
+            with tempfile.NamedTemporaryFile(mode="w", dir=marker.parent, delete=False) as stamp:
+                stamp.write(sys.argv[4] + "\n")
+                stamp.flush()
+                os.fsync(stamp.fileno())
+            try:
+                os.replace(stamp.name, marker)
+                subprocess.run(["sync", "-f", marker.parent], check=True)
+            finally:
+                Path(stamp.name).unlink(missing_ok=True)
+    except (OSError, ValueError, AttributeError, subprocess.CalledProcessError) as error:
         sys.exit(f"WebUI publication failed: {error}")

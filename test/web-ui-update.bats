@@ -38,5 +38,14 @@ SH
   run bash updater update
   [ "$status" -eq 0 ]
   [ -s www/public/assets/app.js ]
-  [ ! -e www/.raspiblitz-webui-update-pending ]
+  [ "$(cat www/.raspiblitz-webui-revision)" = "$(git -C web rev-parse HEAD)" ]
+}
+
+@test "a detached legacy install is rebuilt at its pinned commit" {
+  git -C web checkout -q --detach HEAD
+  pinned=$(git -C web rev-parse HEAD)
+  run bash updater update
+  [ "$status" -eq 0 ]
+  [ "$(cat www/.raspiblitz-webui-revision)" = "$pinned" ]
+  [ "$(git -C web rev-parse HEAD)" = "$pinned" ]
 }

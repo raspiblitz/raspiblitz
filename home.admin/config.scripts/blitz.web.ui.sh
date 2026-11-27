@@ -44,14 +44,15 @@ fi
 # An install, update and uninstall all change the same checkout and served tree.
 exec 9>/run/raspiblitz-webui.lock || exit 1
 flock -x 9 || exit 1
-pending=/var/www/.raspiblitz-webui-update-pending
+revision=/var/www/.raspiblitz-webui-revision
 publish_script="$(dirname "$(realpath "$0")")/publish-web-ui.py"
 
 build_and_publish() {
+  local head
+  head=$(git rev-parse --verify HEAD) || return 1
   npm install || { echo "error='npm install failed'"; return 1; }
   npm run build || { echo "error='npm run build failed'"; return 1; }
-  python3 "$publish_script" build /var/www/public || return 1
-  rm -f -- "$pending"
+  python3 "$publish_script" build /var/www/public "$revision" "$head"
 }
 
 ###################
@@ -143,7 +144,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# using lastest code in branch"
   fi
   echo "# Compile WebUI"
-  touch "$pending" || exit 1
   /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
   build_and_publish || exit 1
 
@@ -159,16 +159,20 @@ if [ "$1" = "update" ]; then
   if [ -d /home/blitzapi/blitz_web ]; then
     echo "# Update WebUI"
     cd /home/blitzapi/blitz_web || exit 1
-    currentBranch=$(git symbolic-ref --short HEAD) || exit 1
+    currentBranch=$(git symbolic-ref -q --short HEAD)
     echo "# updating local repo ..."
     oldCommit=$(git rev-parse HEAD) || exit 1
-    git fetch origin || exit 1
-    newCommit=$(git rev-parse --verify "refs/remotes/origin/${currentBranch}^{commit}") || exit 1
-    if [ "$oldCommit" != "$newCommit" ] || [ -e "$pending" ] || [ ! -s /var/www/public/index.html ]; then
-      # The checkout can advance before the bundle is built. Retry that commit
-      # on the next update if compilation or publication failed.
-      touch "$pending" || exit 1
+    newCommit=$oldCommit
+    if [ -n "$currentBranch" ]; then
+      git fetch origin || exit 1
+      newCommit=$(git rev-parse --verify "refs/remotes/origin/${currentBranch}^{commit}") || exit 1
+    fi
+    if [ "$oldCommit" != "$newCommit" ]; then
       git reset --hard "$newCommit" || exit 1
+    fi
+    # The checkout can advance before the UI is published. Unstamped legacy
+    # installs are rebuilt once, including checkouts pinned to a detached HEAD.
+    if [ ! -r "$revision" ] || [ "$(< "$revision")" != "$newCommit" ] || [ ! -s /var/www/public/index.html ]; then
       build_and_publish || exit 1
     else
       echo "# no code changes"
@@ -190,6 +194,6 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# UNINSTALL WebUI"
   sudo rm -rf /root/blitz_web /home/blitzapi/blitz_web /var/www/public/*
-  rm -f -- "$pending"
+  rm -f -- "$revision"
   exit 0
 fi
