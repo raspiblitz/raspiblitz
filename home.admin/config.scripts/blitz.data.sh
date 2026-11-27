@@ -26,6 +26,20 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
     exit 1
 fi
 
+# Only offer reuse for the on-disk layout the clean operation can preserve.
+has_reusable_blocks() {
+    local root=$1 blocks="$1/app-storage/bitcoin/blocks" directory file
+    for directory in "$root/app-storage" "$root/app-storage/bitcoin" "$blocks"; do
+        [ -d "$directory" ] && [ ! -L "$directory" ] || return 1
+    done
+    for file in "$blocks"/blk[0-9][0-9][0-9][0-9][0-9].dat; do
+        if [ -f "$file" ] && [ ! -L "$file" ] && [ -s "$file" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 ###################
 # BASICS
 ###################
@@ -224,9 +238,11 @@ if [ "$action" = "status" ]; then
 
     # initial values for drives & state to determine
     storageDevice=""
+    storagePartition=""
     systemDevice=""
     dataDevice=""
     storageBlockchainGB=0
+    storageHasReusableBlocks=0
     dataInspectSuccess=0
     dataConfigFound=0
     combinedDataStorage=0
@@ -276,6 +292,13 @@ if [ "$action" = "status" ]; then
             # Check STORAGE DRIVE
             if [ -d "${mountPath}/app-storage" ]; then
 
+                if [ -n "$storagePartition" ] && [ "$storagePartition" != "$name" ]; then
+                    if [ "$needsUnmount" = 1 ]; then umount "$mountPath"; fi
+                    echo "scenario='error:ambiguous-storage'"
+                    echo "error='multiple RaspiBlitz storage partitions found; select one before setup'"
+                    exit 1
+                fi
+
                 # set data
                 echo "#  - STORAGE partition"
                 storageDevice="${deviceName}"
@@ -295,6 +318,9 @@ if [ "$action" = "status" ]; then
                 else
                     combinedDataStorage=0
                 fi
+
+                storageHasReusableBlocks=0
+                if has_reusable_blocks "$mountPath"; then storageHasReusableBlocks=1; fi
 
                 # check blochain data
                 storageBlockchainGB=$(du -s ${mountPath}/app-storage/bitcoin/blocks 2>/dev/null| awk '{printf "%.0f", $1/(1024*1024)}')
@@ -879,6 +905,7 @@ if [ "$action" = "status" ]; then
     echo "storagePartitionsCount='${storagePartitionsCount}'"
     echo "storageMountedPath='${storageMountedPath}'"
     echo "storageBlockchainGB='${storageBlockchainGB}'"
+    echo "storageHasReusableBlocks='${storageHasReusableBlocks}'"
     echo "storageMigration='${storageMigration}'"
     echo "storageUnusedSpacePercent='${storageUnusedPercent}'"
     echo "systemDevice='${systemDevice}'"
@@ -928,6 +955,7 @@ if [ "$action" = "status" ]; then
         /home/admin/_cache.sh set "system_setup_storageSizeGB" "${storageSizeGB}"
         /home/admin/_cache.sh set "system_setup_storageWarning" "${storageWarning}"
         /home/admin/_cache.sh set "system_setup_storageBlockchainGB" "${storageBlockchainGB}"
+        /home/admin/_cache.sh set system_setup_storageHasReusableBlocks "$storageHasReusableBlocks"
         /home/admin/_cache.sh set "system_setup_storageMigration" "${storageMigration}"
         /home/admin/_cache.sh set "system_setup_storagePartitionsCount" "${storagePartitionsCount}"
         /home/admin/_cache.sh set "system_setup_systemDevice" "${systemDevice}"
@@ -2199,117 +2227,87 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
         fi
         if [ "${actionType}" = "STORAGE" ]; then
             
-            # DEBUG: Log partition count before clean storage operations
-            beforeCleanStorageCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-            echo "# DEBUG CLEAN STORAGE: Partition count before clean operations: ${beforeCleanStorageCount}" >> ${logFile}
-            
-            # check first partition for storage
-            mkdir -p /mnt/disk_storage 2>/dev/null
-            mount /dev/${actionDevicePartitionBase}1 /mnt/disk_storage 2>/dev/null
-            
-            # DEBUG: Log partition count after attempting to mount partition 1
-            afterMountAttemptCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-            echo "# DEBUG CLEAN STORAGE: Partition count after mount attempt partition 1: ${afterMountAttemptCount}" >> ${logFile}
-            
-            # check if /mnt/disk_storage/app-storage exists
-            if [ ! -d "/mnt/disk_storage/app-storage" ]; then
-                # multi partion layout
-                umount /mnt/disk_storage 2>/dev/null
-                
-                # DEBUG: Log partition count after umount partition 1
-                afterUmount1Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-                echo "# DEBUG CLEAN STORAGE: Partition count after umount partition 1: ${afterUmount1Count}" >> ${logFile}
-                
-                echo "# .. formating boot & system partition" >> ${logFile}
-                echo "# - format: boot(/dev/${actionDevicePartitionBase}1)" >> ${logFile}
-                wipefs -a /dev/${actionDevicePartitionBase}1 >> ${logFile}
-                
-                # DEBUG: Log partition count after wipefs partition 1
-                afterWipeP1Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-                echo "# DEBUG CLEAN STORAGE: Partition count after wipefs partition 1: ${afterWipeP1Count}" >> ${logFile}
-                
-                mkfs.fat -F 32 /dev/${actionDevicePartitionBase}1 >> ${logFile}
-                
-                # DEBUG: Log partition count after mkfs partition 1
-                afterMkfsP1Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-                echo "# DEBUG CLEAN STORAGE: Partition count after mkfs partition 1: ${afterMkfsP1Count}" >> ${logFile}
-                
-                echo "# - format: system(/dev/${actionDevicePartitionBase}2)" >> ${logFile}
-                wipefs -a /dev/${actionDevicePartitionBase}2 >> ${logFile}
-                
-                # DEBUG: Log partition count after wipefs partition 2
-                afterWipeP2Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-                echo "# DEBUG CLEAN STORAGE: Partition count after wipefs partition 2: ${afterWipeP2Count}" >> ${logFile}
-                
-                mkfs -t ext4  /dev/${actionDevicePartitionBase}2 >> ${logFile}
-                
-                # DEBUG: Log partition count after mkfs partition 2
-                afterMkfsP2Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-                echo "# DEBUG CLEAN STORAGE: Partition count after mkfs partition 2: ${afterMkfsP2Count}" >> ${logFile}
-                
-                echo "# - mount: storage(/dev/${actionDevicePartitionBase}3)" >> ${logFile}
-                mount /dev/${actionDevicePartitionBase}3 /mnt/disk_storage >> ${logFile}
-                
-                # DEBUG: Log partition count after mounting partition 3
-                afterMountP3Count=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-                echo "# DEBUG CLEAN STORAGE: Partition count after mounting partition 3: ${afterMountP3Count}" >> ${logFile}
-                
-                echo "storagePartition='${actionDevicePartitionBase}3'"
-                echo "# storagePartition(${actionDevicePartitionBase}3)" >> ${logFile}
-                if [ $? -ne 0 ]; then
-                    echo "error='failed to mount /dev/${actionDevicePartitionBase}3'" >> ${logFile}
-                    echo "error='failed to mount storage partition (1)'"
+            # Validate the partition we will keep before formatting or deleting anything.
+            case "$initialRecoverPartitionCount" in
+                1) partition="${actionDevicePartitionBase}1" ;;
+                3) partition="${actionDevicePartitionBase}3" ;;
+                *) echo "error='unsupported partition layout for keeping blockchain'"; exit 1 ;;
+            esac
+            if ! mounts=$(lsblk -nr -o MOUNTPOINTS -- "/dev/$actionDevice") || [[ "$mounts" =~ [^[:space:]] ]]; then
+                echo "error='storage or a child partition is mounted'"
+                exit 1
+            fi
+            storageMount=$(mktemp -d) || { echo "error='cannot prepare storage mount'"; exit 1; }
+            trap 'if mountpoint -q "$storageMount"; then umount "$storageMount"; fi; rmdir -- "$storageMount"' EXIT
+            # Do not treat arbitrary sibling partitions as erasable boot and SYSTEM.
+            # A new RaspiBlitz layout leaves them empty. An installed layout has Pi
+            # boot files plus the corresponding RaspiBlitz files on SYSTEM.
+            if [ "$initialRecoverPartitionCount" = 3 ]; then
+                if [ "$(blkid -s TYPE -o value "/dev/${actionDevicePartitionBase}1")" != vfat ] ||
+                   [ "$(blkid -s TYPE -o value "/dev/${actionDevicePartitionBase}2")" != ext4 ] ||
+                   [ "$(blkid -s TYPE -o value "/dev/$partition")" != ext4 ]; then
+                    echo "error='unexpected boot or system partition type; keeping all partitions'"
                     exit 1
                 fi
-                if [ ! -d "/mnt/disk_storage/app-storage" ]; then
-                    echo "error='to /app-storage on /dev/${actionDevicePartitionBase}3'" >> ${logFile}
-                    echo "error='failed to mount storage partition (2)'"
+                for sibling in 1 2; do
+                    if ! mount -o ro "/dev/${actionDevicePartitionBase}$sibling" "$storageMount"; then
+                        echo "error='cannot inspect boot or system partition; keeping all partitions'"
+                        exit 1
+                    fi
+                    if ! firstEntry=$(find "$storageMount" -mindepth 1 -maxdepth 1 ! -name lost+found -print -quit); then
+                        echo "error='cannot inspect partition contents; keeping all partitions'"
+                        exit 1
+                    fi
+                    if [ -n "$firstEntry" ]; then
+                        if [ "$sibling" = 1 ]; then
+                            if [ ! -f "$storageMount/config.txt" ] || [ ! -f "$storageMount/cmdline.txt" ]; then
+                                echo "error='unrecognized boot files; keeping all partitions'"
+                                exit 1
+                            fi
+                        elif [ ! -f "$storageMount/home/admin/_version.info" ] || [ ! -f "$storageMount/etc/fstab" ]; then
+                            echo "error='unrecognized system files; keeping all partitions'"
+                            exit 1
+                        fi
+                    fi
+                    if ! umount "$storageMount"; then
+                        echo "error='cannot unmount inspected partition'"
+                        exit 1
+                    fi
+                done
+            fi
+            if ! mount -o ro "/dev/$partition" "$storageMount" || ! has_reusable_blocks "$storageMount"; then
+                echo "error='no reusable RaspiBlitz block files on the selected storage partition'"
+                exit 1
+            fi
+            if ! mount -o remount,rw "/dev/$partition" "$storageMount"; then
+                echo "error='storage partition is not writable'"
+                exit 1
+            fi
+            if [ "$initialRecoverPartitionCount" = 3 ]; then
+                if ! { wipefs -a "/dev/${actionDevicePartitionBase}1" &&
+                       mkfs.fat -F 32 "/dev/${actionDevicePartitionBase}1" &&
+                       wipefs -a "/dev/${actionDevicePartitionBase}2" &&
+                       mkfs -t ext4 "/dev/${actionDevicePartitionBase}2"; } >> "$logFile" 2>&1; then
+                    echo "error='failed to prepare boot or system partition'"
                     exit 1
                 fi
-            else
-                echo "storagePartition='${actionDevicePartitionBase}1'"
-                echo "# storagePartition(${actionDevicePartitionBase}1)" >> ${logFile}
             fi
-            # in both setups /mnt/disk_storage/app-storage should exist
-            # delete all data in /mnt/disk_storage except for /mnt/disk_storage/app-storage
-            # Cleaning storage partition - preserving app-storage
-            echo "# Cleaning storage partition - preserving blockchain (blocks & chainstate)" >> ${logFile}
-            
-            # Alte Logik löschte versehentlich chainstate. Neu:
-            # 1. Auf Root der Partition alles löschen außer app-storage
-            find /mnt/disk_storage -mindepth 1 -maxdepth 1 \
-                -not -name "app-storage" -exec rm -rf {} \;
-            # 2. In app-storage alles löschen außer bitcoin
-            find /mnt/disk_storage/app-storage -mindepth 1 -maxdepth 1 \
-                -not -name "bitcoin" -exec rm -rf {} \;
-            # 3. In bitcoin alles löschen außer blocks und chainstate (beides behalten)
-            if [ -d /mnt/disk_storage/app-storage/bitcoin ]; then
-              find /mnt/disk_storage/app-storage/bitcoin -mindepth 1 -maxdepth 1 \
-                -not -name "blocks" -not -name "chainstate" -exec rm -rf {} \;
+            echo "# Cleaning $partition, preserving blocks and chainstate" >> "$logFile"
+            if ! { find "$storageMount" -mindepth 1 -maxdepth 1 ! -name app-storage -exec rm -rf -- {} + &&
+                   find "$storageMount/app-storage" -mindepth 1 -maxdepth 1 ! -name bitcoin -exec rm -rf -- {} + &&
+                   find "$storageMount/app-storage/bitcoin" -mindepth 1 -maxdepth 1 ! -name blocks ! -name chainstate -exec rm -rf -- {} +; }; then
+                echo "error='failed to clean storage while keeping blockchain'"
+                exit 1
             fi
-
-            # Logging nach Cleanup
-            ls -la /mnt/disk_storage >> ${logFile}
-            ls -la /mnt/disk_storage/app-storage >> ${logFile}
-            ls -la /mnt/disk_storage/app-storage/bitcoin >> ${logFile}
-
-            # DEBUG: Log partition count after cleaning operations
-            afterCleaningCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-            echo "# DEBUG CLEAN STORAGE: Partition count after cleaning operations: ${afterCleaningCount}" >> ${logFile}
-
-            # Create fresh app-data directory if needed with combined data
-            if [ ${actionCombinedData} -eq 1 ]; then
-                mkdir -p /mnt/disk_storage/app-data
+            if [ "$actionCombinedData" = 1 ] && ! mkdir -p "$storageMount/app-data"; then
+                echo "error='failed to create combined data directory'"
+                exit 1
             fi
-            
-            # Unmount after cleaning
-            umount /mnt/disk_storage
-            
-            # DEBUG: Log partition count after final umount
-            afterFinalUmountCleanCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
-            echo "# DEBUG CLEAN STORAGE: Partition count after final umount: ${afterFinalUmountCleanCount}" >> ${logFile}
-            
-            rm -rf /mnt/disk_storage
+            if ! umount "$storageMount"; then
+                echo "error='failed to unmount cleaned storage'"
+                exit 1
+            fi
+            echo "storagePartition='$partition'"
         fi
     fi
 
@@ -2508,6 +2506,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         /home/admin/_cache.sh set hddMigrateDeviceFrom "${storageDevice}"
         /home/admin/_cache.sh set hddMigrateDeviceTo "${biggerDevice}"  
         /home/admin/_cache.sh set system_setup_storageBlockchainGB "0"
+        /home/admin/_cache.sh set system_setup_storageHasReusableBlocks "0"
         /home/admin/_cache.sh set system_setup_askSystemCopy "${scenarioSystemCopy}"  
 
         # return 0 to indicate success and let calling script finish
