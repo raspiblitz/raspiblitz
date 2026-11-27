@@ -8,7 +8,9 @@ script=$(realpath "${1:?path to candidate bonus.lit.sh required}")
 [[ $(id -u) == 0 && ! -e /etc/systemd/system/litd.service && ! -e /home/lit ]]
 if id lit >/dev/null 2>&1; then echo 'Requires a fresh disposable guest'; exit 1; fi
 mount -t tmpfs tmpfs /mnt
-mkdir -p /mnt/hdd/app-data
+mkdir /mnt/hdd
+mount -t tmpfs tmpfs /mnt/hdd
+mkdir /mnt/hdd/app-data
 echo 'runBehindTor=off' >/mnt/hdd/app-data/raspiblitz.conf
 work=$(mktemp -d); chmod 700 "$work"
 cleanup() {
@@ -39,6 +41,6 @@ bash "$script" off >"$work/off-again.log" 2>&1
 [[ $(sha256sum <"$data_dir/custody.fixture") == "$first" && ! -e /home/lit ]]
 echo 'PASS existing sources conflict safely; both removals preserve exact synthetic .tapd custody data.'
 # Drive the regular local SSH info screen through a terminal and capture it.
-TERM=xterm timeout 25 script -qefc "stty rows 32 cols 90; bash '$script' menu" "$work/dialog" < <(for i in {1..15}; do sleep 1; printf '\r'; done) >/dev/null
+TERM=xterm timeout 25 script -qefc "stty rows 32 cols 90; bash '$script' menu" "$work/dialog" < <(for _ in {1..15}; do sleep 1; printf '\r'; done) >/dev/null
 for word in 'Password C' 'Password B'; do grep -aFq "$word" "$work/dialog"; done
 echo 'PASS rendered terminal login instructions include LND Password C and Lightning Terminal Password B.'
