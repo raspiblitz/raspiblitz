@@ -142,6 +142,8 @@ fi
 echo 'collector diagnostic for fixture' >&2
 [ "${fault:-}" != empty ] || exit 0
 echo 'API query: wal=TEST_FIRST&wal=TEST_SECOND at 192.0.2.2 and 198.51.100.5'
+echo 'IPv6 [2001:db8::20] and fe80::1%eth0 and 2001:db8:0:0:0:0:0:20'
+echo 'headers: "api-key": "TEST_QUOTED", X-Api-Key: TEST_HEADER or api_key="TEST_ATTRIBUTE"'
 [ "${fault:-}" != collect ]
 MOCK
   cat >"$sandbox/bin/nc" <<'MOCK'
@@ -160,6 +162,8 @@ MOCK
   [ "$status" -eq 0 ]
   [[ "$output" == *'wal=***&wal=*** at *.*.*.* and *.*.*.*'* ]]
   [[ "$output" != *TEST_FIRST* && "$output" != *'collector diagnostic'* ]]
+  [[ "$output" != *TEST_QUOTED* && "$output" != *TEST_HEADER* && "$output" != *TEST_ATTRIBUTE* ]]
+  [[ "$output" != *'2001:db8'* && "$output" != *'fe80::1'* && "$output" != *'%eth0'* ]]
   [ ! -e "$sandbox/sent" ]
   [ -z "$(ls -A "$TMPDIR")" ]
 }
@@ -191,6 +195,7 @@ MOCK
   [ "$status" -eq 0 ]
   grep -Fx 'termbin.com 9999' "$calls"
   ! grep -q TEST_ "$sandbox/sent"
+  ! grep -Eq '2001:db8|fe80::1|%eth0' "$sandbox/sent"
   grep -F 'wal=***&wal=***' "$sandbox/sent"
   [ -z "$(ls -A "$TMPDIR")" ]
 }

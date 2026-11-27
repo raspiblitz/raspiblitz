@@ -34,6 +34,10 @@ if [ "$1" = "check" ]; then
         fi
         selected=${3:-ALL}
         if [ "$2" = select ]; then
+            if ! command -v whiptail >/dev/null; then
+                echo "whiptail is unavailable; use 'check smart' from the command line." >&2
+                exit 1
+            fi
             selected=$(whiptail --title "Drive health" --menu "Select a disk to read its SMART data" 16 65 8 \
                 ALL "All listed disks" "${disks[@]}" 3>&1 1>&2 2>&3) || exit 0
         fi

@@ -10,6 +10,8 @@ if [ "$1" == "redact" ]; then
   fi
   # Edit and replace the file in a single pass. Return sed's status to the caller.
   exec sed -E -i \
+    -e 's/\[((([a-f0-9]{0,4}:){2,})[a-f0-9:.]*)(%[[:alnum:]_.-]+)?\]/[redacted-ipv6]/gI' \
+    -e 's/(([a-f0-9]{0,4}:){2,}[a-f0-9:.]*:[a-f0-9:.]*|[a-f0-9:]*::[a-f0-9:.]*)(%[[:alnum:]_.-]+)?/[redacted-ipv6]/gI' \
     -e 's/[a-z0-9]+@/***@/g' \
     -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/*.*.*.*/g' \
     -e 's/[[:alnum:]]+\.onion/***.onion/g' \
@@ -17,7 +19,8 @@ if [ "$1" == "redact" ]; then
     -e 's/[0-9]+ mSAT/* mSAT/g; s/[0-9]+(\.[0-9]+)? BTC/* BTC/g; s/balance=.*/balance=****/' \
     -e 's/Server started with public key .+/Server started with public key ****/' \
     -e 's/alias [A-Za-z0-9]+ /alias *** /g; s/public key [a-z0-9]+,/public key ***,/g; s/alias=.*/alias=****/' \
-    -e 's/(api-key|wallet|wal|usr)=[^[:space:]&#"]+/\1=***/g; s/user [a-zA-Z0-9]+/user ***/g' \
+    -e "s/((x-)?api[-_]key|wallet|wal|usr)([\"']?[[:space:]]*[:=][[:space:]]*)(\"([^\"\\\\]|\\\\.)*\"|'[^']*'|[^[:space:]&#,}\"']+)/\1\3***/gI" \
+    -e 's/user [a-zA-Z0-9]+/user ***/g' \
     -e 's/[[:alnum:]]+\.b32\.i2p/***.b32.i2p/g' -- "$redactFile"
 fi
 

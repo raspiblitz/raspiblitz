@@ -11,7 +11,7 @@ def read_smart(device, transport, sat=False):
         options += ["-n", "standby,2"]
     if sat:
         options += ["-d", "sat"]
-    result = subprocess.run(options + [device], capture_output=True)
+    result = subprocess.run(options + [device], capture_output=True, timeout=20)
     try:
         return json.loads(result.stdout), result.returncode
     except (ValueError, UnicodeError):
@@ -72,4 +72,8 @@ def report(device, transport):
 
 
 if __name__ == "__main__":
-    sys.exit(report(sys.argv[1], sys.argv[2]))
+    try:
+        sys.exit(report(sys.argv[1], sys.argv[2]))
+    except subprocess.TimeoutExpired:
+        print("Drive did not respond within 20 seconds.")
+        sys.exit(1)
