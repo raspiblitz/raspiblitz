@@ -5,13 +5,13 @@ setup() {
   sed -e 's|/home/admin/|./|g' -e 's|/mnt/hdd/app-data/|./|g' \
     "$BATS_TEST_DIRNAME/../home.admin/setup.scripts/eventBlockchainSync.sh" > show.sh
   touch _version.info raspiblitz.info raspiblitz.conf
-  cat > _cache.sh <<'SH'
+  cat > redis-cli <<'SH'
 #!/bin/bash
-shift
-for key in "$@"; do printf '%s=%q\n' "$key" "${!key}"; done
+shift 2
+for key in "$@"; do printf '%s\n' "${!key}"; done
 SH
   printf '#!/bin/bash\nprintf "%%s\\n" "$@"\n' > dialog
-  chmod +x _cache.sh dialog
+  chmod +x redis-cli dialog
   export PATH="$PWD:$PATH" lightning=lnd vm=1
   export btc_default_ready=1 btc_default_sync_percentage=99.99 btc_default_peers=2
   export btc_default_blocks_behind=1 ln_default_ready=1 ln_default_sync_chain=1

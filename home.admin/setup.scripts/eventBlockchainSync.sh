@@ -13,14 +13,25 @@ if [ "$1" == "lcd" ]; then
     PRAMETER_LCD=1
 fi
 
-# get data from cache
-source <(/home/admin/_cache.sh get \
+# All display fields are single-line values. Read them as data; only the
+# keys supplied by this script may become shell variables.
+read_cache() {
+    local key index=0
+    local -a values
+    mapfile -t values < <(redis-cli --raw mget "$@")
+    if (( ${#values[@]} != $# )); then values=(); fi
+    for key in "$@"; do
+        printf -v "$key" '%s' "${values[index]-}"
+        (( ++index ))
+    done
+}
+
+read_cache \
   btc_default_ready \
   btc_default_sync_percentage \
   btc_default_blocks_behind \
   btc_default_peers \
-  system_count_start_blockchain \
-)
+  system_count_start_blockchain
 
 # display blockchain sync
 height=6
@@ -43,7 +54,7 @@ else
 fi
 
 # get data from cache
-source <(/home/admin/_cache.sh get \
+read_cache \
     lightning \
     ln_default_ready \
     ln_default_sync_progress \
@@ -53,7 +64,6 @@ source <(/home/admin/_cache.sh get \
     ln_default_sync_chain \
     ln_default_sync_graph \
     system_count_start_lightning
-)
 
 # formatting LIGHTNING SCAN PROGRESS  
 if [ "${lightning}" != ""  ] && [ "${ln_default_sync_progress}" == "" ]; then
@@ -123,7 +133,7 @@ else
 fi
     
 # get data from cache
-source <(/home/admin/_cache.sh get \
+read_cache \
     internet_localip \
     codeVersion \
     codeRelease \
@@ -131,8 +141,7 @@ source <(/home/admin/_cache.sh get \
     system_temp_fahrenheit \
     hostname \
     network \
-    hdd_used_info \
-)
+    hdd_used_info
 
 # set admin string
 if [ ${PRAMETER_LCD} -eq 1 ]; then
