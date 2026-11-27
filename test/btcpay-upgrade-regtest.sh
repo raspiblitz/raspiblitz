@@ -40,7 +40,8 @@ docker exec "$pg" pg_isready -h 127.0.0.1 -U postgres >/dev/null
 for database in nbxmerchant btcpaymerchant; do docker exec "$pg" createdb -U postgres "$database"; done
 db="Host=127.0.0.1;Port=18432;Username=postgres;Password=$database_password;Database="
 printf 'postgres=%snbxmerchant\nbtc.rpc.password=%s\n' "$db" "$rpc_password" >nbx.conf
-printf 'postgres=%sbtcpaymerchant\n' "$db" >btcpay.conf
+mkdir -p btcpay/RegTest
+printf 'postgres=%sbtcpaymerchant\n' "$db" >btcpay/RegTest/settings.config
 docker run --cidfile="$work/nbx.cid" --name "$nbx" -d --network host -v "$work/nbx:/datadir" -v "$work/nbx.conf:/qa.conf:ro" nicolasdorier/nbxplorer:2.6.10@sha256:7d2ab1f6ce38e301cba98a4f85bfbfcf2912d5034bd88af056f9d60e5511f911 \
   --conf=/qa.conf --network=regtest --bind=127.0.0.1:18435 --chains=btc \
   --btcrpcurl=http://127.0.0.1:18343 --btcrpcuser=regtest \
@@ -50,11 +51,11 @@ for ((i=0;i<90;i++)); do [[ -s $cookie ]] && break; sleep 1; done
 [[ -s $cookie ]] || { echo 'NBXplorer regtest did not initialize'; exit 1; }
 base=http://127.0.0.1:18436
 start_app() {
-  docker run --cidfile="$work/app.cid" --name "$app" -d --network host -v "$work/btcpay:/datadir" -v "$cookie:/qa.cookie:ro" -v "$work/btcpay.conf:/qa.conf:ro" \
+  docker run --cidfile="$work/app.cid" --name "$app" -d --network host -v "$work/btcpay:/datadir" -v "$cookie:/qa.cookie:ro" \
     -e BTCPAY_DATADIR=/datadir -e BTCPAY_NETWORK=regtest -e BTCPAY_CHAINS=btc \
     -e BTCPAY_BIND=127.0.0.1:18436 \
     -e BTCPAY_BTCEXPLORERURL=http://127.0.0.1:18435/ -e BTCPAY_BTCEXPLORERCOOKIEFILE=/qa.cookie \
-    "btcpayserver/btcpayserver:$1@sha256:$2" --conf=/qa.conf >/dev/null
+    "btcpayserver/btcpayserver:$1@sha256:$2" >/dev/null
   for ((i=0;i<150;i++)); do
     if curl -fsS "$base/api/v1/health" >health.json 2>/dev/null && jq -e '.synchronized' health.json >/dev/null; then return; fi
     if [[ $(docker inspect -f '{{.State.Running}}' "$app") != true ]]; then break; fi
