@@ -27,6 +27,40 @@ source <(/home/admin/config.scripts/network.aliases.sh getvars cl $2)
 
 plugin="backup"
 plugindir="/home/bitcoin/cl-plugins-available/plugins"
+dbPath="/home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3"
+backupPath="/home/bitcoin/${netprefix}lightningd.sqlite3.backup"
+
+function read_db_size() {
+  local dbBytes
+  if [ "$1" = on ] && sudo test -x "${dbPath%/*}" &&
+    sudo test ! -e "${dbPath}" && sudo test ! -L "${dbPath}"; then
+    # backup-cli also supports initialization before the first database exists.
+    dbKiB=0
+  else
+    if ! sudo test -f "${dbPath}"; then
+      echo "Cannot read CLN database size at ${dbPath}." >&2
+      return 1
+    fi
+    dbBytes=$(sudo stat -Lc %s -- "${dbPath}") || return 1
+    dbKiB=$(( (dbBytes + 1023) / 1024 ))
+  fi
+}
+
+function check_backup_space() {
+  local destination="$1" copies="$2" availableKiB minimumKiB message
+  availableKiB=$(LC_ALL=C sudo df -Pk -- "${destination}" | awk 'NR==2 {print $4}')
+  if ! [[ "${availableKiB}" =~ ^[0-9]+$ ]]; then
+    echo "Cannot determine available CLN backup space on ${destination}." >&2
+    return 1
+  fi
+  minimumKiB=$(( dbKiB * copies + 200 * 1024 ))
+  if (( availableKiB < minimumKiB )); then
+    message="Low CLN backup space on ${destination}: ${availableKiB} KiB available, need at least ${minimumKiB} KiB. Free space while preserving the recovery backup."
+    echo "${message}" >&2
+    logger -t raspiblitz-cl-backup -- "${message}"
+    return 1
+  fi
+}
 
 function install() {
   if [ ! -f "${plugindir}/${plugin}/${plugin}.py" ]; then
@@ -68,7 +102,11 @@ function install() {
 
 if [ "$1" = on ]; then
 
-  install
+  # Initialization moves an existing backup aside and creates a new file here.
+  read_db_size on && check_backup_space "${backupPath%/*}" 1 || exit 1
+  install || exit 1
+  # Dependency installation can consume significant space on SYSTEM.
+  read_db_size on && check_backup_space "${backupPath%/*}" 1 || exit 1
 
   echo "# Stop the ${netprefix}lightningd.service"
   sudo systemctl stop ${netprefix}lightningd
@@ -168,23 +206,39 @@ elif
   [ "$1" = backup-compact ]
 then
   # https://github.com/lightningd/plugins/tree/master/backup#performing-backup-compaction
-  dbPath="/home/bitcoin/.lightning/${CLNETWORK}/lightningd.sqlite3"
-  backupPath="/home/bitcoin/${netprefix}lightningd.sqlite3.backup"
-
-  if sudo ls "${dbPath}" >/dev/null; then
-    dbSize=$(sudo du -m "${dbPath}" | awk '{print $1}')
-    echo "$dbSize MB $dbPath"
-    backupSize=$(sudo du -m "${backupPath}" | awk '{print $1}')
-    echo "$backupSize MB $backupPath"
-    if [ "$backupSize" -gt $((dbSize + 200)) ]; then
-      echo "# The backup is 200MB+ larger than the db, running '${netprefix}lightning-cli backup-compact' ..."
-      $lightningcli_alias backup-compact
-    else
-      echo "The backup is not significantly larger than the db, there is no need to compact."
+  if sudo test ! -e "${backupPath}"; then
+    if sudo test -L "/home/bitcoin/${netprefix}cl-plugins-enabled/backup.py" ||
+      sudo test -e "${dbPath%/*}/backup.lock"; then
+      echo "CLN backup is configured but its recovery file is missing: ${backupPath}" >&2
+      exit 1
     fi
+    echo "No active CLN file backup on ${CLNETWORK}."
+    exit 0
+  fi
+  read_db_size backup-compact && check_backup_space "${backupPath}" 1 || exit 1
+  dbSize=$(sudo du -m "${dbPath}" | awk '{print $1}')
+  backupSize=$(sudo du -m "${backupPath}" | awk '{print $1}')
+  if ! [[ "${dbSize}" =~ ^[0-9]+$ && "${backupSize}" =~ ^[0-9]+$ ]]; then
+    echo "Cannot determine the CLN database or backup size for compaction." >&2
+    exit 1
+  fi
+  echo "$dbSize MB $dbPath"
+  echo "$backupSize MB $backupPath"
+  if [ "$backupSize" -gt $((dbSize + 200)) ]; then
+    # The packaged CLN service uses a private /tmp backed by /tmp. The
+    # plugin holds its replay database there while writing a sibling backup.
+    outputDir="${backupPath%/*}"
+    outputDevice=$(sudo stat -Lc %d -- "${outputDir}") || exit 1
+    tempDevice=$(sudo stat -Lc %d -- /tmp) || exit 1
+    if [ "${tempDevice}" = "${outputDevice}" ]; then
+      check_backup_space "${outputDir}" 2 || exit 1
+    else
+      check_backup_space /tmp 1 && check_backup_space "${outputDir}" 1 || exit 1
+    fi
+    echo "# The backup is 200MB+ larger than the db, running '${netprefix}lightning-cli backup-compact' ..."
+    $lightningcli_alias backup-compact
   else
-    echo "# No ${dbPath} is present"
-    echo "# Run 'config.scripts/cl-plugin.backup.sh on ${CLNETWORK}' first"
+    echo "The backup is not significantly larger than the db, there is no need to compact."
   fi
 
 else
