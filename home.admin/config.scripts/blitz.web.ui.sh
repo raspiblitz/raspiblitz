@@ -41,6 +41,19 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# An install, update and uninstall all change the same checkout and served tree.
+exec 9>/run/raspiblitz-webui.lock || exit 1
+flock -x 9 || exit 1
+pending=/var/www/.raspiblitz-webui-update-pending
+publish_script="$(dirname "$(realpath "$0")")/publish-web-ui.py"
+
+build_and_publish() {
+  npm install || { echo "error='npm install failed'"; return 1; }
+  npm run build || { echo "error='npm run build failed'"; return 1; }
+  python3 "$publish_script" build /var/www/public || return 1
+  rm -f -- "$pending"
+}
+
 ###################
 # ON / INSTALL
 ###################
@@ -130,13 +143,9 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# using lastest code in branch"
   fi
   echo "# Compile WebUI"
-  /home/admin/config.scripts/bonus.nodejs.sh on
-  npm install || { echo "error='npm install failed'"; exit 1; }
-  npm run build || { echo "error='npm run build failed'"; exit 1; }
-
-  rm -rf /var/www/public/*
-  cp -r /home/blitzapi/blitz_web/build/* /var/www/public
-  chown www-data:www-data -R /var/www/public
+  touch "$pending" || exit 1
+  /home/admin/config.scripts/bonus.nodejs.sh on || exit 1
+  build_and_publish || exit 1
 
   echo "# The WebUI is now available under:"
   echo "# http://$(hostname -I | awk '{print $1}')"
@@ -147,22 +156,20 @@ fi
 # UPDATE
 ###################
 if [ "$1" = "update" ]; then
-  webuiActive=$(sudo ls /home/blitzapi/blitz_web/README.md | grep -c "README")
-  if [ "${webuiActive}" != "0" ]; then
-    echo "# Update Web API"
-    cd /home/blitzapi/blitz_web
-    currentBranch=$(git rev-parse --abbrev-ref HEAD)
+  if [ -d /home/blitzapi/blitz_web ]; then
+    echo "# Update WebUI"
+    cd /home/blitzapi/blitz_web || exit 1
+    currentBranch=$(git symbolic-ref --short HEAD) || exit 1
     echo "# updating local repo ..."
-    oldCommit=$(git rev-parse HEAD)
-    git fetch
-    git reset --hard origin/"${currentBranch}"
-    newCommit=$(git rev-parse HEAD)
-    if [ "${oldCommit}" != "${newCommit}" ]; then
-      npm install
-      npm run build
-      sudo rm -rf /var/www/public/*
-      sudo cp -r /home/blitzapi/blitz_web/build/* /var/www/public
-      sudo chown www-data:www-data -R /var/www/public
+    oldCommit=$(git rev-parse HEAD) || exit 1
+    git fetch origin || exit 1
+    newCommit=$(git rev-parse --verify "refs/remotes/origin/${currentBranch}^{commit}") || exit 1
+    if [ "$oldCommit" != "$newCommit" ] || [ -e "$pending" ] || [ ! -s /var/www/public/index.html ]; then
+      # The checkout can advance before the bundle is built. Retry that commit
+      # on the next update if compilation or publication failed.
+      touch "$pending" || exit 1
+      git reset --hard "$newCommit" || exit 1
+      build_and_publish || exit 1
     else
       echo "# no code changes"
     fi
@@ -183,5 +190,6 @@ fi
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   echo "# UNINSTALL WebUI"
   sudo rm -rf /root/blitz_web /home/blitzapi/blitz_web /var/www/public/*
+  rm -f -- "$pending"
   exit 0
 fi

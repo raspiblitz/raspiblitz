@@ -141,15 +141,24 @@ patch()
       echo
       echo "#######################################################"
       echo "### UPDATE BLITZ --> SCRIPTS (code)"
-      /home/admin/config.scripts/blitz.github.sh -run
+      if ! /home/admin/config.scripts/blitz.github.sh -run; then
+        whiptail --title "Patch failed" --msgbox "Could not sync the RaspiBlitz scripts. Check the Git output and retry." 9 56
+        exit 1
+      fi
       echo
       echo "#######################################################"
       echo "### UPDATE BLITZ --> API"
-      sudo /home/admin/config.scripts/blitz.web.api.sh update-code
+      if [ -f /etc/systemd/system/blitzapi.service ] && ! sudo /home/admin/config.scripts/blitz.web.api.sh update-code; then
+        whiptail --title "Patch failed" --msgbox "The Web API update failed. Check the updater output and retry." 9 56
+        exit 1
+      fi
       echo
       echo "#######################################################"
       echo "### UPDATE BLITZ --> WEBUI"
-      sudo /home/admin/config.scripts/blitz.web.ui.sh update
+      if [ -d /home/blitzapi/blitz_web ] && ! sudo /home/admin/config.scripts/blitz.web.ui.sh update; then
+        whiptail --title "Patch failed" --msgbox "The WebUI update failed. Check the updater output and retry." 9 56
+        exit 1
+      fi
       sleep 5
       whiptail --title " Patching/Syncing " --yes-button "Reboot" --no-button "Skip Reboot" --yesno "  OK patching/syncing done.
 

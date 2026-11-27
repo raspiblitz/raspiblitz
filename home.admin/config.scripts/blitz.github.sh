@@ -15,7 +15,7 @@ fi
 
 source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
-cd /home/admin/raspiblitz
+cd /home/admin/raspiblitz || exit 1
 
 # gather info
 activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config 2>/dev/null | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
@@ -121,7 +121,7 @@ if [ $? -eq 0 ]; then
   echo "# OK - git config pull.rebase true"
 else
   echo "# FAIL - git config pull.rebase true"
-  exit
+  exit 1
 fi
 if [[ ${activeBranch} != pr* ]]; then
   git pull 1>&2
@@ -129,7 +129,7 @@ if [[ ${activeBranch} != pr* ]]; then
     echo "# OK - git pull"
   else
     echo "# FAIL - git pull"
-    exit
+    exit 1
   fi
 else
   echo "# SKIP - git pull on PR-Branches"
