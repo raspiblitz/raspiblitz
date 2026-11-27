@@ -27,7 +27,7 @@ infoFile="/home/admin/raspiblitz.info"
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
+setupFile="/run/raspiblitz-setup/raspiblitz.setup"
 
  # make sure ram disk is mounted
 /home/admin/_cache.sh ramdisk on 
@@ -57,6 +57,10 @@ echo "## prepare raspiblitz temp" >> $logFile
 # make sure /var/cache/raspiblitz/temp exists
 mkdir -p /var/cache/raspiblitz/temp
 chmod 777 /var/cache/raspiblitz/temp
+# The API account and admin are members of admin; other service users must not replace this record.
+install -d -o root -g admin -m 0755 /run/raspiblitz-setup || exit 1
+install -d -o root -g admin -m 2770 /run/raspiblitz-setup/request || exit 1
+install -o root -g admin -m 0640 /dev/null /run/raspiblitz-setup/submit.lock || exit 1
 
 ################################
 # INIT raspiblitz.info
@@ -599,7 +603,13 @@ if [ "${scenario}" != "ready" ] ; then
 
   echo "## WHEN SETUP IS NEEDED " >> $logFile
   echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)" >> $logFile
-  source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
+  if ! inspection=$(/home/admin/config.scripts/blitz.data.sh status -inspect); then
+    /home/admin/_cache.sh set message "Drive inspection failed. Check storage before setup."
+    /home/admin/_cache.sh set state error
+    exit 1
+  fi
+  source <(printf '%s\n' "$inspection")
+  confirmedDriveInventory=$setupDriveIdentity
 
   # when there are no partitions on any drive - signal all drives are clean 
   /home/admin/_cache.sh set system_setup_cleanDrives "0"
@@ -669,16 +679,19 @@ if [ "${scenario}" != "ready" ] ; then
     infoMessage="Unkonwn Setup Phase"
   fi
 
-  # check if raspiblitz.setup exists (from former system copy step)
-   if [ -f "/var/cache/raspiblitz/hdd-inspect/raspiblitz.setup" ]; then
+  # Resume only a handoff stored on this SYSTEM during its own copy.
+  resumeFromCopiedSystem=0
+  if [ -f /root/.raspiblitz-setup-resume ] && [ ! -L /root/.raspiblitz-setup-resume ]; then
+      resumeFromCopiedSystem=1
 
       # this is when booting from hdd after system copy
       echo "INFO: 'raspiblitz.setup' exists - skip user wait loop" >> ${logFile}
-      cp -a /var/cache/raspiblitz/hdd-inspect/raspiblitz.setup ${setupFile}
+      install -o root -g admin -m 0640 /root/.raspiblitz-setup-resume "${setupFile}" || exit 1
       state="waitprovision"
 
   else
-    echo "INFO: 'raspiblitz.setup' does not exist - wait for user config" >> ${logFile}
+    echo "INFO: no SYSTEM resume record - wait for user config" >> ${logFile}
+    rm -f -- "${setupFile}" /run/raspiblitz-setup/request/raspiblitz.setup || exit 1
     state="waitsetup"
     /home/admin/_cache.sh set state "${state}"
     /home/admin/_cache.sh set message "${infoMessage}"
@@ -692,24 +705,91 @@ if [ "${scenario}" != "ready" ] ; then
 
   echo "## WAIT LOOP: USER SETUP/UPDATE/MIGRATION" >> ${logFile}
   echo "state(${state})" >> ${logFile}
-  until [ "${state}" = "waitprovision" ]
-  do
+  request_setup_again() {
+    # A rejected checkpoint must not be selected again after retry or reboot.
+    if [ "$resumeFromCopiedSystem" = 1 ]; then
+      if ! rm -f -- /root/.raspiblitz-setup-resume || ! sync -f /root; then
+        /home/admin/_cache.sh set message "Could not retire the rejected setup checkpoint."
+        /home/admin/_cache.sh set state error
+        return 1
+      fi
+      resumeFromCopiedSystem=0
+    fi
+    state=waitsetup
+    /home/admin/_cache.sh set message "$1"
+    /home/admin/_cache.sh set state "$state"
+  }
+  while true; do
+    until [ "${state}" = "waitprovision" ]
+    do
 
-    # give the loop a little bed time
-    sleep 4
+      # give the loop a little bed time
+      sleep 4
 
-    # check for updated state value from SSH-UI or WEB-UI for loop
-    source <(/home/admin/_cache.sh get state)
+      # check for updated state value from SSH-UI or WEB-UI for loop
+      source <(/home/admin/_cache.sh get state)
 
+    done
+    echo "## WAIT LOOP: DONE" >> ${logFile}
+
+    echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)"
+    if ! inspection=$(/home/admin/config.scripts/blitz.data.sh status -inspect); then
+      /home/admin/_cache.sh set message "Drive inspection failed. Check storage before setup."
+      /home/admin/_cache.sh set state error
+      exit 1
+    fi
+    unset setupDriveIdentity scenario
+    source <(printf '%s\n' "$inspection")
+
+    # get the results from the SSH-UI or WEB-UI
+    echo "LOADING 'raspiblitz.setup' ..." >> ${logFile}
+    unset deleteData systemCopy menuchoice passwordA
+    if [ "$resumeFromCopiedSystem" != 1 ] &&
+       ! python3 /home/admin/setup.scripts/freezeSetup.py /run/raspiblitz-setup/request/raspiblitz.setup "$setupFile"; then
+      request_setup_again "No complete choices were received. Open the matching API or SSH setup." || exit 1
+      continue
+    fi
+    if [ ! -f "${setupFile}" ] || [ -L "${setupFile}" ] || ! source /home/admin/setup.scripts/readSetup.sh "${setupFile}"; then
+      request_setup_again "Setup choices unavailable. Use the matching API or restart setup over SSH." || exit 1
+      continue
+    fi
+    case "${scenario}" in
+      setup|recover|migration|biggerdevice) ;;
+      *)
+        echo "Drive inspection returned no supported setup scenario. Storage unchanged." >> "${logFile}"
+        /home/admin/_cache.sh set message "Unsupported drive layout. Inspect the drives before setup."
+        /home/admin/_cache.sh set state error
+        exit 1
+        ;;
+    esac
+
+    # SSH may omit systemCopy when no copy was offered. A fresh setup must
+    # always carry an explicit disk choice, including a forced fresh recovery.
+    if [ -z "$passwordA" ] || { [ "${systemCopy}" = done ] && [ "$resumeFromCopiedSystem" != 1 ]; }; then
+      request_setup_again "Required setup choices are missing. Reopen setup." || exit 1
+      continue
+    fi
+    if [ "${scenario}" != setup ] && ! { [ "${scenario}" = recover ] && [ "${menuchoice}" = setup ]; }; then
+      break
+    fi
+    if [ -z "$confirmedDriveInventory" ] || [ "$confirmedDriveInventory" != "$setupDriveIdentity" ]; then
+      /home/admin/_cache.sh set message "The inspected drives changed. Restart setup with the intended drives."
+      /home/admin/_cache.sh set state error
+      exit 1
+    fi
+    if [ "${systemCopy}" = done ] && [ "$resumeFromCopiedSystem" = 1 ]; then
+      break
+    fi
+    if [ "${deleteData}" = all ] || [ "${deleteData}" = keepBlockchain ]; then
+      if [ "${systemCopy}" = 0 ] ||
+         { [ "${systemCopy}" = 1 ] && [ "${scenarioSystemCopy}" = 1 ]; } ||
+         { [ -z "${systemCopy}" ] && [ "${scenarioSystemCopy}" != 1 ]; }; then
+        break
+      fi
+    fi
+    echo "Incomplete setup drive choice. Returning to setup before touching storage." >> "${logFile}"
+    request_setup_again "Drive choice missing or inconsistent. Open setup again." || exit 1
   done
-  echo "## WAIT LOOP: DONE" >> ${logFile}
-
-  echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)"
-  source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
-
-  # get the results from the SSH-UI or WEB-UI
-  echo "LOADING 'raspiblitz.setup' ..." >> ${logFile}
-  source ${setupFile}
 
   # overwrite recover by user choice
   if [ "${scenario}" = "recover" ] && [ "${menuchoice}" = "setup" ]; then
@@ -933,7 +1013,7 @@ if [ "${scenario}" != "ready" ] ; then
 
     # pre-quick change of login passwort for admin
     # do proper passwordA setting later when HDD is mounted
-    source ${setupFile}
+    source /home/admin/setup.scripts/readSetup.sh "${setupFile}" || exit 1
     if [ "${passwordA}" != "" ]; then
       echo "## SETTING PASSWORD FOR ADMIN" >> ${logFile}
       echo "admin:${passwordA}" | chpasswd
@@ -962,7 +1042,7 @@ if [ "${scenario}" != "ready" ] ; then
 
       echo "bootFromStorage(${bootFromStorage})" >> ${logFile}
       if [ "${bootFromStorage}" = "1" ]; then
-        /home/admin/config.scripts/blitz.data.sh copy-system "${storageDevice}" storage
+        /home/admin/config.scripts/blitz.data.sh copy-system "${storageDevice}" storage --resume-setup
         if [ $? -ne 0 ]; then
           echo "FAIL: copy-system (storage) failed" >> ${logFile}
           /home/admin/_cache.sh set state "error"
@@ -970,7 +1050,7 @@ if [ "${scenario}" != "ready" ] ; then
           exit 1
         fi
       else
-        /home/admin/config.scripts/blitz.data.sh copy-system "${systemDevice}" system
+        /home/admin/config.scripts/blitz.data.sh copy-system "${systemDevice}" system --resume-setup
         if [ $? -ne 0 ]; then
           echo "FAIL: copy-system (system) failed" >> ${logFile}
           /home/admin/_cache.sh set state "error"
@@ -978,27 +1058,6 @@ if [ "${scenario}" != "ready" ] ; then
           exit 1
         fi
       fi
-
-      # mark systemCopy as done in raspiblitz.setup
-      if ! sed -i "s/^systemCopy=.*/systemCopy=done/" "${setupFile}"; then
-        echo "error='failed to update systemCopy in setupFile'" >> ${logFile}
-        exit 1
-      fi
-
-      # put setupFile to new system (so after reboot it does not need to ask user again)
-      source <(/home/admin/config.scripts/blitz.data.sh status)
-      mkdir -p /mnt/disk_data 2>/dev/null
-      mount /dev/${dataPartition} /mnt/disk_data
-      echo "copy setupFile(${setupFile}) to /mnt/disk_data/app-data/raspiblitz.setup" >> ${logFile}
-      mkdir -p /mnt/disk_data/app-data 2>/dev/null
-      cp ${setupFile} /mnt/disk_data/app-data/raspiblitz.setup
-      if [ $? -ne 0 ]; then
-        echo "FAIL: copy setupFile to new system failed" >> ${logFile}
-        /home/admin/_cache.sh set state "error"
-        /home/admin/_cache.sh set message "copy setupFile to new system failed"
-        exit 1
-      fi
-      umount /mnt/disk_data
 
       # put flag file into old system 
       touch /home/admin/systemcopy.flag
@@ -1084,7 +1143,7 @@ if [ "${scenario}" != "ready" ] ; then
   ############################################
 
   # if migrationFile was uploaded (value from raspiblitz.setup) - now import
-  source ${setupFile}
+  source /home/admin/setup.scripts/readSetup.sh "${setupFile}" || exit 1
   echo "# migrationFile(/mnt/disk_storage/temp/${migrationFile})" >> ${logFile}
   if [ "${migrationFile}" != "" ]; then
 
@@ -1121,7 +1180,7 @@ if [ "${scenario}" != "ready" ] ; then
     rm -f ${configFile}
     echo "# CREATING raspiblitz.conf from setup file" >> ${logFile}
     source /home/admin/_version.info
-    source ${setupFile}
+    source /home/admin/setup.scripts/readSetup.sh "${setupFile}" || exit 1
     touch ${configFile} >> ${logFile}
     echo "# RASPIBLITZ CONFIG FILE" > ${configFile}
     echo "raspiBlitzVersion='${codeVersion}'" >> ${configFile}
@@ -1139,7 +1198,7 @@ if [ "${scenario}" != "ready" ] ; then
 
   # load fresh setup data
   echo "# Sourcing ${setupFile} " >> ${logFile}
-  source ${setupFile}
+  source /home/admin/setup.scripts/readSetup.sh "${setupFile}" || exit 1
   
   # enable tor service
   /home/admin/config.scripts/tor.install.sh enable >> ${logFile}
@@ -1161,7 +1220,7 @@ if [ "${scenario}" != "ready" ] ; then
 
   # load fresh setup data
   echo "# Sourcing ${setupFile} " >> ${logFile}
-  source ${setupFile}
+  source /home/admin/setup.scripts/readSetup.sh "${setupFile}" || exit 1
 
   # make sure basic info is in raspiblitz.info
   /home/admin/_cache.sh set network "${network}"

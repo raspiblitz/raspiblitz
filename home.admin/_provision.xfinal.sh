@@ -23,7 +23,8 @@ sudo systemctl daemon-reload 2>/dev/null
 
 # delete setup data from RAM
 echo "# removing raspiblitz.setup" >> /home/admin/raspiblitz.log
-sudo rm /var/cache/raspiblitz/temp/raspiblitz.setup
+sudo rm -f -- /run/raspiblitz-setup/raspiblitz.setup /run/raspiblitz-setup/request/raspiblitz.setup /root/.raspiblitz-setup-resume
+sync -f /root
 
 ########################################
 # AFTER SETUP REBOOT

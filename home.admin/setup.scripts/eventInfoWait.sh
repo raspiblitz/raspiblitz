@@ -24,8 +24,8 @@ contentWords=($2)
 contentString=$2
 
 # get progress if available
-progresstype=$(head -n 1 /var/cache/raspiblitz/temp/progress.txt 2>/dev/null)
-progress=$(tail -n 1 /var/cache/raspiblitz/temp/progress.txt 2>/dev/null)
+progresstype=$(head -n 1 /run/raspiblitz-setup/progress.txt 2>/dev/null)
+progress=$(tail -n 1 /run/raspiblitz-setup/progress.txt 2>/dev/null)
 
 # 3rd PARAMETER (optional): Place of display - could be "lcd" or "ssh" (defalt)
 mode=$3
