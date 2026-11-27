@@ -578,8 +578,12 @@ if [ $(uname -a | grep -c 'tegra') -gt 0 ] ; then
 fi
 
 # remove rpi-first-boot-wizard
-apt purge piwiz -y
-userdel -r rpi-first-boot-wizard
+if dpkg-query -W -f='${db:Status-Status}' piwiz 2>/dev/null | grep -qx installed; then
+  apt-get purge -y piwiz || exit 1
+fi
+if id rpi-first-boot-wizard >/dev/null 2>&1; then
+  userdel -r rpi-first-boot-wizard || exit 1
+fi
 
 echo -e "\n*** CONFIG ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#raspi-config
@@ -729,7 +733,7 @@ sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/
 sudo -u admin chmod +x /home/admin/setup.scripts/*.sh || exit 1
 sudo -u admin git config --global --add safe.directory /home/admin/raspiblitz
 # Also configure safe.directory for root user in case root processes need to access the repo
-git config --global --add safe.directory /home/admin/raspiblitz
+sudo -H git config --global --add safe.directory /home/admin/raspiblitz || exit 1
 
 # install newest version of BlitzPy
 blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "any.whl" | tail -n 1)
@@ -850,7 +854,15 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian" ]; then
   systemctl disable hciuart.service
 
   # remove bluetooth packages
-  apt-get remove -y --purge pi-bluetooth bluez bluez-firmware
+  bluetoothPackages=()
+  for pkg in pi-bluetooth bluez bluez-firmware; do
+    if dpkg-query -W -f='${db:Status-Status}' "$pkg" 2>/dev/null | grep -qx installed; then
+      bluetoothPackages+=("$pkg")
+    fi
+  done
+  if [ "${#bluetoothPackages[@]}" -gt 0 ]; then
+    apt-get remove -y --purge "${bluetoothPackages[@]}" || exit 1
+  fi
 
   # disable audio
   echo -e "\n*** DISABLE AUDIO (snd_bcm2835) ***"
