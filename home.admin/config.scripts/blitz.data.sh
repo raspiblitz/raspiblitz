@@ -2240,8 +2240,8 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
             storageMount=$(mktemp -d) || { echo "error='cannot prepare storage mount'"; exit 1; }
             trap 'if mountpoint -q "$storageMount"; then umount "$storageMount"; fi; rmdir -- "$storageMount"' EXIT
             # Do not treat arbitrary sibling partitions as erasable boot and SYSTEM.
-            # A new RaspiBlitz layout leaves them empty. An installed layout has Pi
-            # boot files plus the corresponding RaspiBlitz files on SYSTEM.
+            # Only reuse empty placeholders. Existing boot or system contents
+            # require a separate recovery decision; this path never reformats them.
             if [ "$initialRecoverPartitionCount" = 3 ]; then
                 if [ "$(blkid -s TYPE -o value "/dev/${actionDevicePartitionBase}1")" != vfat ] ||
                    [ "$(blkid -s TYPE -o value "/dev/${actionDevicePartitionBase}2")" != ext4 ] ||
@@ -2250,7 +2250,9 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                     exit 1
                 fi
                 for sibling in 1 2; do
-                    if ! mount -o ro "/dev/${actionDevicePartitionBase}$sibling" "$storageMount"; then
+                    probeOptions=ro
+                    if [ "$sibling" = 2 ]; then probeOptions=ro,noload; fi
+                    if ! mount -o "$probeOptions" "/dev/${actionDevicePartitionBase}$sibling" "$storageMount"; then
                         echo "error='cannot inspect boot or system partition; keeping all partitions'"
                         exit 1
                     fi
@@ -2259,15 +2261,8 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                         exit 1
                     fi
                     if [ -n "$firstEntry" ]; then
-                        if [ "$sibling" = 1 ]; then
-                            if [ ! -f "$storageMount/config.txt" ] || [ ! -f "$storageMount/cmdline.txt" ]; then
-                                echo "error='unrecognized boot files; keeping all partitions'"
-                                exit 1
-                            fi
-                        elif [ ! -f "$storageMount/home/admin/_version.info" ] || [ ! -f "$storageMount/etc/fstab" ]; then
-                            echo "error='unrecognized system files; keeping all partitions'"
-                            exit 1
-                        fi
+                        echo "error='boot or system partition has data; choose recovery or inspect it separately'"
+                        exit 1
                     fi
                     if ! umount "$storageMount"; then
                         echo "error='cannot unmount inspected partition'"
@@ -2275,22 +2270,18 @@ if [ "$action" = "recover" ] || [ "$action" = "clean" ]; then
                     fi
                 done
             fi
-            if ! mount -o ro "/dev/$partition" "$storageMount" || ! has_reusable_blocks "$storageMount"; then
+            if [ "$(blkid -s TYPE -o value "/dev/$partition")" != ext4 ] ||
+               ! mount -t ext4 -o ro,noload "/dev/$partition" "$storageMount" || ! has_reusable_blocks "$storageMount"; then
                 echo "error='no reusable RaspiBlitz block files on the selected storage partition'"
                 exit 1
             fi
-            if ! mount -o remount,rw "/dev/$partition" "$storageMount"; then
-                echo "error='storage partition is not writable'"
+            # Verify the same device again after switching out of the no-journal probe.
+            verifiedDevice=$(stat -c %d "$storageMount")
+            if ! umount "$storageMount" ||
+               ! mount -t ext4 "/dev/$partition" "$storageMount" ||
+               [ "$(stat -c %d "$storageMount")" != "$verifiedDevice" ] || ! has_reusable_blocks "$storageMount"; then
+                echo "error='could not reopen the verified storage partition for writing'"
                 exit 1
-            fi
-            if [ "$initialRecoverPartitionCount" = 3 ]; then
-                if ! { wipefs -a "/dev/${actionDevicePartitionBase}1" &&
-                       mkfs.fat -F 32 "/dev/${actionDevicePartitionBase}1" &&
-                       wipefs -a "/dev/${actionDevicePartitionBase}2" &&
-                       mkfs -t ext4 "/dev/${actionDevicePartitionBase}2"; } >> "$logFile" 2>&1; then
-                    echo "error='failed to prepare boot or system partition'"
-                    exit 1
-                fi
             fi
             echo "# Cleaning $partition, preserving blocks and chainstate" >> "$logFile"
             if ! { find "$storageMount" -mindepth 1 -maxdepth 1 ! -name app-storage -exec rm -rf -- {} + &&
