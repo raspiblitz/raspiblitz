@@ -108,18 +108,27 @@ case $CHOICE in
       OPTIONS+=(DISABLEBLOOM "Disable BIP37 peer bloom filters")
     fi
     edit_and_reload() (
-      local file=$1 action=$2 unit=$3 backup
-      shift 3
+      local file=$1 action=$2 unit=$3 verify=$4 backup
+      shift 4
       backup=$(sudo mktemp /run/raspiblitz-bisq.XXXXXXXX) || return 1
       trap 'sudo rm -f -- "$backup"' EXIT
       sudo cp -- "$file" "$backup" || return 1
-      if "$@" && sudo systemctl "$action" "$unit"; then return 0; fi
+      if "$@" && sudo systemctl "$action" "$unit" && "$verify"; then return 0; fi
       echo "# Failed to apply $file. Restoring the previous configuration." >&2
       if ! sudo cp -- "$backup" "$file" || ! sudo systemctl "$action" "$unit"; then
         echo "# Could not restore the running $unit service. Check systemctl status $unit." >&2
       fi
       return 1
     )
+    verify_bloom() {
+      local services effective
+      services=$(sudo -u bitcoin bitcoin-cli -rpcwait -rpcwaittimeout=60 getnetworkinfo) || return 1
+      effective=$(jq -r 'if (.localservicesnames | index("BLOOM")) == null then "0" else "1" end' <<<"$services") || return 1
+      if [ "$effective" != "$value" ]; then
+        echo "# Bitcoin Core's live BLOOM flag differs from the global setting. Check network or command-line overrides." >&2
+        return 1
+      fi
+    }
     set_bloom() {
       local value=$1
       if [ ! -s "$bitcoin_conf" ]; then
@@ -127,18 +136,17 @@ case $CHOICE in
         return 1
       fi
       # Keep the managed default global even if the operator added network sections.
-      edit_and_reload "$bitcoin_conf" restart bitcoind sudo sed -i -E -e "1i peerbloomfilters=$value" \
+      edit_and_reload "$bitcoin_conf" restart bitcoind verify_bloom sudo sed -i -E -e "1i peerbloomfilters=$value" \
         -e '0,/^[[:space:]]*\[/{/^[[:space:]]*peerbloomfilters[[:space:]]*=/d;}' "$bitcoin_conf" || return 1
-      local services
-      if services=$(sudo -u bitcoin bitcoin-cli -rpcwait -rpcwaittimeout=10 getnetworkinfo 2>/dev/null); then
-        local effective
-        effective=$(jq -r 'if (.localservicesnames | index("BLOOM")) == null then "0" else "1" end' <<<"$services")
-        if [ "$effective" != "$value" ]; then
-          echo "# Bitcoin Core's live BLOOM flag differs from the global setting. Check network or command-line overrides." >&2
-          return 1
-        fi
-      else
-        echo "# Global BIP37 setting saved. Bitcoin Core RPC is not ready to verify the live service flag yet." >&2
+
+    }
+    remove_bisq_service() {
+      # Remove only the exact four-line stanza written above; keep custom Tor services.
+      edit_and_reload /etc/tor/torrc reload tor@default true sudo sed -i "/^# Hidden Service for Bisq (bitcoin P2P v3)$/{N;N;N;
+        \\|\\nHiddenServiceDir ${bisq_dir}\\nHiddenServiceVersion 3\\nHiddenServicePort 8333 127\\.0\\.0\\.1:8333$|d;}" /etc/tor/torrc || return 1
+      if grep -Fxq "HiddenServiceDir ${bisq_dir}" /etc/tor/torrc; then
+        echo "# Custom Bisq hidden service found. Remove it manually from torrc." >&2
+        return 1
       fi
     }
     CHOICE=$(dialog --clear \
@@ -156,7 +164,7 @@ case $CHOICE in
           clear
           if [ "$has_service" = 0 ]; then
             echo "# Creating the Hidden Service for Bisq"
-            edit_and_reload /etc/tor/torrc reload tor@default sudo tee -a /etc/tor/torrc <<EOF || exit 1
+            edit_and_reload /etc/tor/torrc reload tor@default true sudo tee -a /etc/tor/torrc <<EOF || exit 1
 
 # Hidden Service for Bisq (bitcoin P2P v3)
 HiddenServiceDir /mnt/hdd/app-data/tor/bisq
@@ -170,6 +178,7 @@ EOF
                 sleep 10
                 TOR_ADDRESS=$(sudo cat /mnt/hdd/app-data/tor/bisq/hostname)
                 if [ -z "$TOR_ADDRESS" ]; then
+                  remove_bisq_service || echo "# Check the Bisq service in torrc." >&2
                   echo "# FAIL - The Hidden Service address could not be found - Tor error?"
                   exit 1
                 fi
@@ -183,7 +192,10 @@ EOF
             exit 1
           fi
           if [ "$bloom" = OFF ]; then
-            set_bloom 1 || exit 1
+            if ! set_bloom 1; then
+              if [ "$has_service" = 0 ]; then remove_bisq_service || echo "# Check the Bisq service in torrc." >&2; fi
+              exit 1
+            fi
           fi
           echo
           echo "Install from https://bisq.network/downloads/"
@@ -195,13 +207,7 @@ EOF
           read key
           exit 0;;
         REMOVEBISQ)
-          # Remove only the exact four-line stanza written above; keep custom Tor services.
-          edit_and_reload /etc/tor/torrc reload tor@default sudo sed -i "/^# Hidden Service for Bisq (bitcoin P2P v3)$/{N;N;N;
-            \\|\\nHiddenServiceDir ${bisq_dir}\\nHiddenServiceVersion 3\\nHiddenServicePort 8333 127\\.0\\.0\\.1:8333$|d;}" /etc/tor/torrc || exit 1
-          if grep -Fxq "HiddenServiceDir ${bisq_dir}" /etc/tor/torrc; then
-            echo "# Custom Bisq hidden service found. Remove it manually from torrc." >&2
-            exit 1
-          fi
+          remove_bisq_service || exit 1
           if [ "$bloom" = ON ]; then set_bloom 0 || exit 1; fi
           ;;
         DISABLEBLOOM)

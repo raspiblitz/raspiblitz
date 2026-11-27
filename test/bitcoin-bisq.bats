@@ -10,7 +10,20 @@ setup() {
   sed -e "s@/home/admin@$box/admin@g" -e "s@/mnt/hdd/app-data@$box/data@g" \
     -e "s@/run/raspiblitz-bisq@$box/temp.bisq@g" -e "s@/etc/tor@$box/tor@g" "$BATS_TEST_DIRNAME/../home.admin/99connectMenu.sh" >"$box/menu"
   printf '#!/bin/sh\nexit 0\n' >"$box/admin/_cache.sh"
-  printf '#!/bin/sh\nexec "$@"\n' >"$BATS_TEST_TMPDIR/bin/sudo"
+  cat >"$BATS_TEST_TMPDIR/bin/sudo" <<'SH'
+#!/bin/sh
+if [ "$1" = -u ]; then shift 2; fi
+exec "$@"
+SH
+  cat >"$BATS_TEST_TMPDIR/bin/bitcoin-cli" <<'SH'
+#!/bin/sh
+[ "${rpc_fail:-0}" = 0 ] || exit 1
+if grep -qx peerbloomfilters=1 "$box/data/bitcoin/bitcoin.conf"; then
+  echo '{"localservicesnames":["BLOOM"]}'
+else
+  echo '{"localservicesnames":[]}'
+fi
+SH
   printf '#!/bin/sh\necho "$*" >> "$box/services"\n[ "$*" != "${failed_service:-}" ]\n' >"$BATS_TEST_TMPDIR/bin/systemctl"
   printf '#!/bin/sh\nexit 0\n' >"$BATS_TEST_TMPDIR/bin/sleep"
   cat >"$BATS_TEST_TMPDIR/bin/dialog" <<'SH'
@@ -58,6 +71,8 @@ menu() {
   rm "$box/data/tor/bisq/hostname"
   menu ADDBISQ
   [ "$status" -eq 1 ]
+  run grep -q HiddenServiceDir "$box/tor/torrc"
+  [ "$status" -eq 1 ]
   run grep -q '^peerbloomfilters=1' "$box/data/bitcoin/bitcoin.conf"
   [ "$status" -eq 1 ]
   run grep -q '^restart bitcoind' "$box/services"
@@ -76,4 +91,14 @@ menu() {
   menu ADDBISQ
   [ "$status" -eq 1 ]
   cmp "$box/previous" "$conf"
+}
+
+@test "a failed live BIP37 check restores the Bitcoin and Tor configurations" {
+  cp "$box/data/bitcoin/bitcoin.conf" "$box/before"
+  export rpc_fail=1
+  menu ADDBISQ
+  [ "$status" -eq 1 ]
+  cmp "$box/before" "$box/data/bitcoin/bitcoin.conf"
+  run grep -q HiddenServiceDir "$box/tor/torrc"
+  [ "$status" -eq 1 ]
 }
