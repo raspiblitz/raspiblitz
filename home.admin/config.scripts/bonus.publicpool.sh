@@ -122,10 +122,15 @@ export const environment = {
 EOL
 
   echo "##### Install Backend"
-  cd /home/${APPID}/${APPID}
-  sudo npm install zeromq
-  sudo chown publicpool:publicpool -R /home/${APPID}/${APPID}
-  sudo -u ${APPID} npm install || exit 1
+  cd /home/${APPID}/${APPID} || exit 1
+  # SQLite stores the high-score timestamp in UTC without a zone. Include the
+  # zone in the API response so browsers display the same instant everywhere.
+  clockPatch=/home/admin/assets/public-pool-highscore-utc.patch
+  if ! sudo -u "${APPID}" git apply --reverse --check "${clockPatch}" 2>/dev/null; then
+    sudo -u "${APPID}" git apply "${clockPatch}" || { echo "# FAIL - check Public Pool high-score query compatibility"; exit 1; }
+  fi
+  # zeromq is included in Public Pool's package-lock.json.
+  sudo -u "${APPID}" npm ci || exit 1
   echo "##### Build Backend"
   sudo -u ${APPID} npm run build || exit 1
 

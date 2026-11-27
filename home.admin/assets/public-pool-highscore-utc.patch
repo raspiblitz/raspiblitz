@@ -1,0 +1,11 @@
+diff --git a/src/ORM/address-settings/address-settings.service.ts b/src/ORM/address-settings/address-settings.service.ts
+index a934993..421ee40 100644
+--- a/src/ORM/address-settings/address-settings.service.ts
++++ b/src/ORM/address-settings/address-settings.service.ts
+@@ -52,5 +52,5 @@ export class AddressSettingsService {
+     public async getHighScores() {
+         return await this.addressSettingsRepository.createQueryBuilder()
+-            .select('"updatedAt", "bestDifficulty", "bestDifficultyUserAgent"')
++            .select(`COALESCE(strftime('%Y-%m-%dT%H:%M:%fZ', "updatedAt"), "updatedAt") AS "updatedAt", "bestDifficulty", "bestDifficultyUserAgent"`)
+             .orderBy('"bestDifficulty"', 'DESC')
+             .limit(10)
