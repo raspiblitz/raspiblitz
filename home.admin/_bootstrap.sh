@@ -1286,22 +1286,13 @@ if [ "${scenario}" != "ready" ] ; then
   # mark provision process done
   /home/admin/_cache.sh set message "Provision Done"
 
-  # wait until syncProgress is available (neeed for final dialogs)
+  # Wait until Bitcoin RPC is ready for the final dialogs.
   /home/admin/_cache.sh set state "waitsync"
-  btc_default_ready="0"
-  loop_counter=0
-  while [ "${btc_default_ready}" != "1" ]
-  do
-    loop_counter=$((loop_counter + 1))
-    source <(/home/admin/_cache.sh get btc_default_ready)
-    echo "# waitsync loop ${loop_counter} ... btc_default_ready(${btc_default_ready})" >> $logFile
-    sleep 2
-    if [ ${loop_counter} -eq 30 ]; then
-      echo "LOOP TAKES TOO LONG: Try deleting settings.json & force restart" >> $logFile
-      rm /mnt/hdd/app-storage/bitcoin/settings.json
-      systemctl restart bitcoind
-    fi
-  done
+  if ! bash /home/admin/setup.scripts/waitBitcoinReady.sh "${chain:-main}" >> "$logFile" 2>&1; then
+    /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "bitcoin-readiness-failed" "" \
+      "See the Bitcoin unit in the setup log, correct the startup error, then reboot to retry." "$logFile"
+    exit 1
+  fi
 
   # one time add info on blockchain sync to chache
   source <(/home/admin/_cache.sh get chain)
