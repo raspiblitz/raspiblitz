@@ -705,6 +705,20 @@ if [ "${scenario}" != "ready" ] ; then
 
   echo "## WAIT LOOP: USER SETUP/UPDATE/MIGRATION" >> ${logFile}
   echo "state(${state})" >> ${logFile}
+  request_setup_again() {
+    # A rejected checkpoint must not be selected again after retry or reboot.
+    if [ "$resumeFromCopiedSystem" = 1 ]; then
+      if ! rm -f -- /root/.raspiblitz-setup-resume || ! sync -f /root; then
+        /home/admin/_cache.sh set message "Could not retire the rejected setup checkpoint."
+        /home/admin/_cache.sh set state error
+        return 1
+      fi
+      resumeFromCopiedSystem=0
+    fi
+    state=waitsetup
+    /home/admin/_cache.sh set message "$1"
+    /home/admin/_cache.sh set state "$state"
+  }
   while true; do
     until [ "${state}" = "waitprovision" ]
     do
@@ -732,15 +746,11 @@ if [ "${scenario}" != "ready" ] ; then
     unset deleteData systemCopy menuchoice passwordA
     if [ "$resumeFromCopiedSystem" != 1 ] &&
        ! python3 /home/admin/setup.scripts/freezeSetup.py /run/raspiblitz-setup/request/raspiblitz.setup "$setupFile"; then
-      state=waitsetup
-      /home/admin/_cache.sh set message "No complete choices were received. Open the matching API or SSH setup."
-      /home/admin/_cache.sh set state "$state"
+      request_setup_again "No complete choices were received. Open the matching API or SSH setup." || exit 1
       continue
     fi
     if [ ! -f "${setupFile}" ] || [ -L "${setupFile}" ] || ! source /home/admin/setup.scripts/readSetup.sh "${setupFile}"; then
-      /home/admin/_cache.sh set message "Setup choices unavailable. Use the matching API or restart setup over SSH."
-      state=waitsetup
-      /home/admin/_cache.sh set state "${state}"
+      request_setup_again "Setup choices unavailable. Use the matching API or restart setup over SSH." || exit 1
       continue
     fi
     case "${scenario}" in
@@ -756,9 +766,7 @@ if [ "${scenario}" != "ready" ] ; then
     # SSH may omit systemCopy when no copy was offered. A fresh setup must
     # always carry an explicit disk choice, including a forced fresh recovery.
     if [ -z "$passwordA" ] || { [ "${systemCopy}" = done ] && [ "$resumeFromCopiedSystem" != 1 ]; }; then
-      state=waitsetup
-      /home/admin/_cache.sh set message "Required setup choices are missing. Reopen setup."
-      /home/admin/_cache.sh set state "$state"
+      request_setup_again "Required setup choices are missing. Reopen setup." || exit 1
       continue
     fi
     if [ "${scenario}" != setup ] && ! { [ "${scenario}" = recover ] && [ "${menuchoice}" = setup ]; }; then
@@ -780,9 +788,7 @@ if [ "${scenario}" != "ready" ] ; then
       fi
     fi
     echo "Incomplete setup drive choice. Returning to setup before touching storage." >> "${logFile}"
-    state=waitsetup
-    /home/admin/_cache.sh set message "Drive choice missing or inconsistent. Open setup again."
-    /home/admin/_cache.sh set state "${state}"
+    request_setup_again "Drive choice missing or inconsistent. Open setup again." || exit 1
   done
 
   # overwrite recover by user choice

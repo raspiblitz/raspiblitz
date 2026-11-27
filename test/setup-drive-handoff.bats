@@ -11,7 +11,7 @@ setup() {
   # before its first drive command. The cache and disk inspector are fixtures.
   sed -n '/^  echo "state(${state})"/,/^  # even when the user decided/{p; /^  # even when the user decided/q;}' \
     "$BATS_TEST_DIRNAME/../home.admin/_bootstrap.sh" |
-    sed -e "s|/home/admin|$FIXTURE/admin|g" -e "s|/run/raspiblitz-setup/request/raspiblitz.setup|$FIXTURE/request|g" > "$FIXTURE/handoff"
+    sed -e "s|/home/admin|$FIXTURE/admin|g" -e "s|/root|$FIXTURE|g" -e "s|/run/raspiblitz-setup/request/raspiblitz.setup|$FIXTURE/request|g" > "$FIXTURE/handoff"
   printf '\nprintf "selected=%%s\\n" "$setupCommand"\n' >> "$FIXTURE/handoff"
   printf '#!/bin/sh\necho "scenario=$FIXTURE_SCENARIO"\necho "setupDriveIdentity=${FIXTURE_INVENTORY:-fixture-id}"\n' > "$FIXTURE/admin/config.scripts/blitz.data.sh"
   cat > "$FIXTURE/admin/_cache.sh" <<'SH'
@@ -85,4 +85,17 @@ PY
   [ "$status" = 1 ]
   [ "$(cat "$FIXTURE/states")" = error ]
   [[ "$output" != *selected=setup* ]]
+}
+
+
+@test "rejecting a saved checkpoint accepts the next UI submission" {
+  export resumeFromCopiedSystem=1
+  printf 'systemCopy=done\n' > "$setupFile"
+  cp "$setupFile" "$FIXTURE/.raspiblitz-setup-resume"
+  printf 'passwordA=Fixture-A\nsystemCopy=0\ndeleteData=keepBlockchain\n' > "$FIXTURE/retry"
+  run timeout 4 bash "$FIXTURE/handoff"
+  [ "$status" = 0 ]
+  [ "$(cat "$FIXTURE/states")" = waitsetup ]
+  [ ! -e "$FIXTURE/.raspiblitz-setup-resume" ]
+  [[ "$output" == *selected=clean* ]]
 }
