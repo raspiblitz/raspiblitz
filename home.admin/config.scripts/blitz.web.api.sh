@@ -236,14 +236,19 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "error='Invalid API branch'"
     exit 1
   fi
-  if ! GIT_TERMINAL_PROMPT=0 git ls-remote --exit-code --heads "$api_url" "refs/heads/${GITHUB_BRANCH}" >/dev/null; then
+  api_branch_available() {
+    local ref="refs/heads/$1" refs
+    refs=$(GIT_TERMINAL_PROMPT=0 git ls-remote --exit-code --heads "$api_url" "$ref") || return 1
+    cut -f2 <<<"$refs" | grep -Fxq -- "$ref"
+  }
+  if ! api_branch_available "$GITHUB_BRANCH"; then
     if [[ "${GITHUB_BRANCH}" == blitz-v* ]]; then
       echo "error='Could not verify the requested API release branch. Check connectivity and retry.'"
       exit 1
     fi
     echo "# Development branch unavailable; checking fallback branch ${FALLACK_BRANCH}"
     GITHUB_BRANCH="${FALLACK_BRANCH}"
-    GIT_TERMINAL_PROMPT=0 git ls-remote --exit-code --heads "$api_url" "refs/heads/${GITHUB_BRANCH}" >/dev/null || exit 1
+    api_branch_available "$GITHUB_BRANCH" || exit 1
   fi
 
   echo "# INSTALL Web API & Celery Services..."
