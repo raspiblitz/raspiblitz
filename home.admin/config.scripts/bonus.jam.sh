@@ -147,6 +147,52 @@ if [ "$1" = "uninstall" ]; then
   exit 0
 fi
 
+activate_jam_nginx() (
+  shopt -s nullglob
+  backup=$(mktemp -d) || exit 1
+  trap 'sudo rm -rf -- "$backup"' EXIT
+  names=(jam_ssl.conf jam_tor.conf jam_tor_ssl.conf)
+  legacy=(/etc/nginx/sites-{available,enabled}/joinmarket_webui_*)
+  paths=("${legacy[@]}")
+  for name in "${names[@]}"; do
+    paths+=("/etc/nginx/sites-available/$name" "/etc/nginx/sites-enabled/$name")
+  done
+  for path in "${paths[@]}"; do
+    if [[ -e "$path" || -L "$path" ]]; then
+      sudo cp -a --parents -- "$path" "$backup" || exit 1
+    fi
+  done
+
+  apply_sites() {
+    sudo rm -f -- "${legacy[@]}" || return 1
+    for name in "${names[@]}"; do
+      sudo install -m 0644 "/home/admin/assets/nginx/sites-available/$name" "/etc/nginx/sites-available/$name" || return 1
+      sudo ln -sfn "/etc/nginx/sites-available/$name" "/etc/nginx/sites-enabled/$name" || return 1
+    done
+    sudo nginx -t && sudo systemctl reload nginx &&
+      sudo ufw allow proto tcp from any to any port 7500:7501 comment 'allow JAM HTTP and HTTPS'
+  }
+  if ! apply_sites; then
+    trap - EXIT
+    restored=1
+    for path in "${paths[@]}"; do
+      if ! sudo rm -f -- "$path"; then
+        restored=0
+        continue
+      fi
+      if [[ -e "$backup$path" || -L "$backup$path" ]]; then
+        sudo cp -a -- "$backup$path" "$path" || restored=0
+      fi
+    done
+    if [ "$restored" = 1 ] && sudo nginx -t && sudo systemctl reload nginx; then
+      sudo rm -rf -- "$backup"
+    else
+      echo "# JAM nginx restore incomplete. Previous site files retained at $backup" >&2
+    fi
+    exit 1
+  fi
+)
+
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
@@ -168,27 +214,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   sudo /home/admin/config.scripts/bonus.joinmarket.sh on 1>&2 || exit 1
 
   echo "# *** ACTIVATING JAM ***"
-
-  ##################
-  # NGINX
-  ##################
-  # remove legacy nginx symlinks and configs
-  sudo rm -f /etc/nginx/sites-enabled/joinmarket_webui_* 1>&2
-  sudo rm -f /etc/nginx/sites-available/joinmarket_webui_* 1>&2
-  # setup nginx symlinks
-  sudo cp -f /home/admin/assets/nginx/sites-available/jam_ssl.conf /etc/nginx/sites-available/jam_ssl.conf 1>&2
-  sudo cp -f /home/admin/assets/nginx/sites-available/jam_tor.conf /etc/nginx/sites-available/jam_tor.conf 1>&2
-  sudo cp -f /home/admin/assets/nginx/sites-available/jam_tor_ssl.conf /etc/nginx/sites-available/jam_tor_ssl.conf 1>&2
-  sudo ln -sf /etc/nginx/sites-available/jam_ssl.conf /etc/nginx/sites-enabled/ 1>&2
-  sudo ln -sf /etc/nginx/sites-available/jam_tor.conf /etc/nginx/sites-enabled/ 1>&2
-  sudo ln -sf /etc/nginx/sites-available/jam_tor_ssl.conf /etc/nginx/sites-enabled/ 1>&2
-  sudo nginx -t 1>&2
-  sudo systemctl reload nginx 1>&2
-
-  # open the firewall
-  echo "# *** Updating Firewall ***" 1>&2
-  sudo ufw allow from any to any port 7500 comment 'allow Jam HTTP' 1>&2
-  sudo ufw allow from any to any port 7501 comment 'allow Jam HTTPS' 1>&2
 
   #########################
   ## JOINMARKET-API SERVICE
@@ -233,28 +258,55 @@ WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/joinmarket-api.service 1>&2
   sudo systemctl enable joinmarket-api 1>&2
 
+  source $RASPIBLITZ_INFO
+  if [ "${state}" == "ready" ]; then
+      echo "# OK - the joinmarket-api.service is enabled, system is ready so starting service"
+      if ! sudo systemctl start joinmarket-api; then
+        echo "error='joinmarket-api failed to start'"
+        exit 1
+      fi
+  else
+      echo "# OK - the joinmarket-api.service is enabled, to start manually use: 'sudo systemctl start joinmarket-api'"
+  fi
+
+  echo "# Start the joinmarket ob-watcher.service"
+  if ! sudo -u joinmarket /home/joinmarket/menu.orderbook.sh startOrderBookService 1>&2; then
+    echo "error='JoinMarket orderbook watcher failed to start'"
+    exit 1
+  fi
+  # The helper can exit successfully before the local HTTP service is listening.
+  if [ "${state}" = "ready" ]; then
+    set -o pipefail
+    if ! curl --noproxy '*' --silent --show-error --fail --max-time 3 \
+        --retry 10 --retry-delay 1 --retry-connrefused --retry-max-time 20 \
+        http://127.0.0.1:62601/orderbook.json | jq -e 'type == "array" or (.offers | type == "array")' >/dev/null; then
+      echo "error='JoinMarket orderbook unavailable. Check journalctl -u ob-watcher'"
+      exit 1
+    fi
+  fi
+
   # remove legacy name
   /home/admin/config.scripts/blitz.conf.sh delete joinmarketWebUI $RASPIBLITZ_CONF 1>&2
   # setting value in raspiblitz config
-  /home/admin/config.scripts/blitz.conf.sh set jam on $RASPIBLITZ_CONF 1>&2
+  /home/admin/config.scripts/blitz.conf.sh set jam on $RASPIBLITZ_CONF 1>&2 || exit 1
 
   # Hidden Service for jam if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
       # remove legacy
       /home/admin/config.scripts/tor.onion-service.sh off joinmarket-webui 1>&2
       # add jam
-      /home/admin/config.scripts/tor.onion-service.sh jam 80 7502 443 7503 1>&2
+      /home/admin/config.scripts/tor.onion-service.sh jam 80 7502 443 7503 1>&2 || exit 1
   fi
-  source $RASPIBLITZ_INFO
-  if [ "${state}" == "ready" ]; then
-      echo "# OK - the joinmarket-api.service is enabled, system is ready so starting service"
-      sudo systemctl start joinmarket-api
-  else
-      echo "# OK - the joinmarket-api.service is enabled, to start manually use: 'sudo systemctl start joinmarket-api'"
+  # Open both TCP ports in one rule only once the other activation steps succeed.
+  if ! activate_jam_nginx >&2; then
+    if [ -n "${jam:-}" ]; then
+      /home/admin/config.scripts/blitz.conf.sh set jam "$jam" "$RASPIBLITZ_CONF" >&2
+    else
+      /home/admin/config.scripts/blitz.conf.sh delete jam "$RASPIBLITZ_CONF" >&2
+    fi
+    echo "error='JAM nginx or firewall configuration could not be activated'"
+    exit 1
   fi
-
-  echo "# Start the joinmarket ob-watcher.service"
-  sudo -u joinmarket /home/joinmarket/menu.orderbook.sh startOrderBookService 1>&2
   echo "# For the connection details run: /home/admin/config.scripts/bonus.jam.sh menu"
   echo "result='OK'"
   exit 0
@@ -355,6 +407,8 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo rm -f /etc/systemd/system/joinmarket-api.service
 
   # close ports on firewall
+  sudo ufw delete allow proto tcp from any to any port 7500:7501 1>&2
+  # Older installations used individual rules.
   sudo ufw delete allow from any to any port 7500 1>&2
   sudo ufw delete allow from any to any port 7501 1>&2
 
