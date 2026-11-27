@@ -187,7 +187,7 @@ if [ "$1" = "menu" ]; then
   if [ "$backend_state" = "Running" ]; then
     # tailscale set changes one saved preference and keeps the VPN connected.
     dns_choice=$(whiptail --title "Tailscale DNS" --cancel-button "Back" --menu \
-      "Connected as ${login_name}. Keep the current setting or choose which DNS this node uses. Local DNS can restore Internet lookups when the tailnet resolver fails. Tailnet-only names may then stop resolving." \
+      "Connected as ${login_name}. Keep the current setting or choose which DNS this node uses. Local DNS can restore Internet lookups when the tailnet resolver fails. Private tailnet names may then be sent to your regular DNS server and fail to resolve." \
       0 0 3 KEEP "Keep current DNS settings" LOCAL "Use the node's regular DNS" TAILNET "Accept DNS from the tailnet" \
       3>&1 1>&2 2>&3) || exit 0
     case "$dns_choice" in

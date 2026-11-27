@@ -25,10 +25,11 @@ SH
 
 @test "the running VPN keeps other preferences while switching DNS in either direction" {
   for pair in LOCAL:false TAILNET:true; do
+    : >"$calls"
     export choice=${pair%:*}
     run sh "$menu" menu
     [ "$status" -eq 0 ]
-    grep -Fxq "set --accept-dns=${pair#*:}" "$calls"
+    [ "$(grep '^set ' "$calls")" = "set --accept-dns=${pair#*:}" ]
   done
   ! grep -Eq '^(up|down|logout|login)' "$calls"
 }

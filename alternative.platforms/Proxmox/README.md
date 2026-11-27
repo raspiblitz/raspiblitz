@@ -194,4 +194,4 @@ Now you can call the IP address of your VM in the browser and perform the normal
 
 ### DNS after connecting Tailscale
 
-On a Debian VM, a tailnet DNS configuration that cannot resolve public names can interrupt APT downloads. Open **TAILSCALE** in the RaspiBlitz SSH main menu and select **LOCAL** to use the node's regular DNS while keeping the VPN connected. This requires a working local resolver. Check it with `getent hosts deb.debian.org`. Tailnet-only names may stop resolving in this mode. Select **TAILNET** to accept the tailnet DNS configuration again.
+On a Debian VM, a tailnet DNS configuration that cannot resolve public names can interrupt APT downloads. Open **TAILSCALE** in the RaspiBlitz SSH main menu and select **LOCAL** to use the node's regular DNS while keeping the VPN connected. This requires a working local resolver. Check it with `getent hosts deb.debian.org`. In this mode, applications may send private tailnet names to the regular resolver and those lookups may fail. Select **TAILNET** to accept the tailnet DNS configuration again.
