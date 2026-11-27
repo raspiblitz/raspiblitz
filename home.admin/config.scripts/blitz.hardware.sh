@@ -3,8 +3,44 @@
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
  echo "Hardware Tool Script"
- echo "blitz.hardware.sh [status]"
+ echo "blitz.hardware.sh status"
+ echo "blitz.hardware.sh check [smart]"
  exit 1
+fi
+
+# A quick, read-only inventory for bootstrap, support reports and the menus.
+if [ "$1" = "check" ]; then
+    echo "Block devices (name, type, transport, size):"
+    lsblk --nodeps --exclude 7 --output NAME,TYPE,TRAN,SIZE || exit 1
+    if command -v lsusb >/dev/null; then
+        echo "USB topology and negotiated link speeds:"
+        lsusb -t
+    fi
+    if [ "${2:-}" = "smart" ]; then
+        echo "Drive health (read-only SMART summary):"
+        if ! command -v smartctl >/dev/null; then
+            echo "smartctl is unavailable."
+            exit 1
+        fi
+        found=0
+        health_status=0
+        while read -r name type transport; do
+            [ "$type" = "disk" ] || continue
+            case "$transport" in
+                sata|ata|sas|usb|nvme)
+                    found=1
+                    echo "/dev/$name"
+                    # Avoid waking a sleeping drive or starting a self-test.
+                    smartctl -n standby,0 -H "/dev/$name" || health_status=1
+                    ;;
+            esac
+        done < <(lsblk --nodeps --noheadings --raw --output NAME,TYPE,TRAN)
+        if [ "$found" = 0 ]; then
+            echo "No SATA, SAS, USB or NVMe disks reported by lsblk."
+        fi
+        exit "$health_status"
+    fi
+    exit 0
 fi
 
 ########################

@@ -45,6 +45,9 @@ echo "Running RaspiBlitz Bootstrap ${codeVersion}" >> $logFile
 date >> $logFile
 echo "***********************************************" >> $logFile
 
+# Record a read-only drive inventory before setup even if the data disk is missing.
+/home/admin/config.scripts/blitz.hardware.sh check >> "$logFile" 2>&1
+
 # list all running systemd services for future debug
 systemctl list-units --type=service --state=running >> $logFile
 

@@ -477,6 +477,7 @@ sudo /home/admin/config.scripts/blitz.zram.sh status
 echo
 
 echo "*** HARDWARE TEST RESULTS ***"
+/home/admin/config.scripts/blitz.hardware.sh check
 sudo vcgencmd get_throttled 2>/dev/null
 source <(/home/admin/_cache.sh get system_count_undervoltage)
 showImproveInfo=0
