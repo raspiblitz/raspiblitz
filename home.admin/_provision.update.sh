@@ -33,19 +33,49 @@ if [ ! -f ${configFile} ]; then
   exit 1
 fi
 
-# load old or init raspiblitz config
-source ${configFile}
+# On v1.12 app-data may link to either DATA or combined DATA/STORAGE.
+# A stale directory on the system partition must never receive upgrade writes.
+resolvedConfig=$(realpath -e -- "${configFile}")
+dataMount=$(findmnt --first-only --noheadings --output TARGET --target "${resolvedConfig}")
+case "${dataMount}" in
+  /mnt/disk_data|/mnt/disk_storage|/mnt/hdd) ;;
+  *) dataMount="" ;;
+esac
+if [ -z "${dataMount}" ] || [ "${resolvedConfig}" != "${dataMount}/app-data/raspiblitz.conf" ]; then
+  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "data-not-mounted" "Check the DATA mount for ${configFile}" "" ${logFile}
+  exit 1
+fi
+# blitz.data.sh records the selected block device in fstab. Verify that the
+# file really lives on that device, including when another mount covers it.
+expectedSource=$(findmnt --fstab --evaluate --first-only --noheadings --output SOURCE --mountpoint "${dataMount}")
+expectedDevice=$(lsblk --nodeps --noheadings --raw --output MAJ:MIN -- "${expectedSource}" 2>/dev/null)
+configDevice=$(stat -L -c '%Hd:%Ld' -- "${resolvedConfig}")
+fsRoot=$(findmnt --first-only --noheadings --output FSROOT --target "${resolvedConfig}")
+if [ -z "${expectedDevice}" ] || [ "${configDevice}" != "${expectedDevice}" ] || [ "${fsRoot}" != "/" ]; then
+  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "wrong-data-device" "Check the configured and mounted DATA device at ${dataMount}" "" ${logFile}
+  exit 1
+fi
+configFile="${resolvedConfig}"
 
-# if hostname missing - set default
-if [ ${#hostname} -eq 0 ]; then
-  /home/admin/config.scripts/blitz.conf.sh set hostname "raspiblitz"
-  source ${configFile}
+# Read the saved name separately from the setup session's proposed name.
+setupHostname=${hostname:-}
+unset hostname
+if ! source "${configFile}"; then
+  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "unreadable-config" "Cannot load ${configFile}" "" ${logFile}
+  exit 1
 fi
 
-# re-check if config files contains hostname value
-if [ ${#hostname} -eq 0 ]; then
-  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "missing-hostname" "${setupFile} or ${configFile} contains no hostname" "" ${logFile}
-  exit 1
+# if hostname missing - set default
+if [ -z "${hostname:-}" ]; then
+  if ! [[ "${setupHostname}" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$ ]]; then
+    setupHostname=raspiblitz
+  fi
+  if ! /home/admin/config.scripts/blitz.conf.sh set hostname "${setupHostname}" "${configFile}" ||
+     ! grep -Fxq "hostname='${setupHostname}'" "${configFile}"; then
+    /home/admin/config.scripts/blitz.error.sh _provision.update.sh "missing-hostname" "Could not save hostname on DATA. Check free space and write access to ${configFile}" "" ${logFile}
+    exit 1
+  fi
+  hostname="${setupHostname}"
 fi
 
 # check if config files contain lightning (lnd is default) introduced in v1.7.1
