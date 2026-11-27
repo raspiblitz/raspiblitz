@@ -52,6 +52,7 @@ SH
   export ln_default_recovery_mode=1
   unset ln_default_recovery_done
   run bash show.sh ssh
+  [ "$status" -eq 0 ]
   [[ "$output" == *"Wallet recovery: unknown"* ]]
 }
 
@@ -59,6 +60,7 @@ SH
   printf 'lightning=lnd\n' > raspiblitz.conf
   printf '#!/bin/bash\nexit 1\n' > redis-cli
   run bash show.sh lcd
+  [ "$status" -eq 0 ]
   [[ "$output" == *"LND chain scan : waiting for RPC"* ]]
   [[ "$output" == *"LND graph      : unknown"* ]]
 }
