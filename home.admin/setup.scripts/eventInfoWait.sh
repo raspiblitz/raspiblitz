@@ -52,6 +52,26 @@ backtitle="${codeVersion}-${codeRelease} ${eventID} ${internet_localip} ${temp_i
 
 if [ "${eventID}" == "starting" ] || [ "${eventID}" == "system-init" ]; then
 
+    # Early boot may still be probing storage or connectivity. Report a known
+    # loss of carrier while preserving the startup screen if link state is unknown.
+    if [ "${mode}" = "lcd" ]; then
+        linkDown=0
+        for iface in /sys/class/net/*; do
+            [ -e "$iface/device" ] || continue
+            case "$(cat "$iface/carrier" 2>/dev/null)" in
+                1) linkDown=0; break ;;
+                0) linkDown=1 ;;
+            esac
+        done
+        if [ "$linkDown" = 1 ]; then
+            dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+No network link
+Check the Ethernet cable or Wi-Fi.
+" 6 39
+            exit 0
+        fi
+    fi
+
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
 Starting RaspiBlitz
 Please wait ...
