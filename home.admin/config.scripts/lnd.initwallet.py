@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import re
+import stat
 import sys
 import time
 from pathlib import Path
@@ -36,14 +37,32 @@ else:
 
 def stage_recovery(path, record):
     # O_EXCL also refuses a previous, uncertain initialization attempt.
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    with os.fdopen(fd, "w") as stream:
-        stream.write(record)
-        stream.flush()
-        os.fsync(stream.fileno())
-    directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+    path.parent.mkdir(mode=0o700, exist_ok=True)
+    directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
     try:
-        os.fsync(directory)
+        info = os.fstat(directory)
+        if info.st_uid != os.geteuid() or stat.S_IMODE(info.st_mode) != 0o700:
+            raise PermissionError("unsafe recovery directory")
+        parent = os.open("..", os.O_RDONLY | os.O_DIRECTORY, dir_fd=directory)
+        try:
+            os.fsync(parent)
+        finally:
+            os.close(parent)
+        fd = os.open(path.name, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600, dir_fd=directory)
+        created = os.fstat(fd)
+        try:
+            with os.fdopen(fd, "w") as stream:
+                stream.write(record)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.fsync(directory)
+        except OSError:
+            # No InitWallet RPC has run. Remove only this attempt's inode.
+            current = os.stat(path.name, dir_fd=directory, follow_symlinks=False)
+            if os.path.samestat(created, current):
+                os.unlink(path.name, dir_fd=directory)
+                os.fsync(directory)
+            raise
     finally:
         os.close(directory)
 
@@ -399,7 +418,10 @@ def main():
         print("# *** CREATING NEW LND WALLET ***")
         recovery_path = None
         if "--stage-seed" in sys.argv[4:]:
-            recovery_path = cert_path.parent / f"seedwords-{network}.pending"
+            # app-data may be a symlink to the data disk. Keep secrets outside
+            # the LND tree, whose ownership and permissions are reset on install.
+            disk_root = cert_path.parent.parent.resolve().parent
+            recovery_path = disk_root / ".raspiblitz-lnd-recovery" / f"{network}.pending"
         new(stub, wallet_password, recovery_path=recovery_path)
 
     elif mode == "seed":

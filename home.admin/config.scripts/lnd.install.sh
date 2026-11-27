@@ -234,6 +234,19 @@ source /home/admin/raspiblitz.info
 source <(/home/admin/_cache.sh get state)
 source /mnt/hdd/app-data/raspiblitz.conf
 
+recoveryDir="/mnt/hdd/app-data/../.raspiblitz-lnd-recovery"
+pendingSeed="${recoveryDir}/${CHAIN}.pending"
+if [[ $1 == display-seed || ( ( $1 == on || $1 == 1 ) && $3 == initwallet ) ]] && sudo test -e "$pendingSeed"; then
+  if sudo test "$pendingSeed" -ef "$recoveryDir/${CHAIN}.info"; then
+    # The RPC succeeded and the record was published. Finish interrupted cleanup.
+    sudo sync -f "$recoveryDir" && sudo rm -- "$pendingSeed" || exit 1
+  else
+    echo "# Wallet creation was interrupted. Preserve the wallet database and $pendingSeed." >&2
+    echo "# Check both offline before retrying or resetting this wallet." >&2
+    exit 1
+  fi
+fi
+
 function removeParallelService() {
   if [ -f "/etc/systemd/system/${netprefix}lnd.service" ];then
     echo "# Stopping ${netprefix}lnd ..."
@@ -427,8 +440,7 @@ alias ${netprefix}lndconf=\"sudo nano /mnt/hdd/app-data/lnd/${netprefix}lnd.conf
         passwordC="raspiblitz"
       fi
       seedDir="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}"
-      pendingSeed="/mnt/hdd/app-data/lnd/seedwords-${CHAIN}.pending"
-      if sudo test -e "${seedDir}/seedwords.info" || sudo test -L "${seedDir}/seedwords.info"; then
+      if sudo test -e "${seedDir}/seedwords.info" || sudo test -e "${recoveryDir}/${CHAIN}.info"; then
         echo "# Recovery words already exist. Check the wallet backup before retrying." >&2
         exit 1
       fi
@@ -436,10 +448,9 @@ alias ${netprefix}lndconf=\"sudo nano /mnt/hdd/app-data/lnd/${netprefix}lnd.conf
         echo "# Wallet setup failed. Check the LND service log. Preserve ${pendingSeed} if it exists." >&2
         exit 1
       fi
-      sudo -u bitcoin mkdir -p "${seedDir}" || exit 1
       # Publish the fsynced record without replacing an existing backup.
-      sudo ln -T -- "${pendingSeed}" "${seedDir}/seedwords.info" &&
-        sudo sync -f "${seedDir}" && sudo rm -- "${pendingSeed}" || exit 1
+      sudo ln -T -- "${pendingSeed}" "${recoveryDir}/${CHAIN}.info" &&
+        sudo sync -f "${recoveryDir}" && sudo rm -- "${pendingSeed}" || exit 1
   fi
 
   if [ "${CHAIN}" != "mainnet" ]; then
@@ -515,7 +526,10 @@ if [ "$1" = "display-seed" ]; then
   fi
 
   # check if seedword file exists
-  seedwordFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
+  seedwordFile="/mnt/hdd/app-data/../.raspiblitz-lnd-recovery/${CHAIN}.info"
+  if [[ ! -f $seedwordFile ]]; then
+    seedwordFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
+  fi
   echo "# seedwordFile(${seedwordFile})"
   seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
   echo "# seedwordFileExists(${seedwordFileExists})"

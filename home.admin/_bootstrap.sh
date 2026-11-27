@@ -1313,6 +1313,10 @@ if [ "${scenario}" != "ready" ] ; then
   ###################################################
 
   echo "# HANDOVER TO FINAL SETUP CONTROLLER ..." >> $logFile
+  setupRecovery="/mnt/hdd/app-data/../.raspiblitz-lnd-recovery/setup-ready"
+  if [[ $setupPhase == setup && -f $setupRecovery ]] && ! grep -q "^seedwords6x4NEW='" "$setupFile"; then
+    sed -e 's/^seedwords=/seedwordsNEW=/' -e 's/^seedwords6x4=/seedwords6x4NEW=/' "$setupRecovery" >> "$setupFile" || exit 1
+  fi
   /home/admin/_cache.sh set state "waitfinal"
   /home/admin/_cache.sh set message "Setup Done"
 

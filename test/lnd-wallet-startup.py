@@ -85,6 +85,15 @@ class FirstStart(unittest.TestCase):
             stub.InitWallet.assert_called_once()
             self.assertEqual(path.read_bytes(), before)
 
+    def test_failed_stage_is_retryable_before_wallet_mutation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory, "mainnet.pending")
+            with patch.object(wallet.os, "fsync", side_effect=[None, OSError("disk full"), None]), self.assertRaises(OSError):
+                wallet.stage_recovery(path, "test record")
+            self.assertFalse(path.exists())
+            wallet.stage_recovery(path, "test record")
+            self.assertEqual(path.read_text(), "test record")
+
 
 if __name__ == "__main__":
     unittest.main()

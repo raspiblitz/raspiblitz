@@ -22,6 +22,14 @@ sudo sed -i "s/^After=.*/After=bootstrap.service/g" /etc/systemd/system/bitcoind
 sudo systemctl daemon-reload 2>/dev/null
 
 # delete setup data from RAM
+setupRecovery="/mnt/hdd/app-data/../.raspiblitz-lnd-recovery/setup-ready"
+setupRecord="/var/cache/raspiblitz/temp/raspiblitz.setup"
+# Both the SSH and WebUI confirmations lead here. Remove only the record whose
+# words were handed to that session. An interrupted creation stays recoverable.
+if sudo test -f "$setupRecovery" && sudo grep -q "^seedwords='." "$setupRecovery" &&
+   cmp -s <(sudo sed -n "s/^seedwords=/seedwordsNEW=/p" "$setupRecovery") <(sudo sed -n '/^seedwordsNEW=/p' "$setupRecord" | tail -1); then
+  sudo rm -- "$setupRecovery" || exit 1
+fi
 echo "# removing raspiblitz.setup" >> /home/admin/raspiblitz.log
 sudo rm /var/cache/raspiblitz/temp/raspiblitz.setup
 
