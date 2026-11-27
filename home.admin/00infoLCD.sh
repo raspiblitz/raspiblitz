@@ -109,6 +109,9 @@ while :
     source <(/home/admin/_cache.sh get \
       lightning \
       ln_default_locked \
+      ln_default_ready \
+      ln_default_sync_chain \
+      ln_default_sync_initial_done \
       btc_default_synced \
       btc_default_online \
       btc_default_sync_initialblockdownload \
@@ -121,8 +124,9 @@ while :
       continue
     fi
 
-    # when lightning is active - show sync until ln_default_sync_initial_done
-    if [ "${lightning}" != "" ] && [ "${lightning}" != "none" ] && [ "${ln_default_sync_initial_done}" == "0" ]; then
+    # Use the same Lightning readiness signals as the SSH menu.
+    if [ -n "${lightning}" ] && [ "${lightning}" != "none" ] &&
+      { [ "${ln_default_ready}" == "0" ] || [ "${ln_default_sync_chain}" == "0" ] || [ "${ln_default_sync_initial_done}" == "0" ]; }; then
       /home/admin/setup.scripts/eventBlockchainSync.sh lcd
       sleep 3
       continue
