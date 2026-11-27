@@ -315,6 +315,17 @@ Not able to get local IP.
 LAN cable connected? WIFI lost?
 " 7 41
 
+elif [ "${eventID}" = "noInternet" ] && [ "${contentString}" = "No nameserver configured by resolvconf" ]; then
+
+    dialog --backtitle "${backtitle}" --cr-wrap --infobox "
+No DNS server from the network.
+Set DNS in the VM/router DHCP settings or add
+nameserver <your DNS server IP> to
+/etc/resolvconf/resolv.conf.d/base
+and run: sudo resolvconf -u
+Setup retries automatically.
+" 10 51
+
 elif [ "${eventID}" = "noInternet" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "

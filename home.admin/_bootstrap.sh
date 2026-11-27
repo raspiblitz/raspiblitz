@@ -413,6 +413,14 @@ while true; do
       /home/admin/_cache.sh set state "noIP-WIFI"
       /home/admin/_cache.sh set message "WIFI Settings not working"
     fi
+  elif [ "${scenario}" != "ready" ] &&
+       [ "$(readlink -f /etc/resolv.conf)" = /run/resolvconf/resolv.conf ] &&
+       [ -r /etc/resolv.conf ] &&
+       ! grep -Eq '^[[:space:]]*nameserver[[:space:]]+[^#;[:space:]]+' /etc/resolv.conf &&
+       ! timeout 3 getent ahosts deb.debian.org >/dev/null; then
+    # Numeric connectivity probes can pass even when package downloads cannot resolve names.
+    /home/admin/_cache.sh set state "noInternet"
+    /home/admin/_cache.sh set message "No nameserver configured by resolvconf"
   elif [ "${online}" = "0" ]; then
     # display user that internet is missing (needed for firmware updates)
     echo "Waiting for internet ..." >> $logFile
