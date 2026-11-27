@@ -348,7 +348,10 @@ if [ "${lndNode}" != "${choice}" ]; then
   echo "# LND NODE Setting changed .."
   if [ "${choice}" = "on" ]; then
     echo "# turning ON"
-    /home/admin/config.scripts/lnd.install.sh on mainnet initwallet
+    if ! /home/admin/config.scripts/lnd.install.sh on mainnet initwallet; then
+      whiptail --title "LND Wallet" --msgbox "Wallet setup failed. Check the LND service log before retrying." 8 65
+      exit 1
+    fi
     sudo /home/admin/config.scripts/lnd.install.sh display-seed mainnet delete
     if [ "${testnet}" == "on" ]; then
       /home/admin/config.scripts/lnd.install.sh on testnet initwallet

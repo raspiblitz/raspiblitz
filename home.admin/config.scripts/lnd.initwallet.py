@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import time
 from pathlib import Path
 
 import grpc
@@ -330,9 +331,27 @@ def main():
         sys.exit(1)
 
     os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
-    cert = open('/mnt/hdd/app-data/lnd/tls.cert', 'rb').read()
+    cert_path = Path('/mnt/hdd/app-data/lnd/tls.cert')
+    deadline = time.monotonic() + 60
+    while True:
+        try:
+            cert = cert_path.read_bytes()
+            if cert:
+                break
+        except FileNotFoundError:
+            pass  # On first start LND creates its certificate asynchronously.
+        except OSError:
+            sys.exit(wallet_error("cannot read the LND TLS certificate"))
+        if mode != "new" or time.monotonic() >= deadline:
+            sys.exit(wallet_error("LND TLS certificate is not ready"))
+        time.sleep(1)
     ssl_creds = grpc.ssl_channel_credentials(cert)
     channel = grpc.secure_channel(grpcEndpoint, ssl_creds)
+    if mode == "new":
+        try:
+            grpc.channel_ready_future(channel).result(timeout=max(0, deadline - time.monotonic()))
+        except grpc.FutureTimeoutError:
+            sys.exit(wallet_error("LND wallet RPC is not ready"))
     if mode == "scb":
         stub = lightningstub.LightningStub(channel)
     else:
@@ -357,6 +376,12 @@ def main():
     elif mode == "change-password":
         print("# *** SETTING NEW PASSWORD FOR WALLET ***")
         change_password(stub, wallet_password, wallet_password_new)
+
+
+def wallet_error(message):
+    print("err='" + message + "'")
+    print(message, file=sys.stderr)
+    return 1
 
 
 if __name__ == '__main__':

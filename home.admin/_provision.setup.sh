@@ -285,8 +285,12 @@ if [ "${lightning}" == "lnd" ]; then
 
     echo "# WALLET --> NEW" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (NEW)"
-    source <(/home/admin/config.scripts/lnd.initwallet.py new mainnet "${passwordC}")
-    if [ "${err}" != "" ]; then
+    unset err errMore seedwords seedwords6x4
+    if walletInfo=$(/home/admin/config.scripts/lnd.initwallet.py new mainnet "${passwordC}"); then
+      source /dev/stdin <<< "${walletInfo}"
+    fi
+    if [[ -z ${seedwords} || -z ${seedwords6x4} ]]; then
+      err="LND did not return a successful wallet creation result"
       /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-new" "lnd.initwallet.py new returned error" "/home/admin/config.scripts/lnd.initwallet.py new mainnet ... --> ${err} + ${errMore}" ${logFile}
       /home/admin/_cache.sh set state "error"
       /home/admin/_cache.sh set message "setup: lnd wallet NEW failed"

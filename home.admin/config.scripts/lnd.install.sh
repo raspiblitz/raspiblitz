@@ -426,19 +426,20 @@ alias ${netprefix}lndconf=\"sudo nano /mnt/hdd/app-data/lnd/${netprefix}lnd.conf
       else
         passwordC="raspiblitz"
       fi
-      source <(sudo /home/admin/config.scripts/lnd.initwallet.py new ${CHAIN} ${passwordC})
-      if [ "${err}" != "" ]; then
-        clear
-        echo "# LND ${CHAIN} wallet creation failed"
-        echo "# ${err}"
-        echo "# press ENTER to continue"
-        read key
-      else
-        sudo mkdir -p /mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}
-        seedFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
-        echo "seedwords='${seedwords}'" | sudo tee ${seedFile}
-        echo "seedwords6x4='${seedwords6x4}'" | sudo tee -a ${seedFile}
+      if ! walletInfo=$(sudo /home/admin/config.scripts/lnd.initwallet.py new "${CHAIN}" "${passwordC}"); then
+        echo "# LND ${CHAIN} wallet creation failed. Check the LND service log." >&2
+        exit 1
       fi
+      unset seedwords seedwords6x4
+      source /dev/stdin <<< "${walletInfo}"
+      if [[ -z ${seedwords} || -z ${seedwords6x4} ]]; then
+        echo "# LND did not return recovery words." >&2
+        exit 1
+      fi
+      seedDir="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}"
+      sudo mkdir -p "${seedDir}" || exit 1
+      printf "seedwords='%s'\nseedwords6x4='%s'\n" "${seedwords}" "${seedwords6x4}" |
+        sudo install -m 600 /dev/stdin "${seedDir}/seedwords.info" || exit 1
   fi
 
   if [ "${CHAIN}" != "mainnet" ]; then

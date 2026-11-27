@@ -368,7 +368,10 @@ case $CHOICE in
     removeLNDwallet
 
     # create wallet
-    /home/admin/config.scripts/lnd.install.sh on ${chain}net initwallet
+    if ! /home/admin/config.scripts/lnd.install.sh on "${chain}net" initwallet; then
+      whiptail --title "LND Wallet" --msgbox "Wallet setup failed. Check the LND service log before retrying." 8 65
+      exit 1
+    fi
     # display and delete the seed for ${chain}net
     sudo /home/admin/config.scripts/lnd.install.sh display-seed ${chain}net delete
 
