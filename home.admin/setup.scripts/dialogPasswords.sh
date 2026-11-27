@@ -63,50 +63,71 @@ Write them down & store them in a safe place.
 fi
 
 # temp file for password results
-_temp="/var/cache/raspiblitz/temp/.temp.tmp"
+passwordDir=$(mktemp -d "${SETUPFILE%/*}/.password.XXXXXXXX") || exit 1
+_temp="$passwordDir/input"
+trap 'rm -f -- "$_temp"; rmdir -- "$passwordDir"' EXIT
+
+# Replace the complete handoff in the same directory. Keep the previous record if
+# writing the new one fails; the admin menu must still own and read the result.
+save_password() (
+  key=$1
+  record="$key='${password}'"
+  [ -f "$SETUPFILE" ] && [ ! -L "$SETUPFILE" ] || return 1
+  staged=$(mktemp "${SETUPFILE%/*}/.setup.XXXXXXXX") || return 1
+  trap 'rm -f -- "$staged"' EXIT
+  sed "/^${key}=/d" "$SETUPFILE" > "$staged" &&
+    printf '%s\n' "$record" >> "$staged" &&
+    chown --reference="$SETUPFILE" -- "$staged" &&
+    mv -fT -- "$staged" "$SETUPFILE" &&
+    [ "$(tail -n 1 -- "$SETUPFILE")" = "$record" ]
+)
+
+confirm_saved() {
+  until save_password "password$1"; do
+    dialog --backtitle "RaspiBlitz - Setup" --yes-label "Retry" --no-label "Stop setup" \
+      --yesno "Could not save Password $1. Check that setup storage is writable, then retry." 8 55 || return 1
+  done
+}
 
 # PASSWORD A
 if [ "${setPasswordA}" == "1" ]; then
   clear
-  sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD A - Main User Password" $_temp
-  password=$(sudo cat $_temp)
-  sudo rm $_temp
+  sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD A - Main User Password" "$_temp" || exit 1
+  password=$(cat -- "$_temp") || exit 1
+  : > "$_temp" || exit 1
   if [ "${password}" == "" ]; then
     echo "FAIL password A cannot be empty - stopped setup"
     exit 1
   fi
-  sudo sed -i '/^passwordA=/d' $SETUPFILE
-  echo "passwordA='${password}'" >> $SETUPFILE
+  confirm_saved A || exit 1
   dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password A accepted.\n\nUse this password for future SSH or Web-Admin logins to your RaspiBlitz & for sudo commands." 11 35
 fi
 
 # PASSWORD B
 if [ "${setPasswordB}" == "1" ]; then
   clear
-  sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD B - APP Password" $_temp
-  password=$(sudo cat $_temp)
-  sudo rm $_temp
+  sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD B - APP Password" "$_temp" || exit 1
+  password=$(cat -- "$_temp") || exit 1
+  : > "$_temp" || exit 1
   if [ "${password}" == "" ]; then
     echo "FAIL password B cannot be empty - stopped setup"
     exit 1
   fi
-  sudo sed -i '/^passwordB=/d' $SETUPFILE
-  echo "passwordB='${password}'" >> $SETUPFILE
+  confirm_saved B || exit 1
   dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password B accepted.\n\nUse this password as login for\nadditional Apps & API access." 10 34
 fi
 
 # PASSWORD C
 if [ "${setPasswordC}" == "1" ]; then
   clear
-  sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD C - Lightning Wallet Password" $_temp
-  password=$(sudo cat $_temp)
-  sudo rm $_temp
+  sudo /home/admin/config.scripts/blitz.passwords.sh set x "PASSWORD C - Lightning Wallet Password" "$_temp" || exit 1
+  password=$(cat -- "$_temp") || exit 1
+  : > "$_temp" || exit 1
   if [ "${password}" == "" ]; then
     echo "FAIL password C cannot be empty - stopped setup"
     exit 1
   fi
-  sudo sed -i '/^passwordC=/d' $SETUPFILE
-  echo "passwordC='${password}'" >> $SETUPFILE
+  confirm_saved C || exit 1
   dialog --backtitle "RaspiBlitz - Setup" --msgbox "\nThanks - Password C accepted.\n\nAlways use this password to \nunlock your Lightning Wallet." 10 34
 fi
 

@@ -12,10 +12,8 @@ SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
 # init SETUPFILE & temp dir on mem drive
 sudo mkdir /var/cache/raspiblitz/temp
 sudo chown admin:admin /var/cache/raspiblitz/temp
-sudo rm $SETUPFILE 2>/dev/null
-echo "# RASPIBLITZ SETUP STATE" > $SETUPFILE
-sudo chown admin:admin $SETUPFILE
-sudo chmod 777 $SETUPFILE
+sudo install -o admin -g admin -m 600 /dev/null "$SETUPFILE" || exit 1
+echo "# RASPIBLITZ SETUP STATE" > "$SETUPFILE" || exit 1
 
 source <(/home/admin/_cache.sh get dnsworking)
 
