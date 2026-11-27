@@ -169,8 +169,21 @@ activate_jam_nginx() (
       sudo install -m 0644 "/home/admin/assets/nginx/sites-available/$name" "/etc/nginx/sites-available/$name" || return 1
       sudo ln -sfn "/etc/nginx/sites-available/$name" "/etc/nginx/sites-enabled/$name" || return 1
     done
-    sudo nginx -t && sudo systemctl reload nginx &&
-      sudo ufw allow proto tcp from any to any port 7500:7501 comment 'allow JAM HTTP and HTTPS'
+    sudo nginx -t && sudo systemctl reload nginx || return 1
+    # A failed UFW invocation can have committed the IPv4 rule before IPv6.
+    # Withdraw only a rule that was absent before this attempt.
+    local rules_before rules_after
+    rules_before=$(sudo env LC_ALL=C ufw show added) || return 1
+    if ! sudo ufw allow proto tcp from any to any port 7500:7501 comment 'allow JAM HTTP and HTTPS'; then
+      if ! grep -Eq '(^|[[:space:]])7500:7501(/tcp)?([[:space:]]|$)' <<< "$rules_before"; then
+        sudo ufw delete allow proto tcp from any to any port 7500:7501 >&2
+      fi
+      rules_after=$(sudo env LC_ALL=C ufw show added) || rules_after=
+      if [[ "$rules_after" != "$rules_before" ]]; then
+        echo "# Check UFW: the requested rules differ from their pre-activation state." >&2
+      fi
+      return 1
+    fi
   }
   if ! apply_sites; then
     trap - EXIT
@@ -285,18 +298,17 @@ WantedBy=multi-user.target
     fi
   fi
 
-  # remove legacy name
-  /home/admin/config.scripts/blitz.conf.sh delete joinmarketWebUI $RASPIBLITZ_CONF 1>&2
-  # setting value in raspiblitz config
-  /home/admin/config.scripts/blitz.conf.sh set jam on $RASPIBLITZ_CONF 1>&2 || exit 1
-
   # Hidden Service for jam if Tor is active
   if [ "${runBehindTor}" = "on" ]; then
       # remove legacy
       /home/admin/config.scripts/tor.onion-service.sh off joinmarket-webui 1>&2
       # add jam
-      /home/admin/config.scripts/tor.onion-service.sh jam 80 7502 443 7503 1>&2 || exit 1
+      if ! /home/admin/config.scripts/tor.onion-service.sh jam 80 7502 443 7503 >&2; then
+        echo "error='JAM Tor service could not be activated'"
+        exit 1
+      fi
   fi
+  /home/admin/config.scripts/blitz.conf.sh set jam on "$RASPIBLITZ_CONF" >&2 || exit 1
   # Open both TCP ports in one rule only once the other activation steps succeed.
   if ! activate_jam_nginx >&2; then
     if [ -n "${jam:-}" ]; then
@@ -307,6 +319,7 @@ WantedBy=multi-user.target
     echo "error='JAM nginx or firewall configuration could not be activated'"
     exit 1
   fi
+  /home/admin/config.scripts/blitz.conf.sh delete joinmarketWebUI "$RASPIBLITZ_CONF" >&2
   echo "# For the connection details run: /home/admin/config.scripts/bonus.jam.sh menu"
   echo "result='OK'"
   exit 0
