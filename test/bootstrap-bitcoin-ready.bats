@@ -26,7 +26,8 @@ echo "$(( $(cat tick) * ${TICK_SECONDS:-2} ))"
 SH
   cat > _cache.sh <<'SH'
 #!/bin/bash
-if (( $(cat tick) >= READY_AFTER )); then echo 'btc_default_ready="1"'; else echo 'btc_default_ready="0"'; fi
+if (( $(cat tick) >= READY_AFTER )); then echo 'value="1"'; else echo 'value="0"'; fi
+printf 'lasttouch="%s"\n' "$(date +%s)"
 SH
   cat > bin/sudo <<'SH'
 #!/bin/bash
@@ -79,4 +80,12 @@ SH
   run bash setup.scripts/waitBitcoinReady.sh
   [ "$status" -eq 0 ]
   [[ "$output" == *"warming up"* ]]
+}
+
+@test "persistent identical warmup becomes an actionable error without resetting Core" {
+  export TICK_SECONDS=1800 RPC_AFTER=20 RPC_ERROR="error code: -28"
+  run bash setup.scripts/waitBitcoinReady.sh
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"same RPC warmup for an hour"* ]]
+  [ ! -e unexpected ]
 }

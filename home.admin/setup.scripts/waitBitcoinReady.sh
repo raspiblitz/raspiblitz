@@ -9,7 +9,10 @@ case "${1:-main}" in
   *) echo "Unsupported default Bitcoin chain: $1"; exit 1 ;;
 esac
 stopped_polls=0
-deadline=$(( $(date +%s) + 1800 ))
+started=$(date +%s)
+deadline=$(( started + 1800 ))
+last_warmup=
+warmup_changed=$started
 probe_rpc() {
   # Match bitcoin.install.sh's service: chain-specific RPC settings and cookie.
   timeout 6 sudo -u bitcoin /usr/local/bin/bitcoin-cli "${chain_args[@]}" \
@@ -25,7 +28,10 @@ while true; do
     active)
       stopped_polls=0
       # A readiness value from before the service restarted can remain cached.
-      if "$cache" get btc_default_ready | grep -Fxq 'btc_default_ready="1"' && probe_rpc >/dev/null 2>&1; then
+      sample=$("$cache" meta btc_default_ready)
+      updated=$(sed -n 's/^lasttouch="\([0-9]\{1,12\}\)"$/\1/p' <<< "$sample")
+      if [[ "$updated" =~ ^[0-9]{1,12}$ ]] && (( 10#$updated >= started )) &&
+        grep -Fxq 'value="1"' <<< "$sample" && probe_rpc >/dev/null 2>&1; then
         exit 0
       fi
       ;;
@@ -48,6 +54,13 @@ while true; do
       echo "$unit answers RPC but setup has no current ready status. Check the background scanner."
       exit 1
     elif [[ "$detail" == *"error code: -28"* ]]; then
+      if [ "$detail" != "$last_warmup" ]; then
+        last_warmup=$detail
+        warmup_changed=$now
+      elif (( now - warmup_changed >= 3600 )); then
+        echo "$unit reports the same RPC warmup for an hour. Inspect journalctl -u $unit -b."
+        exit 1
+      fi
       echo "$unit is still warming up; RPC returned -28."
       deadline=$(( now + 300 ))
     else
