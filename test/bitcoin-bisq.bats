@@ -102,3 +102,24 @@ menu() {
   run grep -q HiddenServiceDir "$box/tor/torrc"
   [ "$status" -eq 1 ]
 }
+
+@test "a preconfigured global ON value requires a matching live service before adding a Tor service" {
+  echo peerbloomfilters=1 >>"$box/data/bitcoin/bitcoin.conf"
+  printf '#!/bin/sh\necho '\''{"localservicesnames":[]}'\''\n' >"$BATS_TEST_TMPDIR/bin/bitcoin-cli"
+  menu ADDBISQ
+  [ "$status" -eq 1 ]
+  [ ! -s "$box/tor/torrc" ]
+}
+
+@test "failed Tor reload during rollback leaves the new service out of torrc on disk" {
+  rm "$box/data/tor/bisq/hostname"
+  cat >"$BATS_TEST_TMPDIR/bin/systemctl" <<'SH'
+#!/bin/sh
+if [ -e "$box/reloaded" ]; then exit 1; fi
+touch "$box/reloaded"
+SH
+  menu ADDBISQ
+  [ "$status" -ne 0 ]
+  run grep -q HiddenServiceDir "$box/tor/torrc"
+  [ "$status" -eq 1 ]
+}

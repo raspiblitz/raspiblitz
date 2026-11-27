@@ -121,10 +121,10 @@ case $CHOICE in
       return 1
     )
     verify_bloom() {
-      local services effective
+      local services effective expected=${1:-$value}
       services=$(sudo -u bitcoin bitcoin-cli -rpcwait -rpcwaittimeout=60 getnetworkinfo) || return 1
       effective=$(jq -r 'if (.localservicesnames | index("BLOOM")) == null then "0" else "1" end' <<<"$services") || return 1
-      if [ "$effective" != "$value" ]; then
+      if [ "$effective" != "$expected" ]; then
         echo "# Bitcoin Core's live BLOOM flag differs from the global setting. Check network or command-line overrides." >&2
         return 1
       fi
@@ -142,8 +142,15 @@ case $CHOICE in
     }
     remove_bisq_service() {
       # Remove only the exact four-line stanza written above; keep custom Tor services.
-      edit_and_reload /etc/tor/torrc reload tor@default true sudo sed -i "/^# Hidden Service for Bisq (bitcoin P2P v3)$/{N;N;N;
-        \\|\\nHiddenServiceDir ${bisq_dir}\\nHiddenServiceVersion 3\\nHiddenServicePort 8333 127\\.0\\.0\\.1:8333$|d;}" /etc/tor/torrc || return 1
+      local -a remove=(sudo sed -i "/^# Hidden Service for Bisq (bitcoin P2P v3)$/{N;N;N;
+        \\|\\nHiddenServiceDir ${bisq_dir}\\nHiddenServiceVersion 3\\nHiddenServicePort 8333 127\\.0\\.0\\.1:8333$|d;}" /etc/tor/torrc)
+      if [ "${1:-}" = undo_add ]; then
+        # On rollback, keep the newly added stanza out of the disk configuration
+        # even when Tor cannot reload. Surface the runtime error for the operator.
+        "${remove[@]}" && sudo systemctl reload tor@default || return 1
+      else
+        edit_and_reload /etc/tor/torrc reload tor@default true "${remove[@]}" || return 1
+      fi
       if grep -Fxq "HiddenServiceDir ${bisq_dir}" /etc/tor/torrc; then
         echo "# Custom Bisq hidden service found. Remove it manually from torrc." >&2
         return 1
@@ -162,6 +169,7 @@ case $CHOICE in
       case $CHOICE in
         ADDBISQ)
           clear
+          if [ "$bloom" = ON ]; then verify_bloom 1 || exit 1; fi
           if [ "$has_service" = 0 ]; then
             echo "# Creating the Hidden Service for Bisq"
             edit_and_reload /etc/tor/torrc reload tor@default true sudo tee -a /etc/tor/torrc <<EOF || exit 1
@@ -178,7 +186,7 @@ EOF
                 sleep 10
                 TOR_ADDRESS=$(sudo cat /mnt/hdd/app-data/tor/bisq/hostname)
                 if [ -z "$TOR_ADDRESS" ]; then
-                  remove_bisq_service || echo "# Check the Bisq service in torrc." >&2
+                  remove_bisq_service undo_add || echo "# Could not complete Bisq cleanup; check tor@default and torrc." >&2
                   echo "# FAIL - The Hidden Service address could not be found - Tor error?"
                   exit 1
                 fi
@@ -193,7 +201,7 @@ EOF
           fi
           if [ "$bloom" = OFF ]; then
             if ! set_bloom 1; then
-              if [ "$has_service" = 0 ]; then remove_bisq_service || echo "# Check the Bisq service in torrc." >&2; fi
+              if [ "$has_service" = 0 ]; then remove_bisq_service undo_add || echo "# Could not complete Bisq cleanup; check tor@default and torrc." >&2; fi
               exit 1
             fi
           fi
