@@ -123,8 +123,7 @@ if [ "$1" == "backup-restore" ]; then
     if [ ${hddRestoreConfigAvailable} -eq 1 ]; then
       restoreFrom=/mnt/hdd/app-data/wifi
     fi
-    if ! sudo cp -a "$restoreFrom"/* /etc/NetworkManager/system-connections/ ||
-       ! sudo chmod 600 /etc/NetworkManager/system-connections/* ||
+    if ! sudo python3 /home/admin/config.scripts/internet.wifi.restore.py "$restoreFrom" ||
        ! sudo nmcli radio wifi on; then
       echo "wifiRestore=0"
       echo "wifiBackup=0"

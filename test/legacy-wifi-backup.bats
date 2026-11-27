@@ -3,7 +3,10 @@
 setup() {
   export FIXTURE="$BATS_TEST_TMPDIR"
   mkdir -p "$FIXTURE/hdd/app-data" "$FIXTURE/inspect" "$FIXTURE/bin" "$FIXTURE/nm"
-  sed -e "s|/mnt/hdd|$FIXTURE/hdd|g" -e "s|/var/cache/raspiblitz/hdd-inspect|$FIXTURE/inspect|g" \
+  sed "s|/etc/NetworkManager/system-connections|$FIXTURE/nm|g" \
+    "$BATS_TEST_DIRNAME/../home.admin/config.scripts/internet.wifi.restore.py" > "$FIXTURE/restore.py"
+  sed -e "s|/home/admin/config.scripts/internet.wifi.restore.py|$FIXTURE/restore.py|g" \
+    -e "s|/mnt/hdd|$FIXTURE/hdd|g" -e "s|/var/cache/raspiblitz/hdd-inspect|$FIXTURE/inspect|g" \
     -e "s|/etc/NetworkManager/system-connections|$FIXTURE/nm|g" \
     "$BATS_TEST_DIRNAME/../home.admin/config.scripts/internet.wifi.sh" > "$FIXTURE/wifi.sh"
   printf '#!/bin/sh\nexec "$@"\n' > "$FIXTURE/bin/sudo"
@@ -46,4 +49,16 @@ SH
   export TEST_DEVICE_STATE=wifi:connected
   run bash "$FIXTURE/wifi.sh" backup-restore
   [[ "$output" == *wifiActive=1* ]]
+}
+
+
+@test "invalid profile link aborts before installing any entry" {
+  mkdir "$FIXTURE/hdd/app-data/wifi"
+  echo '[connection]' > "$FIXTURE/hdd/app-data/wifi/a.nmconnection"
+  echo 'outside fixture' > "$FIXTURE/outside"
+  ln -s "$FIXTURE/outside" "$FIXTURE/hdd/app-data/wifi/z.nmconnection"
+  run bash "$FIXTURE/wifi.sh" backup-restore
+  [ "$status" -ne 0 ]
+  [ -z "$(ls -A "$FIXTURE/nm")" ]
+  grep -Fxq 'outside fixture' "$FIXTURE/outside"
 }
