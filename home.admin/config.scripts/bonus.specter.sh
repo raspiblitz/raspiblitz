@@ -213,6 +213,23 @@ if [ "$1" = "config" ]; then
   exit 0
 fi
 
+ensure_specter_rpc_location() {
+  local environment
+  environment=$(systemctl show specter.service --property=Environment --value) || return 1
+  if [[ " ${environment}" == *" RASPIBLITZ_SPECTER_RPC_LOGIN_BITCOIN_CONF_LOCATION="* ]]; then
+    return 0
+  fi
+
+  # Units installed before #5236 lack the Bitcoin config path used by RPC PIN login.
+  # Keep the existing unit, administrator overrides and Specter's wallet data.
+  printf '%s\n' '[Service]' 'Environment=RASPIBLITZ_SPECTER_RPC_LOGIN_BITCOIN_CONF_LOCATION=/mnt/hdd/app-data/bitcoin' |
+    sudo install -D -m 0644 /dev/stdin /etc/systemd/system/specter.service.d/10-raspiblitz-rpc.conf || return 1
+  sudo systemctl daemon-reload || return 1
+  if [ "$1" = "on" ]; then
+    sudo systemctl try-restart specter.service || return 1
+  fi
+}
+
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   echo "#    --> INSTALL Specter Desktop"
@@ -405,6 +422,7 @@ EOF
 
   else
     echo "#    --> specter already installed."
+    ensure_specter_rpc_location on || exit 1
   fi
 
   # setting value in raspi blitz config
@@ -459,6 +477,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop specter
     sudo systemctl disable specter
     sudo rm /etc/systemd/system/specter.service
+    sudo rm -f /etc/systemd/system/specter.service.d/10-raspiblitz-rpc.conf
   else
     echo "#    --> The specter.service is not installed."
   fi
@@ -509,6 +528,7 @@ fi
 # update
 if [ "$1" = "update" ]; then
   echo "#    --> UPDATING Specter Desktop "
+  ensure_specter_rpc_location update || exit 1
   sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade pip
   sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
   echo "#    --> Updated to the latest in https://pypi.org/project/cryptoadvance.specter/#history ***"
