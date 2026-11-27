@@ -26,12 +26,12 @@ if [ -n "${rpiModel}" ]; then
 fi
 
 if [ "$1" = "reboot" ]; then
-  shutdownParams="-h -r now"
+  shutdownMode="-r"
   echo "It will then reboot again automatically."
   /home/admin/_cache.sh set state "reboot"
   /home/admin/_cache.sh set message "$2"
 else
-  shutdownParams="-P -h now"
+  shutdownMode="-P"
   echo "Then wait 5 seconds and disconnect power."
   /home/admin/_cache.sh set state "shutdown"
   /home/admin/_cache.sh set message ""
@@ -98,18 +98,5 @@ fi
 sync
 
 echo "starting shutdown ..."
-shutdown ${shutdownParams}
-
-# detect missing DBUS
-if [ "${DBUS_SESSION_BUS_ADDRESS}" == "" ]; then
-  echo "WARN: Missing \$DBUS_SESSION_BUS_ADDRESS .. "
-  if [ "$1" = "reboot" ]; then
-    echo "RUNNING FALLBACK REBOOT .. "
-    systemctl --force --force reboot
-  else
-    echo "RUNNING FALLBACK SHUTDOWN .. "
-    systemctl --force --force poweroff
-  fi
-fi
-
-exit 0
+# The system shutdown request works independently of a login session bus.
+exec shutdown "$shutdownMode" now
