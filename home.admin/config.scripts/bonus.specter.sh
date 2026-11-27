@@ -391,7 +391,6 @@ PrivateDevices=true
 WantedBy=multi-user.target
 EOF
 
-    sudo touch /var/cache/raspiblitz/specter-start-pending || exit 1
     sudo mv /home/admin/specter.service /etc/systemd/system/specter.service || exit 1
     sudo systemctl enable specter || exit 1
     echo "#    --> OK - the specter service is now enabled"
@@ -401,9 +400,14 @@ EOF
   fi
 
   source <(/home/admin/_cache.sh get state)
-  if [ "${state}" = "ready" ] && [ -f /var/cache/raspiblitz/specter-start-pending ]; then
-    if ! sudo systemctl start specter; then
-      echo "error='Specter failed to start. Check journalctl -u specter'"
+  if [ "${state}" = "ready" ]; then
+    if [ "${isInstalled}" -eq 0 ] || systemctl is-failed --quiet specter; then
+      if ! sudo systemctl start specter; then
+        echo "error='Specter failed to start. Check journalctl -u specter'"
+        exit 1
+      fi
+    elif ! systemctl is-active --quiet specter; then
+      echo "error='Specter is installed but stopped. Start it explicitly to check its HTTPS endpoint.'"
       exit 1
     fi
     # The locally issued certificate uses this name. Never resolve it externally.
@@ -415,10 +419,9 @@ EOF
       echo "error='Specter HTTPS is unavailable. Check journalctl -u specter'"
       exit 1
     fi
-    sudo rm -f /var/cache/raspiblitz/specter-start-pending || exit 1
     echo "#    --> OK - Specter is responding over HTTPS"
-  elif [ -f /var/cache/raspiblitz/specter-start-pending ]; then
-    echo "#    --> Specter provisioned; HTTPS readiness will be checked on activation"
+  else
+    echo "#    --> Specter provisioned; HTTPS readiness requires a running node"
   fi
 
   # setting value in raspi blitz config
@@ -457,7 +460,6 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
-  sudo rm -f /var/cache/raspiblitz/specter-start-pending || echo "# Could not clear pending startup marker" >&2
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set specter "off"
 
