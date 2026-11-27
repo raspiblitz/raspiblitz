@@ -415,9 +415,10 @@ while true; do
       /home/admin/_cache.sh set message "WIFI Settings not working"
     fi
   elif [ "${scenario}" != "ready" ] &&
-       [ -L /etc/resolv.conf ] &&
-       [ "$(readlink -m /etc/resolv.conf)" = /run/resolvconf/resolv.conf ] &&
-       { [ "$waiting_for_dns" = 1 ] || ! grep -Eq '^[[:space:]]*nameserver[[:space:]]+[^#;[:space:]]+' /etc/resolv.conf 2>/dev/null; } &&
+       { [ "$waiting_for_dns" = 1 ] || {
+           [ -L /etc/resolv.conf ] && [ "$(readlink -m /etc/resolv.conf)" = /run/resolvconf/resolv.conf ] &&
+           ! grep -Eq '^[[:space:]]*nameserver[[:space:]]+[^#;[:space:]]+' /etc/resolv.conf 2>/dev/null;
+         }; } &&
        ! timeout 3 getent ahosts deb.debian.org >/dev/null; then
     # Numeric probes can pass while APT cannot resolve hosts. After detecting this,
     # retry the lookup so an unusable nameserver cannot clear the setup warning.
