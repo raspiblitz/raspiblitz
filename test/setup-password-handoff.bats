@@ -2,10 +2,11 @@
 
 setup() {
   export FIXTURE="$BATS_TEST_TMPDIR"
-  mkdir -p "$FIXTURE/admin/config.scripts" "$FIXTURE/bin" "$FIXTURE/state"
+  mkdir -p "$FIXTURE/admin/config.scripts" "$FIXTURE/bin" "$FIXTURE/state" "$FIXTURE/admin/setup.scripts"
+  cp "$BATS_TEST_DIRNAME/../home.admin/setup.scripts/readSetup.sh" "$FIXTURE/admin/setup.scripts/"
   touch "$FIXTURE/admin/raspiblitz.info" "$FIXTURE/dialogs"
   printf 'setPasswordA=1\nsetPasswordB=1\nsetPasswordC=1\nhostname=lab\n' > "$FIXTURE/state/raspiblitz.setup"
-  sed -e "s|/home/admin|$FIXTURE/admin|g" -e "s|/run/raspiblitz-setup|$FIXTURE/state|g" \
+  sed -e "s|/home/admin|$FIXTURE/admin|g" -e "s|/run/raspiblitz-setup/request|$FIXTURE/state|g" \
     "$BATS_TEST_DIRNAME/../home.admin/setup.scripts/dialogPasswords.sh" > "$FIXTURE/dialog.sh"
   cat > "$FIXTURE/admin/config.scripts/blitz.passwords.sh" <<'SH'
 #!/bin/sh

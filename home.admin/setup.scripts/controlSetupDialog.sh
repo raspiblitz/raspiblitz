@@ -7,7 +7,16 @@ source /home/admin/raspiblitz.info
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-SETUPFILE="/run/raspiblitz-setup/raspiblitz.setup"
+SETUPFILE="/run/raspiblitz-setup/request/raspiblitz.setup"
+
+# Keep SSH and API from submitting different drive choices concurrently.
+exec {setupLock}< /run/raspiblitz-setup/submit.lock || exit 1
+if ! flock -n "$setupLock"; then
+  dialog --msgbox "Another setup dialog is in progress. Finish it before retrying." 7 50
+  exit 1
+fi
+source <(/home/admin/_cache.sh get state)
+[ "$state" = waitsetup ] || exit 1
 
 # Create the SSH record in the protected, shared setup directory.
 sudo install -o admin -g admin -m 640 /dev/null "$SETUPFILE" || exit 1
@@ -271,7 +280,7 @@ if [ "${setupPhase}" = "setup" ]; then
     # because password C not needed if LND rescue file is uploaded
 
     lightningWalletDone=0
-    source ${SETUPFILE}
+    source /home/admin/setup.scripts/readSetup.sh "${SETUPFILE}" || exit 1
     if [ "${lightning}" = "none" ]; then
       lightningWalletDone=1
       # also disable asking for password c if no lightning implementation was chosen
@@ -324,7 +333,7 @@ echo "# Starting passwords dialog ..."
 sudo /home/admin/setup.scripts/dialogPasswords.sh || exit 1
 
 # check if password A is set
-source ${SETUPFILE}
+source /home/admin/setup.scripts/readSetup.sh "${SETUPFILE}" || exit 1
 if [ "${passwordA}" = "" ]; then
   sudo /home/admin/config.scripts/blitz.error.sh $(basename "$0") "missing-passworda-1" "missing passwordA(1) in (${SETUPFILE}) after dialogPasswords.sh" ""
   exit 1

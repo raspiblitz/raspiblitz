@@ -706,6 +706,27 @@ if [ "$action" = "status" ]; then
         biggerDeviceName=$(find_by_id_filename "${biggerDevice}")
     fi
 
+    # Bind a pending setup decision to the inspected devices and this kernel's
+    # disk instances. Names alone may be reused after hot-plug.
+    setupDriveIdentity=""
+    if [ -n "$storageDevice" ]; then
+        driveInventory=""
+        inventoryComplete=1
+        for inspectedDevice in "$storageDevice" "$dataDevice" "$systemDevice"; do
+            if [ -z "$inspectedDevice" ]; then driveInventory+="none;"; continue; fi
+            if ! IFS= read -r diskSequence < "/sys/class/block/$inspectedDevice/diskseq" ||
+               ! [[ "$diskSequence" =~ ^[0-9]+$ ]] ||
+               ! layout=$(lsblk -rn -o NAME,TYPE,MAJ:MIN,PARTUUID "/dev/$inspectedDevice"); then
+                inventoryComplete=0
+                break
+            fi
+            driveInventory+="$inspectedDevice:$diskSequence:$layout;"
+        done
+        if [ "$inventoryComplete" = 1 ]; then
+            setupDriveIdentity=$(printf '%s' "$driveInventory" | sha256sum | cut -d' ' -f1)
+        fi
+    fi
+
     # count number of partitions
     storagePartitionsCount=0
     systemPartitionsCount=0
@@ -861,6 +882,7 @@ if [ "$action" = "status" ]; then
     # output the result
     echo "scenario='${scenario}'"
     echo "scenarioSystemCopy='${systemCopy}'"
+    echo "setupDriveIdentity='${setupDriveIdentity}'"
     echo "storageDevice='${storageDevice}'"
     echo "storageDeviceName='${storageDeviceName}'"
     echo "storageSizeGB='${storageSizeGB}'"
@@ -1447,8 +1469,8 @@ if [ "$action" = "copy-system" ]; then
     
     if [ "${computerType}" = "raspberrypi" ]; then
         echo "# .. boot rsync start" >> ${logFile}
-        echo "boot" > /var/cache/raspiblitz/temp/progress.txt
-        rsync -axHAX --delete --info=progress2 ${bootPath} /mnt/disk_boot/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+        echo "boot" > /run/raspiblitz-setup/progress.txt
+        rsync -axHAX --delete --info=progress2 ${bootPath} /mnt/disk_boot/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /run/raspiblitz-setup/progress.txt
         if [ $? -ne 0 ]; then
             echo "error='fail on boot copy'"
             exit 1
@@ -1480,7 +1502,7 @@ if [ "$action" = "copy-system" ]; then
     echo "# DEBUG: Partition count after mounting system: ${afterMountSystemPartitionCount}" >> ${logFile}
     
     echo "# .. system rsync start" >> ${logFile}
-    echo "system" > /var/cache/raspiblitz/temp/progress.txt
+    echo "system" > /run/raspiblitz-setup/progress.txt
     rsync -axHAX --delete\
         --exclude=/dev/* \
         --exclude=/proc/* \
@@ -1495,7 +1517,7 @@ if [ "$action" = "copy-system" ]; then
         --exclude=/var/cache/* \
         --exclude=/var/tmp/* \
         --exclude=/var/log/* \
-        --info=progress2 / /mnt/disk_system/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+        --info=progress2 / /mnt/disk_system/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /run/raspiblitz-setup/progress.txt
                                                  
     if [ "${PIPESTATUS[0]}" -ne 0 ]; then
         echo "error='fail on system copy'"
@@ -1514,7 +1536,9 @@ if [ "$action" = "copy-system" ]; then
         resume=$(mktemp /mnt/disk_system/root/.raspiblitz-setup.XXXXXXXX) || exit 1
         if ! { sed '/^systemCopy=/d' /run/raspiblitz-setup/raspiblitz.setup > "$resume" &&
                printf '\nsystemCopy=done\n' >> "$resume" &&
-               mv -fT -- "$resume" /mnt/disk_system/root/.raspiblitz-setup-resume; }; then
+               sync "$resume" &&
+               mv -fT -- "$resume" /mnt/disk_system/root/.raspiblitz-setup-resume &&
+               sync -f /mnt/disk_system; }; then
             rm -f -- "$resume"
             echo "error='cannot persist setup handoff on the new system'"
             exit 1
@@ -1639,7 +1663,7 @@ EOF
         echo "# DEBUG: Partition count after final umount: ${afterFinalUmountPartitionCount}" >> ${logFile}
     fi
 
-    rm /var/cache/raspiblitz/temp/progress.txt
+    rm /run/raspiblitz-setup/progress.txt
     
     # DEBUG: Log final partition count
     finalPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)
@@ -2531,7 +2555,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
     if [ "${action}" = "run" ]; then
 
         echo "### MIGRATING HDD"
-        echo "# see /var/cache/raspiblitz/temp/progress.txt for progress"
+        echo "# see /run/raspiblitz-setup/progress.txt for progress"
 
         # get source hdd of migration
         hddMigrateDeviceFrom=$4
@@ -2627,9 +2651,9 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         fi
 
         echo "# rsync storage from source to target ..."
-        echo "chain" > /var/cache/raspiblitz/temp/progress.txt
+        echo "chain" > /run/raspiblitz-setup/progress.txt
         mkdir -p /mnt/migrate_storage/app-storage 2>/dev/null
-        rsync -ah --info=progress2 /mnt/migrate_source/app-storage/ /mnt/migrate_storage/app-storage/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+        rsync -ah --info=progress2 /mnt/migrate_source/app-storage/ /mnt/migrate_storage/app-storage/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /run/raspiblitz-setup/progress.txt
         if [ $? -ne 0 ]; then
             echo "error='failed to rsync storage'"
             exit 1
@@ -2639,8 +2663,8 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         if [ -d /mnt/migrate_source/bitcoin ] && [ ! -L /mnt/migrate_source/bitcoin ]; then
             echo "# rsync bitcoin from source to target ..."
             mkdir -p /mnt/migrate_storage/app-storage/bitcoin 2>/dev/null
-            echo "bitcoin" > /var/cache/raspiblitz/temp/progress.txt
-            rsync -ah --info=progress2 /mnt/migrate_source/bitcoin/ /mnt/migrate_storage/app-storage/bitcoin/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+            echo "bitcoin" > /run/raspiblitz-setup/progress.txt
+            rsync -ah --info=progress2 /mnt/migrate_source/bitcoin/ /mnt/migrate_storage/app-storage/bitcoin/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /run/raspiblitz-setup/progress.txt
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync bitcoin'"
                 exit 1
@@ -2672,8 +2696,8 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
 
         echo "# rsync data from source to target ..."
         mkdir -p /mnt/migrate_data/app-data 2>/dev/null
-        echo "data" > /var/cache/raspiblitz/temp/progress.txt
-        rsync -ah --info=progress2 /mnt/migrate_source/app-data/ /mnt/migrate_data/app-data/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
+        echo "data" > /run/raspiblitz-setup/progress.txt
+        rsync -ah --info=progress2 /mnt/migrate_source/app-data/ /mnt/migrate_data/app-data/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /run/raspiblitz-setup/progress.txt
         if [ $? -ne 0 ]; then
             echo "error='failed to rsync data'"
             exit 1
@@ -2683,7 +2707,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         if [ -d /mnt/migrate_source/lnd ] && [ ! -L /mnt/migrate_source/lnd ]; then
             echo "# moving lnd from source to target ..."
             mkdir -p /mnt/migrate_data/app-data/lnd 2>/dev/null
-            echo "lnd" > /var/cache/raspiblitz/temp/progress.txt
+            echo "lnd" > /run/raspiblitz-setup/progress.txt
 
             # use rsync to move files (hidden & merge directories)
             rsync -a --remove-source-files "/mnt/migrate_source/lnd/" "/mnt/migrate_data/app-data/lnd/"
@@ -2705,7 +2729,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
             echo "# rsync tor from source to target ..."
             rm -f /mnt/migrate_source/tor/*.log*
             mkdir -p /mnt/migrate_data/app-data/tor 2>/dev/null
-            echo "tor" > /var/cache/raspiblitz/temp/progress.txt
+            echo "tor" > /run/raspiblitz-setup/progress.txt
             rsync -a --remove-source-files --prune-empty-dirs /mnt/migrate_source/tor/ /mnt/migrate_data/app-data/tor/
             if [ $? -ne 0 ]; then
                 echo "error='failed to rsync tor'"
@@ -2747,7 +2771,7 @@ if [ "$1" = "migration" ] && [ "$2" = "hdd" ]; then
         rm -rf /mnt/migrate_source
         rm -rf /mnt/migrate_storage
         rm -rf /mnt/migrate_data
-        rm -rf /var/cache/raspiblitz/temp/progress.txt
+        rm -rf /run/raspiblitz-setup/progress.txt
 
         exit 0
     fi

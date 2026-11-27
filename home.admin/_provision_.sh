@@ -23,7 +23,7 @@ configFile="/mnt/hdd/app-data/raspiblitz.conf"
 # SETUPFILE
 # this key/value file contains the state during the setup process
 setupFile="/run/raspiblitz-setup/raspiblitz.setup"
-source ${setupFile}
+source /home/admin/setup.scripts/readSetup.sh "${setupFile}" || exit 1
 
 # log header
 echo "" >> ${logFile}

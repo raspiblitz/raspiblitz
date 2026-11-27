@@ -17,7 +17,7 @@ configFile="/mnt/hdd/app-data/raspiblitz.conf"
 
 # SETUPFILE - - setup data of RaspiBlitz
 setupFile="/run/raspiblitz-setup/raspiblitz.setup"
-source ${setupFile}
+source /home/admin/setup.scripts/readSetup.sh "${setupFile}" || exit 1
 
 # log header
 echo "###################################" >> ${logFile}
