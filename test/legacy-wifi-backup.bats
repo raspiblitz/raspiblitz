@@ -21,6 +21,50 @@ SH
   PATH="$FIXTURE/bin:$PATH"
 }
 
+
+@test "a partially published set is replayed only from the matching original backup" {
+  python3 - "$FIXTURE" <<'PY'
+import importlib.util
+import os
+import sys
+from pathlib import Path
+from unittest.mock import patch
+
+root = Path(sys.argv[1])
+spec = importlib.util.spec_from_file_location("restore", root / "restore.py")
+restore = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(restore)
+source = root / "profiles"
+source.mkdir()
+for name in ("a", "b"):
+    (source / name).write_text(name)
+target = root / "nm"
+replace = os.replace
+def interrupt(source, destination):
+    if Path(destination).name == "b":
+        raise OSError("synthetic interrupted write")
+    return replace(source, destination)
+try:
+    with patch.object(restore.os, "replace", side_effect=interrupt):
+        restore.restore_profiles(source, target)
+except OSError:
+    pass
+assert (target / "a").read_text() == "a"
+assert not (target / "b").exists()
+assert (target / ".raspiblitz-restore-pending").is_file()
+(source / "b").write_text("another backup")
+try:
+    restore.restore_profiles(source, target)
+except ValueError:
+    pass
+assert not (target / "b").exists()
+(source / "b").write_text("b")
+restore.restore_profiles(source, target)
+assert (target / "a").read_text() == "a" and (target / "b").read_text() == "b"
+assert not (target / ".raspiblitz-restore-pending").exists()
+PY
+}
+
 @test "legacy-only backup gives actionable guidance without disclosing or deleting credentials" {
   echo 'psk="FixtureOnly123"' > "$FIXTURE/hdd/app-data/wpa_supplicant.conf"
   run bash "$FIXTURE/wifi.sh" backup-restore

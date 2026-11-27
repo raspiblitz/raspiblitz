@@ -107,7 +107,8 @@ if [ "$1" == "backup-restore" ]; then
   fi
   echo "memRestoreConfigAvailable=${memRestoreConfigAvailable}"
 
-  if [ ${wifiIsSet} -eq 1 ]; then
+  restorePending=/etc/NetworkManager/system-connections/.raspiblitz-restore-pending
+  if [ ${wifiIsSet} -eq 1 ] && [ ! -f "$restorePending" ]; then
     # BACKUP latest wifi settings to HDD if available
     if [ ${hddBackupLocationAvailable} -eq 1 ]; then
       sudo cp -a /etc/NetworkManager/system-connections/* /mnt/hdd/app-data/wifi
@@ -144,6 +145,11 @@ if [ "$1" == "backup-restore" ]; then
     echo "wifiRestore=1"
     echo "wifiBackup=0"
     exit 0
+  elif [ -f "$restorePending" ]; then
+    echo "wifiRestore=0"
+    echo "wifiBackup=0"
+    echo "# Wi-Fi restore was interrupted. Reconnect the original backup and retry."
+    exit 1
   else
     # Old releases saved wpa_supplicant settings, which NetworkManager cannot load as a keyfile.
     if [ -f /var/cache/raspiblitz/hdd-inspect/legacy-wifi ] ||
