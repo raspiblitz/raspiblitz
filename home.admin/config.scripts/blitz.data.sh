@@ -410,11 +410,6 @@ if [ "$action" = "status" ]; then
                         echo "#    * SSH keys copied to RAMDISK"
                     fi
 
-                    # make copy of raspiblitz.setup to RAMDISK (if available from former systemcopy)
-                    cp -a ${mountPath}/app-data/raspiblitz.setup /var/cache/raspiblitz/hdd-inspect/raspiblitz.setup 2>/dev/null
-                    if [ -f "/var/cache/raspiblitz/hdd-inspect/raspiblitz.setup" ]; then
-                        echo "#    * raspiblitz.setup copied to RAMDISK"
-                    fi
 
                 fi
             fi
@@ -1492,6 +1487,7 @@ if [ "$action" = "copy-system" ]; then
         --exclude=/sys/* \
         --exclude=/tmp/* \
         --exclude=/run/* \
+        --exclude=/root/.raspiblitz-setup-resume \
         --exclude=/mnt/* \
         --exclude=/media/* \
         --exclude=${bootPath}/* \
@@ -1501,11 +1497,29 @@ if [ "$action" = "copy-system" ]; then
         --exclude=/var/log/* \
         --info=progress2 / /mnt/disk_system/ 2>&1 | stdbuf -oL tr '\r' '\n' | grep --line-buffered '%' | stdbuf -oL sed -n 's/.* \([0-9]\+\)% .*/\1%/p' >> /var/cache/raspiblitz/temp/progress.txt
                                                  
-    if [ $? -ne 0 ]; then
+    if [ "${PIPESTATUS[0]}" -ne 0 ]; then
         echo "error='fail on system copy'"
         exit 1
     fi
     echo "# OK - System copied" >> ${logFile}
+
+    if [ "$4" = --resume-setup ]; then
+        # Persist the operator's choices on the new, trusted SYSTEM only.
+        # Never import a shell record from removable DATA or the public cache.
+        if ! findmnt -n -S "/dev/$systemPartition" -M /mnt/disk_system >/dev/null ||
+           [ ! -d /mnt/disk_system/root ] || [ -L /mnt/disk_system/root ]; then
+            echo "error='cannot verify system partition for setup handoff'"
+            exit 1
+        fi
+        resume=$(mktemp /mnt/disk_system/root/.raspiblitz-setup.XXXXXXXX) || exit 1
+        if ! { sed '/^systemCopy=/d' /run/raspiblitz-setup/raspiblitz.setup > "$resume" &&
+               printf '\nsystemCopy=done\n' >> "$resume" &&
+               mv -fT -- "$resume" /mnt/disk_system/root/.raspiblitz-setup-resume; }; then
+            rm -f -- "$resume"
+            echo "error='cannot persist setup handoff on the new system'"
+            exit 1
+        fi
+    fi
 
     # DEBUG: Log partition count after system copy
     afterSystemCopyPartitionCount=$(partx -g /dev/"${actionDevice}" 2>/dev/null | wc -l)

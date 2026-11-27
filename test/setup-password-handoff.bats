@@ -5,7 +5,7 @@ setup() {
   mkdir -p "$FIXTURE/admin/config.scripts" "$FIXTURE/bin" "$FIXTURE/state"
   touch "$FIXTURE/admin/raspiblitz.info" "$FIXTURE/dialogs"
   printf 'setPasswordA=1\nsetPasswordB=1\nsetPasswordC=1\nhostname=lab\n' > "$FIXTURE/state/raspiblitz.setup"
-  sed -e "s|/home/admin|$FIXTURE/admin|g" -e "s|/var/cache/raspiblitz/temp|$FIXTURE/state|g" \
+  sed -e "s|/home/admin|$FIXTURE/admin|g" -e "s|/run/raspiblitz-setup|$FIXTURE/state|g" \
     "$BATS_TEST_DIRNAME/../home.admin/setup.scripts/dialogPasswords.sh" > "$FIXTURE/dialog.sh"
   cat > "$FIXTURE/admin/config.scripts/blitz.passwords.sh" <<'SH'
 #!/bin/sh
@@ -32,7 +32,7 @@ SH
     grep -q "Password $key accepted" "$FIXTURE/dialogs"
   done
   grep -Fxq hostname=lab "$FIXTURE/state/raspiblitz.setup"
-  [ "$(stat -c %a "$FIXTURE/state/raspiblitz.setup")" = 600 ]
+  [ "$(stat -c %a "$FIXTURE/state/raspiblitz.setup")" = 640 ]
   [[ "$output" != *Fixture-Input* ]]
 }
 

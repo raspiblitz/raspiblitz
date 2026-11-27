@@ -17,7 +17,7 @@ infoFile="/home/admin/raspiblitz.info"
 source ${infoFile}
 
 # SETUPFILE - setup data of RaspiBlitz
-setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
+setupFile="/run/raspiblitz-setup/raspiblitz.setup"
 source ${setupFile}
 
 # CONFIGFILE - configuration of RaspiBlitz

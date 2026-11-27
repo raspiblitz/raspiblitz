@@ -36,6 +36,16 @@ SH
   [[ "$output" == *selected=clean* ]]
 }
 
+@test "old API handoff is ignored until the operator resubmits via a matching UI" {
+  printf 'systemCopy=0\ndeleteData=all\n' > "$FIXTURE/legacy"
+  printf 'systemCopy=0\ndeleteData=keepBlockchain\n' > "$FIXTURE/retry"
+  run timeout 4 bash "$FIXTURE/handoff"
+  [ "$status" = 0 ]
+  [ "$(cat "$FIXTURE/states")" = waitsetup ]
+  [[ "$output" == *selected=clean* ]]
+  [ -f "$FIXTURE/legacy" ]
+}
+
 @test "SSH can omit systemCopy when the installer did not offer it" {
   export scenarioSystemCopy=0
   echo deleteData=all > "$setupFile"

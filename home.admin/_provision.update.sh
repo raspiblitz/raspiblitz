@@ -16,7 +16,7 @@ infoFile="/home/admin/raspiblitz.info"
 configFile="/mnt/hdd/app-data/raspiblitz.conf"
 
 # SETUPFILE - - setup data of RaspiBlitz
-setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
+setupFile="/run/raspiblitz-setup/raspiblitz.setup"
 source ${setupFile}
 
 # log header

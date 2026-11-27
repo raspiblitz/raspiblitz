@@ -27,7 +27,7 @@ infoFile="/home/admin/raspiblitz.info"
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
+setupFile="/run/raspiblitz-setup/raspiblitz.setup"
 
  # make sure ram disk is mounted
 /home/admin/_cache.sh ramdisk on 
@@ -57,6 +57,8 @@ echo "## prepare raspiblitz temp" >> $logFile
 # make sure /var/cache/raspiblitz/temp exists
 mkdir -p /var/cache/raspiblitz/temp
 chmod 777 /var/cache/raspiblitz/temp
+# The API account and admin are members of admin; other service users must not replace this record.
+install -d -o root -g admin -m 2770 /run/raspiblitz-setup || exit 1
 
 ################################
 # INIT raspiblitz.info
@@ -669,16 +671,17 @@ if [ "${scenario}" != "ready" ] ; then
     infoMessage="Unkonwn Setup Phase"
   fi
 
-  # check if raspiblitz.setup exists (from former system copy step)
-   if [ -f "/var/cache/raspiblitz/hdd-inspect/raspiblitz.setup" ]; then
+  # Resume only a handoff stored on this SYSTEM during its own copy.
+  if [ -f /root/.raspiblitz-setup-resume ] && [ ! -L /root/.raspiblitz-setup-resume ]; then
 
       # this is when booting from hdd after system copy
       echo "INFO: 'raspiblitz.setup' exists - skip user wait loop" >> ${logFile}
-      cp -a /var/cache/raspiblitz/hdd-inspect/raspiblitz.setup ${setupFile}
+      install -o admin -g admin -m 0640 /root/.raspiblitz-setup-resume "${setupFile}" || exit 1
       state="waitprovision"
 
   else
-    echo "INFO: 'raspiblitz.setup' does not exist - wait for user config" >> ${logFile}
+    echo "INFO: no SYSTEM resume record - wait for user config" >> ${logFile}
+    rm -f -- "${setupFile}" || exit 1
     state="waitsetup"
     /home/admin/_cache.sh set state "${state}"
     /home/admin/_cache.sh set message "${infoMessage}"
@@ -711,8 +714,8 @@ if [ "${scenario}" != "ready" ] ; then
     # get the results from the SSH-UI or WEB-UI
     echo "LOADING 'raspiblitz.setup' ..." >> ${logFile}
     unset deleteData systemCopy menuchoice
-    if ! source "${setupFile}"; then
-      /home/admin/_cache.sh set message "Could not load setup choices. Open setup again."
+    if [ ! -f "${setupFile}" ] || [ -L "${setupFile}" ] || ! source "${setupFile}"; then
+      /home/admin/_cache.sh set message "Setup choices unavailable. Use the matching API or restart setup over SSH."
       state=waitsetup
       /home/admin/_cache.sh set state "${state}"
       continue
@@ -999,7 +1002,7 @@ if [ "${scenario}" != "ready" ] ; then
 
       echo "bootFromStorage(${bootFromStorage})" >> ${logFile}
       if [ "${bootFromStorage}" = "1" ]; then
-        /home/admin/config.scripts/blitz.data.sh copy-system "${storageDevice}" storage
+        /home/admin/config.scripts/blitz.data.sh copy-system "${storageDevice}" storage --resume-setup
         if [ $? -ne 0 ]; then
           echo "FAIL: copy-system (storage) failed" >> ${logFile}
           /home/admin/_cache.sh set state "error"
@@ -1007,7 +1010,7 @@ if [ "${scenario}" != "ready" ] ; then
           exit 1
         fi
       else
-        /home/admin/config.scripts/blitz.data.sh copy-system "${systemDevice}" system
+        /home/admin/config.scripts/blitz.data.sh copy-system "${systemDevice}" system --resume-setup
         if [ $? -ne 0 ]; then
           echo "FAIL: copy-system (system) failed" >> ${logFile}
           /home/admin/_cache.sh set state "error"
@@ -1015,27 +1018,6 @@ if [ "${scenario}" != "ready" ] ; then
           exit 1
         fi
       fi
-
-      # mark systemCopy as done in raspiblitz.setup
-      if ! sed -i "s/^systemCopy=.*/systemCopy=done/" "${setupFile}"; then
-        echo "error='failed to update systemCopy in setupFile'" >> ${logFile}
-        exit 1
-      fi
-
-      # put setupFile to new system (so after reboot it does not need to ask user again)
-      source <(/home/admin/config.scripts/blitz.data.sh status)
-      mkdir -p /mnt/disk_data 2>/dev/null
-      mount /dev/${dataPartition} /mnt/disk_data
-      echo "copy setupFile(${setupFile}) to /mnt/disk_data/app-data/raspiblitz.setup" >> ${logFile}
-      mkdir -p /mnt/disk_data/app-data 2>/dev/null
-      cp ${setupFile} /mnt/disk_data/app-data/raspiblitz.setup
-      if [ $? -ne 0 ]; then
-        echo "FAIL: copy setupFile to new system failed" >> ${logFile}
-        /home/admin/_cache.sh set state "error"
-        /home/admin/_cache.sh set message "copy setupFile to new system failed"
-        exit 1
-      fi
-      umount /mnt/disk_data
 
       # put flag file into old system 
       touch /home/admin/systemcopy.flag

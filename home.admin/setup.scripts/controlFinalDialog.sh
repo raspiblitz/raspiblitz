@@ -6,7 +6,7 @@ source /home/admin/raspiblitz.info
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-source /var/cache/raspiblitz/temp/raspiblitz.setup
+source /run/raspiblitz-setup/raspiblitz.setup
 
 # make sure also admin user can write to log
 sudo chmod 777 /home/admin/raspiblitz.log

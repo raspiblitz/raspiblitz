@@ -14,7 +14,7 @@ infoFile="/home/admin/raspiblitz.info"
 source ${infoFile}
 
 # SETUPFILE - data from setup process
-source /var/cache/raspiblitz/temp/raspiblitz.setup
+source /run/raspiblitz-setup/raspiblitz.setup
 
 # CACHEDATA - import needed data from cache 
 source <(/home/admin/_cache.sh get hddGotMigrationData hddVersionLND)

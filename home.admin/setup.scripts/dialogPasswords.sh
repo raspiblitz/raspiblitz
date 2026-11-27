@@ -6,7 +6,7 @@ source /home/admin/raspiblitz.info
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
+SETUPFILE="/run/raspiblitz-setup/raspiblitz.setup"
 source $SETUPFILE
 
 ####################################################
@@ -78,6 +78,7 @@ save_password() (
   sed "/^${key}=/d" "$SETUPFILE" > "$staged" &&
     printf '%s\n' "$record" >> "$staged" &&
     chown --reference="$SETUPFILE" -- "$staged" &&
+    chmod 640 -- "$staged" &&
     mv -fT -- "$staged" "$SETUPFILE" &&
     [ "$(tail -n 1 -- "$SETUPFILE")" = "$record" ]
 )

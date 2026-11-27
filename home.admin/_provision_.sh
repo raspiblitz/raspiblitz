@@ -22,7 +22,7 @@ configFile="/mnt/hdd/app-data/raspiblitz.conf"
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-setupFile="/var/cache/raspiblitz/temp/raspiblitz.setup"
+setupFile="/run/raspiblitz-setup/raspiblitz.setup"
 source ${setupFile}
 
 # log header

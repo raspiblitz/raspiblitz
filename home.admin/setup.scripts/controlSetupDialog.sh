@@ -7,12 +7,10 @@ source /home/admin/raspiblitz.info
 
 # SETUPFILE
 # this key/value file contains the state during the setup process
-SETUPFILE="/var/cache/raspiblitz/temp/raspiblitz.setup"
+SETUPFILE="/run/raspiblitz-setup/raspiblitz.setup"
 
-# init SETUPFILE & temp dir on mem drive
-sudo mkdir /var/cache/raspiblitz/temp
-sudo chown admin:admin /var/cache/raspiblitz/temp
-sudo install -o admin -g admin -m 600 /dev/null "$SETUPFILE" || exit 1
+# Create the SSH record in the protected, shared setup directory.
+sudo install -o admin -g admin -m 640 /dev/null "$SETUPFILE" || exit 1
 echo "# RASPIBLITZ SETUP STATE" > "$SETUPFILE" || exit 1
 
 source <(/home/admin/_cache.sh get dnsworking)
