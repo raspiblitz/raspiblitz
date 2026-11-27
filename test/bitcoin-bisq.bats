@@ -8,10 +8,10 @@ setup() {
   printf 'test-address\n' >"$box/data/tor/bisq/hostname"
   cp "$BATS_TEST_DIRNAME/../home.admin/assets/bitcoin.conf" "$box/data/bitcoin/bitcoin.conf"
   sed -e "s@/home/admin@$box/admin@g" -e "s@/mnt/hdd/app-data@$box/data@g" \
-    -e "s@/etc/tor@$box/tor@g" "$BATS_TEST_DIRNAME/../home.admin/99connectMenu.sh" >"$box/menu"
+    -e "s@/run/raspiblitz-bisq@$box/temp.bisq@g" -e "s@/etc/tor@$box/tor@g" "$BATS_TEST_DIRNAME/../home.admin/99connectMenu.sh" >"$box/menu"
   printf '#!/bin/sh\nexit 0\n' >"$box/admin/_cache.sh"
   printf '#!/bin/sh\nexec "$@"\n' >"$BATS_TEST_TMPDIR/bin/sudo"
-  printf '#!/bin/sh\necho "$*" >> "$box/services"\n' >"$BATS_TEST_TMPDIR/bin/systemctl"
+  printf '#!/bin/sh\necho "$*" >> "$box/services"\n[ "$*" != "${failed_service:-}" ]\n' >"$BATS_TEST_TMPDIR/bin/systemctl"
   printf '#!/bin/sh\nexit 0\n' >"$BATS_TEST_TMPDIR/bin/sleep"
   cat >"$BATS_TEST_TMPDIR/bin/dialog" <<'SH'
 #!/bin/sh
@@ -47,7 +47,7 @@ menu() {
 }
 
 @test "legacy BIP37 can be turned off even without a Bisq hidden service" {
-  printf '\npeerbloomfilters=1\n' >>"$box/data/bitcoin/bitcoin.conf"
+  printf '\npeerbloomfilters=1 # previous=0\n' >>"$box/data/bitcoin/bitcoin.conf"
   menu DISABLEBLOOM
   [ "$status" -eq 0 ]
   grep -q 'DISABLEBLOOM' "$box/dialogs"
@@ -62,4 +62,18 @@ menu() {
   [ "$status" -eq 1 ]
   run grep -q '^restart bitcoind' "$box/services"
   [ "$status" -eq 1 ]
+}
+
+@test "failed Tor reload restores torrc and failed Bitcoin restart restores bitcoin.conf" {
+  conf="$box/data/bitcoin/bitcoin.conf"
+  cp "$conf" "$box/previous"
+  export failed_service='reload tor@default'
+  menu ADDBISQ
+  [ "$status" -eq 1 ]
+  [ ! -s "$box/tor/torrc" ]
+  cmp "$box/previous" "$conf"
+  export failed_service='restart bitcoind'
+  menu ADDBISQ
+  [ "$status" -eq 1 ]
+  cmp "$box/previous" "$conf"
 }
