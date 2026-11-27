@@ -81,8 +81,8 @@ if [ "${targetWallet}" = "zap-ios" ]; then
   fi
 
 elif [ "${targetWallet}" = "zap-android" ]; then
-  connectInfo="- start the Zap/Bitbanana Wallet --> SETUP WALLET\n  or choose new Wallet in app menu\n- scan the QR code \n- confirm host address"
-  # ZAP uses gRPC ports
+  connectInfo="In BitBanana, scan the QR code and confirm your node address.\nThis code grants access to your LND wallet. Keep it private."
+  # BitBanana connects to LND over gRPC.
   port="10009"
   if [ ${#ip2torGRPC_IP} -gt 0 ]; then
     # when IP2TOR bridge is available - force using that
@@ -219,7 +219,7 @@ if [ "$3" == "key-value" ]; then
 fi
 
 # display qr code image on LCD
-sudo /home/admin/config.scripts/blitz.display.sh qr "${lndconnect}"
+printf '%s' "${lndconnect}" | sudo /home/admin/config.scripts/blitz.display.sh qr-stdin
 
 # show pairing info dialog
 msg=""
@@ -237,10 +237,7 @@ whiptail --backtitle "Connecting Mobile Wallet" \
 	 --yesno "${msg}" 18 65
 if [ $? -eq 1 ]; then
   # backup - show QR code on screen (not LCD)
-  echo "##############"
-  echo "qrencode -o - -t ANSIUTF8 -m2 "${lndconnect}""
-  echo "##############"
-  qrencode -o - -t ANSIUTF8 -m2 "${lndconnect}"
+  printf '%s' "${lndconnect}" | qrencode -o - -t ANSIUTF8 -m2
   echo "Press ENTER when finished."
   read key
 fi
