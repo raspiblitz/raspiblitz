@@ -77,6 +77,12 @@ echo "prechecks OK"  >> ${logFile}
 # this is the place if on a future version change
 # a conversion of config data or app data is needed
 
+# Older backups can contain a wallet directory without owner traversal (#5034).
+if [ "${chain:-main}" = main ] && ! sudo -u bitcoin /home/admin/config.scripts/bitcoin.check.sh recover-wallet-access >> "${logFile}" 2>&1; then
+  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "wallet-access" "Bitcoin cannot access the recovered wallet directory. See raspiblitz.log for the directory to check." "" "${logFile}"
+  exit 1
+fi
+
 # if old bitcoin.conf exists ...
 configExists=$(sudo ls /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep -c '.conf')
 if [ ${configExists} -eq 1 ]; then

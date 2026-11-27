@@ -6,6 +6,40 @@ if [ $# -eq 0 ] || [[ "$1" =~ ^(-h|--help|-help)$ ]]; then
   exit 1
 fi
 
+# Recover only owner traversal on the two directories used by the default mainnet wallet.
+# Run as the same unprivileged account as Bitcoin Core.
+if [ "$1" = "recover-wallet-access" ]; then
+  walletRoot=/mnt/hdd/app-data/bitcoin/wallets
+  if [ "$(id -un)" != bitcoin ]; then
+    echo "# FAIL: check wallet access as bitcoin" >&2
+    exit 1
+  fi
+  for directory in /mnt/hdd/app-data /mnt/hdd/app-data/bitcoin; do
+    if [ -d "$directory" ] && [ ! -x "$directory" ]; then
+      echo "# FAIL: bitcoin cannot traverse $directory" >&2
+      exit 1
+    fi
+  done
+  customLink=0
+  for directory in "$walletRoot" "$walletRoot/wallet.dat"; do
+    if [ -L "$directory" ]; then
+      # Custom links are managed by the operator. Do not change their targets.
+      if [ ! -e "$directory" ] || { [ -d "$directory" ] && [ ! -x "$directory" ]; }; then
+        echo "# FAIL: bitcoin cannot access wallet link at $directory" >&2
+        exit 1
+      fi
+      customLink=1
+    fi
+    if [ -d "$directory" ] && [ ! -x "$directory" ]; then
+      if [ "$customLink" = 1 ] || [ ! -O "$directory" ] || ! chmod u+x -- "$directory" || [ ! -x "$directory" ]; then
+        echo "# FAIL: bitcoin cannot traverse $directory; check directory ownership and access" >&2
+        exit 1
+      fi
+    fi
+  done
+  exit 0
+fi
+
 ######################################################################
 # PRESTART
 # is executed by systemd bitcoind services everytime before bitcoin is started
