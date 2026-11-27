@@ -193,20 +193,11 @@ if [ "${setupPhase}" = "setup" ]; then
   # FORMAT DRIVE on NEW SETUP or MIGRATION UPLOAD/HDD 
   if [ "${menuresult}" = "0" ] || [ "${menuresult}" = "1" ]  || [ "${menuresult}" = "6" ]; then
 
-    source <(/home/admin/_cache.sh get system_setup_storageMigration system_setup_storageBlockchainGB system_setup_bootFromStorage system_setup_cleanDrives system_setup_storagePartitionsCount)
+    source <(/home/admin/_cache.sh get system_setup_storageHasReusableBlocks system_setup_cleanDrives)
 
-    # handle existing blockchain data # CLOSED FOR REPAIR #5029
     existingBlockchain=""
-    if [ "${menuresult}" = "0" ] && [ "${system_setup_storageBlockchainGB}" != "" ] && [ "${system_setup_storageBlockchainGB}" != "0" ]; then
-      echo "# Existing blockchain can be used - cannot be moved to new drive layout"
+    if [ "${system_setup_storageHasReusableBlocks}" = 1 ]; then
       existingBlockchain="BITCOIN"
-      # allow, when bootFromStorage & storage already has 3 partitions (new drive layout)
-    elif [ "${system_setup_storagePartitionsCount}" == "3" ]; then
-        echo "# Existing blockchain can be used - already new drive layout"
-        existingBlockchain="BITCOIN"
-      # otherwise - dont use existing blockchain
-    else
-        echo "# Existing blockchain will not be used - to allow transfere to new drive layout"
     fi
 
     # ask user about possible existing blockchain and formatting HDD
