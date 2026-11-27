@@ -10,6 +10,11 @@
 # setup fresh SD card with image above - login via SSH and run this script:
 ##########################################################################
 
+if [[ "$1" != *EXPORT && "$1" != "--help" && "$1" != "-h" ]] && [ -d /etc/pve ] && command -v pveversion >/dev/null; then
+  echo "Run the image builder inside a fresh guest VM or on dedicated Raspberry Pi boot media." >&2
+  exit 1
+fi
+
 # debian sources
 REQUIRED_SOURCES=(
   "deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware"
@@ -934,11 +939,16 @@ cat /home/admin/raspiblitz.info
 echo -e "\n**********************************************"
 echo "BASIC SD CARD BUILD DONE"
 echo -e "**********************************************\n"
-echo "Your SD Card Image for RaspiBlitz is ready (might still do display config)."
-echo "Take the chance & look through the output above if you can spot any errors or warnings."
-echo -e "\nIMPORTANT IF YOU WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
-echo "1. login fresh --> user:admin password:raspiblitz"
-echo -e "2. run --> release\n"
+echo "Review the build output and let display configuration finish. Then choose a next step:"
+echo "  Use this machine: reboot it, reconnect as admin and follow the setup dialogs."
+echo "  If you set a manual provision stop flag, clear it before booting for setup."
+echo "  If a virtual audio device was used to pause provisioning, detach it before that boot."
+echo "  Export an image: start a fresh admin login, run 'release' and confirm the cleanup."
+echo "  After power-off, capture the system medium before booting it again."
+echo "  Customize first: stay in the shell and inspect /home/admin/raspiblitz."
+echo "Additional local login accounts to review before distributing an image:"
+awk -F: '$3 >= 1000 && $3 < 65534 && $1 != "pi" && $1 != "admin" && $7 !~ /(nologin|false)$/ {print "  " $1; found=1} END {if (!found) print "  (none)"}' /etc/passwd
+echo "Keep intended accounts. For an unwanted account, review its files and access before removing it."
 
 # make sure that at least the code is available (also if no internet)
 echo "** DISPLAY(${display})"
