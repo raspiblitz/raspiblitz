@@ -178,12 +178,29 @@ if [ "$1" = "menu" ]; then
       else
         echo "# Cancelled Tailscale login"
         sleep 2
-        break
+        exit 0
       fi
     done
-    exit 0
+  fi
+
+  echo "# Tailscale state is '${backend_state}'"
+  if [ "$backend_state" = "Running" ]; then
+    # tailscale set changes one saved preference and keeps the VPN connected.
+    dns_choice=$(whiptail --title "Tailscale DNS" --cancel-button "Back" --menu \
+      "Connected as ${login_name}. Keep the current setting or choose which DNS this node uses. Local DNS can restore Internet lookups when the tailnet resolver fails. Tailnet-only names may then stop resolving." \
+      0 0 3 KEEP "Keep current DNS settings" LOCAL "Use the node's regular DNS" TAILNET "Accept DNS from the tailnet" \
+      3>&1 1>&2 2>&3) || exit 0
+    case "$dns_choice" in
+      LOCAL) accept_dns=false ;;
+      TAILNET) accept_dns=true ;;
+      *) exit 0 ;;
+    esac
+    if ! sudo tailscale set --accept-dns="$accept_dns"; then
+      whiptail --msgbox "Could not change the Tailscale DNS preference. Check the tailscaled service and retry." 0 0
+      exit 1
+    fi
+    whiptail --msgbox "Tailscale DNS preference saved. To check resolution, run: getent hosts deb.debian.org" 0 0
   else
-    echo "# Tailscale state is '${backend_state}'"
     whiptail --msgbox "Tailscale state on RaspiBlitz is '${backend_state}'.\n\nFor details login with '${login_name}' to Tailscale service:\nhttps://login.tailscale.com\n\nOr use the command in the terminal:\nsudo tailscale status" 0 0
   fi
   exit 0
