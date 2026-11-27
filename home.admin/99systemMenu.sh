@@ -15,6 +15,8 @@ TITLE=" ${CHAIN} System Options "
 MENU=""    # adds lines to HEIGHT
 OPTIONS=() # adds lines to HEIGHt + CHOICE_HEIGHT
 
+OPTIONS+=(HARDWARE "Check hardware and drive health")
+OPTIONS+=(DEBUG "View the redacted debug report")
 OPTIONS+=(BTOP "Monitor system resources with btop")
 OPTIONS+=(TIME "Set Timezone")
 
@@ -52,6 +54,16 @@ CHOICE=$(dialog --clear \
                 2>&1 >/dev/tty)
 
 case $CHOICE in
+  HARDWARE)
+    clear
+    sudo /home/admin/config.scripts/blitz.hardware.sh check select
+    read -r -p "Press ENTER to return to the main menu."
+    ;;
+  DEBUG)
+    source /home/admin/_commands.sh
+    debug
+    read -r -p "Press ENTER to return to the main menu."
+    ;;
   BTOP)
     if ! btop -v; then
       sudo apt install -y btop

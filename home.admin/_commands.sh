@@ -199,23 +199,32 @@ function fatpack() {
 }
 
 # command: debug
-function debug() {
+function debug() (
+  umask 077
+  local reportDir report
+  reportDir=$(mktemp -d -- "${TMPDIR:-/tmp}/raspiblitz-debug.XXXXXXXX") || return 1
+  trap 'rm -rf -- "$reportDir"' EXIT
+  trap 'exit 1' HUP INT TERM
+  report="$reportDir/report"
   clear
   echo "Printing debug logs. Be patient, this should take maximum 2 minutes .."
-  sudo rm /var/cache/raspiblitz/debug.log 2>/dev/null
-  /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log
-  echo "Redacting .."
-  /home/admin/config.scripts/blitz.debug.sh redact /var/cache/raspiblitz/debug.log
-  sudo chmod 640 /var/cache/raspiblitz/debug.log
-  sudo chown root:sudo /var/cache/raspiblitz/debug.log
-  if [ "$1" = "-l" ]||[ "$1" = "--link" ]; then
-    proxy="-X 5 -x localhost:9050"
-    if [ "$2" = "-n" ]||[ "$2" = "--no-tor" ]; then proxy=""; fi
-    cat /var/cache/raspiblitz/debug.log | nc ${proxy} termbin.com 9999
-  else
-    cat /var/cache/raspiblitz/debug.log
+  if ! /home/admin/config.scripts/blitz.debug.sh >"$report" 2>"$reportDir/errors" || [ ! -s "$report" ]; then
+    echo "Could not collect the debug report." >&2
+    return 1
   fi
-}
+  echo "Redacting .."
+  if ! /home/admin/config.scripts/blitz.debug.sh redact "$report" >"$reportDir/errors" 2>&1; then
+    echo "Could not redact the debug report." >&2
+    return 1
+  fi
+  if [ "${1:-}" = "-l" ] || [ "${1:-}" = "--link" ]; then
+    local -a proxy=(-X 5 -x localhost:9050)
+    if [ "${2:-}" = "-n" ] || [ "${2:-}" = "--no-tor" ]; then proxy=(); fi
+    nc "${proxy[@]}" termbin.com 9999 <"$report"
+  else
+    cat -- "$report"
+  fi
+)
 
 # command: patch
 # syncs script with latest set github and branch

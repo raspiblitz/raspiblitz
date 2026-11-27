@@ -69,7 +69,7 @@ RaspiBlitz image to your SD card.
 source <(sudo /home/admin/config.scripts/network.txindex.sh status)
 
 OPTIONS=()
-#OPTIONS+=(HARDWARE "Run Hardwaretest")
+OPTIONS+=(HARDWARE "Check hardware and drive health")
 OPTIONS+=(SOFTWARE "Run Softwaretest (DebugReport)")
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(REPAIR-LND "Repair/Backup LND")
@@ -95,20 +95,14 @@ CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 19 62 12 "${OPTIONS
 
 clear
 case $CHOICE in
-#  HARDWARE)
-#    ;;
+  HARDWARE)
+    sudo /home/admin/config.scripts/blitz.hardware.sh check select
+    read -r -p "Press ENTER to return to the main menu."
+    ;;
   SOFTWARE)
-    echo "Generating debug logs. Be patient, this should take maximum 2 minutes .."
-    sudo rm /var/cache/raspiblitz/debug.log 2>/dev/null
-    /home/admin/config.scripts/blitz.debug.sh > /var/cache/raspiblitz/debug.log
-    echo "Redacting .."
-    /home/admin/config.scripts/blitz.debug.sh redact /var/cache/raspiblitz/debug.log
-    sudo chmod 640 /var/cache/raspiblitz/debug.log
-    sudo chown root:sudo /var/cache/raspiblitz/debug.log
-    cat /var/cache/raspiblitz/debug.log
-    echo
-    echo "Press ENTER to return to main menu."
-    read key
+    source /home/admin/_commands.sh
+    debug
+    read -r -p "Press ENTER to return to the main menu."
     ;;
   REPAIR-LND)
     /home/admin/99lndRepairMenu.sh
