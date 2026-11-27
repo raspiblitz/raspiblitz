@@ -15,6 +15,23 @@ To start your Deep Dive into the RaspiBlitz project, watch [this video](https://
 
 ## Getting started
 
+### Build v1.12 manually on a Raspberry Pi or Debian VM
+
+Use fresh Raspberry Pi OS Bookworm 64-bit on a separate Pi boot medium, or install Debian 12 amd64 inside a fresh guest VM. The builder changes users, packages and system services on the machine where it runs. Use an isolated network during provisioning because the image starts with known setup passwords. Keep existing node data disks detached during the build.
+
+1. Check the vendor checksum/signature for the base image. The [Pi build definition](ci/arm64-rpi/) records the base used by the project. Boot the base OS, enable wired networking, and make sure the build account can use sudo.
+2. Install Git if needed. Clone the release branch into the build user's home, away from the installer's destination `/home/admin/raspiblitz`. Record the source commit before starting.
+
+   ```bash
+   git clone --branch v1.12 --single-branch https://github.com/raspiblitz/raspiblitz.git ~/raspiblitz-build
+   cd ~/raspiblitz-build
+   git rev-parse HEAD
+   ```
+
+3. For a minimal Pi image run `sudo env RASPIBLITZ_BUILD_COMMIT="$(git rev-parse HEAD)" bash build_sdcard.sh -b v1.12 -f 0 -d headless`. On a Debian VM append `-t 0 -w off`. Use `-f 1` to build Fatpack. Check the interactive summary and review the output through the final display step.
+4. The installer fetches the named branch again and verifies the requested commit before copying its code. Record `git -C /home/admin/raspiblitz rev-parse HEAD` from the admin account in the build notes.
+5. To use the new machine, reboot, then log in as `admin` and complete first setup. If you deliberately paused provisioning, clear your stop marker from `/boot/firmware/stop` or `/home/admin/stop` and detach any virtual audio device used as a stop signal. To distribute an image instead, review the extra login accounts, start a fresh admin shell and run `release`. Capture the powered-off system disk, checksum the image, and boot a separate copy to check the first login. Booting that copy generates its own host keys.
+
 Get all details on "How to contribute to RaspiBlitz Development" on [this video](https://www.youtube.com/watch?v=ZVtZepV3OfM).
 
 ### Levels

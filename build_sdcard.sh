@@ -17,16 +17,6 @@ REQUIRED_SOURCES=(
   "deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware"
 )
 
-# set locale to en_US.UTF-8 on system & activate for this script
-if [ "$1" != "-EXPORT" ] && [ "$1" != "EXPORT" ]; then
-  echo "# updating locale ..."
-  sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
-  sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
-  locale-gen en_US.UTF-8 en_US ISO-8859-1 1>/dev/null
-  update-locale LANG=en_US.UTF-8 1>/dev/null
-  source /etc/default/locale
-fi
-
 defaultRepo="raspiblitz" # user that hosts a `raspiblitz` repo
 defaultBranch="v1.12" # latest version branch
 
@@ -99,6 +89,23 @@ if [ "$1" = "-EXPORT" ] || [ "$1" = "EXPORT" ]; then
   echo "defaultWEBUIrepo='${defaultWEBUIrepo}'"
   exit 0
 fi
+
+if [ -d /etc/pve ] && [ -x /usr/bin/pveversion ]; then
+  echo "Run the image builder inside a fresh guest VM or on dedicated Raspberry Pi boot media." >&2
+  exit 1
+fi
+if [ -n "${RASPIBLITZ_BUILD_COMMIT:-}" ] && ! [[ "$RASPIBLITZ_BUILD_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+  echo "RASPIBLITZ_BUILD_COMMIT requires the full Git commit ID." >&2
+  exit 1
+fi
+
+# set locale to en_US.UTF-8 on system & activate for this script
+echo "# updating locale ..."
+sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
+sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
+locale-gen en_US.UTF-8 en_US ISO-8859-1 1>/dev/null
+update-locale LANG=en_US.UTF-8 1>/dev/null
+source /etc/default/locale
 
 ## default user message
 error_msg(){ printf %s"${red}${me}: ${1}${nocolor}\n"; exit 1; }
@@ -571,8 +578,12 @@ if [ $(uname -a | grep -c 'tegra') -gt 0 ] ; then
 fi
 
 # remove rpi-first-boot-wizard
-apt purge piwiz -y
-userdel -r rpi-first-boot-wizard
+if dpkg-query -W -f='${db:Status-Status}' piwiz 2>/dev/null | grep -qx installed; then
+  apt-get purge -y piwiz || exit 1
+fi
+if id rpi-first-boot-wizard >/dev/null 2>&1; then
+  userdel -r rpi-first-boot-wizard || exit 1
+fi
 
 echo -e "\n*** CONFIG ***"
 # based on https://raspibolt.github.io/raspibolt/raspibolt_20_pi.html#raspi-config
@@ -708,6 +719,10 @@ sudo -u admin git config --global user.email "johndoe@example.com" || exit 1
 sudo -u admin git config --global http.postBuffer 524288000 || exit 1
 sudo -u admin rm -rf /home/admin/raspiblitz
 sudo -u admin git clone -b "${branch}" https://github.com/${github_user}/raspiblitz.git || exit 1
+if [ -n "${RASPIBLITZ_BUILD_COMMIT:-}" ] && [ "$(sudo -u admin git -C /home/admin/raspiblitz rev-parse HEAD)" != "$RASPIBLITZ_BUILD_COMMIT" ]; then
+  echo "Build stopped: the checked-out branch no longer matches the requested commit." >&2
+  exit 1
+fi
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin || exit 1
 sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin || exit 1
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/ || exit 1
@@ -718,7 +733,7 @@ sudo -u admin cp -r /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/
 sudo -u admin chmod +x /home/admin/setup.scripts/*.sh || exit 1
 sudo -u admin git config --global --add safe.directory /home/admin/raspiblitz
 # Also configure safe.directory for root user in case root processes need to access the repo
-git config --global --add safe.directory /home/admin/raspiblitz
+sudo -H git config --global --add safe.directory /home/admin/raspiblitz || exit 1
 
 # install newest version of BlitzPy
 blitzpy_wheel=$(ls -tR /home/admin/raspiblitz/home.admin/BlitzPy/dist | grep -E "any.whl" | tail -n 1)
@@ -839,7 +854,15 @@ if [ "${baseimage}" = "raspios_arm64"  ] || [ "${baseimage}" = "debian" ]; then
   systemctl disable hciuart.service
 
   # remove bluetooth packages
-  apt-get remove -y --purge pi-bluetooth bluez bluez-firmware
+  bluetoothPackages=()
+  for pkg in pi-bluetooth bluez bluez-firmware; do
+    if dpkg-query -W -f='${db:Status-Status}' "$pkg" 2>/dev/null | grep -qx installed; then
+      bluetoothPackages+=("$pkg")
+    fi
+  done
+  if [ "${#bluetoothPackages[@]}" -gt 0 ]; then
+    apt-get remove -y --purge "${bluetoothPackages[@]}" || exit 1
+  fi
 
   # disable audio
   echo -e "\n*** DISABLE AUDIO (snd_bcm2835) ***"
@@ -934,11 +957,17 @@ cat /home/admin/raspiblitz.info
 echo -e "\n**********************************************"
 echo "BASIC SD CARD BUILD DONE"
 echo -e "**********************************************\n"
-echo "Your SD Card Image for RaspiBlitz is ready (might still do display config)."
-echo "Take the chance & look through the output above if you can spot any errors or warnings."
-echo -e "\nIMPORTANT IF YOU WANT TO MAKE A RELEASE IMAGE FROM THIS BUILD:"
-echo "1. login fresh --> user:admin password:raspiblitz"
-echo -e "2. run --> release\n"
+echo "Review the build output and let display configuration finish. Then choose a next step:"
+echo "  Use this machine: reboot it, reconnect as admin and follow the setup dialogs."
+echo "  If you set a manual provision stop flag, clear it before booting for setup."
+echo "  If a virtual audio device was used to pause provisioning, detach it before that boot."
+echo "  Export an image: start a fresh admin login, run 'release' and confirm the cleanup."
+echo "  After power-off, capture the system medium before booting it again."
+echo "  Customize first: stay in the shell and inspect /home/admin/raspiblitz."
+echo "Additional local login accounts to review before distributing an image:"
+awk -F: '($3 == 0 && $1 != "root") || ($3 >= 1000 && $3 < 65534 && $1 != "pi" && $1 != "admin" && $7 !~ /(nologin|false)$/) {print "  " $1; found=1} END {if (!found) print "  (none)"}' /etc/passwd
+echo "Review root, admin, pi and any extra accounts for passwords, SSH keys and sudo access."
+echo "Keep intended accounts. For an unwanted account, review its files and access before removing it."
 
 # make sure that at least the code is available (also if no internet)
 echo "** DISPLAY(${display})"
