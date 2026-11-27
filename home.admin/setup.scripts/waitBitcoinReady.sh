@@ -37,7 +37,8 @@ while true; do
       sample=$("$cache" meta btc_default_ready)
       updated=$(sed -n 's/^lasttouch="\([0-9]\{1,12\}\)"$/\1/p' <<< "$sample")
       if [[ -n "$instance" && "$updated" =~ ^[0-9]{1,12}$ ]] && (( 10#$updated > observed )) &&
-        grep -Fxq 'value="1"' <<< "$sample" && probe_rpc >/dev/null 2>&1; then
+        grep -Fxq 'value="1"' <<< "$sample" && probe_rpc >/dev/null 2>&1 &&
+        [ "$instance" = "$(systemctl show "$unit" --property=InvocationID --value)" ]; then
         exit 0
       fi
       ;;

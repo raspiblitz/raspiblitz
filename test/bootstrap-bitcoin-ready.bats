@@ -7,12 +7,13 @@ setup() {
   export PATH="$PWD/bin:$PATH"
   export READY_AFTER=0 STOPPED_UNTIL=0 RPC_AFTER=0 EXPECT_UNIT=bitcoind.service EXPECT_CHAIN=
   echo 0 > tick
+  echo first > invocation
   cat > bin/systemctl <<'SH'
 #!/bin/bash
 case "$*" in
   "show $EXPECT_UNIT --property=ActiveState --value")
     if (( $(cat tick) < STOPPED_UNTIL )); then echo inactive; else echo active; fi ;;
-  "show $EXPECT_UNIT --property=InvocationID --value") echo instance ;;
+  "show $EXPECT_UNIT --property=InvocationID --value") cat invocation ;;
   "show $EXPECT_UNIT --property=Result,ExecMainStatus") echo 'Result=exit-code' ;;
   *) echo "$*" > unexpected; exit 1 ;;
 esac
@@ -36,6 +37,9 @@ SH
 if (( $(cat tick) < RPC_AFTER )); then
   echo "${RPC_ERROR:-RPC unavailable}" >&2
   exit 1
+fi
+if [ "${RESTART_DURING_PROBE:-no}" = yes ] && [ "$(cat invocation)" = first ]; then
+  echo second > invocation
 fi
 SH
   chmod +x bin/* _cache.sh
@@ -96,4 +100,18 @@ SH
   run bash setup.scripts/waitBitcoinReady.sh
   [ "$status" -eq 0 ]
   [ "$(cat tick)" -eq 6 ]
+}
+
+@test "a restart during the RPC probe requires a sample for the new invocation" {
+  export RESTART_DURING_PROBE=yes
+  run bash setup.scripts/waitBitcoinReady.sh
+  [ "$status" -eq 0 ]
+  [ "$(cat tick)" -eq 3 ]
+}
+
+@test "the total warmup wait has a diagnostic deadline" {
+  export TICK_SECONDS=86400 RPC_AFTER=10 RPC_ERROR="error code: -28"
+  run bash setup.scripts/waitBitcoinReady.sh
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"24 hours"* ]]
 }
