@@ -10,27 +10,12 @@
 # setup fresh SD card with image above - login via SSH and run this script:
 ##########################################################################
 
-if [[ "$1" != *EXPORT && "$1" != "--help" && "$1" != "-h" ]] && [ -d /etc/pve ] && command -v pveversion >/dev/null; then
-  echo "Run the image builder inside a fresh guest VM or on dedicated Raspberry Pi boot media." >&2
-  exit 1
-fi
-
 # debian sources
 REQUIRED_SOURCES=(
   "deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware"
   "deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware"
   "deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware"
 )
-
-# set locale to en_US.UTF-8 on system & activate for this script
-if [ "$1" != "-EXPORT" ] && [ "$1" != "EXPORT" ]; then
-  echo "# updating locale ..."
-  sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
-  sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
-  locale-gen en_US.UTF-8 en_US ISO-8859-1 1>/dev/null
-  update-locale LANG=en_US.UTF-8 1>/dev/null
-  source /etc/default/locale
-fi
 
 defaultRepo="raspiblitz" # user that hosts a `raspiblitz` repo
 defaultBranch="v1.12" # latest version branch
@@ -104,6 +89,23 @@ if [ "$1" = "-EXPORT" ] || [ "$1" = "EXPORT" ]; then
   echo "defaultWEBUIrepo='${defaultWEBUIrepo}'"
   exit 0
 fi
+
+if [ -d /etc/pve ] && [ -x /usr/bin/pveversion ]; then
+  echo "Run the image builder inside a fresh guest VM or on dedicated Raspberry Pi boot media." >&2
+  exit 1
+fi
+if [ -n "${RASPIBLITZ_BUILD_COMMIT:-}" ] && ! [[ "$RASPIBLITZ_BUILD_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+  echo "RASPIBLITZ_BUILD_COMMIT requires the full Git commit ID." >&2
+  exit 1
+fi
+
+# set locale to en_US.UTF-8 on system & activate for this script
+echo "# updating locale ..."
+sed -i "s/^# en_US.UTF-8 UTF-8.*/en_US.UTF-8 UTF-8/g" /etc/locale.gen
+sed -i "s/^# en_US ISO-8859-1.*/en_US ISO-8859-1/g" /etc/locale.gen
+locale-gen en_US.UTF-8 en_US ISO-8859-1 1>/dev/null
+update-locale LANG=en_US.UTF-8 1>/dev/null
+source /etc/default/locale
 
 ## default user message
 error_msg(){ printf %s"${red}${me}: ${1}${nocolor}\n"; exit 1; }
@@ -713,6 +715,10 @@ sudo -u admin git config --global user.email "johndoe@example.com" || exit 1
 sudo -u admin git config --global http.postBuffer 524288000 || exit 1
 sudo -u admin rm -rf /home/admin/raspiblitz
 sudo -u admin git clone -b "${branch}" https://github.com/${github_user}/raspiblitz.git || exit 1
+if [ -n "${RASPIBLITZ_BUILD_COMMIT:-}" ] && [ "$(sudo -u admin git -C /home/admin/raspiblitz rev-parse HEAD)" != "$RASPIBLITZ_BUILD_COMMIT" ]; then
+  echo "Build stopped: the checked-out branch no longer matches the requested commit." >&2
+  exit 1
+fi
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/*.* /home/admin || exit 1
 sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin || exit 1
 sudo -u admin cp -r /home/admin/raspiblitz/home.admin/assets /home/admin/ || exit 1
@@ -947,7 +953,8 @@ echo "  Export an image: start a fresh admin login, run 'release' and confirm th
 echo "  After power-off, capture the system medium before booting it again."
 echo "  Customize first: stay in the shell and inspect /home/admin/raspiblitz."
 echo "Additional local login accounts to review before distributing an image:"
-awk -F: '$3 >= 1000 && $3 < 65534 && $1 != "pi" && $1 != "admin" && $7 !~ /(nologin|false)$/ {print "  " $1; found=1} END {if (!found) print "  (none)"}' /etc/passwd
+awk -F: '($3 == 0 && $1 != "root") || ($3 >= 1000 && $3 < 65534 && $1 != "pi" && $1 != "admin" && $7 !~ /(nologin|false)$/) {print "  " $1; found=1} END {if (!found) print "  (none)"}' /etc/passwd
+echo "Review root, admin, pi and any extra accounts for passwords, SSH keys and sudo access."
 echo "Keep intended accounts. For an unwanted account, review its files and access before removing it."
 
 # make sure that at least the code is available (also if no internet)

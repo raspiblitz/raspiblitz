@@ -28,8 +28,8 @@ Use fresh Raspberry Pi OS Bookworm 64-bit on a separate Pi boot medium, or insta
    git rev-parse HEAD
    ```
 
-3. For a minimal Pi image run `sudo bash build_sdcard.sh -b v1.12 -f 0 -d headless`. On a Debian VM use `sudo bash build_sdcard.sh -b v1.12 -f 0 -d headless -t 0 -w off`. Use `-f 1` to build Fatpack. Check the interactive summary and review the output through the final display step.
-4. Compare `git -C /home/admin/raspiblitz rev-parse HEAD` as the admin user with the recorded commit. The installer fetches the named branch again. If it moved, reconcile the two revisions before using the build for a release.
+3. For a minimal Pi image run `sudo env RASPIBLITZ_BUILD_COMMIT="$(git rev-parse HEAD)" bash build_sdcard.sh -b v1.12 -f 0 -d headless`. On a Debian VM append `-t 0 -w off`. Use `-f 1` to build Fatpack. Check the interactive summary and review the output through the final display step.
+4. The installer fetches the named branch again and verifies the requested commit before copying its code. Record `git -C /home/admin/raspiblitz rev-parse HEAD` from the admin account in the build notes.
 5. To use the new machine, reboot, then log in as `admin` and complete first setup. If you deliberately paused provisioning, clear your stop marker from `/boot/firmware/stop` or `/home/admin/stop` and detach any virtual audio device used as a stop signal. To distribute an image instead, review the extra login accounts, start a fresh admin shell and run `release`. Capture the powered-off system disk, checksum the image, and boot a separate copy to check the first login. Booting that copy generates its own host keys.
 
 Get all details on "How to contribute to RaspiBlitz Development" on [this video](https://www.youtube.com/watch?v=ZVtZepV3OfM).
