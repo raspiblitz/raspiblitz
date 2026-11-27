@@ -2,13 +2,13 @@
 
 setup() {
   root="$BATS_TEST_TMPDIR"
-  mkdir -p "$root/helpers" "$root/bin"
-  conf="$root/data.conf"
+  mkdir -p "$root/helpers" "$root/bin" "$root/disk_data/app-data"
+  conf="$root/disk_data/app-data/raspiblitz.conf"
   printf '%s\n' '# Existing node settings' > "$conf"
   setupFile="$root/setup"
   : > "$setupFile"
   export PATH="$root/bin:$PATH"
-  printf '#!/bin/sh\necho /mnt/disk_data\n' > "$root/bin/findmnt"
+  printf '#!/bin/sh\necho "%s"\n' "$root/disk_data" > "$root/bin/findmnt"
   printf '#!/bin/sh\necho "$2" >&2\n' > "$root/helpers/blitz.error.sh"
   printf '#!/bin/sh\nexec "$@"\n' > "$root/bin/sudo"
   printf '#!/bin/sh\nexit 0\n' > "$root/cache"
@@ -17,7 +17,7 @@ setup() {
   chmod +x "$root/bin/"* "$root/helpers/"* "$root/cache"
   # Exercise the release precheck and config writer without starting migration.
   sed -n '/^# check if config file exists/,/^# check if config files contain lightning/p' \
-    "$src/_provision.update.sh" | sed "s|/home/admin/config.scripts|$root/helpers|g" > "$root/precheck"
+    "$src/_provision.update.sh" | sed "s|/home/admin/config.scripts|$root/helpers|g; s|/mnt/disk_data|$root/disk_data|g" > "$root/precheck"
 }
 
 precheck() {
@@ -58,6 +58,10 @@ precheck() {
   [ "$status" -ne 0 ]
   [[ "$output" == *data-not-mounted* ]]
   [ "$(cat "$conf")" = 'lnd=on' ]
+  printf '#!/bin/sh\necho /var\n' > "$root/bin/findmnt"
+  run precheck
+  [ "$status" -ne 0 ]
+  [[ "$output" == *data-not-mounted* ]]
 }
 
 @test "a failed write stops migration and identifies the hostname failure" {

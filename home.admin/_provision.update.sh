@@ -35,11 +35,17 @@ fi
 
 # On v1.12 app-data may link to either DATA or combined DATA/STORAGE.
 # A stale directory on the system partition must never receive upgrade writes.
-dataMount=$(findmnt --noheadings --output TARGET --target "$(readlink -f "${configFile}")")
-if [ -z "${dataMount}" ] || [ "${dataMount}" = "/" ]; then
+resolvedConfig=$(realpath -e -- "${configFile}")
+dataMount=$(findmnt --noheadings --output TARGET --target "${resolvedConfig}")
+case "${dataMount}" in
+  /mnt/disk_data|/mnt/disk_storage|/mnt/hdd) ;;
+  *) dataMount="" ;;
+esac
+if [ -z "${dataMount}" ] || [ "${resolvedConfig}" != "${dataMount}/app-data/raspiblitz.conf" ]; then
   /home/admin/config.scripts/blitz.error.sh _provision.update.sh "data-not-mounted" "Check the DATA mount for ${configFile}" "" ${logFile}
   exit 1
 fi
+configFile="${resolvedConfig}"
 
 # Read the saved name separately from the setup session's proposed name.
 setupHostname=${hostname:-}
@@ -55,10 +61,11 @@ if [ -z "${hostname:-}" ]; then
     setupHostname=raspiblitz
   fi
   if ! /home/admin/config.scripts/blitz.conf.sh set hostname "${setupHostname}" "${configFile}" ||
-     ! source "${configFile}" || [ "${hostname:-}" != "${setupHostname}" ]; then
+     ! grep -Fxq "hostname='${setupHostname}'" "${configFile}"; then
     /home/admin/config.scripts/blitz.error.sh _provision.update.sh "missing-hostname" "Could not save hostname on DATA. Check free space and write access to ${configFile}" "" ${logFile}
     exit 1
   fi
+  hostname="${setupHostname}"
 fi
 
 # check if config files contain lightning (lnd is default) introduced in v1.7.1
