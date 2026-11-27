@@ -22,7 +22,7 @@ import sys
 from contextlib import ExitStack
 
 mount, expected = sys.argv[1:]
-parts = ("app-data", "bitcoin", "wallets", "wallet.dat")
+parts = ("app-data", "bitcoin", "wallets", "wallet.dat", "wallet.dat")
 position = mount
 try:
     with ExitStack() as stack:
@@ -50,11 +50,14 @@ try:
                 entry = os.fstat(child)
             if entry.st_dev != device:
                 can_repair = False
-            if index == 3 and stat.S_ISREG(entry.st_mode):
-                break  # Legacy wallet.dat is a file; keep its mode and contents.
-            if not stat.S_ISDIR(entry.st_mode):
-                raise NotADirectoryError
             descriptor = f"/proc/self/fd/{child}"
+            if index >= 3 and stat.S_ISREG(entry.st_mode):
+                # Validate flat and nested wallet files as the service account.
+                # Opening the pinned file read-only leaves its mode and bytes intact.
+                os.close(os.open(descriptor, os.O_RDONLY))
+                break
+            if index == 4 or not stat.S_ISDIR(entry.st_mode):
+                raise NotADirectoryError
             if not os.access(descriptor, os.X_OK):
                 if index < 2 or not can_repair or entry.st_uid != os.geteuid():
                     raise PermissionError
@@ -63,7 +66,7 @@ try:
                     raise PermissionError
             current = child
 except OSError:
-    sys.exit(f"Wallet access: check ownership and traversal of {position}")
+    sys.exit(f"Wallet access: check read or directory traversal permission for {position}")
 PY
 fi
 

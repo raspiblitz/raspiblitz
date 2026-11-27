@@ -14,6 +14,19 @@ setup() {
     "$BATS_TEST_DIRNAME/../home.admin/config.scripts/bitcoin.check.sh" > "$BATS_TEST_TMPDIR/check.sh"
 }
 
+
+@test "unreadable flat and nested files are reported without changing their mode" {
+  chmod 000 "$dir/wallet.dat/wallet.dat"
+  run bash "$BATS_TEST_TMPDIR/check.sh" recover-wallet-access "$mountRoot" "$device"
+  [ "$status" -ne 0 ]
+  [ "$(stat -c %a "$dir/wallet.dat/wallet.dat")" = 0 ]
+  mv "$dir/wallet.dat" "$root/old-database"
+  mv "$root/old-database/wallet.dat" "$dir/wallet.dat"
+  run bash "$BATS_TEST_TMPDIR/check.sh" recover-wallet-access "$mountRoot" "$device"
+  [ "$status" -ne 0 ]
+  [ "$(stat -c %a "$dir/wallet.dat")" = 0 ]
+}
+
 @test "recovery restores only owner traversal on the legacy wallet directories" {
   chmod 600 "$dir/wallet.dat" "$dir"
   run bash "$BATS_TEST_TMPDIR/check.sh" recover-wallet-access "$mountRoot" "$device"
