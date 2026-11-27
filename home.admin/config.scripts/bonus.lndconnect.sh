@@ -219,7 +219,7 @@ if [ "$3" == "key-value" ]; then
 fi
 
 # display qr code image on LCD
-sudo /home/admin/config.scripts/blitz.display.sh qr "${lndconnect}"
+printf '%s' "${lndconnect}" | sudo /home/admin/config.scripts/blitz.display.sh qr-stdin
 
 # show pairing info dialog
 msg=""
@@ -237,7 +237,7 @@ whiptail --backtitle "Connecting Mobile Wallet" \
 	 --yesno "${msg}" 18 65
 if [ $? -eq 1 ]; then
   # backup - show QR code on screen (not LCD)
-  qrencode -o - -t ANSIUTF8 -m2 "${lndconnect}"
+  printf '%s' "${lndconnect}" | qrencode -o - -t ANSIUTF8 -m2
   echo "Press ENTER when finished."
   read key
 fi

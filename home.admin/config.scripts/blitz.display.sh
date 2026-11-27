@@ -7,6 +7,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   echo "# all commands need to run as root or with sudo"
   echo "# blitz.display.sh image [path]"
   echo "# blitz.display.sh qr [datastring]"
+  echo "# blitz.display.sh qr-stdin"
   echo "# blitz.display.sh qr-console [datastring]"
   echo "# blitz.display.sh hide"
   echo
@@ -106,22 +107,31 @@ fi
 # QR CODE
 ###################
 
-if [ "${command}" == "qr" ]; then
-
-  datastring=$2
-  if [ ${#datastring} -eq 0 ]; then
+if [ "${command}" == "qr" ] || [ "${command}" == "qr-stdin" ]; then
+  if [ "${command}" == "qr" ] && [ -z "$2" ]; then
     echo "error='missing second parameter - see help'"
     exit 1
   fi
 
-  qrencode -l L -o /var/cache/raspiblitz/qr.png "${datastring}" > /dev/null
+  # Pairing codes can contain wallet credentials. Keep their image in root-only tmpfs.
+  umask 077
+  qrDir=/run/raspiblitz-display
+  install -d -o root -g root -m 0700 "$qrDir" || exit 1
+  pending=$(mktemp "$qrDir/qr.XXXXXXXX") || exit 1
+  trap 'rm -f -- "$pending"' EXIT
+  if [ "${command}" == "qr" ]; then
+    printf '%s' "$2" | qrencode -l L -t PNG -o "$pending" || exit 1
+  else
+    qrencode -l L -t PNG -o "$pending" || exit 1
+  fi
+  mv -fT -- "$pending" "$qrDir/qr.png" || exit 1
   # see https://github.com/rootzoll/raspiblitz/pull/1580
   if [ ${fb1Exists} -eq 1 ] ; then
     # LCD
-    fbi -a -T 1 -d /dev/fb1 --noverbose /var/cache/raspiblitz/qr.png 2> /dev/null
+    fbi -a -T 1 -d /dev/fb1 --noverbose "$qrDir/qr.png" 2> /dev/null
   else
     # HDMI
-    fbi -a -T 1 -d /dev/fb0 --noverbose /var/cache/raspiblitz/qr.png 2> /dev/null
+    fbi -a -T 1 -d /dev/fb0 --noverbose "$qrDir/qr.png" 2> /dev/null
   fi
   exit 0
 fi
@@ -132,7 +142,7 @@ fi
 
 if [ "${command}" == "hide" ]; then
   killall -3 fbi
-  rm /var/cache/raspiblitz/qr.png 2> /dev/null
+  rm -f -- /run/raspiblitz-display/qr.png /var/cache/raspiblitz/qr.png
   exit 0
 fi
 
