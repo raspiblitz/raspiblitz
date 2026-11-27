@@ -1,0 +1,16 @@
+/mnt/hdd/app-data/tor/*.log {
+    su debian-tor debian-tor
+    size 100M
+    rotate 2
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 debian-tor debian-tor
+    sharedscripts
+    postrotate
+        if systemctl is-active --quiet tor@default.service; then
+            systemctl reload tor@default.service
+        fi
+    endscript
+}
