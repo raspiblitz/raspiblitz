@@ -315,10 +315,10 @@ Not able to get local IP.
 LAN cable connected? WIFI lost?
 " 7 41
 
-elif [ "${eventID}" = "noInternet" ] && [ "${contentString}" = "No nameserver configured by resolvconf" ]; then
+elif [ "${eventID}" = "noInternet" ] && [ "${contentString}" = "Check resolvconf DNS settings" ]; then
 
     dialog --backtitle "${backtitle}" --cr-wrap --infobox "
-No DNS server from the network.
+Cannot resolve deb.debian.org.
 Set DNS in the VM/router DHCP settings or add
 nameserver <your DNS server IP> to
 /etc/resolvconf/resolv.conf.d/base

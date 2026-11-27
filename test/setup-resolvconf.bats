@@ -12,7 +12,7 @@ setup() {
   chmod +x "$box/admin/_cache.sh" "$box/admin/config.scripts/internet.sh" "$BATS_TEST_TMPDIR/bin/"*
   local root="$BATS_TEST_DIRNAME/../home.admin"
   sed -n '/^# WAIT LOOP: LOCALNET/,/^done$/p' "$root/_bootstrap.sh" |
-    sed -e 's/^while true; do$/for check in once; do/' -e '/^  sleep 1$/d' \
+    sed -e 's/^while true; do$/for check in 1 2 3; do/' -e 's@^  sleep 1$@  if [ -x "$box/next" ]; then "$box/next" "$check"; fi@' \
       -e "s@/home/admin@$box/admin@g" -e "s@/etc/resolv.conf@$box/resolv.conf@g" \
       -e "s@ = /run/resolvconf/resolv.conf@ = $box/run/resolvconf/resolv.conf@" >"$box/wait"
   sed "s@/home/admin@$box/admin@g" "$root/setup.scripts/eventInfoWait.sh" >"$box/event"
@@ -20,15 +20,25 @@ setup() {
 }
 
 @test "first boot explains missing resolvconf DNS even with numeric connectivity and recovers" {
+  cat >"$box/next" <<'SH'
+#!/bin/sh
+case "$1" in
+  1) echo 'nameserver 2001:db8::53' >>"$box/run/resolvconf/resolv.conf" ;;
+  2) touch "$box/lookup-works" ;;
+esac
+SH
+  chmod +x "$box/next"
+  printf '#!/bin/sh\ntest -f "$box/lookup-works"\n' >"$BATS_TEST_TMPDIR/bin/getent"
   run bash "$box/wait"
   [ "$status" -eq 0 ]
+  [ "$(grep -c 'set state noInternet' "$box/state")" -eq 2 ]
   grep -q 'set state noInternet' "$box/state"
   local message
-  message=$(sed -n 's/^set message //p' "$box/state")
+  message=$(sed -n 's/^set message //p' "$box/state" | tail -n 1)
   run bash "$box/event" noInternet "$message" ssh
   [[ "$output" == *'/etc/resolvconf/resolv.conf.d/base'* ]]
   [[ "$output" == *'sudo resolvconf -u'* ]]
-  echo 'nameserver 2001:db8::53' >>"$box/run/resolvconf/resolv.conf"
+  grep -q 'OK got localIP' "$logFile"
   : >"$box/state"
   run bash "$box/wait"
   [ "$status" -eq 0 ]
