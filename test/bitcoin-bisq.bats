@@ -28,7 +28,8 @@ menu() {
 
 @test "new installs opt out; adding and removing Bisq changes only the managed defaults" {
   conf="$box/data/bitcoin/bitcoin.conf"
-  ! grep -q '^peerbloomfilters=1' "$conf"
+  run grep -q '^peerbloomfilters=1' "$conf"
+  [ "$status" -eq 1 ]
   printf '\n# peerbloomfilters=1\npeerbloomfilters = 0\n[signet]\nport=38333\n' >>"$conf"
   menu ADDBISQ
   [ "$status" -eq 0 ]
@@ -51,4 +52,14 @@ menu() {
   [ "$status" -eq 0 ]
   grep -q 'DISABLEBLOOM' "$box/dialogs"
   grep -qx peerbloomfilters=0 "$box/data/bitcoin/bitcoin.conf"
+}
+
+@test "failed Tor setup does not enable BIP37" {
+  rm "$box/data/tor/bisq/hostname"
+  menu ADDBISQ
+  [ "$status" -eq 1 ]
+  run grep -q '^peerbloomfilters=1' "$box/data/bitcoin/bitcoin.conf"
+  [ "$status" -eq 1 ]
+  run grep -q '^restart bitcoind' "$box/services"
+  [ "$status" -eq 1 ]
 }

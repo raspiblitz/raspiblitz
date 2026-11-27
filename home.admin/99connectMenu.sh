@@ -131,10 +131,6 @@ case $CHOICE in
       case $CHOICE in
         ADDBISQ)
           clear
-          if [ "$bloom" = OFF ]; then
-            set_bloom 1 || exit 1
-          fi
-
           if [ "$has_service" = 0 ]; then
             echo "# Creating the Hidden Service for Bisq"
             echo "
@@ -157,6 +153,13 @@ HiddenServicePort 8333 127.0.0.1:8333" | sudo tee -a /etc/tor/torrc || exit 1
               fi
           else
             TOR_ADDRESS=$(sudo cat "$bisq_dir/hostname") || exit 1
+          fi
+          if [ -z "$TOR_ADDRESS" ]; then
+            echo "# Bisq hidden service has no address yet." >&2
+            exit 1
+          fi
+          if [ "$bloom" = OFF ]; then
+            set_bloom 1 || exit 1
           fi
           echo
           echo "Install from https://bisq.network/downloads/"
