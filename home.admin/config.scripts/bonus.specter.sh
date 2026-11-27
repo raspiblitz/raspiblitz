@@ -273,12 +273,6 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo mv /tmp/key.pem /home/specter/.specter
     sudo chown -R specter:specter /home/specter/.specter/key.pem
 
-    # open firewall
-    echo "#    --> Updating Firewall"
-    sudo ufw allow 25441 comment 'specter'
-    sudo ufw --force enable
-    echo
-
     echo "#    --> Installing udev-rules for hardware-wallets"
 
     # Ledger
@@ -392,36 +386,47 @@ WantedBy=multi-user.target
 EOF
 
     sudo mv /home/admin/specter.service /etc/systemd/system/specter.service || exit 1
-    sudo systemctl enable specter || exit 1
+    cleanup_new_specter_unit() {
+      if sudo systemctl stop specter && sudo systemctl disable specter &&
+         sudo rm -f /etc/systemd/system/specter.service && sudo systemctl daemon-reload; then
+        echo "# The new unit was removed. Retry the installation after fixing the error." >&2
+      else
+        echo "# Unit cleanup is incomplete. Check systemctl status specter before retrying." >&2
+      fi
+    }
+    source <(/home/admin/_cache.sh get state)
+    if [ "${state}" = "ready" ]; then
+      if ! sudo systemctl start specter; then
+        echo "error='Specter failed to start. Check journalctl -u specter'"
+        cleanup_new_specter_unit
+        exit 1
+      fi
+      # Use the locally generated certificate and its name, over loopback only.
+      if ! curl -q --noproxy '*' --silent --show-error --fail --max-time 3 \
+           --retry 15 --retry-delay 1 --retry-connrefused --retry-max-time 30 \
+           --cacert /home/specter/.specter/cert.pem \
+           --resolve www.fakeurl.com:25441:127.0.0.1 \
+           --output /dev/null https://www.fakeurl.com:25441/; then
+        echo "error='Specter HTTPS is unavailable. Check journalctl -u specter'"
+        cleanup_new_specter_unit
+        exit 1
+      fi
+      echo "#    --> OK - Specter is responding over HTTPS"
+    fi
+    if ! sudo systemctl enable specter; then
+      cleanup_new_specter_unit
+      exit 1
+    fi
     echo "#    --> OK - the specter service is now enabled"
+
+    # open firewall
+    echo "#    --> Updating Firewall"
+    sudo ufw allow 25441 comment 'specter'
+    sudo ufw --force enable
+    echo
 
   else
     echo "#    --> specter already installed."
-  fi
-
-  source <(/home/admin/_cache.sh get state)
-  if [ "${state}" = "ready" ]; then
-    if [ "${isInstalled}" -eq 0 ] || systemctl is-failed --quiet specter; then
-      if ! sudo systemctl start specter; then
-        echo "error='Specter failed to start. Check journalctl -u specter'"
-        exit 1
-      fi
-    elif ! systemctl is-active --quiet specter; then
-      echo "error='Specter is installed but stopped. Start it explicitly to check its HTTPS endpoint.'"
-      exit 1
-    fi
-    # The locally issued certificate uses this name. Never resolve it externally.
-    if ! curl --noproxy '*' --silent --show-error --fail --max-time 3 \
-        --retry 15 --retry-delay 1 --retry-connrefused --retry-max-time 30 \
-        --cacert /home/specter/.specter/cert.pem \
-        --resolve www.fakeurl.com:25441:127.0.0.1 \
-        --output /dev/null https://www.fakeurl.com:25441/; then
-      echo "error='Specter HTTPS is unavailable. Check journalctl -u specter'"
-      exit 1
-    fi
-    echo "#    --> OK - Specter is responding over HTTPS"
-  else
-    echo "#    --> Specter provisioned; HTTPS readiness requires a running node"
   fi
 
   # setting value in raspi blitz config
