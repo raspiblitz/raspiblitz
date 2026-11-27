@@ -38,6 +38,16 @@ if [ "$1" = "status" ] || [ "$1" = "menu" ]; then
 
     echo "version='${THUBVERSION}'"
     echo "installed='${isInstalled}'"
+    if [ "${thunderhub}" = "on" ]; then
+      echo "configured=1"
+    else
+      echo "configured=0"
+    fi
+    case "$(systemctl is-active thunderhub.service 2>/dev/null)" in
+      active|reloading|refreshing) echo "serviceRunning=1" ;;
+      inactive|failed|activating|deactivating|maintenance|unknown) echo "serviceRunning=0" ;;
+      *) echo "error='Could not read the ThunderHub service state'"; exit 1 ;;
+    esac
     echo "localIP='${localip}'"
     echo "httpPort='${httpPort}'"
     echo "httpsPort='${httpsPort}'"
