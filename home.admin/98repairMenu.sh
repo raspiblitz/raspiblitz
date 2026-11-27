@@ -96,7 +96,7 @@ CHOICE=$(whiptail --clear --title "Repair Options" --menu "" 19 62 12 "${OPTIONS
 clear
 case $CHOICE in
   HARDWARE)
-    sudo /home/admin/config.scripts/blitz.hardware.sh check smart
+    sudo /home/admin/config.scripts/blitz.hardware.sh check select
     read -r -p "Press ENTER to return to the main menu."
     ;;
   SOFTWARE)

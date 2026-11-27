@@ -20,8 +20,18 @@ MOCK
   cat >"$sandbox/bin/smartctl" <<'MOCK'
 #!/bin/bash
 printf '%s\n' "$*" >> "$calls"
-echo "SMART health: ${HEALTH:-PASSED}"
-[ "${HEALTH:-PASSED}" = PASSED ]
+if [[ "$*" == *'-d sat'* ]]; then
+  echo '{"smart_status":{"passed":true},"ata_smart_attributes":{"table":[{"id":5,"name":"Reallocated_Sector_Ct","raw":{"value":4}}]},"ata_smart_error_log":{"summary":{"count":2}}}'
+  exit 64
+fi
+case "${HEALTH:-PASSED}" in
+  FAILED) echo '{"smart_status":{"passed":false}}'; exit 8 ;;
+  USB) echo '{}'; exit 2 ;;
+  MISSING) echo '{}'; exit 0 ;;
+  STANDBY) echo '{"smartctl":{"messages":[{"string":"Device is in STANDBY mode, exit(2)"}]}}'; exit 2 ;;
+  NVME) printf '{"smart_status":{"passed":true},"serial_number":"private-serial","nvme_smart_health_information_log":{"percentage_used":%d,"critical_warning":0,"media_errors":%d,"data_units_written":2000000}}\n' "$wear" "${errors:-0}" ;;
+  *) echo '{"smart_status":{"passed":true}}' ;;
+esac
 MOCK
   chmod +x "$sandbox/bin/"*
 }
@@ -36,7 +46,7 @@ MOCK
 @test "manual summary reads health from supported whole disks with the standby guard" {
   run bash "$admin/config.scripts/blitz.hardware.sh" check smart
   [ "$status" -eq 0 ]
-  [ "$(cat "$calls")" = "$(printf '%s\n' '-n standby,0 -H /dev/nvme0n1' '-n standby,0 -H /dev/sda')" ]
+  [ "$(cat "$calls")" = "$(printf '%s\n' '-a -j /dev/nvme0n1' '-a -j -n standby,2 /dev/sda')" ]
 }
 
 @test "failed SMART remains visible and the other disks are still checked" {
@@ -54,10 +64,11 @@ MOCK
   printf '%s\n' '#!/bin/bash' 'echo "CHAIN=mainnet"' 'echo "network=bitcoin"' >"$sandbox/admin/config.scripts/network.aliases.sh"
   printf '%s\n' '#!/bin/bash' 'echo "txindex=0"' >"$sandbox/admin/config.scripts/network.txindex.sh"
   cp "$admin/config.scripts/blitz.hardware.sh" "$sandbox/admin/config.scripts/"
+  cp "$admin/config.scripts/blitz.drive-health.py" "$sandbox/admin/config.scripts/"
   chmod +x "$sandbox/admin/config.scripts/"*
   printf '%s\n' 'debug() { printf "local-debug:%s\n" "$#" >> "$calls"; }' >"$sandbox/admin/_commands.sh"
   printf '%s\n' '#!/bin/bash' 'exec "$@"' >"$sandbox/bin/sudo"
-  printf '%s\n' '#!/bin/bash' '[[ " $* " == *" $pick "* ]] || exit 1' 'echo "$pick" >&2' >"$sandbox/bin/dialog"
+  printf '%s\n' '#!/bin/bash' 'if [[ "$*" == *"Select a disk"* ]]; then echo sda >&2; exit 0; fi' '[[ " $* " == *" $pick "* ]] || exit 1' 'echo "$pick" >&2' >"$sandbox/bin/dialog"
   cp "$sandbox/bin/dialog" "$sandbox/bin/whiptail"
   chmod +x "$sandbox/bin/"*
   export TERM=dumb
@@ -67,6 +78,7 @@ MOCK
     run bash "$sandbox/$menu" <<< ""
     [ "$status" -eq 0 ]
     [[ "$output" == *"SMART health: PASSED"* ]]
+    [ "$(tail -1 "$calls")" = '-a -j -n standby,2 /dev/sda' ]
   done
   export pick=DEBUG
   run bash "$sandbox/99systemMenu.sh" <<< ""
@@ -76,6 +88,45 @@ MOCK
   run bash "$sandbox/98repairMenu.sh" <<< ""
   [ "$status" -eq 0 ]
   [ "$(grep -Fc 'local-debug:0' "$calls")" -eq 2 ]
+}
+
+@test "NVMe thresholds, device health and host writes are reported without exposing identifiers" {
+  export HEALTH=NVME wear=75
+  run bash "$admin/config.scripts/blitz.hardware.sh" check smart nvme0n1
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"1.02 TB"* && "$output" != *"private-serial"* ]]
+  for wear in 76 90 91; do
+    run bash "$admin/config.scripts/blitz.hardware.sh" check smart nvme0n1
+    [ "$status" -eq 1 ]
+    if [ "$wear" = 91 ]; then [[ "$output" == *"critical wear"* ]]; else [[ "$output" == *"wear warning"* ]]; fi
+  done
+  export wear=5 errors=2
+  run bash "$admin/config.scripts/blitz.hardware.sh" check smart nvme0n1
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"media/data integrity errors: 2"* ]]
+}
+
+@test "USB bridges retry SAT for an unsupported command and flag ATA errors" {
+  export HEALTH=USB
+  run bash "$admin/config.scripts/blitz.hardware.sh" check smart sda
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"Reallocated_Sector_Ct: 4 (review)"* && "$output" == *"ATA logged errors: 2"* ]]
+  [ "$(wc -l < "$calls")" -eq 2 ]
+}
+
+@test "standby is skipped, unsupported health is explicit, and a partition cannot be selected" {
+  export HEALTH=STANDBY
+  run bash "$admin/config.scripts/blitz.hardware.sh" check smart sda
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"check skipped"* ]]
+  [ "$(wc -l < "$calls")" -eq 1 ]
+  export HEALTH=MISSING
+  run bash "$admin/config.scripts/blitz.hardware.sh" check smart nvme0n1
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"unavailable"* ]]
+  run bash "$admin/config.scripts/blitz.hardware.sh" check smart sda1
+  [ "$status" -eq 1 ]
+  [ "$(wc -l < "$calls")" -eq 2 ]
 }
 
 prepare_debug() {

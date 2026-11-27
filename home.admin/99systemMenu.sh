@@ -56,7 +56,7 @@ CHOICE=$(dialog --clear \
 case $CHOICE in
   HARDWARE)
     clear
-    sudo /home/admin/config.scripts/blitz.hardware.sh check smart
+    sudo /home/admin/config.scripts/blitz.hardware.sh check select
     read -r -p "Press ENTER to return to the main menu."
     ;;
   DEBUG)
