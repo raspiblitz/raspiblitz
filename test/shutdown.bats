@@ -9,7 +9,7 @@ setup() {
   sed -e "s@/home/admin/_cache.sh@$sandbox/cache@g" \
       -e 's/"$EUID"/"0"/' \
       "$BATS_TEST_DIRNAME/../home.admin/config.scripts/blitz.shutdown.sh" >"$sandbox/shutdown.sh"
-  printf '%s\n' '#!/bin/sh' '[ "$1" != get ] || echo network=' >"$sandbox/cache"
+  printf '%s\n' '#!/bin/sh' 'if [ "$1" = get ]; then echo network=; else echo "cache $*" >> "$calls"; fi' >"$sandbox/cache"
   for name in sudo sleep sync; do
     printf '%s\n' '#!/bin/sh' 'echo "${0##*/} $*" >>"$calls"' >"$sandbox/bin/$name"
   done
@@ -39,6 +39,9 @@ setup() {
   export shutdown_result=7
   run bash "$sandbox/shutdown.sh" reboot
   [ "$status" -eq 7 ]
+  [[ "$output" == *"services may already be stopped"* ]]
+  grep -Fx 'cache set state error' "$calls"
+  grep -F 'cache set message Shutdown request failed' "$calls"
   [ "$(grep -c '^shutdown ' "$calls")" -eq 1 ]
   ! grep -q -- '--force' "$calls"
 }

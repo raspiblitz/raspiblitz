@@ -99,4 +99,10 @@ sync
 
 echo "starting shutdown ..."
 # The system shutdown request works independently of a login session bus.
-exec shutdown "$shutdownMode" now
+shutdown "$shutdownMode" now && exit 0
+result=$?
+message="Shutdown request failed; node services may already be stopped. Check the error and retry."
+echo "$message" >&2
+/home/admin/_cache.sh set state error
+/home/admin/_cache.sh set message "$message"
+exit "$result"
