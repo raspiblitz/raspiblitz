@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import os
+import re
+import stat
 import sys
+import time
 from pathlib import Path
 
 import grpc
@@ -12,7 +15,7 @@ if sys.version_info < (3, 0):
 # display config script info
 if len(sys.argv) <= 1 or sys.argv[1] in ["-h", "--help", "help"]:
     print("# creating or recovering the LND wallet")
-    print("# lnd.initwallet.py new [mainnet|testnet|signet] [walletpassword] [?seedpassword]")
+    print("# lnd.initwallet.py new [mainnet|testnet|signet] [walletpassword] [--stage-seed]")
     print("# lnd.initwallet.py seed [mainnet|testnet|signet] [walletpassword] [\"seeds-words-seperated-spaces\"] [?seedpassword]")
     print("# lnd.initwallet.py unlock [mainnet|testnet|signet] [walletpassword] [recovery_window]")
     print("# lnd.initwallet.py scb [mainnet|testnet|signet] [filepathSCB] [macaroonPath]")
@@ -32,7 +35,39 @@ else:
     from lndlibs import walletunlocker_pb2_grpc as rpcstub
     
 
-def new(stub, wallet_password="", seed_entropy=None):
+def stage_recovery(path, record):
+    # O_EXCL also refuses a previous, uncertain initialization attempt.
+    path.parent.mkdir(mode=0o700, exist_ok=True)
+    directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        info = os.fstat(directory)
+        if info.st_uid != os.geteuid() or stat.S_IMODE(info.st_mode) != 0o700:
+            raise PermissionError("unsafe recovery directory")
+        parent = os.open("..", os.O_RDONLY | os.O_DIRECTORY, dir_fd=directory)
+        try:
+            os.fsync(parent)
+        finally:
+            os.close(parent)
+        fd = os.open(path.name, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600, dir_fd=directory)
+        created = os.fstat(fd)
+        try:
+            with os.fdopen(fd, "w") as stream:
+                stream.write(record)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.fsync(directory)
+        except OSError:
+            # No InitWallet RPC has run. Remove only this attempt's inode.
+            current = os.stat(path.name, dir_fd=directory, follow_symlinks=False)
+            if os.path.samestat(created, current):
+                os.unlink(path.name, dir_fd=directory)
+                os.fsync(directory)
+            raise
+    finally:
+        os.close(directory)
+
+
+def new(stub, wallet_password="", seed_entropy=None, recovery_path=None):
     if seed_entropy:
         # provide 16-bytes of static data to get reproducible seeds for TESTING!)
         print("WARNING: Use this for testing only")
@@ -43,8 +78,9 @@ def new(stub, wallet_password="", seed_entropy=None):
     try:
         response = stub.GenSeed(request)
         seed_words = response.cipher_seed_mnemonic
+        if len(seed_words) != 24 or not all(re.fullmatch("[a-z]+", word) for word in seed_words):
+            sys.exit(wallet_error("invalid mnemonic returned by LND"))
         seed_words_str = ', '.join(seed_words)
-        print("seedwords='" + seed_words_str + "'")
 
         # add a 6x4 formatted version to the output
         seed_words_6x4 = ""
@@ -55,7 +91,7 @@ def new(stub, wallet_password="", seed_entropy=None):
             while len(single_word) < 12:
                 single_word = single_word + " "
             seed_words_6x4 = seed_words_6x4 + single_word
-        print("seedwords6x4='" + seed_words_6x4 + "'")
+        record = f"seedwords='{seed_words_str}'\nseedwords6x4='{seed_words_6x4}'\n"
 
     except grpc.RpcError as rpc_error_call:
         code = rpc_error_call.code()
@@ -69,6 +105,14 @@ def new(stub, wallet_password="", seed_entropy=None):
         print(e, file=sys.stderr)
         print("err='GenSeedRequest'")
         sys.exit(1)
+
+    if recovery_path is None:
+        print(record, end="", flush=True)
+    else:
+        try:
+            stage_recovery(recovery_path, record)
+        except OSError:
+            sys.exit(wallet_error("cannot stage recovery words; check the data drive and any pending seed file"))
 
     request = lnrpc.InitWalletRequest(
         wallet_password=wallet_password.encode(),
@@ -88,6 +132,8 @@ def new(stub, wallet_password="", seed_entropy=None):
         print(e, file=sys.stderr)
         print("err='InitWallet'")
         sys.exit(1)
+    if recovery_path is not None:
+        print(record, end="")
 
 # init wallet with recovery_window=0 (to not trigger rescan)
 # but make sure to put lnd into recovery mode with lnd.backup.sh
@@ -218,7 +264,7 @@ def parse_args():
             print("err='missing parameters'")
             sys.exit(1)
 
-        if len(sys.argv) > 4:
+        if len(sys.argv) > 4 and sys.argv[4] != "--stage-seed":
             seed_password = sys.argv[4]
 
     elif mode == "change-password":
@@ -330,9 +376,39 @@ def main():
         sys.exit(1)
 
     os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
-    cert = open('/mnt/hdd/app-data/lnd/tls.cert', 'rb').read()
-    ssl_creds = grpc.ssl_channel_credentials(cert)
-    channel = grpc.secure_channel(grpcEndpoint, ssl_creds)
+    cert_path = Path('/mnt/hdd/app-data/lnd/tls.cert')
+    deadline = time.monotonic() + 60
+    last_cert = None
+    channel = None
+    while True:
+        cert = None
+        try:
+            cert = cert_path.read_bytes()
+        except FileNotFoundError:
+            pass  # On first start LND creates its certificate asynchronously.
+        except OSError:
+            sys.exit(wallet_error("cannot read the LND TLS certificate"))
+        if cert and cert != last_cert:
+            if channel is not None:
+                channel.close()
+            channel = grpc.secure_channel(grpcEndpoint, grpc.ssl_channel_credentials(cert))
+            last_cert = cert
+            if mode != "new":
+                break
+            ready = grpc.channel_ready_future(channel)
+        remaining = deadline - time.monotonic()
+        if not cert:
+            if mode != "new" or remaining <= 0:
+                sys.exit(wallet_error("LND TLS certificate is not ready"))
+            time.sleep(min(1, remaining))
+            continue
+        try:
+            ready.result(timeout=min(2, max(0, remaining)))
+            break
+        except grpc.FutureTimeoutError:
+            if time.monotonic() >= deadline:
+                channel.close()
+                sys.exit(wallet_error("LND wallet RPC is not ready"))
     if mode == "scb":
         stub = lightningstub.LightningStub(channel)
     else:
@@ -340,7 +416,13 @@ def main():
 
     if mode == "new":
         print("# *** CREATING NEW LND WALLET ***")
-        new(stub, wallet_password)
+        recovery_path = None
+        if "--stage-seed" in sys.argv[4:]:
+            # app-data may be a symlink to the data disk. Keep secrets outside
+            # the LND tree, whose ownership and permissions are reset on install.
+            disk_root = cert_path.parent.parent.resolve().parent
+            recovery_path = disk_root / ".raspiblitz-lnd-recovery" / f"{network}.pending"
+        new(stub, wallet_password, recovery_path=recovery_path)
 
     elif mode == "seed":
         print("# *** RECOVERING LND WALLET FROM SEED ***")
@@ -357,6 +439,12 @@ def main():
     elif mode == "change-password":
         print("# *** SETTING NEW PASSWORD FOR WALLET ***")
         change_password(stub, wallet_password, wallet_password_new)
+
+
+def wallet_error(message):
+    print("err='" + message + "'")
+    print(message, file=sys.stderr)
+    return 1
 
 
 if __name__ == '__main__':

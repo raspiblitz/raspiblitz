@@ -276,6 +276,15 @@ function restoreSCB()
 
 function removeLNDwallet 
 {
+  local recoveryDir="/mnt/hdd/app-data/../.raspiblitz-lnd-recovery"
+  if sudo test -e "$recoveryDir/${CHAIN}.info"; then
+    sudo /home/admin/config.scripts/lnd.install.sh display-seed "$CHAIN" delete
+    exit $?
+  fi
+  if sudo test -e "$recoveryDir/${CHAIN}.pending" || { [[ $CHAIN == mainnet ]] && sudo test -e "$recoveryDir/setup-ready"; }; then
+    whiptail --title "LND recovery pending" --msgbox "An earlier wallet setup has recovery data on the data drive in .raspiblitz-lnd-recovery. Preserve this directory and the wallet database. Check their relationship offline before attempting a reset." 12 68
+    exit 1
+  fi
   clear
   echo  
   echo "The next step WILL REMOVE the old LND wallet on ${CHAIN}"
@@ -368,7 +377,10 @@ case $CHOICE in
     removeLNDwallet
 
     # create wallet
-    /home/admin/config.scripts/lnd.install.sh on ${chain}net initwallet
+    if ! /home/admin/config.scripts/lnd.install.sh on "${chain}net" initwallet; then
+      whiptail --title "LND Wallet" --msgbox "Wallet setup failed. Check the LND service log before retrying." 8 65
+      exit 1
+    fi
     # display and delete the seed for ${chain}net
     sudo /home/admin/config.scripts/lnd.install.sh display-seed ${chain}net delete
 

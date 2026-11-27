@@ -234,6 +234,19 @@ source /home/admin/raspiblitz.info
 source <(/home/admin/_cache.sh get state)
 source /mnt/hdd/app-data/raspiblitz.conf
 
+recoveryDir="/mnt/hdd/app-data/../.raspiblitz-lnd-recovery"
+pendingSeed="${recoveryDir}/${CHAIN}.pending"
+if [[ $1 == display-seed || ( ( $1 == on || $1 == 1 ) && $3 == initwallet ) ]] && sudo test -e "$pendingSeed"; then
+  if sudo test "$pendingSeed" -ef "$recoveryDir/${CHAIN}.info"; then
+    # The RPC succeeded and the record was published. Finish interrupted cleanup.
+    sudo sync -f "$recoveryDir" && sudo rm -- "$pendingSeed" || exit 1
+  else
+    echo "# Wallet creation was interrupted. Preserve the wallet database and $pendingSeed." >&2
+    echo "# Check both offline before retrying or resetting this wallet." >&2
+    exit 1
+  fi
+fi
+
 function removeParallelService() {
   if [ -f "/etc/systemd/system/${netprefix}lnd.service" ];then
     echo "# Stopping ${netprefix}lnd ..."
@@ -426,19 +439,18 @@ alias ${netprefix}lndconf=\"sudo nano /mnt/hdd/app-data/lnd/${netprefix}lnd.conf
       else
         passwordC="raspiblitz"
       fi
-      source <(sudo /home/admin/config.scripts/lnd.initwallet.py new ${CHAIN} ${passwordC})
-      if [ "${err}" != "" ]; then
-        clear
-        echo "# LND ${CHAIN} wallet creation failed"
-        echo "# ${err}"
-        echo "# press ENTER to continue"
-        read key
-      else
-        sudo mkdir -p /mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}
-        seedFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
-        echo "seedwords='${seedwords}'" | sudo tee ${seedFile}
-        echo "seedwords6x4='${seedwords6x4}'" | sudo tee -a ${seedFile}
+      seedDir="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}"
+      if sudo test -e "${seedDir}/seedwords.info" || sudo test -e "${recoveryDir}/${CHAIN}.info"; then
+        echo "# Recovery words already exist. Check the wallet backup before retrying." >&2
+        exit 1
       fi
+      if ! sudo /home/admin/config.scripts/lnd.initwallet.py new "${CHAIN}" "${passwordC}" --stage-seed >/dev/null; then
+        echo "# Wallet setup failed. Check the LND service log. Preserve ${pendingSeed} if it exists." >&2
+        exit 1
+      fi
+      # Publish the fsynced record without replacing an existing backup.
+      sudo ln -T -- "${pendingSeed}" "${recoveryDir}/${CHAIN}.info" &&
+        sudo sync -f "${recoveryDir}" && sudo rm -- "${pendingSeed}" || exit 1
   fi
 
   if [ "${CHAIN}" != "mainnet" ]; then
@@ -514,12 +526,15 @@ if [ "$1" = "display-seed" ]; then
   fi
 
   # check if seedword file exists
-  seedwordFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
+  seedwordFile="/mnt/hdd/app-data/../.raspiblitz-lnd-recovery/${CHAIN}.info"
+  if [[ ! -f $seedwordFile ]]; then
+    seedwordFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
+  fi
   echo "# seedwordFile(${seedwordFile})"
-  seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
-  echo "# seedwordFileExists(${seedwordFileExists})"
-  if [ "${seedwordFileExists}" == "1" ]; then
-    source ${seedwordFile}
+  if [[ -f $seedwordFile ]]; then
+    # Older versions wrote the same two quoted fields. Read them as data.
+    seedwords=$(sed -n "s/^seedwords='\([a-z ,]*\)'$/\1/p" "${seedwordFile}")
+    seedwords6x4=$(sed -n "/^seedwords6x4='/,\$p" "${seedwordFile}" | sed "1s/^seedwords6x4='//;\$s/'\$//")
   fi
   if [ "${seedwords}" != "" ]; then
     #echo "# seedwords(${seedwords})"

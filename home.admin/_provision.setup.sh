@@ -285,22 +285,33 @@ if [ "${lightning}" == "lnd" ]; then
 
     echo "# WALLET --> NEW" >> ${logFile}
     /home/admin/_cache.sh set message "LND Wallet (NEW)"
-    source <(/home/admin/config.scripts/lnd.initwallet.py new mainnet "${passwordC}")
-    if [ "${err}" != "" ]; then
-      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-new" "lnd.initwallet.py new returned error" "/home/admin/config.scripts/lnd.initwallet.py new mainnet ... --> ${err} + ${errMore}" ${logFile}
+    recoveryDir="/mnt/hdd/app-data/../.raspiblitz-lnd-recovery"
+    pending="$recoveryDir/mainnet.pending"
+    ready="$recoveryDir/setup-ready"
+    err=""
+    if [[ -s $ready && -f /mnt/hdd/app-data/lnd/data/chain/bitcoin/mainnet/wallet.db ]]; then
+      if [[ -e $pending && ! $pending -ef $ready ]]; then err="Conflicting recovery records"; fi
+    elif [[ -e $pending || -e $ready ]]; then
+      err="A previous wallet setup needs recovery"
+    elif ! /home/admin/config.scripts/lnd.initwallet.py new mainnet "${passwordC}" --stage-seed >/dev/null ||
+         ! ln -T -- "$pending" "$ready"; then
+      err="Wallet creation or recovery record publication failed"
+    fi
+    if [[ -n $err ]]; then
+      err="$err. Check LND; preserve the wallet database and .raspiblitz-lnd-recovery on the data drive."
+      /home/admin/config.scripts/blitz.error.sh _provision.setup.sh "lnd-wallet-new" "LND wallet setup stopped" "$err" "${logFile}"
       /home/admin/_cache.sh set state "error"
       /home/admin/_cache.sh set message "setup: lnd wallet NEW failed"
       echo "FAIL see ${logFile}"
       echo "FAIL: setup: lnd wallet SEED failed (2)" >> ${logFile}
       echo "${err}" >> ${logFile}
-      echo "${errMore}" >> ${logFile}
       exit 13
     fi
 
     # write created seedwords into SETUPFILE to be displayed to user on final setup later
     echo "# writing seed info to setup file" >> ${logFile}
-    echo "seedwordsNEW='${seedwords}'" >> ${setupFile}
-    echo "seedwords6x4NEW='${seedwords6x4}'" >> ${setupFile}
+    sync -f "$recoveryDir" && rm -f -- "$pending" || exit 13
+    sed -e 's/^seedwords=/seedwordsNEW=/' -e 's/^seedwords6x4=/seedwords6x4NEW=/' "$ready" >> "${setupFile}" || exit 13
 
   fi
 
