@@ -25,6 +25,7 @@ if [[ "$*" == *'-d sat'* ]]; then
   exit 64
 fi
 case "${HEALTH:-PASSED}" in
+  SLOW) if [[ "$*" == *'/dev/nvme0n1' ]]; then exec sleep 30; fi; echo '{"smart_status":{"passed":true}}' ;;
   FAILED) echo '{"smart_status":{"passed":false}}'; exit 8 ;;
   USB) echo '{}'; exit 2 ;;
   MISSING) echo '{}'; exit 0 ;;
@@ -37,7 +38,7 @@ MOCK
 }
 
 @test "boot and support inventory can run without querying SMART or identifying disks by serial" {
-  run bash "$admin/config.scripts/blitz.hardware.sh" check
+  run "$admin/config.scripts/blitz.hardware.sh" check
   [ "$status" -eq 0 ]
   [[ "$output" == *"nvme0n1"* && "$output" == *"5000M"* ]]
   [ ! -s "$calls" ]
@@ -55,6 +56,13 @@ MOCK
   [ "$status" -ne 0 ]
   [[ "$output" == *FAILED* ]]
   [ "$(wc -l < "$calls")" -eq 2 ]
+}
+
+@test "an unresponsive disk times out and the next disk is still read" {
+  export HEALTH=SLOW
+  run "$admin/config.scripts/blitz.hardware.sh" check smart
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"within 20 seconds"* && "$output" == *"SMART health: PASSED"* ]]
 }
 
 @test "SYSTEM and REPAIR both reach the manual check and SYSTEM can view debug locally" {
