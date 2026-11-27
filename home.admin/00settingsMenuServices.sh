@@ -539,11 +539,12 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndk}" != "${choice}" ]; then
   echo "LNDK Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/config.scripts/bonus.lndk.sh ${choice}
-  if [ "${choice}" =  "on" ]; then
-    whiptail --title " Installed LNDK" --msgbox "\
-LNDK was installed.\n
-" 10 45
+  if sudo -u admin /home/admin/config.scripts/bonus.lndk.sh "${choice}"; then
+    if [ "${choice}" = "on" ]; then
+      whiptail --title "LNDK" --msgbox "LNDK was installed." 10 45
+    fi
+  else
+    whiptail --title "LNDK" --msgbox "Could not turn LNDK ${choice}. Check the installer output for details." 10 54
   fi
 else
   echo "LNDK Setting unchanged."

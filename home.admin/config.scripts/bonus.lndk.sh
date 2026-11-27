@@ -90,7 +90,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown -R lndk:lndk /mnt/hdd/app-data/.lndk
     sudo chmod 755 /mnt/hdd/app-data/.lndk
 
-    cat <<EOF | sudo tee /mnt/hdd/app-data/.lndk/lndk.conf
+    # Keep the existing configuration when reusing the DATA disk or reinstalling with --keep-data.
+    lndkConfig=/mnt/hdd/app-data/.lndk/lndk.conf
+    if ! sudo -u lndk test -f "$lndkConfig"; then
+      sudo -u lndk sh -c 'umask 077; set -C; cat >"$1"' _ "$lndkConfig" <<EOF || exit 1
 address="https://localhost:10009"
 cert_path="/mnt/hdd/app-data/lnd/tls.cert"
 macaroon_path="/home/lndk/.lnd/data/chain/bitcoin/mainnet/admin.macaroon"
@@ -98,6 +101,7 @@ grpc_port=5635
 log_level="debug"
 response_invoice_timeout=15
 EOF
+    fi
 
     # symlink data dir for lndk and admin users
     sudo rm -rf /home/lndk/.lndk
@@ -112,6 +116,7 @@ EOF
     sudo /usr/sbin/usermod --append --groups lndadmin lndk
 
     echo "[Unit]
+# RaspiBlitz LNDK ${LNDKVERSION}
 Description=lndk Service
 After=lnd.service
 BindsTo=lnd.service
@@ -135,13 +140,7 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee $lndkServicePath
-    sudo systemctl enable lndk
-    echo "# Enabled the lndk.service"
-    if [ "${state}" == "ready" ]; then
-      sudo systemctl start lndk
-      echo "# Started the lndk.service"
-    fi
+" | sudo tee "$lndkServicePath" >/dev/null || exit 1
 
     echo "# Add alias for lndk-cli"
     sudo -u admin touch /home/admin/_aliases
@@ -149,14 +148,18 @@ WantedBy=multi-user.target
       echo 'alias lndk-cli="lndk-cli -n mainnet --grpc-port=5635"' | sudo tee -a /home/admin/_aliases
     fi
 
-    # Set value in raspiblitz config
-    /home/admin/config.scripts/blitz.conf.sh set lndk "on"
-  else
-    echo "# LNDK is already installed."
-    sudo systemctl status lndk
+  elif ! grep -Fxq "# RaspiBlitz LNDK ${LNDKVERSION}" "$lndkServicePath" || [ ! -x /usr/local/bin/lndk ] || [ ! -x /usr/local/bin/lndk-cli ]; then
+    echo "An existing LNDK installation needs an explicit upgrade to ${LNDKVERSION}."
+    echo "Turn LNDK off, choose Keep Data, then turn it on again to install this version."
+    exit 1
   fi
 
-  exit 0
+  sudo systemctl enable lndk || exit 1
+  if [ "${state}" == "ready" ]; then
+    sudo systemctl start lndk || exit 1
+  fi
+  /home/admin/config.scripts/blitz.conf.sh set lndk "on"
+  exit $?
 fi
 
 # Show info menu
