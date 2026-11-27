@@ -41,12 +41,12 @@ if [ "$1" = "menu" ]; then
 https://${localip}:8443\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
-Use your Password B to login.\n
+If LND is locked after the restart, unlock it on RaspiBlitz with Password C first. Then log in to Lightning Terminal with Password B.\n
 Hidden Service address for the Tor Browser (see LCD for QR):
 https://${toraddress}\n
 For the command line switch to 'lit' user with: 'sudo su - lit'
 use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'.
-" 19 74
+" 21 74
     sudo /home/admin/config.scripts/blitz.display.sh hide
   else
     # Info without TOR
@@ -54,11 +54,11 @@ use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'.
 https://${localip}:8443\n
 SHA1 Thumb/Fingerprint:
 ${fingerprint}\n
-Use your Password B to login.\n
+If LND is locked after the restart, unlock it on RaspiBlitz with Password C first. Then log in to Lightning Terminal with Password B.\n
 Activate TOR to access the web interface from outside your local network.\n
 For the command line switch to 'lit' user with: 'sudo su - lit'
 use the commands: 'lncli', 'lit-loop', 'lit-pool' and 'lit-frcli'.
-" 19 63
+" 21 63
   fi
   echo "please wait ..."
   exit 0
@@ -67,6 +67,43 @@ fi
 # stop services
 echo "making sure the lit service is not running"
 sudo systemctl stop litd 2>/dev/null
+
+# Integrated Taproot Assets uses ~/.tapd, independently of ~/.lit.
+# Preserve its custody data before replacing the service account or its home.
+persist_tapd() {
+  local home_dir=/home/lit/.tapd data_dir=/mnt/hdd/app-data/.tapd
+  if ! sudo test -f /mnt/hdd/app-data/raspiblitz.conf; then
+    echo "# The RaspiBlitz data drive is unavailable. Leaving Taproot Assets data in place." >&2
+    return 1
+  fi
+  if sudo test -L "$home_dir"; then
+    if [[ $(sudo readlink -f "$home_dir") != "$data_dir" ]] || ! sudo test -d "$data_dir"; then
+      echo "# Unexpected Taproot Assets link. Check $home_dir before continuing." >&2
+      return 1
+    fi
+  elif sudo test -e "$home_dir"; then
+    if ! sudo test -d "$home_dir" || sudo test -e "$data_dir" || sudo test -L "$data_dir"; then
+      echo "# Conflicting Taproot Assets paths. Preserve both directories and resolve them before continuing." >&2
+      return 1
+    fi
+    sudo mv -T "$home_dir" "$data_dir" || return 1
+  fi
+  if sudo test -L "$data_dir"; then
+    echo "# Unexpected Taproot Assets data link at $data_dir." >&2
+    return 1
+  fi
+  sudo install -d -m 700 -o lit -g lit "$data_dir" || return 1
+  sudo chown -Rh lit:lit "$data_dir" || return 1
+  sudo test -L "$home_dir" || sudo ln -s "$data_dir" "$home_dir"
+}
+
+if [[ "$1" =~ ^(0|1|on|off)$ ]] && id lit >/dev/null 2>&1; then
+  if systemctl is-active --quiet litd; then
+    echo "# Cannot move Taproot Assets data while Lightning Terminal is running." >&2
+    exit 1
+  fi
+  persist_tapd || exit 1
+fi
 
 # switch on
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
@@ -93,6 +130,7 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     USERNAME=lit
     echo "# add the user: ${USERNAME}"
     sudo adduser --system --group --shell /bin/bash --home /home/${USERNAME} ${USERNAME}
+    persist_tapd || exit 1
     echo "Copy the skeleton files for login"
     sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
     # make sure symlink to central app-data directory exists
@@ -271,7 +309,7 @@ faraday.connect_bitcoin=true
 faraday.bitcoin.host=localhost
 faraday.bitcoin.user=raspibolt
 faraday.bitcoin.password=$PASSWORD_B
-" | sudo tee /mnt/hdd/app-data/.lit/lit.conf
+" | sudo tee /mnt/hdd/app-data/.lit/lit.conf >/dev/null
 
     # secure
     sudo chown lit:lit /mnt/hdd/app-data/.lit/lit.conf
