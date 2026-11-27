@@ -17,6 +17,7 @@ fi
 source <(/home/admin/_cache.sh get \
   btc_default_ready \
   btc_default_sync_percentage \
+  btc_default_blocks_behind \
   btc_default_peers \
   system_count_start_blockchain \
 )
@@ -47,8 +48,10 @@ source <(/home/admin/_cache.sh get \
     ln_default_ready \
     ln_default_sync_progress \
     ln_default_recovery_mode \
+    ln_default_recovery_done \
     ln_default_peers \
     ln_default_sync_chain \
+    ln_default_sync_graph \
     system_count_start_lightning
 )
 
@@ -76,8 +79,43 @@ fi
 
 # setting info string
 infoStr=" Blockchain Progress : ${syncProgress}\n"
-    
-if [ "${lightning}" == "lnd" ] || [ "${lightning}" == "cl" ]; then
+if [[ "$btc_default_ready" = 1 && "$btc_default_blocks_behind" =~ ^[1-9][0-9]*$ ]]; then
+    infoStr+=" Blocks behind headers: ${btc_default_blocks_behind}\n"
+    (( height += 1 ))
+fi
+
+if [ "$lightning" = lnd ]; then
+    if [ "$ln_default_ready" = 1 ]; then
+        case "$ln_default_sync_chain" in
+            1) chainStatus="synced" ;;
+            0) chainStatus="syncing" ;;
+            *) chainStatus="unknown" ;;
+        esac
+        if [[ "$ln_default_sync_progress" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+            chainStatus+=" ($ln_default_sync_progress %)"
+        fi
+        case "$ln_default_sync_graph" in
+            1) graphStatus="synced" ;;
+            0) graphStatus="pending" ;;
+            *) graphStatus="unknown" ;;
+        esac
+        if [[ "$ln_default_peers" =~ ^[0-9]+$ ]]; then
+            graphStatus+=", $ln_default_peers peers"
+        fi
+    else
+        chainStatus="waiting for RPC"
+        graphStatus="unknown"
+    fi
+    infoStr+=" LND chain scan : ${chainStatus}\n LND graph      : ${graphStatus}\n"
+    (( height += 1 ))
+    if [[ "$ln_default_ready" = 1 && "$ln_default_recovery_mode" = 1 ]]; then
+        recoveryStatus="in progress"
+        [ "$ln_default_recovery_done" = 1 ] && recoveryStatus="complete"
+        infoStr+=" Wallet recovery: ${recoveryStatus}\n"
+        (( height += 1 ))
+    fi
+    infoStr+=" ${actionString}"
+elif [ "${lightning}" == "cl" ]; then
     infoStr="${infoStr} Lightning Progress  : ${scanProgress}\n ${actionString}"
 else
     # if lightning is deactivated (leave line clear)
