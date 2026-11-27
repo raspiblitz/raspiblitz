@@ -26,6 +26,8 @@ class HighScoreClock(unittest.TestCase):
                     self.assertEqual(row, (utc, 42, "miner"))
                     instant = datetime.fromisoformat(row[0].replace("Z", "+00:00"))
                     self.assertEqual(instant.astimezone(ZoneInfo("Europe/Berlin")).strftime("%H:%M %z"), local)
+            db.execute("UPDATE score SET updatedAt = 'unrecognized old value'")
+            self.assertEqual(db.execute(f"SELECT {projection} FROM score").fetchone()[0], "unrecognized old value")
 
 
 if __name__ == "__main__":

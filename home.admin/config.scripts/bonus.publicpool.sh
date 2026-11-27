@@ -129,9 +129,8 @@ EOL
   if ! sudo -u "${APPID}" git apply --reverse --check "${clockPatch}" 2>/dev/null; then
     sudo -u "${APPID}" git apply "${clockPatch}" || { echo "# FAIL - check Public Pool high-score query compatibility"; exit 1; }
   fi
-  sudo npm install zeromq
-  sudo chown publicpool:publicpool -R /home/${APPID}/${APPID}
-  sudo -u ${APPID} npm install || exit 1
+  # zeromq is included in Public Pool's package-lock.json.
+  sudo -u "${APPID}" npm ci || exit 1
   echo "##### Build Backend"
   sudo -u ${APPID} npm run build || exit 1
 
