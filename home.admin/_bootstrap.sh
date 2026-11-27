@@ -1288,9 +1288,9 @@ if [ "${scenario}" != "ready" ] ; then
 
   # Wait until Bitcoin RPC is ready for the final dialogs.
   /home/admin/_cache.sh set state "waitsync"
-  if ! bash /home/admin/setup.scripts/waitBitcoinReady.sh >> "$logFile" 2>&1; then
+  if ! bash /home/admin/setup.scripts/waitBitcoinReady.sh "${chain:-main}" >> "$logFile" 2>&1; then
     /home/admin/config.scripts/blitz.error.sh _bootstrap.sh "bitcoind-start-failed" "" \
-      "Check journalctl -u bitcoind -b, correct the startup error, then reboot to retry." "$logFile"
+      "See the Bitcoin unit in the setup log, correct the startup error, then reboot to retry." "$logFile"
     exit 1
   fi
 
