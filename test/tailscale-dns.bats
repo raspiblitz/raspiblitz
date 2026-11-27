@@ -30,8 +30,9 @@ SH
     run sh "$menu" menu
     [ "$status" -eq 0 ]
     [ "$(grep '^set ' "$calls")" = "set --accept-dns=${pair#*:}" ]
+    run grep -Eq '^(up|down|logout|login)' "$calls"
+    [ "$status" -eq 1 ]
   done
-  ! grep -Eq '^(up|down|logout|login)' "$calls"
 }
 
 @test "back, keep and a stopped backend preserve preferences" {
