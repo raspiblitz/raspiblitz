@@ -141,23 +141,7 @@ case "$1" in
     [ "${itchysats}" = "on" ] && /home/admin/config.scripts/tor.onion-service.sh itchysats 80 8890 443 8891
 
     echo "Setup logrotate"
-    # add logrotate config for modified Tor dir on ext. disk
-    sudo tee /etc/logrotate.d/raspiblitz-tor >/dev/null <<EOF
-/mnt/hdd/app-data/tor/*log {
-        su debian-tor debian-tor
-        size 100M
-        rotate 2
-        compress
-        delaycompress
-        missingok
-        notifempty
-        create 0640 debian-tor debian-tor
-        sharedscripts
-        postrotate
-            systemctl reload tor >/dev/null 2>&1 || true
-        endscript
-}
-EOF
+    sudo install -o root -g root -m 0644 /home/admin/assets/raspiblitz-tor.logrotate /etc/logrotate.d/raspiblitz-tor || exit 1
 
     # make sure its the correct owner before last Tor restart
     sudo chmod -R 700 /mnt/hdd/app-data/tor

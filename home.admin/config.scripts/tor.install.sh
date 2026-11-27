@@ -186,6 +186,11 @@ if [ "${action}" = "install" ]; then
 fi
 
 #### ENABLE (once HDD is available) ####
+if [ "${action}" = "enable" ] || [ "${action}" = "update" ]; then
+  # Tor writes these files even when Bitcoin is using clearnet.
+  sudo install -o root -g root -m 0644 /home/admin/assets/raspiblitz-tor.logrotate /etc/logrotate.d/raspiblitz-tor || exit 1
+fi
+
 if [ "${action}" = "enable" ]; then
 
   echo -e "\n*** Enable Tor Service ***"
