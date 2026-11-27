@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # https://github.com/lndk-org/lndk/releases
-LNDKVERSION="v0.2.0"
+LNDKVERSION="v0.3.0"
+# Commit referenced by the publisher's signed v0.3.0 tag.
+LNDKCOMMIT="b50e09c338b429dbd1eb26395e051b62ae30d71f"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -28,22 +30,22 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "Copy the skeleton files for login"
     sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
 
-    sudo apt-get install -y protobuf-compiler
+    sudo apt-get install -y protobuf-compiler libprotobuf-dev build-essential || exit 1
 
-    # Install Rust for lndk, includes rustfmt
-    sudo -u lndk curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
-      sudo -u lndk sh -s -- -y
+    # The source checkout pins its own Rust toolchain.
+    (set -o pipefail; sudo -u lndk curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
+      sudo -u lndk sh -s -- -y --profile minimal --default-toolchain none) || exit 1
 
-    # Clone and compile lndk onto Raspiblitz.
-    if [ ! -f "/usr/local/bin/lndk" ] || [ ! -f "/usr/local/bin/lndk-cli" ]; then
-      cd /home/lndk || exit 1
-      sudo -u lndk git clone https://github.com/lndk-org/lndk
-      cd /home/lndk/lndk || exit 1
-      sudo -u lndk git reset --hard $LNDKVERSION
-      sudo -u lndk /home/lndk/.cargo/bin/cargo build # Lndk bin will be built to /home/lndk/lndk/target/debug/lndk
-      sudo install -m 0755 -o root -g root -t /usr/local/bin /home/lndk/lndk/target/debug/lndk
-      sudo install -m 0755 -o root -g root -t /usr/local/bin /home/lndk/lndk/target/debug/lndk-cli
+    # Upstream publishes no Linux ARM64 binary. Use the same locked source on both architectures.
+    buildDir=$(sudo -u lndk mktemp -d /home/lndk/build.XXXXXXXX) || exit 1
+    trap 'sudo -u lndk rm -rf -- "${buildDir}"' EXIT
+    sudo -u lndk git clone --depth 1 --branch "${LNDKVERSION}" https://github.com/lndk-org/lndk "${buildDir}" || exit 1
+    if [ "$(sudo -u lndk git -C "${buildDir}" rev-parse HEAD)" != "${LNDKCOMMIT}" ]; then
+      echo "LNDK release commit does not match the pinned version" >&2
+      exit 1
     fi
+    sudo -u lndk bash -c 'cd "$1" && CARGO_PROFILE_DEV_DEBUG=0 exec /home/lndk/.cargo/bin/cargo build --locked --bins --jobs 1' _ "${buildDir}" || exit 1
+    sudo install -m 0755 -o root -g root -t /usr/local/bin "${buildDir}/target/debug/lndk" "${buildDir}/target/debug/lndk-cli" || exit 1
 
     # LND needs the following configuration settings so lndk can run.
     lnd_conf_file="/mnt/hdd/app-data/lnd/lnd.conf"
@@ -188,7 +190,6 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # remove the binaries
   sudo rm -f /usr/local/bin/lndk
   sudo rm -f /usr/local/bin/lndk-cli
-  sudo rm -f /home/lndk/lndk/target/debug/lndk
 
   # remove the user and home dirlndl
   sudo userdel -rf lndk
