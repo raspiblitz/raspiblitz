@@ -692,24 +692,61 @@ if [ "${scenario}" != "ready" ] ; then
 
   echo "## WAIT LOOP: USER SETUP/UPDATE/MIGRATION" >> ${logFile}
   echo "state(${state})" >> ${logFile}
-  until [ "${state}" = "waitprovision" ]
-  do
+  while true; do
+    until [ "${state}" = "waitprovision" ]
+    do
 
-    # give the loop a little bed time
-    sleep 4
+      # give the loop a little bed time
+      sleep 4
 
-    # check for updated state value from SSH-UI or WEB-UI for loop
-    source <(/home/admin/_cache.sh get state)
+      # check for updated state value from SSH-UI or WEB-UI for loop
+      source <(/home/admin/_cache.sh get state)
 
+    done
+    echo "## WAIT LOOP: DONE" >> ${logFile}
+
+    echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)"
+    source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
+
+    # get the results from the SSH-UI or WEB-UI
+    echo "LOADING 'raspiblitz.setup' ..." >> ${logFile}
+    unset deleteData systemCopy menuchoice
+    if ! source "${setupFile}"; then
+      /home/admin/_cache.sh set message "Could not load setup choices. Open setup again."
+      state=waitsetup
+      /home/admin/_cache.sh set state "${state}"
+      continue
+    fi
+    case "${scenario}" in
+      setup|recover|migration|biggerdevice) ;;
+      *)
+        echo "Drive inspection returned no supported setup scenario. Storage unchanged." >> "${logFile}"
+        /home/admin/_cache.sh set message "Unsupported drive layout. Inspect the drives before setup."
+        /home/admin/_cache.sh set state error
+        exit 1
+        ;;
+    esac
+
+    # SSH may omit systemCopy when no copy was offered. A fresh setup must
+    # always carry an explicit disk choice, including a forced fresh recovery.
+    if [ "${scenario}" != setup ] && ! { [ "${scenario}" = recover ] && [ "${menuchoice}" = setup ]; }; then
+      break
+    fi
+    if [ "${systemCopy}" = done ]; then
+      break
+    fi
+    if [ "${deleteData}" = all ] || [ "${deleteData}" = keepBlockchain ]; then
+      if [ "${systemCopy}" = 0 ] ||
+         { [ "${systemCopy}" = 1 ] && [ "${scenarioSystemCopy}" = 1 ]; } ||
+         { [ -z "${systemCopy}" ] && [ "${scenarioSystemCopy}" != 1 ]; }; then
+        break
+      fi
+    fi
+    echo "Incomplete setup drive choice. Returning to setup before touching storage." >> "${logFile}"
+    state=waitsetup
+    /home/admin/_cache.sh set message "Drive choice missing or inconsistent. Open setup again."
+    /home/admin/_cache.sh set state "${state}"
   done
-  echo "## WAIT LOOP: DONE" >> ${logFile}
-
-  echo "/home/admin/config.scripts/blitz.data.sh status -inspect (auto store to cache)"
-  source <(/home/admin/config.scripts/blitz.data.sh status -inspect)
-
-  # get the results from the SSH-UI or WEB-UI
-  echo "LOADING 'raspiblitz.setup' ..." >> ${logFile}
-  source ${setupFile}
 
   # overwrite recover by user choice
   if [ "${scenario}" = "recover" ] && [ "${menuchoice}" = "setup" ]; then
