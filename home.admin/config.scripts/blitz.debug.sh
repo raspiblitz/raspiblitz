@@ -3,55 +3,22 @@
 # USE THIS SCRIPT FOR BASIC SYSTEM STATUS DEBUG INFO
 
 if [ "$1" == "redact" ]; then
-
-  # get & check parameters
   redactFile=$2
-  if [ "${redactFile}" == "" ]; then
-    echo "# FAIL: missing second parameter"
+  if [ ! -f "$redactFile" ]; then
+    echo "# FAIL: expected a report file to redact" >&2
     exit 1
   fi
-  echo "# redacting file: ${redactFile}"
-  if [ $(ls ${redactFile} 2>/dev/null | grep -c "${redactFile}") -lt 1 ]; then
-    echo "# FAIL: file does not exist"
-    exit 1
-  fi
-
-  # redact nodeIDs
-  sed -i 's/[a-z0-9]+@/***@/' ${redactFile}
-
-  # redact IPv4s
-  sed -i 's/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/*.*.*.*/' ${redactFile}
-
-  # redact onion adresses
-  sed -i 's/[a-z0-9]*.onion/***.onion/' ${redactFile}
-
-  # redact hostname
-  sed -i 's/hostname=[^\r\n]*/hostname=*****/' ${redactFile}
-
-  # redact balances
-  sed -i 's/[0-9]* mSAT/* mSAT/' ${redactFile}
-  sed -i 's/[0-9]*.[0-9]* BTC/* BTC/' ${redactFile}
-  sed -i 's/[0-9]*.[0-9]* BTC/* BTC/' ${redactFile}
-  sed -i 's/balance=[^\r\n]*/balance=****/' ${redactFile}
-  sed -i 's/Server started with public key .+/Server started with public key ****/' ${redactFile}
-  
-  # c-lightning self info in logs
-  sed -i 's/alias [A-Za-z0-9]* /alias *** /' ${redactFile}
-  sed -i 's/public key [a-z0-9]*,/public key *** /' ${redactFile}
-  sed -i 's/[a-z0-9][a-z0-9]*.onion/###.onion/' ${redactFile}
-  sed -i 's/alias=[^\r\n]*/alias=****/' ${redactFile}
-  
-  # redact lnbits credentials #3520
-  sed -i 's/api-key=[a-zA-Z0-9]\+/api-key=***/' ${redactFile}
-  sed -i 's/wallet=[a-zA-Z0-9]\+/wallet=***/' ${redactFile}
-  sed -i 's/wal=[a-zA-Z0-9]\+/wal=***/' ${redactFile}
-  sed -i 's/usr=[a-zA-Z0-9]\+/usr=***/' ${redactFile}
-  sed -i 's/user [a-zA-Z0-9]\+/user ***/' ${redactFile}
-
-  # redact i2p #4507
-  sed -i 's/[[:alnum:]]*.b32.i2p/***.b32.i2p/' ${redactFile}
-
-  exit 0
+  # Edit and replace the file in a single pass. Return sed's status to the caller.
+  exec sed -E -i \
+    -e 's/[a-z0-9]+@/***@/g' \
+    -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/*.*.*.*/g' \
+    -e 's/[[:alnum:]]+\.onion/***.onion/g' \
+    -e 's/hostname=.*/hostname=*****/' \
+    -e 's/[0-9]+ mSAT/* mSAT/g; s/[0-9]+(\.[0-9]+)? BTC/* BTC/g; s/balance=.*/balance=****/' \
+    -e 's/Server started with public key .+/Server started with public key ****/' \
+    -e 's/alias [A-Za-z0-9]+ /alias *** /g; s/public key [a-z0-9]+,/public key ***,/g; s/alias=.*/alias=****/' \
+    -e 's/(api-key|wallet|wal|usr)=[^[:space:]&#"]+/\1=***/g; s/user [a-zA-Z0-9]+/user ***/g' \
+    -e 's/[[:alnum:]]+\.b32\.i2p/***.b32.i2p/g' -- "$redactFile"
 fi
 
 

@@ -30,7 +30,7 @@ if [ "$1" = "check" ]; then
                 sata|ata|sas|usb|nvme)
                     found=1
                     echo "/dev/$name"
-                    # Avoid waking a sleeping drive or starting a self-test.
+                    # Request a standby check where the drive and bridge support it.
                     smartctl -n standby,0 -H "/dev/$name" || health_status=1
                     ;;
             esac
