@@ -7,7 +7,8 @@ work=$(mktemp -d)
 cd "$work"
 mkdir bitcoin lnd keys
 export GNUPGHOME="$work/keys"
-btcpid= lndpid=
+btcpid=''
+lndpid=''
 cleanup() {
   if [[ -n $lndpid ]]; then kill "$lndpid" 2>/dev/null || true; wait "$lndpid" || true; fi
   if [[ -n $btcpid ]]; then kill "$btcpid" 2>/dev/null || true; wait "$btcpid" || true; fi
@@ -15,6 +16,13 @@ cleanup() {
 }
 trap cleanup EXIT
 get() { curl --retry 2 -fsSL "$1" -o "$2"; }
+verified_by() {
+  gpg --batch --status-fd=1 --verify "$1" "$2" >signer.status 2>/dev/null &&
+    awk -v fp="$3" '$1=="[GNUPG:]" && $2=="VALIDSIG" && ($3==fp || $12==fp) {valid=1} END {exit !valid}' signer.status
+}
+check_file() {
+  awk -v asset="$1" '$2==asset || $2=="*"asset {print; matches++} END {exit matches!=1}' "$2" | sha256sum -c -
+}
 knots=29.2.knots20251110
 asset="bitcoin-${knots}-x86_64-linux-gnu.tar.gz"
 base="https://bitcoinknots.org/files/29.x/$knots"
@@ -22,11 +30,14 @@ for file in "$asset" SHA256SUMS SHA256SUMS.asc; do get "$base/$file" "$file"; do
 fingerprint=1A3E761F19D2CC7785C5502EA291A2C45D0C504A
 get "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$fingerprint" knots.key
 gpg --batch --import knots.key 2>/dev/null
-# The file has several independent builders' signatures. Verify the pinned signer's first one.
-awk '{ print } /-----END PGP SIGNATURE-----/ { exit }' SHA256SUMS.asc > first.asc
-gpg --batch --status-fd=1 --verify first.asc SHA256SUMS >knots.status 2>/dev/null
-grep -F "[GNUPG:] VALIDSIG $fingerprint " knots.status >/dev/null
-grep -F " $asset" SHA256SUMS | sha256sum -c -
+# The release includes independent builders. Require the expected builder in any position.
+awk '/^-----BEGIN PGP SIGNATURE-----/ {part++; active=1} active {print > ("sig-"part".asc")} /^-----END PGP SIGNATURE-----/ {active=0}' SHA256SUMS.asc
+verified=false
+for signature in sig-*.asc; do
+  if verified_by "$signature" SHA256SUMS "$fingerprint"; then verified=true; break; fi
+done
+"$verified" || { echo "Missing valid Knots builder signature" >&2; exit 1; }
+check_file "$asset" SHA256SUMS
 tar -xzf "$asset" "bitcoin-$knots/bin/bitcoind" "bitcoin-$knots/bin/bitcoin-cli"
 bin="$work/bitcoin-$knots/bin"
 release=v0.19.3-beta
@@ -35,9 +46,8 @@ base="https://github.com/lightningnetwork/lnd/releases/download/$release"
 for file in "$name.tar.gz" "manifest-$release.txt" "manifest-roasbeef-$release.sig"; do get "$base/$file" "$file"; done
 get "https://raw.githubusercontent.com/lightningnetwork/lnd/$release/scripts/keys/roasbeef.asc" lnd.key
 gpg --batch --import lnd.key 2>/dev/null
-gpg --batch --status-fd=1 --verify "manifest-roasbeef-$release.sig" "manifest-$release.txt" >lnd.status 2>/dev/null
-grep -E 'VALIDSIG .*A5B61896952D9FDA83BC054CDC42612E89237182' lnd.status >/dev/null
-grep -F " $name.tar.gz" "manifest-$release.txt" | sha256sum -c -
+verified_by "manifest-roasbeef-$release.sig" "manifest-$release.txt" A5B61896952D9FDA83BC054CDC42612E89237182
+check_file "$name.tar.gz" "manifest-$release.txt"
 tar -xzf "$name.tar.gz" "$name/lnd" "$name/lncli"
 "$bin/bitcoind" -version | head -1
 "$name/lnd" --version
@@ -66,7 +76,7 @@ at_height() {
 }
 start_lnd
 at_height 101
-identity=$(jq -r .identity_pubkey info.json)
+identity=$(jq -er '.identity_pubkey | select(test("^(02|03)[a-f0-9]{64}$"))' info.json)
 mine 2
 at_height 103
 "${lncli[@]}" stop >/dev/null
@@ -75,4 +85,4 @@ mine 1
 start_lnd
 at_height 104
 [[ $(jq -r .identity_pubkey info.json) == "$identity" ]]
-echo 'PASS Knots + LND: initial sync 101, live notifications to 103, same wallet catches up to 104 after restart.'
+echo 'PASS Knots + LND: initial sync 101, live blocks to 103, same wallet catches up to 104 after restart.'
