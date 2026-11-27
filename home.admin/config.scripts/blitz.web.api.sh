@@ -233,6 +233,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   # check if given branch exits on that github user/repo
   branchExists=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/branches/${GITHUB_BRANCH}" | grep -c "\"name\": \"${GITHUB_BRANCH}\"")
   if [ ${branchExists} -lt 1 ]; then
+    # A release checkout must install its matching API, also during recovery.
+    if [[ "${GITHUB_BRANCH}" == blitz-v* ]]; then
+      echo "error='Could not verify the requested API release branch. Check connectivity and retry.'"
+      exit 1
+    fi
     echo
     echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     echo "# WARNING! The given API repo is not available:"
