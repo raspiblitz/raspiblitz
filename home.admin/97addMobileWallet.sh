@@ -73,7 +73,7 @@ if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
 	OPTIONS+=(ZEUS_IOS "Zeus to LND (iOS)")
 	OPTIONS+=(ZEUS_ANDROID "Zeus to LND (Android)")
 	OPTIONS+=(ZAP_IOS "Zap to LND (iOS)")
-	OPTIONS+=(ZAP_ANDROID "Zap/Bitbanana to LND (Android)")
+	OPTIONS+=(ZAP_ANDROID "BitBanana to LND (Android)")
 	OPTIONS+=(SPHINX "Sphinx Chat to LND (Android/iOS)")
   	OPTIONS+=(SENDMANY_ANDROID "SendMany to LND (Android)")
 	OPTIONS+=(FULLYNODED_LND "Fully Noded to LND REST (iOS+Tor)") 
@@ -137,10 +137,9 @@ Or scan the qr code on the LCD with your mobile phone.
       exit 0;
     ;;
   ZAP_ANDROID)
-	  whiptail --title "Install Zap/Bitbanana on your Android Phone" \
-		--yes-button "Continue" \
-		--no-button "StoreLink" \
-		--yesno "Open the Android Play Store on your mobile phone.\n\nSearch for --> 'bitbanana' (for updated fork)\nSearch for --> 'zap bitcoin app' (for original)\n\nWhen app is installed and started --> Continue." 12 65
+	  whiptail --title "Connect BitBanana on Android" \
+		--yes-button "Continue" --no-button "Cancel" \
+		--yesno "Install BitBanana on your phone and open its QR scanner.\n\nContinue to show the private pairing code for your LND node." 12 65 || exit 0
   	  /home/admin/config.scripts/bonus.lndconnect.sh zap-android tor
       exit 0;
     ;;
