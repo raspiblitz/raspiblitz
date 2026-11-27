@@ -11,7 +11,7 @@ setup() {
 #!/bin/sh
 echo "network=bitcoin chain=main CHAIN=mainnet lndConfFile=$PWD/data/app-data/lnd/lnd.conf"
 SH
-  printf '[Application Options]\n\n' >data/app-data/lnd/lnd.conf
+  printf '[Application Options]\n\n[tor]\ntor.control=192.0.2.1:9999\n' >data/app-data/lnd/lnd.conf
   printf 'rpcuser=fixture\nrpcpassword=fixture\n' >data/app-data/bitcoin/bitcoin.conf
   cat >bin/nc <<'SH'
 #!/bin/sh
@@ -31,6 +31,7 @@ prestart() {
 @test "an already listening Tor controller adds no delay" {
   export READY_ON=1
   prestart on
+  grep -Fxq 'tor.control=9051' data/app-data/lnd/lnd.conf
   [ "$(wc -l <probes)" -eq 1 ]
   [ ! -e sleeps ]
   ! grep -q 'control port .* unavailable' stderr
