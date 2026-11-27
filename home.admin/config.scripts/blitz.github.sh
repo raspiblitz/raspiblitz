@@ -152,7 +152,7 @@ sudo -u admin find "$checkout" -maxdepth 1 -type f \
   -name '*.*' ! -name '.*' -exec cp -t "$stage/basic/" -- {} + || exit 1
 sudo -u admin chmod 755 -- "$stage"/basic/*.sh || exit 1
 # Do not apply the staging directory mode or timestamps to admin's home.
-sudo -u admin rsync -tp --delay-updates -- "$stage/basic/.tmux.conf" "$stage"/basic/* /home/admin/ || exit 1
+sudo -u admin rsync -ctp --delay-updates -- "$stage/basic/.tmux.conf" "$stage"/basic/* /home/admin/ || exit 1
 for script in *.sh; do
   if [ ! -f "/home/admin/raspiblitz/home.admin/$script" ]; then
     sudo rm -f -- "$script" || exit 1
@@ -160,7 +160,7 @@ for script in *.sh; do
 done
 for dir in assets config.scripts setup.scripts; do
   echo "# - $dir directory"
-  sudo -u admin rsync -rltp --delay-updates --delete-delay -- "$stage/$dir/" "/home/admin/$dir/" || exit 1
+  sudo -u admin rsync -crltp --delay-updates --delete-delay -- "$stage/$dir/" "/home/admin/$dir/" || exit 1
 done
 echo "# ******************************************"
 echo "# OK - shell scripts and assets are synced"
