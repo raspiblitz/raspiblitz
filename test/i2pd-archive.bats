@@ -64,7 +64,12 @@ SH
   export apt_rc=100
   run bash "$box/installer" install
   [ "$status" -ne 0 ]
-  ! grep -q '^install ' "$box/calls"
+  run grep -q '^install ' "$box/calls"
+  [ "$status" -eq 1 ]
+  [ -f "$box/apt/keyrings/.raspiblitz-i2pd-pending" ]
+  unset apt_rc
+  run bash "$box/installer" install
+  [ "$status" -eq 0 ]; [ ! -f "$box/apt/keyrings/.raspiblitz-i2pd-pending" ]
 }
 
 @test "an already installed daemon is kept and an administrator's mixed keyring is preserved" {
@@ -77,6 +82,7 @@ SH
   printf '#!/bin/sh\necho installed\n' >"$BATS_TEST_TMPDIR/bin/dpkg-query"
   run bash "$box/installer" install
   [ "$status" -eq 0 ]
+  [[ "$output" == *"globally trusted in $legacy"* ]]
   cmp "$box/before" "$legacy"
   ! grep -q '^install ' "$box/calls"
 }
@@ -104,4 +110,12 @@ SH
   [ ! -f "$box/apt/sources.list.d/i2pd.list" ]
   [ ! -f "$box/apt/keyrings/i2pd.gpg" ]
   [ ! -f "$box/calls" ]
+}
+
+@test "a Deb822 source pointing at the archive is preserved" {
+  echo 'URIs: https://repo.i2pd.xyz/debian' >"$box/apt/sources.list.d/existing.sources"
+  run bash "$box/installer" install
+  [ "$status" -ne 0 ]
+  [[ "$output" == *existing.sources* ]]
+  [ ! -e "$box/apt/keyrings/i2pd.gpg" ]
 }
