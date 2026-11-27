@@ -5,7 +5,7 @@ setup() {
   mkdir -p setup.scripts bin
   cp "$BATS_TEST_DIRNAME/../home.admin/setup.scripts/waitBitcoinReady.sh" setup.scripts/
   export PATH="$PWD/bin:$PATH"
-  export READY_AFTER=0 STOPPED_UNTIL=0 RPC_AFTER=0 EXPECT_UNIT=bitcoind.service EXPECT_PORT=8332
+  export READY_AFTER=0 STOPPED_UNTIL=0 RPC_AFTER=0 EXPECT_UNIT=bitcoind.service EXPECT_CHAIN=
   echo 0 > tick
   cat > bin/systemctl <<'SH'
 #!/bin/bash
@@ -20,14 +20,21 @@ SH
 #!/bin/bash
 echo "$(( $(cat tick) + 1 ))" > tick
 SH
+  cat > bin/date <<'SH'
+#!/bin/bash
+echo "$(( $(cat tick) * ${TICK_SECONDS:-2} ))"
+SH
   cat > _cache.sh <<'SH'
 #!/bin/bash
 if (( $(cat tick) >= READY_AFTER )); then echo 'btc_default_ready="1"'; else echo 'btc_default_ready="0"'; fi
 SH
   cat > bin/sudo <<'SH'
 #!/bin/bash
-[[ "$*" = "-u bitcoin /usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcport=$EXPECT_PORT -rpcclienttimeout=4 getblockcount" ]] || exit 1
-(( $(cat tick) >= RPC_AFTER ))
+[[ "$*" = "-u bitcoin /usr/local/bin/bitcoin-cli ${EXPECT_CHAIN:+$EXPECT_CHAIN }-conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf -datadir=/mnt/hdd/app-storage/bitcoin -rpcclienttimeout=4 getblockcount" ]] || exit 1
+if (( $(cat tick) < RPC_AFTER )); then
+  echo "${RPC_ERROR:-RPC unavailable}" >&2
+  exit 1
+fi
 SH
   chmod +x bin/* _cache.sh
 }
@@ -55,9 +62,21 @@ SH
   [ "$(cat tick)" -eq 12 ]
 }
 
-@test "a stale active-service cache waits for live RPC on the configured signet port" {
-  export RPC_AFTER=5 EXPECT_UNIT=sbitcoind.service EXPECT_PORT=38332
+@test "a stale active-service cache waits for live RPC using the configured signet service settings" {
+  export RPC_AFTER=5 EXPECT_UNIT=sbitcoind.service EXPECT_CHAIN=-signet
   run bash setup.scripts/waitBitcoinReady.sh sig
   [ "$status" -eq 0 ]
   [ "$(cat tick)" -eq 5 ]
+}
+
+@test "unavailable scanner is reported, explicit -28 warmup can still complete" {
+  export TICK_SECONDS=900 READY_AFTER=9
+  run bash setup.scripts/waitBitcoinReady.sh
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"background scanner"* ]]
+  echo 0 > tick
+  export READY_AFTER=4 RPC_AFTER=4 RPC_ERROR="error code: -28"
+  run bash setup.scripts/waitBitcoinReady.sh
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"warming up"* ]]
 }

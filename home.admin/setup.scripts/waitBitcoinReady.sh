@@ -3,12 +3,19 @@
 # A healthy Core may spend several minutes verifying blocks before RPC is ready.
 cache="$(dirname "$0")/../_cache.sh"
 case "${1:-main}" in
-  main|mainnet) unit=bitcoind.service; port=8332 ;;
-  test|testnet) unit=tbitcoind.service; port=18332 ;;
-  sig|signet) unit=sbitcoind.service; port=38332 ;;
+  main|mainnet) unit=bitcoind.service; chain_args=() ;;
+  test|testnet) unit=tbitcoind.service; chain_args=(-testnet) ;;
+  sig|signet) unit=sbitcoind.service; chain_args=(-signet) ;;
   *) echo "Unsupported default Bitcoin chain: $1"; exit 1 ;;
 esac
 stopped_polls=0
+deadline=$(( $(date +%s) + 1800 ))
+probe_rpc() {
+  # Match bitcoin.install.sh's service: chain-specific RPC settings and cookie.
+  timeout 6 sudo -u bitcoin /usr/local/bin/bitcoin-cli "${chain_args[@]}" \
+    -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf -datadir=/mnt/hdd/app-storage/bitcoin \
+    -rpcclienttimeout=4 getblockcount
+}
 while true; do
   state=$(systemctl show "$unit" --property=ActiveState --value) || exit 1
   if [ "$state" = activating ]; then
@@ -18,9 +25,7 @@ while true; do
     active)
       stopped_polls=0
       # A readiness value from before the service restarted can remain cached.
-      if "$cache" get btc_default_ready | grep -Fxq 'btc_default_ready="1"' &&
-        timeout 6 sudo -u bitcoin /usr/local/bin/bitcoin-cli -datadir=/home/bitcoin/.bitcoin \
-          -rpcport="$port" -rpcclienttimeout=4 getblockcount >/dev/null 2>&1; then
+      if "$cache" get btc_default_ready | grep -Fxq 'btc_default_ready="1"' && probe_rpc >/dev/null 2>&1; then
         exit 0
       fi
       ;;
@@ -35,5 +40,20 @@ while true; do
       ;;
     *) stopped_polls=0 ;;
   esac
+  now=$(date +%s)
+  if (( now >= deadline )); then
+    # Core explicitly reports -28 while verifying/importing. Allow verified
+    # warmup to continue. A missing monitor or crash loop needs attention.
+    if detail=$(probe_rpc 2>&1); then
+      echo "$unit answers RPC but setup has no current ready status. Check the background scanner."
+      exit 1
+    elif [[ "$detail" == *"error code: -28"* ]]; then
+      echo "$unit is still warming up; RPC returned -28."
+      deadline=$(( now + 300 ))
+    else
+      echo "No ready RPC from $unit after the startup wait. Inspect journalctl -u $unit -b."
+      exit 1
+    fi
+  fi
   sleep 2
 done
