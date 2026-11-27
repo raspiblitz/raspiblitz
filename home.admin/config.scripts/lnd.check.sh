@@ -319,6 +319,20 @@ if [ "$1" == "prestart" ]; then
     # deprecate Tor password (remove if in lnd.conf)
     sed -i '/^tor.password=*/d' ${lndConfFile}
 
+    # Give the local control listener a moment to start before LND opens it.
+    if command -v nc >/dev/null; then
+      for attempt in 1 2 3 4 5; do
+        if nc -n -z -w 1 127.0.0.1 9051; then
+          break
+        fi
+        if [ "${attempt}" = 5 ]; then
+          echo "LND startup: local Tor control port 127.0.0.1:9051 is unavailable. Check tor@default.service and its journal. Continuing with LND startup." >&2
+        else
+          sleep 1
+        fi
+      done
+    fi
+
   fi
 
   ##### RPCMIDDLEWARE SECTION #####
