@@ -5,11 +5,13 @@ setup_file() {
   mkdir -m 700 "$GNUPGHOME"
   gpg --batch --passphrase '' --quick-generate-key 'Fixture Archive <test@example.invalid>' ed25519 sign 0
   gpg --batch --export >"$BATS_FILE_TMPDIR/key"
+  printf 'Suite: trixie\n' | gpg --batch --clearsign >"$BATS_FILE_TMPDIR/InRelease"
 }
 
 setup() {
   export box="$BATS_TEST_TMPDIR/node" PATH="$BATS_TEST_TMPDIR/bin:$PATH"
-  mkdir -p "$box/apt/keyrings" "$box/apt/trusted.gpg.d" "$box/apt/sources.list.d" "$BATS_TEST_TMPDIR/bin"
+  mkdir -p "$box/apt/keyrings" "$box/apt/trusted.gpg.d" "$box/apt/preferences.d" "$box/apt/sources.list.d" "$BATS_TEST_TMPDIR/bin"
+  printf 'ID=debian\nVERSION_CODENAME=trixie\n' >"$box/os-release"
   touch "$box/raspiblitz.conf"
   echo 'deb https://repo.i2pd.xyz/debian trixie main' >"$box/apt/sources.list.d/i2pd.list"
   cp "$BATS_FILE_TMPDIR/key" "$box/apt/trusted.gpg.d/i2pd.gpg"
@@ -19,12 +21,15 @@ setup() {
   cat >"$BATS_TEST_TMPDIR/bin/curl" <<'SH'
 #!/bin/bash
 [ "${fetch:-ok}" = ok ] || exit 22
-cp "$BATS_FILE_TMPDIR/key" "${!#}"
+case "$*" in
+  *'/InRelease '*) cp "${index:-$BATS_FILE_TMPDIR/InRelease}" "${!#}" ;;
+  *) cp "$BATS_FILE_TMPDIR/key" "${!#}" ;;
+esac
 SH
   printf '#!/bin/sh\necho "$*" >> "$box/calls"\nexit "${apt_rc:-0}"\n' >"$BATS_TEST_TMPDIR/bin/apt-get"
   printf '#!/bin/sh\nexit 1\n' >"$BATS_TEST_TMPDIR/bin/dpkg-query"
   chmod +x "$BATS_TEST_TMPDIR/bin/"*
-  sed -e "s@/etc/apt@$box/apt@g" -e "s@/mnt/hdd/app-data/raspiblitz.conf@$box/raspiblitz.conf@g" \
+  sed -e "s@/etc/os-release@$box/os-release@g" -e "s@/etc/apt@$box/apt@g" -e "s@/mnt/hdd/app-data/raspiblitz.conf@$box/raspiblitz.conf@g" \
     -e "s/951928BB317024EFD053D73C66F6C87B98EBCFE2/$fingerprint/" \
     "$BATS_TEST_DIRNAME/../home.admin/config.scripts/blitz.i2pd.sh" >"$box/installer"
 }
@@ -74,4 +79,29 @@ SH
   [ "$status" -eq 0 ]
   cmp "$box/before" "$legacy"
   ! grep -q '^install ' "$box/calls"
+}
+
+@test "an invalid signed release or custom source is preserved without activating trust" {
+  export index="$box/unsigned"
+  echo 'Suite: trixie' >"$index"
+  run bash "$box/installer" install
+  [ "$status" -ne 0 ]
+  [ ! -e "$box/apt/keyrings/i2pd.gpg" ]
+  [ -f "$box/apt/trusted.gpg.d/i2pd.gpg" ]
+  unset index
+  echo 'deb [arch=arm64] https://repo.i2pd.xyz/debian trixie main' >"$box/apt/sources.list.d/i2pd.list"
+  run bash "$box/installer" install
+  [ "$status" -ne 0 ]
+  grep -Fq '[arch=arm64]' "$box/apt/sources.list.d/i2pd.list"
+  [ ! -e "$box/calls" ]
+}
+
+@test "an installed distro package keeps its provider" {
+  rm "$box/apt/sources.list.d/i2pd.list"
+  printf '#!/bin/sh\necho installed\n' >"$BATS_TEST_TMPDIR/bin/dpkg-query"
+  run bash "$box/installer" install
+  [ "$status" -eq 0 ]
+  [ ! -f "$box/apt/sources.list.d/i2pd.list" ]
+  [ ! -f "$box/apt/keyrings/i2pd.gpg" ]
+  [ ! -f "$box/calls" ]
 }
