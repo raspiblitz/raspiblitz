@@ -391,12 +391,16 @@ fi
 ###################################
 while true; do
 
-  # get latest network info directly
-  source <(/home/admin/config.scripts/internet.sh status online)
+  # Show local network failures without waiting for external reachability probes.
+  online=0
+  source <(/home/admin/config.scripts/internet.sh status)
+  if [ -n "${localip}" ] && [ "${dhcp}" != "0" ]; then
+    source <(/home/admin/config.scripts/internet.sh status online)
+  fi
   echo "internet.sh status localip(${localip}) online(${online})" >> $logFile
 
   # check state of network
-  if [ "${dhcp}" = "0" ]; then
+  if [ "${dhcp}" = "0" ] || { [ -z "${localip}" ] && [ -n "${network_device}" ]; }; then
     # display user waiting for DHCP
     echo "Waiting for DHCP ..." >> $logFile
     /home/admin/_cache.sh set state "noDHCP"

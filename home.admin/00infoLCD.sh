@@ -93,6 +93,15 @@ while :
       source <(/home/admin/config.scripts/network.aliases.sh getvars)
     fi
 
+    # Bootstrap can wait for networking on an already configured node too.
+    case "${state}" in
+      noDHCP|noIP-LAN|noIP-WIFI|noInternet)
+        /home/admin/setup.scripts/eventInfoWait.sh "${state}" "${message}" lcd
+        sleep 1
+        continue
+        ;;
+    esac
+
     if [ "${setupPhase}" != "done" ] || [ "${state}" == "reboot" ] || [ "${state}" == "shutdown" ] || [ "${state}" == "copytarget" ] || [ "${state}" == "copysource" ] || [ "${state}" = "storageisfull" ] || [ "${state}" = "dataisfull" ]; then
 
       # show status info during boot & setup & repair on LCD
