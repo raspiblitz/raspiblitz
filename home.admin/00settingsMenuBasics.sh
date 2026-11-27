@@ -170,10 +170,13 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${blitzapi}" != "${choice}" ]; then
   echo "Blitz API + webUI settings changed .."
   anychange=1
-  sudo /home/admin/config.scripts/blitz.web.api.sh ${choice} DEFAULT
-  sudo /home/admin/config.scripts/blitz.web.ui.sh ${choice} DEFAULT
-  errorOnInstall=$?
-  if [ "${choice}" =  "on" ]; then
+  if [ "${choice}" = "off" ]; then
+    sudo /home/admin/config.scripts/blitz.web.api.sh off DEFAULT
+    sudo /home/admin/config.scripts/blitz.web.ui.sh off DEFAULT
+  elif ! sudo /home/admin/config.scripts/blitz.web.api.sh on DEFAULT ||
+       ! sudo /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT; then
+    whiptail --title " Blitz API + webUI installation failed " --msgbox "Setup did not finish. Check connectivity and the installer output, then retry." 10 55
+  else
     whiptail --title " Installed Blitz API + webUI" --msgbox "\
 The Blitz API + webUI was installed.\n
 See the status screen for more info.\n

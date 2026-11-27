@@ -199,8 +199,10 @@ fi
 if [ "${blitzapi}" == "on" ] && [ $blitzApiInstalled -eq 0 ]; then
     echo "Provisioning BlitzAPI - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup BlitzAPI (takes time)"
-    /home/admin/config.scripts/blitz.web.api.sh on DEFAULT >> ${logFile} 2>&1
-    /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT >> ${logFile} 2>&1
+    if ! /home/admin/config.scripts/blitz.web.api.sh on DEFAULT >> "${logFile}" 2>&1 ||
+       ! /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT >> "${logFile}" 2>&1; then
+      echo "Web setup incomplete. Check the installer log and retry in Settings." >> "${logFile}"
+    fi
 else
     echo "Provisioning BlitzAPI - keep default" >> ${logFile}
 fi
