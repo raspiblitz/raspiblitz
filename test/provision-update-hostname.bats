@@ -70,3 +70,12 @@ precheck() {
   [ "$status" -ne 0 ]
   [[ "$output" == *missing-hostname* ]]
 }
+
+@test "a config link escaping the DATA directory is refused" {
+  echo 'lnd=on' > "$root/outside"
+  ln -sf "$root/outside" "$conf"
+  run precheck
+  [ "$status" -ne 0 ]
+  [[ "$output" == *data-not-mounted* ]]
+  [ "$(cat "$root/outside")" = 'lnd=on' ]
+}

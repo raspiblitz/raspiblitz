@@ -36,7 +36,7 @@ fi
 # On v1.12 app-data may link to either DATA or combined DATA/STORAGE.
 # A stale directory on the system partition must never receive upgrade writes.
 resolvedConfig=$(realpath -e -- "${configFile}")
-dataMount=$(findmnt --noheadings --output TARGET --target "${resolvedConfig}")
+dataMount=$(findmnt --first-only --noheadings --output TARGET --target "${resolvedConfig}")
 case "${dataMount}" in
   /mnt/disk_data|/mnt/disk_storage|/mnt/hdd) ;;
   *) dataMount="" ;;
