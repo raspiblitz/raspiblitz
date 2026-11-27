@@ -47,3 +47,18 @@ SH
   run bash show.sh ssh
   [[ "$output" != *"Lightning Progress"* && "$output" != *"LND graph"* ]]
 }
+
+@test "unavailable recovery sample is shown explicitly" {
+  export ln_default_recovery_mode=1
+  unset ln_default_recovery_done
+  run bash show.sh ssh
+  [[ "$output" == *"Wallet recovery: unknown"* ]]
+}
+
+@test "a missing cache preserves the configured LND backend" {
+  printf 'lightning=lnd\n' > raspiblitz.conf
+  printf '#!/bin/bash\nexit 1\n' > redis-cli
+  run bash show.sh lcd
+  [[ "$output" == *"LND chain scan : waiting for RPC"* ]]
+  [[ "$output" == *"LND graph      : unknown"* ]]
+}
