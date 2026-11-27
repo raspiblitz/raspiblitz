@@ -53,7 +53,8 @@ else
     syncProgress="${btc_default_sync_percentage} % ${btc_default_peers} peers"
 fi
 
-# get data from cache
+# The configuration remains authoritative if the status cache is unavailable.
+configured_lightning="$lightning"
 read_cache \
     lightning \
     ln_default_ready \
@@ -64,6 +65,7 @@ read_cache \
     ln_default_sync_chain \
     ln_default_sync_graph \
     system_count_start_lightning
+lightning="${lightning:-$configured_lightning}"
 
 # formatting LIGHTNING SCAN PROGRESS  
 if [ "${lightning}" != ""  ] && [ "${ln_default_sync_progress}" == "" ]; then
@@ -119,8 +121,11 @@ if [ "$lightning" = lnd ]; then
     infoStr+=" LND chain scan : ${chainStatus}\n LND graph      : ${graphStatus}\n"
     (( height += 1 ))
     if [[ "$ln_default_ready" = 1 && "$ln_default_recovery_mode" = 1 ]]; then
-        recoveryStatus="in progress"
-        [ "$ln_default_recovery_done" = 1 ] && recoveryStatus="complete"
+        case "$ln_default_recovery_done" in
+            0) recoveryStatus="in progress" ;;
+            1) recoveryStatus="complete" ;;
+            *) recoveryStatus="unknown" ;;
+        esac
         infoStr+=" Wallet recovery: ${recoveryStatus}\n"
         (( height += 1 ))
     fi
