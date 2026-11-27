@@ -1,5 +1,7 @@
 # Running tests
 
+For shutdown regressions, see [Watchdog and power-cycle tests](watchdog-shutdown.md).
+
 ## Install bats
 ```
 sudo apt install bats
