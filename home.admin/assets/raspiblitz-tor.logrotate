@@ -6,6 +6,7 @@
     delaycompress
     missingok
     notifempty
+    nocopytruncate
     create 0640 debian-tor debian-tor
     sharedscripts
     postrotate

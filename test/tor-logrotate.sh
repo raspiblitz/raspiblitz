@@ -21,7 +21,9 @@ STUB
 chmod +x "$work/bin/systemctl"
 export PATH="$work/bin:$PATH"
 sed "s|/mnt/hdd/app-data/tor/|$work/logs/|" "$policy" >"$work/policy"
-rotate() { logrotate --state "$work/state" "$work/policy"; }
+# build_sdcard.sh sets copytruncate globally. The Tor rule must override it.
+printf 'copytruncate\ninclude %s\n' "$work/policy" >"$work/logrotate.conf"
+rotate() { logrotate --state "$work/state" "$work/logrotate.conf"; }
 
 rotate  # no log files yet
 touch "$work/logs/notice.log" "$work/logs/info.log"
