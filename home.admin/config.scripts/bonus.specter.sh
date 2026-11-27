@@ -391,20 +391,34 @@ PrivateDevices=true
 WantedBy=multi-user.target
 EOF
 
-    sudo mv /home/admin/specter.service /etc/systemd/system/specter.service
-    sudo systemctl enable specter
+    sudo touch /var/cache/raspiblitz/specter-start-pending || exit 1
+    sudo mv /home/admin/specter.service /etc/systemd/system/specter.service || exit 1
+    sudo systemctl enable specter || exit 1
     echo "#    --> OK - the specter service is now enabled"
-
-    source <(/home/admin/_cache.sh get state)
-    if [ "${state}" == "ready" ]; then
-      # start service
-      echo "#    --> starting service ..."
-      sudo systemctl start specter
-      echo "#    --> OK - the specter service is now started"
-    fi
 
   else
     echo "#    --> specter already installed."
+  fi
+
+  source <(/home/admin/_cache.sh get state)
+  if [ "${state}" = "ready" ] && [ -f /var/cache/raspiblitz/specter-start-pending ]; then
+    if ! sudo systemctl start specter; then
+      echo "error='Specter failed to start. Check journalctl -u specter'"
+      exit 1
+    fi
+    # The locally issued certificate uses this name. Never resolve it externally.
+    if ! curl --noproxy '*' --silent --show-error --fail --max-time 3 \
+        --retry 15 --retry-delay 1 --retry-connrefused --retry-max-time 30 \
+        --cacert /home/specter/.specter/cert.pem \
+        --resolve www.fakeurl.com:25441:127.0.0.1 \
+        --output /dev/null https://www.fakeurl.com:25441/; then
+      echo "error='Specter HTTPS is unavailable. Check journalctl -u specter'"
+      exit 1
+    fi
+    sudo rm -f /var/cache/raspiblitz/specter-start-pending || exit 1
+    echo "#    --> OK - Specter is responding over HTTPS"
+  elif [ -f /var/cache/raspiblitz/specter-start-pending ]; then
+    echo "#    --> Specter provisioned; HTTPS readiness will be checked on activation"
   fi
 
   # setting value in raspi blitz config
@@ -443,6 +457,7 @@ fi
 # switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
 
+  sudo rm -f /var/cache/raspiblitz/specter-start-pending || echo "# Could not clear pending startup marker" >&2
   # setting value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set specter "off"
 
