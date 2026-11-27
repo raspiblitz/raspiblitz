@@ -77,10 +77,22 @@ echo "prechecks OK"  >> ${logFile}
 # this is the place if on a future version change
 # a conversion of config data or app data is needed
 
-# Older backups can contain a wallet directory without owner traversal (#5034).
-if [ "${chain:-main}" = main ] && ! sudo -u bitcoin /home/admin/config.scripts/bitcoin.check.sh recover-wallet-access >> "${logFile}" 2>&1; then
-  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "wallet-access" "Bitcoin cannot access the recovered wallet directory. See raspiblitz.log for the directory to check." "" "${logFile}"
-  exit 1
+# Check the recovered wallet only on the configured DATA mount (#5034).
+if [ "${chain:-main}" = main ]; then
+  dataMount=$(findmnt --first-only --noheadings --output TARGET --target "$(realpath -e -- "$configFile")")
+  case "$dataMount" in
+    /mnt/disk_data|/mnt/disk_storage|/mnt/hdd) ;;
+    *) dataMount="" ;;
+  esac
+  expectedSource=$(findmnt --fstab --evaluate --first-only --noheadings --output SOURCE --mountpoint "$dataMount")
+  expectedDevice=$(lsblk --nodeps --noheadings --raw --output MAJ:MIN -- "$expectedSource" 2>/dev/null)
+  if [ -z "$dataMount" ] || [ -z "$expectedDevice" ] ||
+     [ "$(findmnt --first-only --noheadings --output FSROOT --mountpoint "$dataMount")" != / ] ||
+     [ "$(realpath -e -- "$configFile")" != "$dataMount/app-data/raspiblitz.conf" ] ||
+     ! sudo -u bitcoin /home/admin/config.scripts/bitcoin.check.sh recover-wallet-access "$dataMount" "$expectedDevice" >> "${logFile}" 2>&1; then
+    /home/admin/config.scripts/blitz.error.sh _provision.update.sh "wallet-access" "Check the configured DATA mount and wallet directory in raspiblitz.log." "" "${logFile}"
+    exit 1
+  fi
 fi
 
 # if old bitcoin.conf exists ...

@@ -9,35 +9,62 @@ fi
 # Recover only owner traversal on the two directories used by the default mainnet wallet.
 # Run as the same unprivileged account as Bitcoin Core.
 if [ "$1" = "recover-wallet-access" ]; then
-  walletRoot=/mnt/hdd/app-data/bitcoin/wallets
   if [ "$(id -un)" != bitcoin ]; then
     echo "# FAIL: check wallet access as bitcoin" >&2
     exit 1
   fi
-  for directory in /mnt/hdd/app-data /mnt/hdd/app-data/bitcoin; do
-    if [ -d "$directory" ] && [ ! -x "$directory" ]; then
-      echo "# FAIL: bitcoin cannot traverse $directory" >&2
-      exit 1
-    fi
-  done
-  customLink=0
-  for directory in "$walletRoot" "$walletRoot/wallet.dat"; do
-    if [ -L "$directory" ]; then
-      # Custom links are managed by the operator. Do not change their targets.
-      if [ ! -e "$directory" ] || { [ -d "$directory" ] && [ ! -x "$directory" ]; }; then
-        echo "# FAIL: bitcoin cannot access wallet link at $directory" >&2
-        exit 1
-      fi
-      customLink=1
-    fi
-    if [ -d "$directory" ] && [ ! -x "$directory" ]; then
-      if [ "$customLink" = 1 ] || [ ! -O "$directory" ] || ! chmod u+x -- "$directory" || [ ! -x "$directory" ]; then
-        echo "# FAIL: bitcoin cannot traverse $directory; check directory ownership and access" >&2
-        exit 1
-      fi
-    fi
-  done
-  exit 0
+  # O_PATH lets the service inspect its own directory even when the recovered
+  # mode lacks traversal. Keep descriptors open across checks and corrections.
+  exec python3 - "$2" "$3" <<'PY'
+import os
+import stat
+import sys
+from contextlib import ExitStack
+
+mount, expected = sys.argv[1:]
+parts = ("app-data", "bitcoin", "wallets", "wallet.dat")
+position = mount
+try:
+    with ExitStack() as stack:
+        current = os.open(mount, os.O_PATH | os.O_NOFOLLOW | os.O_DIRECTORY)
+        stack.callback(os.close, current)
+        device = os.fstat(current).st_dev
+        if f"{os.major(device)}:{os.minor(device)}" != expected:
+            sys.exit("Wallet access: selected DATA mount changed")
+        can_repair = True
+        for index, name in enumerate(parts):
+            position = os.path.join(position, name)
+            try:
+                child = os.open(name, os.O_PATH | os.O_NOFOLLOW, dir_fd=current)
+            except FileNotFoundError:
+                if index >= 1:
+                    break  # Bitcoin or its optional wallet has not been created.
+                raise
+            stack.callback(os.close, child)
+            entry = os.fstat(child)
+            if stat.S_ISLNK(entry.st_mode):
+                # Support an accessible, operator-managed link without applying chmod.
+                can_repair = False
+                child = os.open(name, os.O_PATH, dir_fd=current)
+                stack.callback(os.close, child)
+                entry = os.fstat(child)
+            if entry.st_dev != device:
+                can_repair = False
+            if index == 3 and stat.S_ISREG(entry.st_mode):
+                break  # Legacy wallet.dat is a file; keep its mode and contents.
+            if not stat.S_ISDIR(entry.st_mode):
+                raise NotADirectoryError
+            descriptor = f"/proc/self/fd/{child}"
+            if not os.access(descriptor, os.X_OK):
+                if index < 2 or not can_repair or entry.st_uid != os.geteuid():
+                    raise PermissionError
+                os.chmod(descriptor, stat.S_IMODE(entry.st_mode) | stat.S_IXUSR)
+                if not os.access(descriptor, os.X_OK):
+                    raise PermissionError
+            current = child
+except OSError:
+    sys.exit(f"Wallet access: check ownership and traversal of {position}")
+PY
 fi
 
 ######################################################################
