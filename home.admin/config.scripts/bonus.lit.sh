@@ -86,9 +86,13 @@ unit_state=$(systemctl show litd.service -p ActiveState --value) || exit 1
 # Preserve its custody data before replacing the service account or its home.
 persist_tapd() {
   local home_dir=/home/lit/.tapd data_dir=/mnt/hdd/app-data/.tapd
-  local app_dir stage differences
+  local app_dir stage differences data_device root_device
   app_dir=$(readlink -e /mnt/hdd/app-data) || return 1
-  if ! { mountpoint -q "$app_dir" || mountpoint -q "$(dirname -- "$app_dir")"; } || ! sudo test -f "$app_dir/raspiblitz.conf"; then
+  data_device=$(findmnt -n -o MAJ:MIN -T "$app_dir") || return 1
+  root_device=$(findmnt -n -o MAJ:MIN -T /) || return 1
+  if [[ -z $data_device || $data_device == "$root_device" ]] ||
+     ! { mountpoint -q "$app_dir" || mountpoint -q "$(dirname -- "$app_dir")"; } ||
+     ! sudo test -f "$app_dir/raspiblitz.conf"; then
     echo "# The RaspiBlitz data drive is unavailable. Leaving Taproot Assets data in place." >&2
     return 1
   fi

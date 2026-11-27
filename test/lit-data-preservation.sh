@@ -12,7 +12,7 @@ mkdir /mnt/hdd
 mount -t tmpfs tmpfs /mnt/hdd
 mkdir /mnt/hdd/app-data
 echo 'runBehindTor=off' >/mnt/hdd/app-data/raspiblitz.conf
-work=$(mktemp -d); chmod 700 "$work"
+work=$(mktemp -d /.rb-lit-test.XXXXXXXX); chmod 700 "$work"
 cleanup() {
   if id lit >/dev/null 2>&1; then userdel -r lit 2>/dev/null || true; fi
   rm -rf -- "$work"
@@ -25,6 +25,13 @@ data_dir=/mnt/hdd/app-data/.tapd
 install -d -o lit -g lit -m 700 "$source_dir"
 printf 'synthetic proof record\n' >"$source_dir/custody.fixture"
 first=$(sha256sum <"$source_dir/custody.fixture")
+# A stale config on the root disk is insufficient evidence of mounted storage.
+mkdir "$work/false-data"
+touch "$work/false-data/raspiblitz.conf"
+mount --bind "$work/false-data" /mnt/hdd/app-data
+if bash "$script" off >"$work/off-no-drive.log" 2>&1; then echo 'OS disk unexpectedly accepted'; exit 1; fi
+umount /mnt/hdd/app-data
+[[ $(sha256sum <"$source_dir/custody.fixture") == "$first" ]]
 # Exercise conflict handling before giving the script a clean destination.
 mkdir "$data_dir"
 printf 'independent state\n' >"$data_dir/other.fixture"
