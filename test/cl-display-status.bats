@@ -55,9 +55,14 @@ lcd() {
   sed -n '/_cache.sh set ln_cl_${CHAIN}net_alias/,/^[[:space:]]*else$/p' \
     "$BATS_TEST_DIRNAME/../home.admin/_background.scan.sh" |
     sed -e '$d' -e "s|/home/admin|$PWD/admin|g" >publish.sh
+  # Apply the monitor's getinfo parser and output formatting to the same RPC values.
+  sed -n -e '/^  cl_peers=/p' -e '/^  cl_fees_collected_msat=/p' \
+    -e '/^  echo "ln_cl_peers=/p' -e '/^  echo "ln_cl_fees_total=/p' \
+    "$BATS_TEST_DIRNAME/../home.admin/config.scripts/cl.monitor.sh" >parse.sh
   for peers in 0 1; do
     : >written
-    env CHAIN=main isDefaultLightning=1 isDefaultChain=1 ln_cl_peers="$peers" ln_cl_fees_total=17 bash publish.sh
+    ln_getInfo="{\"num_peers\":$peers,\"fees_collected_msat\":\"17msat\"}" bash parse.sh >metrics
+    env CHAIN=main isDefaultLightning=1 isDefaultChain=1 bash -c 'source metrics && source publish.sh'
     grep -Fxq "ln_cl_mainnet_peers=$peers" written
     grep -Fxq "ln_default_peers=$peers" written
     grep -Fxq 'ln_default_fees_total=17' written
