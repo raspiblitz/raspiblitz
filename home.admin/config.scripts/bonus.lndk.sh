@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # https://github.com/lndk-org/lndk/releases
-LNDKVERSION="v0.2.0"
+LNDKVERSION="v0.3.0"
+# Commit referenced by the publisher's signed v0.3.0 tag.
+LNDKCOMMIT="b50e09c338b429dbd1eb26395e051b62ae30d71f"
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -28,22 +30,22 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "Copy the skeleton files for login"
     sudo -u ${USERNAME} cp -r /etc/skel/. /home/${USERNAME}/
 
-    sudo apt-get install -y protobuf-compiler
+    sudo apt-get install -y protobuf-compiler libprotobuf-dev build-essential || exit 1
 
-    # Install Rust for lndk, includes rustfmt
-    sudo -u lndk curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
-      sudo -u lndk sh -s -- -y
+    # The source checkout pins its own Rust toolchain.
+    (set -o pipefail; sudo -u lndk curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
+      sudo -u lndk sh -s -- -y --profile minimal --default-toolchain none) || exit 1
 
-    # Clone and compile lndk onto Raspiblitz.
-    if [ ! -f "/usr/local/bin/lndk" ] || [ ! -f "/usr/local/bin/lndk-cli" ]; then
-      cd /home/lndk || exit 1
-      sudo -u lndk git clone https://github.com/lndk-org/lndk
-      cd /home/lndk/lndk || exit 1
-      sudo -u lndk git reset --hard $LNDKVERSION
-      sudo -u lndk /home/lndk/.cargo/bin/cargo build # Lndk bin will be built to /home/lndk/lndk/target/debug/lndk
-      sudo install -m 0755 -o root -g root -t /usr/local/bin /home/lndk/lndk/target/debug/lndk
-      sudo install -m 0755 -o root -g root -t /usr/local/bin /home/lndk/lndk/target/debug/lndk-cli
+    # Upstream publishes no Linux ARM64 binary. Use the same locked source on both architectures.
+    buildDir=$(sudo -u lndk mktemp -d /home/lndk/build.XXXXXXXX) || exit 1
+    trap 'sudo -u lndk rm -rf -- "${buildDir}"' EXIT
+    sudo -u lndk git clone --depth 1 --branch "${LNDKVERSION}" https://github.com/lndk-org/lndk "${buildDir}" || exit 1
+    if [ "$(sudo -u lndk git -C "${buildDir}" rev-parse HEAD)" != "${LNDKCOMMIT}" ]; then
+      echo "LNDK release commit does not match the pinned version" >&2
+      exit 1
     fi
+    sudo -u lndk bash -c 'cd "$1" && CARGO_PROFILE_DEV_DEBUG=0 exec /home/lndk/.cargo/bin/cargo build --locked --bins --jobs 1' _ "${buildDir}" || exit 1
+    sudo install -m 0755 -o root -g root -t /usr/local/bin "${buildDir}/target/debug/lndk" "${buildDir}/target/debug/lndk-cli" || exit 1
 
     # LND needs the following configuration settings so lndk can run.
     lnd_conf_file="/mnt/hdd/app-data/lnd/lnd.conf"
@@ -88,7 +90,16 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     sudo chown -R lndk:lndk /mnt/hdd/app-data/.lndk
     sudo chmod 755 /mnt/hdd/app-data/.lndk
 
-    cat <<EOF | sudo tee /mnt/hdd/app-data/.lndk/lndk.conf
+    # Keep the existing configuration when reusing the DATA disk or reinstalling with --keep-data.
+    lndkConfig=/mnt/hdd/app-data/.lndk/lndk.conf
+    if ! sudo -u lndk test -f "$lndkConfig"; then
+      sudo -u lndk bash -s -- "$lndkConfig" <<'WRITE_CONFIG' || exit 1
+set -e
+umask 077
+config=$1
+staged=$(mktemp -- "${config}.XXXXXXXX")
+trap 'rm -f -- "$staged"' EXIT
+cat > "$staged" <<'EOF'
 address="https://localhost:10009"
 cert_path="/mnt/hdd/app-data/lnd/tls.cert"
 macaroon_path="/home/lndk/.lnd/data/chain/bitcoin/mainnet/admin.macaroon"
@@ -96,6 +107,9 @@ grpc_port=5635
 log_level="debug"
 response_invoice_timeout=15
 EOF
+ln -T -- "$staged" "$config" || test -f "$config"
+WRITE_CONFIG
+    fi
 
     # symlink data dir for lndk and admin users
     sudo rm -rf /home/lndk/.lndk
@@ -110,6 +124,7 @@ EOF
     sudo /usr/sbin/usermod --append --groups lndadmin lndk
 
     echo "[Unit]
+# RaspiBlitz LNDK ${LNDKVERSION}
 Description=lndk Service
 After=lnd.service
 BindsTo=lnd.service
@@ -133,13 +148,7 @@ PrivateDevices=true
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee $lndkServicePath
-    sudo systemctl enable lndk
-    echo "# Enabled the lndk.service"
-    if [ "${state}" == "ready" ]; then
-      sudo systemctl start lndk
-      echo "# Started the lndk.service"
-    fi
+" | sudo tee "$lndkServicePath" >/dev/null || exit 1
 
     echo "# Add alias for lndk-cli"
     sudo -u admin touch /home/admin/_aliases
@@ -147,14 +156,18 @@ WantedBy=multi-user.target
       echo 'alias lndk-cli="lndk-cli -n mainnet --grpc-port=5635"' | sudo tee -a /home/admin/_aliases
     fi
 
-    # Set value in raspiblitz config
-    /home/admin/config.scripts/blitz.conf.sh set lndk "on"
-  else
-    echo "# LNDK is already installed."
-    sudo systemctl status lndk
+  elif ! grep -Fxq "# RaspiBlitz LNDK ${LNDKVERSION}" "$lndkServicePath" || [ ! -x /usr/local/bin/lndk ] || [ ! -x /usr/local/bin/lndk-cli ]; then
+    echo "An existing LNDK installation needs an explicit upgrade to ${LNDKVERSION}."
+    echo "Turn LNDK off, choose Keep Data, then turn it on again to install this version."
+    exit 1
   fi
 
-  exit 0
+  sudo systemctl enable lndk || exit 1
+  if [ "${state}" == "ready" ]; then
+    sudo systemctl start lndk || exit 1
+  fi
+  /home/admin/config.scripts/blitz.conf.sh set lndk "on"
+  exit $?
 fi
 
 # Show info menu
@@ -173,13 +186,29 @@ fi
 
 # Switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+  case "${2:-}" in
+    --keep-data) action=keep ;;
+    --delete-data) action=delete ;;
+    "")
+      if [ ! -t 0 ] || [ ! -t 2 ]; then
+        echo "Specify --keep-data or --delete-data when turning off LNDK without a terminal." >&2
+        exit 1
+      fi
+      action=$(whiptail --title "Turn off LNDK" --menu "What should happen to the stored LNDK data?" 12 68 2 \
+        keep "Keep data for a later installation" delete "Permanently delete LNDK data" 3>&1 1>&2 2>&3) || exit 1
+      case "$action" in keep|delete) ;; *) exit 1 ;; esac
+      ;;
+    *) echo "Unknown LNDK removal option: $2" >&2; exit 1 ;;
+  esac
+
   isInstalled=$(sudo ls /etc/systemd/system/lndk.service 2>/dev/null | grep -c 'lndk.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING LNDK ***"
     # remove the systemd service
-    sudo systemctl stop lndk
-    sudo systemctl disable lndk
-    sudo rm /etc/systemd/system/lndk.service
+    sudo systemctl stop lndk || exit 1
+    sudo systemctl disable lndk || exit 1
+    sudo rm /etc/systemd/system/lndk.service || exit 1
+    sudo systemctl daemon-reload || exit 1
 
   else
     echo "# LNDK is not installed."
@@ -188,39 +217,21 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   # remove the binaries
   sudo rm -f /usr/local/bin/lndk
   sudo rm -f /usr/local/bin/lndk-cli
-  sudo rm -f /home/lndk/lndk/target/debug/lndk
 
   # remove the user and home dirlndl
   sudo userdel -rf lndk
   sudo rm -rf /home/admin/.lndk
 
-  # get delete data status - either by parameter or if not set by user dialog
-  deleteData=""
-  if [ "$2" == "--delete-data" ]; then
-    deleteData="1"
-  fi
-  if [ "$2" == "--keep-data" ]; then
-    deleteData="0"
-  fi
-  if [ "${deleteData}" == "" ]; then
-    if (whiptail --title "Delete Data?" --yes-button "Keep Data" --no-button "Delete Data" --yesno "Do you want to delete all data related to LNDK?" 0 0); then
-      deleteData="0"
-    else
-      deleteData="1"
-    fi
-  fi
-
-  if [ "${deleteData}" == "1" ]; then
+  if [ "$action" = "delete" ]; then
     echo "# Deleting LNDK data ..."
-    sudo rm -rf /mnt/hdd/app-data/.lndk
+    sudo rm -rf /mnt/hdd/app-data/.lndk || exit 1
   else
     echo "# LNDK data is kept on the disk"
   fi
 
   # Set value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lndk "off"
-
-  exit 0
+  exit $?
 fi
 
 echo "FAIL - Unknown Parameter $1"

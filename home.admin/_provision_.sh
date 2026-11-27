@@ -668,6 +668,14 @@ else
   echo "Provisioning LNDg - keep default" >> ${logFile}
 fi
 
+# LNDK
+if [ "${lndk}" = "on" ] && { [ "${lnd}" = "on" ] || [ "${lightning}" = "lnd" ]; }; then
+  /home/admin/_cache.sh set message "Setup LNDK"
+  if ! sudo -u admin /home/admin/config.scripts/bonus.lndk.sh on >> "${logFile}" 2>&1; then
+    echo "LNDK setup failed. Check the installer output above. From the admin terminal, retry /home/admin/config.scripts/bonus.lndk.sh on. For an older installation, run /home/admin/config.scripts/bonus.lndk.sh off --keep-data first." >> "${logFile}"
+  fi
+fi
+
 # helipad
 if [ "${helipad}" = "on" ]; then
   echo "Helipad - run config script" >> ${logFile}
