@@ -33,19 +33,32 @@ if [ ! -f ${configFile} ]; then
   exit 1
 fi
 
-# load old or init raspiblitz config
-source ${configFile}
-
-# if hostname missing - set default
-if [ ${#hostname} -eq 0 ]; then
-  /home/admin/config.scripts/blitz.conf.sh set hostname "raspiblitz"
-  source ${configFile}
+# On v1.12 app-data may link to either DATA or combined DATA/STORAGE.
+# A stale directory on the system partition must never receive upgrade writes.
+dataMount=$(findmnt --noheadings --output TARGET --target "$(readlink -f "${configFile}")")
+if [ -z "${dataMount}" ] || [ "${dataMount}" = "/" ]; then
+  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "data-not-mounted" "Check the DATA mount for ${configFile}" "" ${logFile}
+  exit 1
 fi
 
-# re-check if config files contains hostname value
-if [ ${#hostname} -eq 0 ]; then
-  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "missing-hostname" "${setupFile} or ${configFile} contains no hostname" "" ${logFile}
+# Read the saved name separately from the setup session's proposed name.
+setupHostname=${hostname:-}
+unset hostname
+if ! source "${configFile}"; then
+  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "unreadable-config" "Cannot load ${configFile}" "" ${logFile}
   exit 1
+fi
+
+# if hostname missing - set default
+if [ -z "${hostname:-}" ]; then
+  if ! [[ "${setupHostname}" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$ ]]; then
+    setupHostname=raspiblitz
+  fi
+  if ! /home/admin/config.scripts/blitz.conf.sh set hostname "${setupHostname}" "${configFile}" ||
+     ! source "${configFile}" || [ "${hostname:-}" != "${setupHostname}" ]; then
+    /home/admin/config.scripts/blitz.error.sh _provision.update.sh "missing-hostname" "Could not save hostname on DATA. Check free space and write access to ${configFile}" "" ${logFile}
+    exit 1
+  fi
 fi
 
 # check if config files contain lightning (lnd is default) introduced in v1.7.1
