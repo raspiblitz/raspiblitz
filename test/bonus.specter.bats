@@ -11,6 +11,7 @@ setup() {
   printf 'network=bitcoin\nrunBehindTor=off\n' > "$data/raspiblitz.conf"
   echo blockfilterindex=1 > "$data/bitcoin/bitcoin.conf"
   sed -e "s|/etc/systemd/system|$unitdir|g" -e "s|/mnt/hdd/app-data|$data|g" \
+    -e "s|/run/raspiblitz-specter-rpc-restart|$BATS_TEST_TMPDIR/restart-pending|g" \
     -e "s|/home/admin/config.scripts/blitz.conf.sh|true|g" \
     "$BATS_TEST_DIRNAME/../home.admin/config.scripts/bonus.specter.sh" > "$BATS_TEST_TMPDIR/installer"
   cat > "$bin/sudo" <<'SCRIPT'
@@ -23,6 +24,8 @@ SCRIPT
 echo "$1" >> "$calls"
 case "$1" in
   show) cat "$effective";;
+  is-active) [ -z "$INACTIVE" ];;
+  restart) [ -z "$FAIL_RESTART" ];;
   daemon-reload)
     [ -z "$FAIL_RELOAD" ] || exit 1
     sed -n 's/^Environment=//p' "$unitdir/specter.service.d/10-raspiblitz-rpc.conf" > "$effective";;
@@ -38,7 +41,7 @@ SCRIPT
   grep -Fxq "RASPIBLITZ_SPECTER_RPC_LOGIN_BITCOIN_CONF_LOCATION=$BATS_TEST_TMPDIR/app-data/bitcoin" "$effective"
   run bash "$BATS_TEST_TMPDIR/installer" on
   [ "$status" -eq 0 ]
-  [ "$(grep -cx try-restart "$calls")" -eq 1 ]
+  [ "$(grep -cx restart "$calls")" -eq 1 ]
   [ "$(grep -cx daemon-reload "$calls")" -eq 1 ]
 }
 
@@ -65,4 +68,25 @@ SCRIPT
   run bash "$BATS_TEST_TMPDIR/installer" update
   [ "$status" -eq 0 ]
   [ "$(grep -cx restart "$calls")" -eq 1 ]
+}
+
+@test "reprovision retries a previously running daemon after its restart failed" {
+  export FAIL_RESTART=1
+  run bash "$BATS_TEST_TMPDIR/installer" on
+  [ "$status" -ne 0 ]
+  unset FAIL_RESTART
+  export INACTIVE=1
+  run bash "$BATS_TEST_TMPDIR/installer" on
+  [ "$status" -eq 0 ]
+  [ "$(grep -cx restart "$calls")" -eq 2 ]
+  [ "$(grep -cx daemon-reload "$calls")" -eq 1 ]
+  [ ! -e "$BATS_TEST_TMPDIR/restart-pending" ]
+}
+
+@test "reprovision preserves an intentionally inactive daemon" {
+  export INACTIVE=1
+  run bash "$BATS_TEST_TMPDIR/installer" on
+  [ "$status" -eq 0 ]
+  ! grep -q '^restart$' "$calls"
+  [ ! -e "$BATS_TEST_TMPDIR/restart-pending" ]
 }

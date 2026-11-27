@@ -2,6 +2,7 @@
 # https://github.com/cryptoadvance/specter-desktop
 
 pinnedVersion="2.1.1"
+rpcRestartPending=/run/raspiblitz-specter-rpc-restart
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -216,17 +217,19 @@ fi
 ensure_specter_rpc_location() {
   local environment
   environment=$(systemctl show specter.service --property=Environment --value) || return 1
-  if [[ " ${environment}" == *" RASPIBLITZ_SPECTER_RPC_LOGIN_BITCOIN_CONF_LOCATION="* ]]; then
-    return 0
+  if [[ " ${environment}" != *" RASPIBLITZ_SPECTER_RPC_LOGIN_BITCOIN_CONF_LOCATION="* ]]; then
+    # Remember a running service even if its first restart after reload fails.
+    if [ "$1" = "on" ] && systemctl is-active --quiet specter.service; then
+      sudo touch "$rpcRestartPending" || return 1
+    fi
+    # Units installed before #5236 lack the Bitcoin config path used by RPC PIN login.
+    printf '%s\n' '[Service]' 'Environment=RASPIBLITZ_SPECTER_RPC_LOGIN_BITCOIN_CONF_LOCATION=/mnt/hdd/app-data/bitcoin' |
+      sudo install -D -m 0644 /dev/stdin /etc/systemd/system/specter.service.d/10-raspiblitz-rpc.conf || return 1
+    sudo systemctl daemon-reload || return 1
   fi
-
-  # Units installed before #5236 lack the Bitcoin config path used by RPC PIN login.
-  # Keep the existing unit, administrator overrides and Specter's wallet data.
-  printf '%s\n' '[Service]' 'Environment=RASPIBLITZ_SPECTER_RPC_LOGIN_BITCOIN_CONF_LOCATION=/mnt/hdd/app-data/bitcoin' |
-    sudo install -D -m 0644 /dev/stdin /etc/systemd/system/specter.service.d/10-raspiblitz-rpc.conf || return 1
-  sudo systemctl daemon-reload || return 1
-  if [ "$1" = "on" ]; then
-    sudo systemctl try-restart specter.service || return 1
+  if [ "$1" = "on" ] && [ -e "$rpcRestartPending" ]; then
+    sudo systemctl restart specter.service || return 1
+    sudo rm -f "$rpcRestartPending" || return 1
   fi
 }
 
@@ -477,7 +480,7 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
     sudo systemctl stop specter
     sudo systemctl disable specter
     sudo rm /etc/systemd/system/specter.service
-    sudo rm -f /etc/systemd/system/specter.service.d/10-raspiblitz-rpc.conf
+    sudo rm -f /etc/systemd/system/specter.service.d/10-raspiblitz-rpc.conf "$rpcRestartPending"
   else
     echo "#    --> The specter.service is not installed."
   fi
@@ -533,7 +536,8 @@ if [ "$1" = "update" ]; then
   sudo -u specter /home/specter/.env/bin/python3 -m pip install --upgrade cryptoadvance.specter
   echo "#    --> Updated to the latest in https://pypi.org/project/cryptoadvance.specter/#history ***"
   echo "#    --> Restarting the specter.service"
-  sudo systemctl restart specter
+  sudo systemctl restart specter || exit 1
+  sudo rm -f "$rpcRestartPending" || exit 1
   exit 0
 fi
 
