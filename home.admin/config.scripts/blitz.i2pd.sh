@@ -30,10 +30,9 @@ function confAdd {
   echo "${keystr}=${valuestr}" | sudo tee -a ${configFile}
 }
 
-function add_repo {
+function add_repo (
   # Add repo for the latest version
-  # i2pd — https://repo.i2pd.xyz/.help/readme.txt
-  # https://repo.i2pd.xyz/.help/add_repo
+  # Preserve the existing upstream and distribution selection.
 
   source /etc/os-release
   DIST=$ID
@@ -80,12 +79,44 @@ function add_repo {
     echo "Couldn't detect your system release. Please report issue to me by writing to email: 'r4sas <at> i2pd.xyz'"
     exit 1
   fi
-  echo "Importing signing key"
-  wget -q -O - https://repo.i2pd.xyz/r4sas.gpg | sudo apt-key --keyring /etc/apt/trusted.gpg.d/i2pd.gpg add -
-  echo "Adding APT repository"
-  echo "deb https://repo.i2pd.xyz/$DIST $RELEASE main" | sudo tee /etc/apt/sources.list.d/i2pd.list
-  echo "deb-src https://repo.i2pd.xyz/$DIST $RELEASE main" | sudo tee -a /etc/apt/sources.list.d/i2pd.list
-}
+  local fingerprint=951928BB317024EFD053D73C66F6C87B98EBCFE2
+  local keyring=/etc/apt/keyrings/i2pd.gpg
+  local legacy=/etc/apt/trusted.gpg.d/i2pd.gpg
+  local stage
+  stage=$(mktemp -d) || return 1
+  trap 'rm -rf -- "$stage"' EXIT
+
+  curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+    https://repo.i2pd.xyz/r4sas.gpg -o "$stage/download" || return 1
+  gpg --batch --homedir "$stage" --import "$stage/download" || return 1
+  gpg --batch --homedir "$stage" --export "$fingerprint" >"$stage/i2pd.gpg" || return 1
+  local exported
+  exported=$(gpg --batch --homedir "$stage" --with-colons --show-keys "$stage/i2pd.gpg") || return 1
+  if [ "$(awk -F: '$1=="pub" {pub=1} $1=="fpr" && pub {print $10; pub=0}' <<<"$exported")" != "$fingerprint" ]; then
+    echo "# Missing expected i2pd archive key $fingerprint" >&2
+    return 1
+  fi
+
+  printf '%s\n' "deb [signed-by=$keyring] https://repo.i2pd.xyz/$DIST $RELEASE main" \
+    "deb-src [signed-by=$keyring] https://repo.i2pd.xyz/$DIST $RELEASE main" >"$stage/i2pd.list" || return 1
+  sudo install -d -m 755 /etc/apt/keyrings || return 1
+  local apt_stage
+  apt_stage=$(sudo mktemp -d /etc/apt/keyrings/.i2pd.XXXXXXXX) || return 1
+  trap 'sudo rm -rf -- "$apt_stage"; rm -rf -- "$stage"' EXIT
+  sudo install -m 644 "$stage/i2pd.gpg" "$stage/i2pd.list" "$apt_stage/" || return 1
+  sudo mv -f "$apt_stage/i2pd.gpg" "$keyring" || return 1
+  sudo mv -f "$apt_stage/i2pd.list" /etc/apt/sources.list.d/i2pd.list || return 1
+
+  # Old RaspiBlitz installs trusted this dedicated keyring for every APT source.
+  # Preserve it if it also contains a different primary key.
+  if [ -f "$legacy" ]; then
+    local keys
+    keys=$(gpg --batch --homedir "$stage" --with-colons --show-keys "$legacy") || return 1
+    if [ "$(awk -F: '$1=="pub" {pub=1} $1=="fpr" && pub {print $10; pub=0}' <<<"$keys")" = "$fingerprint" ]; then
+      sudo rm -- "$legacy" || return 1
+    fi
+  fi
+)
 
 function bitcoinI2Pstatus {
   echo "# I2P related logs from the bitcoin debug log"
@@ -108,7 +139,6 @@ function bitcoinI2Pstatus {
 }
 
 echo "# Running: 'blitz.i2pd.sh $*'"
-source /mnt/hdd/app-data/raspiblitz.conf
 
 # make sure to be present in PATH
 if ! echo "$PATH" | grep "/usr/sbin" >/dev/null; then
@@ -118,28 +148,22 @@ fi
 
 if [ "$1" = "install" ]; then
 
-  isInstalled=$(sudo systemctl list-unit-files | grep -c i2pd)
-  if [ "${isInstalled}" != "0" ]; then
-    echo "# i2pd is already installed."
-  else
-    echo "# Installing i2pd ..."
-
-    add_repo
-
-    sudo apt-get update
-    sudo apt-get install -y i2pd
-
+  add_repo || exit 1
+  # Refresh all configured indexes together so dependency indexes are retained.
+  sudo apt-get -o APT::Update::Error-Mode=any update || exit 1
+  if ! dpkg-query -W -f='${db:Status-Status}\n' i2pd 2>/dev/null | grep -qx installed; then
+    sudo apt-get install -y i2pd || exit 1
   fi
   exit 0
 fi
 
 if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
-  isInstalled=$(sudo systemctl list-unit-files | grep -c i2pd)
-  if [ "${isInstalled}" != "0" ]; then
-    echo "# i2pd is installed."
-  else
-    /home/admin/config.scripts/blitz.i2pd.sh install
+  if ! dpkg-query -W -f='${db:Status-Status}\n' i2pd 2>/dev/null | grep -qx installed; then
+    /home/admin/config.scripts/blitz.i2pd.sh install || exit 1
+  elif grep -Eq '^deb[[:space:]]+https://repo\.i2pd\.xyz/' /etc/apt/sources.list.d/i2pd.list 2>/dev/null; then
+    # Repair an existing installation when provisioning a node after a code update.
+    /home/admin/config.scripts/blitz.i2pd.sh install || exit 1
   fi
 
   if systemctl is-active --quiet i2pd.service; then
@@ -224,7 +248,7 @@ fi
 if [ "$1" = "addseednodes" ]; then
 
   if ! sudo -u bitcoin bitcoin-cli -netinfo 4 | grep i2p; then
-    /home/admin/config.scripts/blitz.i2pd.sh on
+    /home/admin/config.scripts/blitz.i2pd.sh on || exit 1
   fi
   echo "Add 21 randomly selected I2P seed nodes from: https://github.com/bitcoin/bitcoin/blob/master/contrib/seeds/nodes_main.txt"
   echo "Monitor in a new terminal with:"
