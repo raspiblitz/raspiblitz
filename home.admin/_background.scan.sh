@@ -615,6 +615,7 @@ do
         ln_default_address \
         ln_default_tor \
         ln_default_sync_chain \
+        ln_default_sync_graph \
         ln_default_sync_progress \
         ln_default_channels_pending \
         ln_default_channels_active \
@@ -646,6 +647,7 @@ do
             /home/admin/_cache.sh set ln_default_address "${ln_lnd_address}"
             /home/admin/_cache.sh set ln_default_tor "${ln_lnd_tor}"
             /home/admin/_cache.sh set ln_default_sync_chain "${ln_lnd_sync_chain}"
+            /home/admin/_cache.sh set ln_default_sync_graph "${ln_lnd_sync_graph}"
             /home/admin/_cache.sh set ln_default_sync_progress "${ln_lnd_sync_progress}"
             /home/admin/_cache.sh set ln_default_channels_pending "${ln_lnd_channels_pending}"
             /home/admin/_cache.sh set ln_default_channels_active "${ln_lnd_channels_active}"
