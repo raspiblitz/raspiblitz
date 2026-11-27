@@ -12,6 +12,7 @@ setup() {
 case "$*" in
   "show $EXPECT_UNIT --property=ActiveState --value")
     if (( $(cat tick) < STOPPED_UNTIL )); then echo inactive; else echo active; fi ;;
+  "show $EXPECT_UNIT --property=InvocationID --value") echo instance ;;
   "show $EXPECT_UNIT --property=Result,ExecMainStatus") echo 'Result=exit-code' ;;
   *) echo "$*" > unexpected; exit 1 ;;
 esac
@@ -27,7 +28,7 @@ SH
   cat > _cache.sh <<'SH'
 #!/bin/bash
 if (( $(cat tick) >= READY_AFTER )); then echo 'value="1"'; else echo 'value="0"'; fi
-printf 'lasttouch="%s"\n' "$(date +%s)"
+if (( $(cat tick) < ${STALE_UNTIL:-0} )); then echo 'lasttouch="0"'; else printf 'lasttouch="%s"\n' "$(date +%s)"; fi
 SH
   cat > bin/sudo <<'SH'
 #!/bin/bash
@@ -60,7 +61,7 @@ SH
   export STOPPED_UNTIL=12
   run bash setup.scripts/waitBitcoinReady.sh
   [ "$status" -eq 0 ]
-  [ "$(cat tick)" -eq 12 ]
+  [ "$(cat tick)" -eq 13 ]
 }
 
 @test "a stale active-service cache waits for live RPC using the configured signet service settings" {
@@ -88,4 +89,11 @@ SH
   [ "$status" -ne 0 ]
   [[ "$output" == *"same RPC warmup for an hour"* ]]
   [ ! -e unexpected ]
+}
+
+@test "even a healthy RPC waits for a sample newer than this service observation" {
+  export STALE_UNTIL=6
+  run bash setup.scripts/waitBitcoinReady.sh
+  [ "$status" -eq 0 ]
+  [ "$(cat tick)" -eq 6 ]
 }
