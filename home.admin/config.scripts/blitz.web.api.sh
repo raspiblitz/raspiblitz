@@ -70,6 +70,33 @@ if [ "$1" = "update-config" ]; then
 
   # prepare config update
   cd /home/blitzapi/blitz_api || exit 1
+  source /home/admin/raspiblitz.info 2>/dev/null
+  if [ "${setupPhase}" = done ] && [ "${lightning}" = lnd ]; then
+    # Recovery can finish before LND has restored both files. Read a coherent
+    # pair before touching the live configuration. Never log credential data.
+    cert=/mnt/hdd/lnd/tls.cert
+    macaroon="/mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon"
+    scratch=$(mktemp -d) || exit 1
+    trap 'rm -rf -- "$scratch"' EXIT
+    if before=$(sudo stat -Lc '%d:%i:%s:%y' "$cert" "$macaroon" 2>/dev/null) &&
+       sudo cat "$cert" >"$scratch/cert" && sudo cat "$macaroon" >"$scratch/macaroon" &&
+       after=$(sudo stat -Lc '%d:%i:%s:%y' "$cert" "$macaroon" 2>/dev/null) &&
+       [ "$before" = "$after" ] &&
+       openssl x509 -in "$scratch/cert" -noout >/dev/null 2>&1 &&
+       /usr/local/bin/lncli printmacaroon --macaroon_file "$scratch/macaroon" >/dev/null 2>&1; then
+      tlsCert=$(xxd -p "$scratch/cert" | tr -d '\n')
+      adminMacaroon=$(xxd -p "$scratch/macaroon" | tr -d '\n')
+      [ -n "$tlsCert" ] && [ -n "$adminMacaroon" ] || exit 1
+    else
+      echo "# LND credentials are incomplete. After unlocking LND, retry with sudo systemctl restart blitzapi." >&2
+      if grep -Eq "^[[:space:]]*BAPI_NETWORK[[:space:]]*=[[:space:]]*['\"]?${chain}net['\"]?[[:space:]]*$" .env 2>/dev/null; then
+        echo "# Keeping the existing API configuration." >&2
+        exit 1
+      fi
+      # On the first setup the login and Bitcoin API can already be used.
+      lightning=""
+    fi
+  fi
   secret=$(cat ./.env 2>/dev/null | grep "BAPI_JWT_SECRET=" | cut -d "=" -f2)
   cp ./.env_sample ./.env
   dateStr=$(date)
@@ -86,7 +113,6 @@ if [ "$1" = "update-config" ]; then
   fi
   sed -i "s/^BAPI_JWT_SECRET=.*/BAPI_JWT_SECRET=${secret}/g" ./.env
 
-  source /home/admin/raspiblitz.info 2>/dev/null
   if [ "${setupPhase}" == "done" ]; then
 
     # configure bitcoin
@@ -107,8 +133,6 @@ if [ "$1" = "update-config" ]; then
     if [ "${lightning}" == "lnd" ]; then
 
       echo "# CONFIG Web API Lightning --> LND"
-      tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
-      adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
       sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=lnd_grpc/g" ./.env
       sed -i "s/^BAPI_LND_GRPC_IP=.*/BAPI_LND_GRPC_IP=127.0.0.1/g" ./.env
       sed -i "s/^BAPI_LND_MACAROON=.*/BAPI_LND_MACAROON=${adminMacaroon}/g" ./.env
