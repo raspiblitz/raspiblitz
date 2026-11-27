@@ -8,7 +8,14 @@ setup() {
   touch "$calls" "$BATS_TEST_TMPDIR/admin/raspiblitz.info"
   printf '%s\n' '#!/bin/sh' 'echo state=ready' >"$BATS_TEST_TMPDIR/admin/_cache.sh"
   printf '%s\n' '#!/bin/sh' 'echo "$*" >> "$calls"' >"$BATS_TEST_TMPDIR/admin/config.scripts/blitz.conf.sh"
-  printf '%s\n' '#!/bin/sh' 'if [ "$1" = -u ]; then shift 2; fi' 'exec "$@"' >"$BATS_TEST_TMPDIR/bin/sudo"
+  cat >"$BATS_TEST_TMPDIR/bin/sudo" <<'MOCK'
+#!/bin/bash
+if [ "$1" = -u ]; then shift 2; fi
+case "$1" in
+  ls|test|bash|systemctl|"$BATS_TEST_TMPDIR"/admin/config.scripts/*) exec "$@" ;;
+  *) printf 'unexpected sudo: %s\n' "$*" >> "$calls"; exit 95 ;;
+esac
+MOCK
   printf '%s\n' '#!/bin/sh' 'echo "$*" >> "$calls"' >"$BATS_TEST_TMPDIR/bin/systemctl"
   printf '%s\n' '#!/bin/sh' 'echo "$*" >> "$calls"' >"$BATS_TEST_TMPDIR/bin/whiptail"
   printf '%s\n' '#!/bin/sh' 'exit 0' > "$BATS_TEST_TMPDIR/bin/lndk"
@@ -74,4 +81,49 @@ setup() {
   run bash "$BATS_TEST_TMPDIR/provision"
   grep -Fx on "$calls"
   grep -F 'LNDK setup failed' "$logFile"
+}
+
+@test "unattended removal without a valid data choice cannot change the installation" {
+  echo 'test fixture' > "$unit"
+  run bash "$BATS_TEST_TMPDIR/installer" off </dev/null
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"--keep-data or --delete-data"* ]]
+  run bash "$BATS_TEST_TMPDIR/installer" off --invalid
+  [ "$status" -ne 0 ]
+  [ ! -s "$calls" ]
+  [ "$(cat "$unit")" = 'test fixture' ]
+}
+
+@test "cancelling or failing the interactive data choice keeps the service and its files" {
+  command -v script >/dev/null || skip "requires a pseudo-terminal from util-linux"
+  echo 'test fixture' > "$unit"
+  printf '%s\n' '#!/bin/bash' 'echo prompt >> "$calls"' 'exit "$result"' > "$BATS_TEST_TMPDIR/bin/whiptail"
+  for result in 255 1; do
+    export result
+    : > "$calls"
+    run script -qec "bash '$BATS_TEST_TMPDIR/installer' off" /dev/null </dev/null
+    [ "$status" -ne 0 ]
+    [ "$(cat "$calls")" = prompt ]
+    [ "$(cat "$unit")" = 'test fixture' ]
+  done
+}
+
+@test "only a complete default configuration is published and existing settings survive a retry" {
+  data="$BATS_TEST_TMPDIR/data"
+  mkdir "$data"
+  sed -n '/^    lndkConfig=/,/^    fi$/p' "$admin/config.scripts/bonus.lndk.sh" |
+    sed "s|/mnt/hdd/app-data/.lndk|$data|g" > "$BATS_TEST_TMPDIR/configure"
+  printf '%s\n' '#!/bin/bash' 'echo partial' 'exit 2' > "$BATS_TEST_TMPDIR/bin/cat"
+  chmod +x "$BATS_TEST_TMPDIR/bin/cat"
+  run bash "$BATS_TEST_TMPDIR/configure"
+  [ "$status" -ne 0 ]
+  [ -z "$(ls -A "$data")" ]
+  rm "$BATS_TEST_TMPDIR/bin/cat"
+  run bash "$BATS_TEST_TMPDIR/configure"
+  [ "$status" -eq 0 ]
+  grep -Fx 'response_invoice_timeout=15' "$data/lndk.conf"
+  echo 'original configuration' > "$data/lndk.conf"
+  run bash "$BATS_TEST_TMPDIR/configure"
+  [ "$status" -eq 0 ]
+  [ "$(cat "$data/lndk.conf")" = 'original configuration' ]
 }

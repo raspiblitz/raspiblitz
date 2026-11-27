@@ -93,7 +93,13 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     # Keep the existing configuration when reusing the DATA disk or reinstalling with --keep-data.
     lndkConfig=/mnt/hdd/app-data/.lndk/lndk.conf
     if ! sudo -u lndk test -f "$lndkConfig"; then
-      sudo -u lndk sh -c 'umask 077; set -C; cat >"$1"' _ "$lndkConfig" <<EOF || exit 1
+      sudo -u lndk bash -s -- "$lndkConfig" <<'WRITE_CONFIG' || exit 1
+set -e
+umask 077
+config=$1
+staged=$(mktemp -- "${config}.XXXXXXXX")
+trap 'rm -f -- "$staged"' EXIT
+cat > "$staged" <<'EOF'
 address="https://localhost:10009"
 cert_path="/mnt/hdd/app-data/lnd/tls.cert"
 macaroon_path="/home/lndk/.lnd/data/chain/bitcoin/mainnet/admin.macaroon"
@@ -101,6 +107,8 @@ grpc_port=5635
 log_level="debug"
 response_invoice_timeout=15
 EOF
+ln -T -- "$staged" "$config" || test -f "$config"
+WRITE_CONFIG
     fi
 
     # symlink data dir for lndk and admin users
@@ -178,13 +186,29 @@ fi
 
 # Switch off
 if [ "$1" = "0" ] || [ "$1" = "off" ]; then
+  case "${2:-}" in
+    --keep-data) action=keep ;;
+    --delete-data) action=delete ;;
+    "")
+      if [ ! -t 0 ] || [ ! -t 2 ]; then
+        echo "Specify --keep-data or --delete-data when turning off LNDK without a terminal." >&2
+        exit 1
+      fi
+      action=$(whiptail --title "Turn off LNDK" --menu "What should happen to the stored LNDK data?" 12 68 2 \
+        keep "Keep data for a later installation" delete "Permanently delete LNDK data" 3>&1 1>&2 2>&3) || exit 1
+      case "$action" in keep|delete) ;; *) exit 1 ;; esac
+      ;;
+    *) echo "Unknown LNDK removal option: $2" >&2; exit 1 ;;
+  esac
+
   isInstalled=$(sudo ls /etc/systemd/system/lndk.service 2>/dev/null | grep -c 'lndk.service')
   if [ ${isInstalled} -eq 1 ]; then
     echo "*** REMOVING LNDK ***"
     # remove the systemd service
-    sudo systemctl stop lndk
-    sudo systemctl disable lndk
-    sudo rm /etc/systemd/system/lndk.service
+    sudo systemctl stop lndk || exit 1
+    sudo systemctl disable lndk || exit 1
+    sudo rm /etc/systemd/system/lndk.service || exit 1
+    sudo systemctl daemon-reload || exit 1
 
   else
     echo "# LNDK is not installed."
@@ -198,33 +222,16 @@ if [ "$1" = "0" ] || [ "$1" = "off" ]; then
   sudo userdel -rf lndk
   sudo rm -rf /home/admin/.lndk
 
-  # get delete data status - either by parameter or if not set by user dialog
-  deleteData=""
-  if [ "$2" == "--delete-data" ]; then
-    deleteData="1"
-  fi
-  if [ "$2" == "--keep-data" ]; then
-    deleteData="0"
-  fi
-  if [ "${deleteData}" == "" ]; then
-    if (whiptail --title "Delete Data?" --yes-button "Keep Data" --no-button "Delete Data" --yesno "Do you want to delete all data related to LNDK?" 0 0); then
-      deleteData="0"
-    else
-      deleteData="1"
-    fi
-  fi
-
-  if [ "${deleteData}" == "1" ]; then
+  if [ "$action" = "delete" ]; then
     echo "# Deleting LNDK data ..."
-    sudo rm -rf /mnt/hdd/app-data/.lndk
+    sudo rm -rf /mnt/hdd/app-data/.lndk || exit 1
   else
     echo "# LNDK data is kept on the disk"
   fi
 
   # Set value in raspi blitz config
   /home/admin/config.scripts/blitz.conf.sh set lndk "off"
-
-  exit 0
+  exit $?
 fi
 
 echo "FAIL - Unknown Parameter $1"
