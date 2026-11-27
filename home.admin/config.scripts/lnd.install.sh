@@ -531,9 +531,7 @@ if [ "$1" = "display-seed" ]; then
     seedwordFile="/mnt/hdd/app-data/lnd/data/chain/${network}/${CHAIN}/seedwords.info"
   fi
   echo "# seedwordFile(${seedwordFile})"
-  seedwordFileExists=$(ls ${seedwordFile} 2>/dev/null | grep -c "seedwords.info")
-  echo "# seedwordFileExists(${seedwordFileExists})"
-  if [ "${seedwordFileExists}" == "1" ]; then
+  if [[ -f $seedwordFile ]]; then
     # Older versions wrote the same two quoted fields. Read them as data.
     seedwords=$(sed -n "s/^seedwords='\([a-z ,]*\)'$/\1/p" "${seedwordFile}")
     seedwords6x4=$(sed -n "/^seedwords6x4='/,\$p" "${seedwordFile}" | sed "1s/^seedwords6x4='//;\$s/'\$//")
