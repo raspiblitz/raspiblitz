@@ -197,11 +197,14 @@ if [ "${blitzapi}" != "on" ] && [ ${blitzApiInstalled} -gt 0 ]; then
 fi
 # WebAPI & UI (in case image was not fatpack - but webapi was switched on)
 webSetupFailed=0
-if [ "${blitzapi}" == "on" ] && [ $blitzApiInstalled -eq 0 ]; then
+webUiPending=/root/.raspiblitz-webui-provision-pending
+if [ "${blitzapi}" == "on" ] && { [ "$blitzApiInstalled" -eq 0 ] || [ -e "$webUiPending" ] || [ ! -s /var/www/public/index.html ]; }; then
     echo "Provisioning BlitzAPI - run config script" >> ${logFile}
     /home/admin/_cache.sh set message "Setup BlitzAPI (takes time)"
-    if ! /home/admin/config.scripts/blitz.web.api.sh on DEFAULT >> "${logFile}" 2>&1 ||
-       ! /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT >> "${logFile}" 2>&1; then
+    if { [ "$blitzApiInstalled" -eq 0 ] && ! /home/admin/config.scripts/blitz.web.api.sh on DEFAULT >> "${logFile}" 2>&1; } ||
+       ! touch "$webUiPending" ||
+       ! /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT >> "${logFile}" 2>&1 ||
+       ! rm -f "$webUiPending"; then
       echo "Web setup incomplete. Retry: sudo /home/admin/config.scripts/blitz.web.api.sh on DEFAULT && sudo /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT" >> "${logFile}"
       webSetupFailed=1
     fi
