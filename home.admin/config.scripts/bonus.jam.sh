@@ -231,6 +231,7 @@ PrivateDevices=true
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/joinmarket-api.service 1>&2
+  sudo /usr/bin/python3 /home/admin/config.scripts/joinmarket.wallet.py install-service || exit 1
   sudo systemctl enable joinmarket-api 1>&2
 
   # remove legacy name
@@ -262,7 +263,9 @@ fi
 
 # precheck
 if [ "$1" = "precheck" ]; then
-  if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ];then
+  if /usr/bin/python3 /home/admin/config.scripts/joinmarket.wallet.py modern; then
+    echo "# The JoinMarket wallet service prepares the descriptor wallet."
+  elif [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ];then
     echo "# Create a non-descriptor wallet.dat"
     /usr/local/bin/bitcoin-cli -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
   else

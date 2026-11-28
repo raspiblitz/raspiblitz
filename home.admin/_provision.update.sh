@@ -77,6 +77,11 @@ echo "prechecks OK"  >> ${logFile}
 # this is the place if on a future version change
 # a conversion of config data or app data is needed
 
+if ! /usr/bin/python3 /home/admin/config.scripts/joinmarket.wallet.py backup >> "${logFile}" 2>&1; then
+  /home/admin/config.scripts/blitz.error.sh _provision.update.sh "joinmarket-wallet-backup" "JoinMarket wallet backup failed" "See the provisioning log before retrying." "${logFile}"
+  exit 1
+fi
+
 # if old bitcoin.conf exists ...
 configExists=$(sudo ls /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep -c '.conf')
 if [ ${configExists} -eq 1 ]; then

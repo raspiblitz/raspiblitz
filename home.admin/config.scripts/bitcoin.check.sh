@@ -73,14 +73,24 @@ if [ "$1" == "prestart" ]; then
 
   # make sure wallet directory entry exists and points to app-data
   echo "# make sure entry(walletdir) is set"
-  # remove existing wallet entries first
+  # Set the RaspiBlitz wallet directory. Core 30+ cannot autoload the old
+  # BDB wallet. JoinMarket loads its descriptor wallet through RPC instead.
   sed -i '/^main.walletdir=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
-  sed -i '/^main.wallet=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
   sed -i '/^walletdir=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
-  sed -i '/^wallet=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
-  # add wallet entries with correct values
   echo "main.walletdir=/mnt/hdd/app-data/bitcoin/wallets" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf
-  echo "main.wallet=wallet.dat" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  if /usr/bin/python3 /home/admin/config.scripts/joinmarket.wallet.py modern; then
+    # A wallet already converted to SQLite can still be named wallet.dat.
+    legacyWallet=/mnt/hdd/app-data/bitcoin/wallets/wallet.dat
+    if [ -d "$legacyWallet" ]; then
+      legacyWallet="$legacyWallet/wallet.dat"
+    fi
+    if ! head -c15 "$legacyWallet" 2>/dev/null | grep -Fxq 'SQLite format 3'; then
+      sed -i '/^main\.wallet=wallet\.dat[[:space:]]*$/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+    fi
+  else
+    sed -i '/^main.wallet=/d; /^wallet=/d' /mnt/hdd/app-data/bitcoin/bitcoin.conf
+    echo "main.wallet=wallet.dat" >> /mnt/hdd/app-data/bitcoin/bitcoin.conf
+  fi
 
   # remove any data directory entries - is already forced by parameter in bitcoind.service
   echo "# remove any data directory entries"
