@@ -60,6 +60,9 @@ fi
 # UPDATE CONFIG
 ###################
 if [ "$1" = "update-config" ]; then
+  if [ "$EUID" = 0 ]; then
+    exec sudo -u blitzapi -- "$0" "$@"
+  fi
 
   # prepare configs data
   source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
@@ -70,9 +73,6 @@ if [ "$1" = "update-config" ]; then
 
   # prepare config update
   cd /home/blitzapi/blitz_api || exit 1
-  if [ "$EUID" = 0 ]; then
-    exec sudo -u blitzapi -- "$0" "$@"
-  fi
   umask 077
   exec 9>.env.lock || exit 1
   flock -x 9 || exit 1
@@ -96,9 +96,18 @@ if [ "$1" = "update-config" ]; then
       [ -n "$tlsCert" ] && [ -n "$adminMacaroon" ] || exit 1
     else
       echo "# LND credentials are incomplete. After unlocking LND, retry with sudo systemctl restart blitzapi." >&2
-      if grep -Eq "^[[:space:]]*BAPI_NETWORK[[:space:]]*=[[:space:]]*['\"]?${chain}net['\"]?[[:space:]]*$" .env 2>/dev/null; then
+      config_matches() {
+        grep -Eq "^[[:space:]]*$1[[:space:]]*=[[:space:]]*['\"]?($2)['\"]?[[:space:]]*$" .env 2>/dev/null
+      }
+      if config_matches BAPI_NETWORK "${chain}net" && {
+        config_matches BAPI_LN_NODE none || {
+          config_matches BAPI_LN_NODE lnd_grpc &&
+          config_matches BAPI_LND_CERT '([[:xdigit:]]{2})+|/[^[:space:]]+' &&
+          config_matches BAPI_LND_MACAROON '([[:xdigit:]]{2})+|/[^[:space:]]+'
+        }
+      }; then
         echo "# Keeping the existing API configuration." >&2
-        exit 1
+        exit 0
       fi
       # On the first setup the login and Bitcoin API can already be used.
       lightning=""
@@ -192,6 +201,11 @@ if [ "$1" = "update-config" ]; then
     sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=none/g" "$output"
   fi
 
+  if [ "${setupPhase}" = done ] && [ "${lightning}" = lnd ] &&
+     [ "$before" != "$(sudo stat -Lc '%d:%i:%s:%y' "$cert" "$macaroon" 2>/dev/null)" ]; then
+    echo "# LND credentials changed during the update. Retry after recovery." >&2
+    exit 1
+  fi
   chmod 600 "$output" && mv -f -- "$output" .env || exit 1
 
   # Note: Celery services might need a restart if config changes affect them.
