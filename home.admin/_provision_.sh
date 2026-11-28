@@ -205,7 +205,7 @@ if [ "${blitzapi}" == "on" ] && { [ "$blitzApiInstalled" -eq 0 ] || [ -e "$webUi
        ! touch "$webUiPending" ||
        ! /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT >> "${logFile}" 2>&1 ||
        ! rm -f "$webUiPending"; then
-      echo "Web setup incomplete. Retry: sudo /home/admin/config.scripts/blitz.web.api.sh on DEFAULT && sudo /home/admin/config.scripts/blitz.web.ui.sh on DEFAULT" >> "${logFile}"
+      echo "Web setup incomplete. Restore connectivity and retry provisioning to finish the pending web setup." >> "${logFile}"
       webSetupFailed=1
     fi
 else
