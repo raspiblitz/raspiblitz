@@ -387,13 +387,19 @@ EOF
 
     sudo mv /home/admin/specter.service /etc/systemd/system/specter.service || exit 1
     cleanup_new_specter_unit() {
-      if sudo systemctl stop specter && sudo systemctl disable specter &&
-         sudo rm -f /etc/systemd/system/specter.service && sudo systemctl daemon-reload; then
+      local cleaned=1
+      sudo systemctl disable specter || cleaned=0
+      sudo systemctl stop specter || cleaned=0
+      if [ "$cleaned" = 1 ] && sudo rm -f /etc/systemd/system/specter.service && sudo systemctl daemon-reload; then
         echo "# The new unit was removed. Retry the installation after fixing the error." >&2
       else
         echo "# Unit cleanup is incomplete. Check systemctl status specter before retrying." >&2
       fi
     }
+    if ! sudo systemctl daemon-reload || ! sudo ufw --force enable; then
+      cleanup_new_specter_unit
+      exit 1
+    fi
     source <(/home/admin/_cache.sh get state)
     if [ "${state}" = "ready" ]; then
       if ! sudo systemctl start specter; then
@@ -422,7 +428,6 @@ EOF
     # open firewall
     echo "#    --> Updating Firewall"
     sudo ufw allow 25441 comment 'specter'
-    sudo ufw --force enable
     echo
 
   else
