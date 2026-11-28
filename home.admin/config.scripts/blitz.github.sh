@@ -15,7 +15,15 @@ fi
 
 source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
 
-cd /home/admin/raspiblitz
+if [ "$1" != info ]; then
+  exec 9</home/admin || exit 1
+  if ! flock -n 9; then
+    echo "Another script update is running; retry after it finishes." >&2
+    exit 1
+  fi
+fi
+
+cd /home/admin/raspiblitz || exit 1
 
 # gather info
 activeGitHubUser=$(sudo -u admin cat /home/admin/raspiblitz/.git/config 2>/dev/null | grep "url = " | cut -d "=" -f2 | cut -d "/" -f4)
@@ -121,7 +129,7 @@ if [ $? -eq 0 ]; then
   echo "# OK - git config pull.rebase true"
 else
   echo "# FAIL - git config pull.rebase true"
-  exit
+  exit 1
 fi
 if [[ ${activeBranch} != pr* ]]; then
   git pull 1>&2
@@ -129,31 +137,117 @@ if [[ ${activeBranch} != pr* ]]; then
     echo "# OK - git pull"
   else
     echo "# FAIL - git pull"
-    exit
+    exit 1
   fi
 else
   echo "# SKIP - git pull on PR-Branches"
 fi
-cd ..
+cd /home/admin || exit 1
+checkout=/home/admin/raspiblitz/home.admin
+stage=$(sudo -u admin mktemp -d /home/admin/.raspiblitz-patch-XXXXXXXX) || exit 1
+trap 'sudo -u admin rm -rf -- "$stage"' EXIT
+# Prepare permissions before rsync stages replacement files on the target.
+# Existing scripts remain callable if a transfer is interrupted.
+for dir in assets config.scripts setup.scripts; do
+  sudo -u admin rsync -rltp --exclude='__pycache__/' -- "$checkout/$dir" "$stage/" || exit 1
+done
+sudo -u admin chmod 755 -- "$stage"/config.scripts/*.sh "$stage"/config.scripts/*.py "$stage"/setup.scripts/*.sh || exit 1
 echo "# COPYING from GIT-Directory to /home/admin/"
 echo "# - basic admin files"
-sudo rm -f *.sh
-sudo -u admin cp /home/admin/raspiblitz/home.admin/.tmux.conf /home/admin
-sudo -u admin cp /home/admin/raspiblitz/home.admin/*.* /home/admin 2>/dev/null
-sudo -u admin chmod 755 *.sh
-echo "# - asset directory"
-sudo rm -rf assets
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/assets /home/admin/assets
-echo "# - config.scripts directory"
-sudo rm -rf /home/admin/config.scripts
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/config.scripts /home/admin/config.scripts 
-sudo -u admin chmod 755 /home/admin/config.scripts/*.sh
-sudo -u admin chmod 755 /home/admin/config.scripts/*.py
-echo "# - setup.scripts directory"
-sudo rm -rf /home/admin/setup.scripts
-sudo -u admin cp -R /home/admin/raspiblitz/home.admin/setup.scripts /home/admin/setup.scripts
-sudo -u admin chmod 755 /home/admin/setup.scripts/*.sh
-sudo -u admin chmod 755 /home/admin/config.scripts/*.py
+sudo -u admin mkdir "$stage/basic" || exit 1
+sudo -u admin cp "$checkout/.tmux.conf" "$stage/basic/" || exit 1
+sudo -u admin find "$checkout" -maxdepth 1 -type f \
+  -name '*.*' ! -name '.*' -exec cp -t "$stage/basic/" -- {} + || exit 1
+sudo -u admin chmod 755 -- "$stage"/basic/*.sh || exit 1
+# Old LND helpers can leave root-owned Python caches that admin cannot unlink.
+# Only skip lndlibs in rsync if the entire library has already been published.
+lndlibsFilter=()
+retired=$(sudo -u admin /usr/bin/python3 -I - "$stage/config.scripts" /home/admin/config.scripts <<'PYTHON_CACHE_HANDOFF'
+import ctypes
+import os
+from pathlib import Path
+import shutil
+import stat
+import sys
+import tempfile
+
+
+def retire(staged_parent, live_parent):
+    if os.geteuid() == 0:
+        raise ValueError("run the PATCH cache handoff as admin, not root")
+    source = staged_parent / "lndlibs"
+    if source.is_symlink():
+        raise ValueError("expected a real staged lndlibs directory")
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    try:
+        live_fd = os.open(live_parent, flags)
+    except FileNotFoundError:
+        return
+    try:
+        try:
+            library_fd = os.open("lndlibs", flags, dir_fd=live_fd)
+        except FileNotFoundError:
+            return
+        try:
+            try:
+                mode = os.stat("__pycache__", dir_fd=library_fd, follow_symlinks=False).st_mode
+            except FileNotFoundError:
+                return
+            if not stat.S_ISDIR(mode) or os.access("__pycache__", os.W_OK | os.X_OK, dir_fd=library_fd):
+                return
+        finally:
+            os.close(library_fd)
+
+        # Keep retired code outside Python's import paths. Debian's normal
+        # /var/tmp policy can expire the private tree without privileged PATCH code.
+        quarantine = Path(tempfile.mkdtemp(prefix="raspiblitz-retired-lndlibs-", dir="/var/tmp"))
+        retired = quarantine / "lndlibs"
+        try:
+            if os.fstat(live_fd).st_dev != quarantine.stat().st_dev:
+                raise ValueError("cannot retire lndlibs: /var/tmp and the live library must share a filesystem")
+            if source.exists():
+                shutil.copytree(source, retired, symlinks=True, ignore=shutil.ignore_patterns("__pycache__"))
+                # RENAME_EXCHANGE swaps whole directories without a gap for imports.
+                libc = ctypes.CDLL(None, use_errno=True)
+                if libc.renameat2(-100, os.fsencode(retired), live_fd, b"lndlibs", 2):
+                    error = ctypes.get_errno()
+                    raise OSError(error, os.strerror(error))
+            else:
+                # The selected branch no longer ships the library.
+                os.rename("lndlibs", retired, src_dir_fd=live_fd)
+        except (OSError, ValueError, AttributeError):
+            # A failed rename leaves only our own prepared copy here.
+            shutil.rmtree(quarantine)
+            raise
+        print(f"Retired previous lndlibs under {quarantine}", file=sys.stderr)
+        print("replaced")
+    finally:
+        os.close(live_fd)
+
+
+if __name__ == "__main__":
+    try:
+        retire(Path(sys.argv[1]), Path(sys.argv[2]))
+    except (OSError, ValueError, AttributeError) as exc:
+        sys.exit(f"PATCH cannot retire Python bytecode: {exc}")
+PYTHON_CACHE_HANDOFF
+) || exit 1
+if [ "$retired" = replaced ]; then
+  lndlibsFilter=(--exclude='/lndlibs/')
+fi
+# Do not apply the staging directory mode or timestamps to admin's home.
+sudo -u admin rsync -ctp --delay-updates -- "$stage/basic/.tmux.conf" "$stage"/basic/* /home/admin/ || exit 1
+for script in *.sh; do
+  if [ ! -f "/home/admin/raspiblitz/home.admin/$script" ]; then
+    sudo -u admin rm -f -- "$script" || exit 1
+  fi
+done
+for dir in assets config.scripts setup.scripts; do
+  echo "# - $dir directory"
+  filters=()
+  if [ "$dir" = config.scripts ]; then filters=("${lndlibsFilter[@]}"); fi
+  sudo -u admin rsync -crltp --delay-updates --delete-delay "${filters[@]}" -- "$stage/$dir/" "/home/admin/$dir/" || exit 1
+done
 echo "# ******************************************"
 echo "# OK - shell scripts and assets are synced"
 echo "# Reboot recommended"
