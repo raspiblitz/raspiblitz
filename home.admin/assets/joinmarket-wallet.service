@@ -1,0 +1,15 @@
+[Unit]
+Description=Prepare the JoinMarket Bitcoin Core wallet
+After=bitcoind.service
+Wants=bitcoind.service
+Before=joinmarket-api.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /home/admin/config.scripts/joinmarket.wallet.py prepare
+TimeoutStartSec=180
+UMask=0077
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,9 +1,16 @@
 ## What's new in Version 1.12.2 of RaspiBlitz?
 
 - Update: BTCPayServer v2.3.9 [details](https://github.com/btcpayserver/btcpayserver/releases/tag/v2.3.9)
-- Update: Bitcoin Core v29.5 (security fixes) [details](https://bitcoincore.org/en/releases/29.5/)
-- Update: Bitcoin Core v32.1 (optional tested update) [details](https://bitcoincore.org/en/releases/32.1/)
+- Update: Bitcoin Core v32.1 (security fixes) [details](https://bitcoincore.org/en/releases/32.1/)
 - Update: LND v0.21.8-beta [details](https://github.com/lightningnetwork/lnd/releases/tag/v0.21.8-beta)
+
+### JoinMarket and JAM wallet migration
+
+An upgrade to Bitcoin Core 30 or newer switches the RaspiBlitz-managed JoinMarket backend from the legacy Bitcoin Core `wallet.dat` to a watch-only descriptor wallet. RaspiBlitz backs up the existing JoinMarket wallet files, the old Core wallet and both configuration files before switching. The upgrade log shows the dated backup directory under `/mnt/hdd/app-data/backup/joinmarket/`. Administrator access is required to read it. For a separate Core instance or custom wallet directory, back up that instance's wallet and prepare its descriptor wallet separately.
+
+Open each existing JoinMarket wallet once to import its addresses. Then use **Wallet → Rescan** in the JoinMarket SSH menu, starting at or before the first deposit, and verify the wallet balances. The Core node must have the block data for the scan. [JoininBox migration instructions](https://github.com/openoms/joininbox/blob/v0.9.0/FAQ.md#migrating-from-legacy-walletdat-to-descriptor-wallet)
+
+To recover the pre-upgrade setup, use the previous RaspiBlitz image and a copy of its compatible data. With Bitcoin Core and JoinMarket stopped, restore the backup's `bitcoin/` and `.joinmarket/` files to the corresponding folders under `/mnt/hdd/app-data/`. Restore the Bitcoin Core files with owner `bitcoin` and the JoinMarket files with owner `joinmarket`. Start Bitcoin Core and JoinMarket, unlock the original wallet and verify its balance.
 
 ## What's new in Version 1.12.1 of RaspiBlitz?
 

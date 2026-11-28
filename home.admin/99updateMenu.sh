@@ -409,9 +409,25 @@ Do you really want to update Core Lightning now?
   esac
 }
 
+resumeBitcoinUpdate() {
+  echo "# starting the bitcoind.service .."
+  sudo systemctl start bitcoind || return 1
+  if systemctl is-enabled --quiet joinmarket-wallet.service; then
+    sudo systemctl start joinmarket-wallet.service || return 1
+    if [ "$1" = "1" ]; then
+      sudo systemctl start joinmarket-api.service || return 1
+    fi
+  fi
+}
+
 bitcoinUpdate() {
   # get bitcoin info
   source <(sudo -u admin /home/admin/config.scripts/bitcoin.update.sh info)
+
+  local resumeJam=0
+  if systemctl is-active --quiet joinmarket-api.service; then
+    resumeJam=1
+  fi
 
   # bitcoin update options
   OPTIONS=()
@@ -477,9 +493,8 @@ By default a reboot is advised.
         exit 1
       else
         echo "# SKIP REBOOT"
-        echo "# starting the bitcoind.service .."
-        sudo systemctl start bitcoind
-        exit 0
+        resumeBitcoinUpdate "$resumeJam"
+        exit $?
       fi
       sleep 8
       ;;
@@ -518,9 +533,8 @@ By default a reboot is advised.
           exit 1
         else
           echo "# SKIP REBOOT"
-          echo "# starting the bitcoind.service .."
-          sudo systemctl start bitcoind
-          exit 0
+          resumeBitcoinUpdate "$resumeJam"
+          exit $?
         fi
       fi
       ;;
@@ -545,9 +559,8 @@ By default a reboot is advised.
           exit 1
         else
           echo "# SKIP REBOOT"
-          echo "# starting the bitcoind.service .."
-          sudo systemctl start bitcoind
-          exit 0
+          resumeBitcoinUpdate "$resumeJam"
+          exit $?
         fi
       fi
       ;;

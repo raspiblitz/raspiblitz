@@ -279,6 +279,12 @@ fi
 # JOINED INSTALL
 if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "custom" ]; then
 
+  tar -xvf "${binaryName}" || exit 1
+  if ! sudo /usr/bin/python3 /home/admin/config.scripts/joinmarket.wallet.py backup-update "${bitcoinVersion}"; then
+    echo "# Upgrade stopped before installing Bitcoin Core. A JoinMarket wallet backup is required."
+    exit 1
+  fi
+
   # install
   echo "# Stopping bitcoind ..."
   sudo systemctl stop bitcoind 2>/dev/null
@@ -286,7 +292,6 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
   sudo systemctl stop sbitcoind 2>/dev/null
   echo
   echo "# Installing Bitcoin Core v${bitcoinVersion}"
-  tar -xvf ${binaryName}
   sudo install -m 0755 -o root -g root -t /usr/local/bin/ bitcoin-${bitcoinVersion}/bin/*
   sudo install -m 0644 -o root -g root -D -t /usr/local/share/man/man1 bitcoin-${bitcoinVersion}/share/man/man1/*
   sleep 3
@@ -295,6 +300,8 @@ if [ "${mode}" = "tested" ] || [ "${mode}" = "reckless" ] || [ "${mode}" = "cust
     echo "# BUILD FAILED --> Was not able to install bitcoind version(${bitcoinVersion})"
     exit 1
   fi
+
+  sudo /usr/bin/python3 /home/admin/config.scripts/joinmarket.wallet.py install-service || exit 1
 
   echo "# mark update in raspiblitz config"
   /home/admin/config.scripts/blitz.conf.sh set bitcoinInterimsUpdate "${bitcoinInterimsUpdateNew}"

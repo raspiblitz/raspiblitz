@@ -150,6 +150,11 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     exit 1
   fi
 
+  modernCore=0
+  if /usr/bin/python3 /home/admin/config.scripts/joinmarket.wallet.py modern; then
+    modernCore=1
+  fi
+
   # set password B
   echo "# setting PASSWORD_B as the password for the 'joinmarket' user"
   PASSWORD_B=$(sudo grep rpcpassword /mnt/hdd/app-data/${network}/${network}.conf | cut -c 13-)
@@ -165,12 +170,12 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
   mkdir /mnt/hdd/app-data/.joinmarket 2>/dev/null
 
   # copy old JoinMarket data to app-data
-  cp -rf /home/admin/joinmarket-clientserver/scripts/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
+  cp -rn /home/admin/joinmarket-clientserver/scripts/wallets /mnt/hdd/app-data/.joinmarket/ 2>/dev/null
   chown -R joinmarket:joinmarket /mnt/hdd/app-data/.joinmarket
   ln -s /mnt/hdd/app-data/.joinmarket /home/joinmarket/ 2>/dev/null
   chown -R joinmarket:joinmarket /home/joinmarket/.joinmarket
   # specify wallet.dat in old config for multiwallet for multiwallet support
-  if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ]; then
+  if [ "${modernCore}" = "0" ] && [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ]; then
     sudo -u joinmarket sed -i "s/^rpc_wallet_file =.*/rpc_wallet_file = wallet.dat/g" \
       /home/joinmarket/.joinmarket/joinmarket.cfg
     echo "# specified to use wallet.dat in the recovered joinmarket.cfg"
@@ -194,8 +199,7 @@ if [ -z \"\$TMUX\" ]; then
 fi
 " | sudo -u joinmarket tee -a /home/joinmarket/.bashrc
 
-  echo "# Check 'deprecatedrpc=create_bdb' in bitcoin.conf"
-  if ! sudo grep "deprecatedrpc=create_bdb" "/mnt/hdd/app-data/bitcoin/bitcoin.conf"; then
+  if [ "${modernCore}" = "0" ] && ! grep -q "^deprecatedrpc=create_bdb" "/mnt/hdd/app-data/bitcoin/bitcoin.conf"; then
     echo "# Place 'deprecatedrpc=create_bdb' in bitcoin.conf"
     echo "deprecatedrpc=create_bdb" | sudo tee -a "/mnt/hdd/app-data/bitcoin/bitcoin.conf"
     source <(/home/admin/_cache.sh get state)
@@ -207,7 +211,21 @@ fi
 
   # make sure the Bitcoin Core wallet is on
   /home/admin/config.scripts/network.wallet.sh on
-  if [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ]; then
+  if [ "${modernCore}" = "1" ]; then
+    # A recovered app already has its backend settings. Initialize JoininBox's
+    # per-image state without generating defaults over joinmarket.cfg.
+    joininConf="/home/joinmarket/joinin.conf"
+    if [ -f "/home/joinmarket/.joinmarket/joinmarket.cfg" ] && ! grep -Fxq "setupStep=100" "$joininConf"; then
+      torDir="/var/lib/tor"
+      if [ -d "/mnt/hdd/tor" ]; then
+        torDir="/mnt/hdd/tor"
+      fi
+      sudo -u joinmarket touch "$joininConf" || exit 1
+      for setting in "runningEnv=raspiblitz" "cpu=$(uname -m)" "runBehindTor=on" "HiddenServiceDir=$torDir" "setupStep=100"; do
+        sudo -u joinmarket /home/joinmarket/set.value.sh set "${setting%%=*}" "${setting#*=}" "$joininConf" noquotes || exit 1
+      done
+    fi
+  elif [ $(/usr/local/bin/bitcoin-cli -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf listwallets | grep -c wallet.dat) -eq 0 ]; then
     echo "# Create a non-descriptor wallet.dat"
     /usr/local/bin/bitcoin-cli -conf=/mnt/hdd/app-data/bitcoin/bitcoin.conf -named createwallet wallet_name=wallet.dat descriptors=false
   else
@@ -226,6 +244,10 @@ fi
 
   # configure joinmarket (includes a check if it is installed)
   if sudo -u joinmarket /home/joinmarket/start.joininbox.sh; then
+    if [ "${modernCore}" = "1" ]; then
+      /usr/bin/python3 /home/admin/config.scripts/joinmarket.wallet.py prepare || exit 1
+      /usr/bin/python3 /home/admin/config.scripts/joinmarket.wallet.py install-service || exit 1
+    fi
     echo "# Start to use by logging in to the 'joinmarket' user with:"
     echo "# 'sudo su joinmarket' or use the shortcut 'jm'"
   else
