@@ -80,9 +80,11 @@ if [ "$1" = "update-config" ]; then
     echo "error='The existing API configuration is unreadable. Check its owner before retrying.'"
     exit 1
   fi
-  secret=$(sed -nE 's/^[[:space:]]*BAPI_JWT_SECRET[[:space:]]*=[[:space:]]*//p' ./.env 2>/dev/null | tail -n 1)
+  secret=$(sed -nE '/^[[:space:]]*(export[[:space:]]+)?BAPI_JWT_SECRET[[:space:]]*=/ {
+    s/^[^=]*=[[:space:]]*//; s/[[:space:]]+$//; p
+  }' ./.env 2>/dev/null | tail -n 1)
   case "$secret" in
-    ''|'""'|"''"|please_please_update_me_please|'"please_please_update_me_please"'|"'please_please_update_me_please'") secret="" ;;
+    ''|'""'|"''"|*please_please_update_me_please*) secret="" ;;
   esac
   scratch=$(mktemp -d ./.env-build.XXXXXXXX) || exit 1
   trap 'rm -rf -- "$scratch"' EXIT
@@ -107,7 +109,8 @@ if [ "$1" = "update-config" ]; then
       config_matches() {
         grep -Eq "^[[:space:]]*$1[[:space:]]*=[[:space:]]*['\"]?($2)['\"]?[[:space:]]*$" .env 2>/dev/null
       }
-      if [ -n "$secret" ] && config_matches BAPI_NETWORK "${chain}net" && {
+      if [ -n "$secret" ] && grep -Eq '^[[:space:]]*BAPI_JWT_SECRET[[:space:]]*=' .env &&
+         config_matches BAPI_NETWORK "${chain}net" && {
         config_matches BAPI_LN_NODE none || {
           config_matches BAPI_LN_NODE lnd_grpc &&
           config_matches BAPI_LND_CERT '([[:xdigit:]]{2})+|/[^[:space:]]+' &&
