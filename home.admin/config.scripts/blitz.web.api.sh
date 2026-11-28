@@ -61,7 +61,7 @@ fi
 ###################
 if [ "$1" = "update-config" ]; then
   if [ "$EUID" = 0 ]; then
-    exec sudo -u blitzapi -- "$0" "$@"
+    exec sudo -u blitzapi -- /bin/bash "$0" "$@"
   fi
 
   # prepare configs data
@@ -80,6 +80,10 @@ if [ "$1" = "update-config" ]; then
     echo "error='The existing API configuration is unreadable. Check its owner before retrying.'"
     exit 1
   fi
+  secret=$(sed -nE 's/^[[:space:]]*BAPI_JWT_SECRET[[:space:]]*=[[:space:]]*//p' ./.env 2>/dev/null | tail -n 1)
+  case "$secret" in
+    ''|'""'|"''"|please_please_update_me_please|'"please_please_update_me_please"'|"'please_please_update_me_please'") secret="" ;;
+  esac
   scratch=$(mktemp -d ./.env-build.XXXXXXXX) || exit 1
   trap 'rm -rf -- "$scratch"' EXIT
   output="$scratch/env"
@@ -103,7 +107,7 @@ if [ "$1" = "update-config" ]; then
       config_matches() {
         grep -Eq "^[[:space:]]*$1[[:space:]]*=[[:space:]]*['\"]?($2)['\"]?[[:space:]]*$" .env 2>/dev/null
       }
-      if config_matches BAPI_NETWORK "${chain}net" && {
+      if [ -n "$secret" ] && config_matches BAPI_NETWORK "${chain}net" && {
         config_matches BAPI_LN_NODE none || {
           config_matches BAPI_LN_NODE lnd_grpc &&
           config_matches BAPI_LND_CERT '([[:xdigit:]]{2})+|/[^[:space:]]+' &&
@@ -117,7 +121,6 @@ if [ "$1" = "update-config" ]; then
       lightning=""
     fi
   fi
-  secret=$(sed -nE 's/^[[:space:]]*BAPI_JWT_SECRET[[:space:]]*=[[:space:]]*//p' ./.env 2>/dev/null | tail -n 1)
   set -e
   cp ./.env_sample "$output"
   dateStr=$(date)
@@ -126,12 +129,12 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^BAPI_PLATFORM=.*/BAPI_PLATFORM=raspiblitz/g" "$output"
 
   # configure access token secret
-  case "$secret" in
-  ''|'""'|"''"|please_please_update_me_please|'"please_please_update_me_please"'|"'please_please_update_me_please'")
+  if [ -z "$secret" ]; then
     echo "# init secret ..."
-    secret=$(openssl rand -hex 32) ;;
-  *) echo "# use existing secret" ;;
-  esac
+    secret=$(openssl rand -hex 32)
+  else
+    echo "# use existing secret"
+  fi
   sed -i '/^BAPI_JWT_SECRET=/d' "$output"
   printf 'BAPI_JWT_SECRET=%s\n' "$secret" >>"$output"
 
