@@ -60,6 +60,9 @@ fi
 # UPDATE CONFIG
 ###################
 if [ "$1" = "update-config" ]; then
+  if [ "$EUID" = 0 ]; then
+    exec sudo -u blitzapi -- /bin/bash "$0" "$@"
+  fi
 
   # prepare configs data
   source /mnt/hdd/app-data/raspiblitz.conf 2>/dev/null
@@ -70,23 +73,81 @@ if [ "$1" = "update-config" ]; then
 
   # prepare config update
   cd /home/blitzapi/blitz_api || exit 1
-  secret=$(cat ./.env 2>/dev/null | grep "BAPI_JWT_SECRET=" | cut -d "=" -f2)
-  cp ./.env_sample ./.env
+  umask 077
+  exec 9>.env.lock || exit 1
+  flock -x 9 || exit 1
+  if [ -e .env ] && [ ! -r .env ]; then
+    echo "error='The existing API configuration is unreadable. Check its owner before retrying.'"
+    exit 1
+  fi
+  # The API loader prefers a bare dotenv key. Migrate an export assignment
+  # only if there was no bare key, including an intentionally empty one.
+  secret=$(awk '
+    /^[[:space:]]*(export[[:space:]]+)?BAPI_JWT_SECRET[[:space:]]*=/ {
+      exported = ($0 ~ /^[[:space:]]*export[[:space:]]+/)
+      sub(/^[^=]*=[[:space:]]*/, ""); sub(/[[:space:]]+$/, "")
+      if (exported) legacy=$0; else {bare=$0; found=1}
+    }
+    END {print (found ? bare : legacy)}
+  ' ./.env 2>/dev/null)
+  case "$secret" in
+    ''|'""'|"''"|please_please_update_me_please|'"please_please_update_me_please"'|"'please_please_update_me_please'") secret="" ;;
+  esac
+  scratch=$(mktemp -d ./.env-build.XXXXXXXX) || exit 1
+  trap 'rm -rf -- "$scratch"' EXIT
+  output="$scratch/env"
+  source /home/admin/raspiblitz.info 2>/dev/null
+  if [ "${setupPhase}" = done ] && [ "${lightning}" = lnd ]; then
+    # Recovery can finish before LND has restored both files. Read a coherent
+    # pair before touching the live configuration. Never log credential data.
+    cert=/mnt/hdd/lnd/tls.cert
+    macaroon="/mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon"
+    if before=$(sudo stat -Lc '%d:%i:%s:%y' "$cert" "$macaroon" 2>/dev/null) &&
+       sudo cat "$cert" >"$scratch/cert" && sudo cat "$macaroon" >"$scratch/macaroon" &&
+       after=$(sudo stat -Lc '%d:%i:%s:%y' "$cert" "$macaroon" 2>/dev/null) &&
+       [ "$before" = "$after" ] &&
+       openssl x509 -in "$scratch/cert" -noout >/dev/null 2>&1 &&
+       /usr/local/bin/lncli printmacaroon --macaroon_file "$scratch/macaroon" >/dev/null 2>&1; then
+      tlsCert=$(xxd -p "$scratch/cert" | tr -d '\n')
+      adminMacaroon=$(xxd -p "$scratch/macaroon" | tr -d '\n')
+      [ -n "$tlsCert" ] && [ -n "$adminMacaroon" ] || exit 1
+    else
+      echo "# LND credentials are incomplete. After unlocking LND, retry with sudo systemctl restart blitzapi." >&2
+      config_matches() {
+        grep -Eq "^[[:space:]]*$1[[:space:]]*=[[:space:]]*['\"]?($2)['\"]?[[:space:]]*$" .env 2>/dev/null
+      }
+      if [ -n "$secret" ] && grep -Eq '^[[:space:]]*BAPI_JWT_SECRET[[:space:]]*=' .env &&
+         config_matches BAPI_NETWORK "${chain}net" && {
+        config_matches BAPI_LN_NODE none || {
+          config_matches BAPI_LN_NODE lnd_grpc &&
+          config_matches BAPI_LND_CERT '([[:xdigit:]]{2})+|/[^[:space:]]+' &&
+          config_matches BAPI_LND_MACAROON '([[:xdigit:]]{2})+|/[^[:space:]]+'
+        }
+      }; then
+        echo "# Keeping the existing API configuration." >&2
+        exit 0
+      fi
+      # On the first setup the login and Bitcoin API can already be used.
+      lightning=""
+    fi
+  fi
+  set -e
+  cp ./.env_sample "$output"
   dateStr=$(date)
   echo "# Update Web API CONFIG (${dateStr})"
-  sed -i "s/^# BAPI_PLATFORM=.*/BAPI_PLATFORM=raspiblitz/g" ./.env
-  sed -i "s/^BAPI_PLATFORM=.*/BAPI_PLATFORM=raspiblitz/g" ./.env
+  sed -i "s/^# BAPI_PLATFORM=.*/BAPI_PLATFORM=raspiblitz/g" "$output"
+  sed -i "s/^BAPI_PLATFORM=.*/BAPI_PLATFORM=raspiblitz/g" "$output"
 
   # configure access token secret
-  if [ "${secret}" == "" ] || [ "${secret}" == "please_please_update_me_please" ]; then
+  if [ -z "$secret" ]; then
     echo "# init secret ..."
-    secret=$(dd if=/dev/urandom bs=256 count=1 2>/dev/null | shasum -a256 | cut -d " " -f1)
+    secret=$(openssl rand -hex 32)
   else
     echo "# use existing secret"
   fi
-  sed -i "s/^BAPI_JWT_SECRET=.*/BAPI_JWT_SECRET=${secret}/g" ./.env
+  sed -i '/^BAPI_JWT_SECRET=/d' "$output"
+  printf 'BAPI_JWT_SECRET=%s\n' "$secret" >>"$output"
 
-  source /home/admin/raspiblitz.info 2>/dev/null
   if [ "${setupPhase}" == "done" ]; then
 
     # configure bitcoin
@@ -98,21 +159,19 @@ if [ "$1" = "update-config" ]; then
     if [ "${RPCPASS}" == "" ]; then
       RPCPASS="passwordB"
     fi
-    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=${chain}net/g" ./.env
-    sed -i "s/^BAPI_BITCOIND_ADDRESS=.*/BAPI_BITCOIND_ADDRESS=127.0.0.1/g" ./.env
-    sed -i "s/^BAPI_BITCOIND_USER=.*/BAPI_BITCOIND_USER=${RPCUSER}/g" ./.env
-    sed -i "s/^BAPI_BITCOIND_RPC_PW=.*/BAPI_BITCOIND_RPC_PW=${RPCPASS}/g" ./.env
+    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=${chain}net/g" "$output"
+    sed -i "s/^BAPI_BITCOIND_ADDRESS=.*/BAPI_BITCOIND_ADDRESS=127.0.0.1/g" "$output"
+    sed -i '/^BAPI_BITCOIND_USER=/d; /^BAPI_BITCOIND_RPC_PW=/d' "$output"
+    printf 'BAPI_BITCOIND_USER=%s\nBAPI_BITCOIND_RPC_PW=%s\n' "$RPCUSER" "$RPCPASS" >>"$output"
 
     # configure LND
     if [ "${lightning}" == "lnd" ]; then
 
       echo "# CONFIG Web API Lightning --> LND"
-      tlsCert=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/tls.cert)
-      adminMacaroon=$(sudo xxd -ps -u -c 1000 /mnt/hdd/lnd/data/chain/bitcoin/${chain}net/admin.macaroon)
-      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=lnd_grpc/g" ./.env
-      sed -i "s/^BAPI_LND_GRPC_IP=.*/BAPI_LND_GRPC_IP=127.0.0.1/g" ./.env
-      sed -i "s/^BAPI_LND_MACAROON=.*/BAPI_LND_MACAROON=${adminMacaroon}/g" ./.env
-      sed -i "s/^BAPI_LND_CERT=.*/BAPI_LND_CERT=${tlsCert}/g" ./.env
+      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=lnd_grpc/g" "$output"
+      sed -i "s/^BAPI_LND_GRPC_IP=.*/BAPI_LND_GRPC_IP=127.0.0.1/g" "$output"
+      sed -i '/^BAPI_LND_MACAROON=/d; /^BAPI_LND_CERT=/d' "$output"
+      printf 'BAPI_LND_MACAROON=%s\nBAPI_LND_CERT=%s\n' "$adminMacaroon" "$tlsCert" >>"$output"
       if [ "${chain}" == "main" ]; then
         L2rpcportmod=0
         portprefix=""
@@ -130,8 +189,8 @@ if [ "$1" = "update-config" ]; then
     elif [ "${lightning}" == "cl" ]; then
 
       echo "# CONFIG Web API Lightning --> CL"
-      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=cln_jrpc/g" ./.env
-      sed -i "s#^BAPI_CLN_JRPC_PATH=.*#BAPI_CLN_JRPC_PATH=\"/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc\"#g" ./.env
+      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=cln_jrpc/g" "$output"
+      sed -i "s#^BAPI_CLN_JRPC_PATH=.*#BAPI_CLN_JRPC_PATH=\"/mnt/hdd/app-data/.lightning/bitcoin/lightning-rpc\"#g" "$output"
 
       # get hex values of pem files
       # hexClient=$(sudo xxd -p -c2000 /home/bitcoin/.lightning/bitcoin/client.pem)
@@ -142,22 +201,29 @@ if [ "$1" = "update-config" ]; then
       # fi
 
       # update config with hex values
-      # sed -i "s/^BAPI_CLN_GRPC_CERT=.*/BAPI_CLN_GRPC_CERT=${hexClient}/g" ./.env
-      # sed -i "s/^BAPI_CLN_GRPC_KEY=.*/BAPI_CLN_GRPC_KEY=${hexClientKey}/g" ./.env
-      # sed -i "s/^BAPI_CLN_GRPC_CA=.*/BAPI_CLN_GRPC_CA=${hexCa}/g" ./.env
-      # sed -i "s/^BAPI_CLN_GRPC_IP=.*/BAPI_CLN_GRPC_IP=127.0.0.1/g" ./.env
-      # sed -i "s/^BAPI_CLN_GRPC_PORT=.*/BAPI_CLN_GRPC_PORT=4772/g" ./.env
+      # sed -i "s/^BAPI_CLN_GRPC_CERT=.*/BAPI_CLN_GRPC_CERT=${hexClient}/g" "$output"
+      # sed -i "s/^BAPI_CLN_GRPC_KEY=.*/BAPI_CLN_GRPC_KEY=${hexClientKey}/g" "$output"
+      # sed -i "s/^BAPI_CLN_GRPC_CA=.*/BAPI_CLN_GRPC_CA=${hexCa}/g" "$output"
+      # sed -i "s/^BAPI_CLN_GRPC_IP=.*/BAPI_CLN_GRPC_IP=127.0.0.1/g" "$output"
+      # sed -i "s/^BAPI_CLN_GRPC_PORT=.*/BAPI_CLN_GRPC_PORT=4772/g" "$output"
 
     else
       echo "# CONFIG Web API Lightning --> OFF"
-      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=none/g" ./.env
+      sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=none/g" "$output"
     fi
 
   else
     echo "# CONFIG Web API ... still in setup, skip bitcoin & lightning"
-    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=none/g" ./.env
-    sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=none/g" ./.env
+    sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=none/g" "$output"
+    sed -i "s/^BAPI_LN_NODE=.*/BAPI_LN_NODE=none/g" "$output"
   fi
+
+  if [ "${setupPhase}" = done ] && [ "${lightning}" = lnd ] &&
+     [ "$before" != "$(sudo stat -Lc '%d:%i:%s:%y' "$cert" "$macaroon" 2>/dev/null)" ]; then
+    echo "# LND credentials changed during the update. Retry after recovery." >&2
+    exit 1
+  fi
+  chmod 600 "$output" && mv -f -- "$output" .env || exit 1
 
   # Note: Celery services might need a restart if config changes affect them.
   # The main blitzapi service restarts automatically due to ExecStartPre.
