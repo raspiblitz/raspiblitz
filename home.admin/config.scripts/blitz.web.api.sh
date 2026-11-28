@@ -230,31 +230,25 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
     echo "# INFO: No GITHUB_COMMITORTAG provided .. will use latest code on branch"
   fi
 
-  # check if given branch exits on that github user/repo
-  branchExists=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/branches/${GITHUB_BRANCH}" | grep -c "\"name\": \"${GITHUB_BRANCH}\"")
-  if [ ${branchExists} -lt 1 ]; then
-    echo
-    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "# WARNING! The given API repo is not available:"
-    echo "# user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
-    GITHUB_BRANCH="${FALLACK_BRANCH}"
-    echo "# SO WORKING WITH FALLBACK REPO:"
-    echo "# user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
-    echo "# USE JUST FOR DEVELOPMENT - DONT USE IN PRODUCTION"
-    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo
-    sleep 10
-    GITHUB_BRANCH="${FALLACK_BRANCH}"
-  fi
-
-  # re-check (if case its fallback)
-  branchExists=$(curl --header "X-GitHub-Api-Version:2022-11-28" -s "https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/branches/${GITHUB_BRANCH}" | grep -c "\"name\": \"${GITHUB_BRANCH}\"")
-  if [ ${branchExists} -lt 1 ]; then
-    echo
-    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    echo "# FAIL! user(${GITHUB_USER}) repo(${GITHUB_REPO}) branch(${GITHUB_BRANCH})"
-    echo "# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  # Verify the same branch and transport used for the clone.
+  api_url="https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git"
+  if ! git check-ref-format "refs/heads/${GITHUB_BRANCH}"; then
+    echo "error='Invalid API branch'"
     exit 1
+  fi
+  api_branch_available() {
+    local ref="refs/heads/$1" refs
+    refs=$(GIT_TERMINAL_PROMPT=0 git ls-remote --exit-code --heads "$api_url" "$ref") || return 1
+    cut -f2 <<<"$refs" | grep -Fxq -- "$ref"
+  }
+  if ! api_branch_available "$GITHUB_BRANCH"; then
+    if [[ "${GITHUB_BRANCH}" == blitz-v* ]]; then
+      echo "error='Could not verify the requested API release branch. Check connectivity and retry.'"
+      exit 1
+    fi
+    echo "# Development branch unavailable; checking fallback branch ${FALLACK_BRANCH}"
+    GITHUB_BRANCH="${FALLACK_BRANCH}"
+    api_branch_available "$GITHUB_BRANCH" || exit 1
   fi
 
   echo "# INSTALL Web API & Celery Services..."
