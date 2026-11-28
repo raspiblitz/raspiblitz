@@ -410,18 +410,19 @@ EOF
       # Use the locally generated certificate and its name, over loopback only.
       deadline=$((SECONDS + 120))
       while true; do
-        if curl -q --noproxy '*' --silent --fail --max-time 3 \
+        if http_status=$(sudo -u specter curl -q --noproxy '*' --silent --fail --max-time 3 \
             --cacert /home/specter/.specter/cert.pem \
             --resolve www.fakeurl.com:25441:127.0.0.1 \
-            --output /dev/null https://www.fakeurl.com:25441/; then
+            --write-out '%{http_code}' --output /dev/null https://www.fakeurl.com:25441/); then
           break
         else
           probe_result=$?
         fi
         # Refused connections, timeouts, TLS negotiation and short reads can
         # occur while Python is starting. A certificate mismatch is final.
-        case "$probe_result" in
-          7|28|35|52|56) if [ "$SECONDS" -lt "$deadline" ]; then sleep 2; continue; fi ;;
+        case "$probe_result:$http_status" in
+          7:*|18:*|28:*|35:*|52:*|56:*|22:408|22:429|22:5??)
+            if [ "$SECONDS" -lt "$deadline" ]; then sleep 2; continue; fi ;;
         esac
         echo "error='Specter HTTPS is unavailable. Check journalctl -u specter'"
         cleanup_new_specter_unit
