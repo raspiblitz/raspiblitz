@@ -61,6 +61,38 @@ def local_wallet():
     return settings.get("rpc_wallet_file", "") if settings is not None else None
 
 
+def rpc_port(settings):
+    port = settings.get("rpc_port") or RPC_PORTS.get(settings.get("network", "mainnet"))
+    if not port:
+        raise ValueError("JoinMarket RPC port is missing")
+    return int(port)
+
+
+def require_raspiblitz_wallet(settings):
+    """Limit legacy migration to the local Core instance whose files we back up."""
+    with regular_file(CORE_CONF) as stream:
+        lines = stream.read().decode("utf-8").splitlines()
+    options = {}
+    section = ""
+    for line in lines:
+        line = line.partition("#")[0].strip()
+        if line.startswith("[") and line.endswith("]"):
+            section = line[1:-1]
+        elif "=" in line:
+            key, _, value = line.partition("=")
+            options[f"{section}.{key.strip()}" if section else key.strip()] = value.strip()
+    chain = "regtest" if options.get("regtest") == "1" else "main"
+    default_port = RPC_PORTS["regtest" if chain == "regtest" else "mainnet"]
+    expected_port = int(options.get(f"{chain}.rpcport", options.get("rpcport", default_port)))
+    if rpc_port(settings) != expected_port:
+        raise ValueError("Back up and migrate the configured JoinMarket wallet on its own Core instance")
+    walletdir = options.get(f"{chain}.walletdir", options.get("walletdir"))
+    if walletdir and Path(walletdir).resolve() not in (
+        CORE_CONF.parent.resolve(), (CORE_CONF.parent / "wallets").resolve(),
+    ):
+        raise ValueError("Back up and migrate the legacy wallet in its custom Core wallet directory")
+
+
 @contextmanager
 def migration_lock():
     descriptor = os.open("/run/raspiblitz-joinmarket-wallet.lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
@@ -175,13 +207,22 @@ def sync_directory(path):
         os.close(descriptor)
 
 
-def backup_legacy_wallet(core_wallet_loaded=False, core_already_started=False):
+def backup_legacy_wallet(core_already_started=False):
+    settings = local_blockchain()
+    if settings is None:
+        raise ValueError("JoinMarket is no longer configured for this node")
+    require_raspiblitz_wallet(settings)
+    core_wallets = [
+        *wallet_files(CORE_CONF.parent / "wallets" / LEGACY_WALLET),
+        *wallet_files(CORE_CONF.parent / LEGACY_WALLET),
+    ]
+    if local_wallet() == LEGACY_WALLET and not core_wallets:
+        raise ValueError("The configured wallet.dat is missing from the RaspiBlitz data drive")
     sources = [
         CORE_CONF,
         JM_CONF,
         *wallet_files(JM_CONF.parent / "wallets"),
-        *wallet_files(CORE_CONF.parent / "wallets" / LEGACY_WALLET),
-        *wallet_files(CORE_CONF.parent / LEGACY_WALLET),
+        *core_wallets,
     ]
     files = {source.relative_to(DATA): source for source in sources}
     with backup_directory() as destination:
@@ -198,8 +239,6 @@ def backup_legacy_wallet(core_wallet_loaded=False, core_already_started=False):
             ):
                 report_backup(previous.name)
                 return
-        if core_wallet_loaded:
-            raise ValueError("Stop Bitcoin Core and back up wallet.dat before migrating the loaded wallet")
         with tempfile.TemporaryDirectory(prefix=".incomplete-", dir=destination) as temporary:
             staging = Path(temporary)
             for relative, source in files.items():
@@ -242,11 +281,6 @@ def rpc(*arguments):
     settings = local_blockchain()
     if settings is None:
         raise ValueError("JoinMarket is no longer configured for this node")
-    connection = [f"-rpcconnect={settings.get('rpc_host', 'localhost')}"]
-    port = settings.get("rpc_port") or RPC_PORTS.get(settings.get("network", "mainnet"))
-    if not port:
-        raise ValueError("JoinMarket RPC port is missing")
-    connection.append(f"-rpcport={int(port)}")
     username = settings.get("rpc_user", "")
     password = settings.get("rpc_password")
     if settings.get("rpc_cookie_file"):
@@ -257,14 +291,16 @@ def rpc(*arguments):
         if cookie.returncode or ":" not in cookie.stdout:
             raise ValueError("Could not read the JoinMarket RPC cookie")
         username, password = cookie.stdout.strip().split(":", maxsplit=1)
-    if password:
-        connection.extend([f"-rpcuser={username}", "-stdinrpcpass"])
+    if not username or not password:
+        raise ValueError("Configure the JoinMarket RPC password or cookie before preparing its wallet")
     result = subprocess.run(
         [
-            "runuser", "-u", "bitcoin", "--", "/usr/local/bin/bitcoin-cli",
-            f"-conf={CORE_CONF}", "-datadir=/mnt/hdd/app-storage/bitcoin", *connection, *arguments,
+            "runuser", "-u", "joinmarket", "--", "/usr/local/bin/bitcoin-cli",
+            "-conf=/dev/null", "-datadir=/home/joinmarket",
+            f"-rpcconnect={settings.get('rpc_host', 'localhost')}", f"-rpcport={rpc_port(settings)}",
+            f"-rpcuser={username}", "-stdinrpcpass", *arguments,
         ],
-        input=f"{password}\n" if password else None,
+        input=f"{password}\n",
         capture_output=True, text=True, timeout=75, check=False,
     )
     if result.returncode:
@@ -281,7 +317,12 @@ def prepare():
             raise ValueError("The running Bitcoin Core is older than the installed binary")
         loaded = rpc("listwallets")
         if wallet != DESCRIPTOR_WALLET:
-            backup_legacy_wallet(core_wallet_loaded=LEGACY_WALLET in loaded, core_already_started=True)
+            if LEGACY_WALLET in loaded:
+                existing = rpc(f"-rpcwallet={LEGACY_WALLET}", "getwalletinfo")
+                if existing["descriptors"] and not existing["private_keys_enabled"]:
+                    return
+                raise ValueError("wallet.dat is already loaded. Select a watch-only wallet in JoinMarket before migrating.")
+            backup_legacy_wallet(core_already_started=True)
         if DESCRIPTOR_WALLET not in loaded:
             names = {entry["name"] for entry in rpc("listwalletdir")["wallets"]}
             if DESCRIPTOR_WALLET in names:

@@ -66,8 +66,41 @@ class WalletMigrationTests(unittest.TestCase):
             self.assertEqual(migration.rpc("getnetworkinfo"), {"version": 320100})
         self.assertIn("-rpcport=38332", command.call_args.args[0])
         self.assertIn("-stdinrpcpass", command.call_args.args[0])
+        self.assertIn("-conf=/dev/null", command.call_args.args[0])
+        self.assertEqual(command.call_args.args[0][:3], ["runuser", "-u", "joinmarket"])
         self.assertNotIn("fixture", " ".join(command.call_args.args[0]))
         self.assertEqual(command.call_args.kwargs["input"], "fixture\n")
+
+    def test_missing_joinmarket_credentials_do_not_fall_back_to_core_credentials(self):
+        with patch.object(migration.subprocess, "run") as command:
+            with self.assertRaisesRegex(ValueError, "Configure the JoinMarket RPC password"):
+                migration.rpc("getnetworkinfo")
+        command.assert_not_called()
+
+    def test_legacy_wallet_on_another_loopback_instance_requires_its_own_backup(self):
+        self.config.write_text("[BLOCKCHAIN]\nrpc_port = 18332\nrpc_wallet_file = wallet.dat\n")
+        with self.assertRaisesRegex(ValueError, "on its own Core instance"):
+            migration.backup("32.1")
+        self.assertFalse(self.backups.exists())
+
+    def test_missing_legacy_core_wallet_prevents_migration(self):
+        self.legacy.unlink()
+        with self.assertRaisesRegex(ValueError, "wallet.dat is missing"):
+            migration.backup("32.1")
+        self.assertFalse(self.backups.exists())
+
+    def test_loaded_watch_only_descriptor_named_wallet_dat_stays_selected(self):
+        old_config = self.config.read_bytes()
+        with patch.object(migration, "modern_core", return_value=True), patch.object(
+            migration, "rpc", side_effect=[
+                {"version": 320100}, [migration.LEGACY_WALLET],
+                {"descriptors": True, "private_keys_enabled": False},
+            ],
+        ) as rpc:
+            migration.prepare()
+        self.assertEqual(rpc.call_count, 3)
+        self.assertFalse(self.backups.exists())
+        self.assertEqual(self.config.read_bytes(), old_config)
 
     @unittest.skipUnless(os.geteuid() == 0, "requires the production admin-only backup permissions")
     def test_explicit_backup_preserves_the_newest_pre_upgrade_core_config(self):
