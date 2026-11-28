@@ -80,11 +80,18 @@ if [ "$1" = "update-config" ]; then
     echo "error='The existing API configuration is unreadable. Check its owner before retrying.'"
     exit 1
   fi
-  secret=$(sed -nE '/^[[:space:]]*(export[[:space:]]+)?BAPI_JWT_SECRET[[:space:]]*=/ {
-    s/^[^=]*=[[:space:]]*//; s/[[:space:]]+$//; p
-  }' ./.env 2>/dev/null | tail -n 1)
+  # The API loader prefers a bare dotenv key. Migrate an export assignment
+  # only if there was no bare key, including an intentionally empty one.
+  secret=$(awk '
+    /^[[:space:]]*(export[[:space:]]+)?BAPI_JWT_SECRET[[:space:]]*=/ {
+      exported = ($0 ~ /^[[:space:]]*export[[:space:]]+/)
+      sub(/^[^=]*=[[:space:]]*/, ""); sub(/[[:space:]]+$/, "")
+      if (exported) legacy=$0; else {bare=$0; found=1}
+    }
+    END {print (found ? bare : legacy)}
+  ' ./.env 2>/dev/null)
   case "$secret" in
-    ''|'""'|"''"|*please_please_update_me_please*) secret="" ;;
+    ''|'""'|"''"|please_please_update_me_please|'"please_please_update_me_please"'|"'please_please_update_me_please'") secret="" ;;
   esac
   scratch=$(mktemp -d ./.env-build.XXXXXXXX) || exit 1
   trap 'rm -rf -- "$scratch"' EXIT
