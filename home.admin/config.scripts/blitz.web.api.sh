@@ -76,6 +76,10 @@ if [ "$1" = "update-config" ]; then
   umask 077
   exec 9>.env.lock || exit 1
   flock -x 9 || exit 1
+  if [ -e .env ] && [ ! -r .env ]; then
+    echo "error='The existing API configuration is unreadable. Check its owner before retrying.'"
+    exit 1
+  fi
   scratch=$(mktemp -d ./.env-build.XXXXXXXX) || exit 1
   trap 'rm -rf -- "$scratch"' EXIT
   output="$scratch/env"
@@ -122,12 +126,12 @@ if [ "$1" = "update-config" ]; then
   sed -i "s/^BAPI_PLATFORM=.*/BAPI_PLATFORM=raspiblitz/g" "$output"
 
   # configure access token secret
-  if [ "${secret}" == "" ] || [ "${secret}" == "please_please_update_me_please" ]; then
+  case "$secret" in
+  ''|'""'|"''"|please_please_update_me_please|'"please_please_update_me_please"'|"'please_please_update_me_please'")
     echo "# init secret ..."
-    secret=$(dd if=/dev/urandom bs=256 count=1 2>/dev/null | shasum -a256 | cut -d " " -f1)
-  else
-    echo "# use existing secret"
-  fi
+    secret=$(openssl rand -hex 32) ;;
+  *) echo "# use existing secret" ;;
+  esac
   sed -i '/^BAPI_JWT_SECRET=/d' "$output"
   printf 'BAPI_JWT_SECRET=%s\n' "$secret" >>"$output"
 
@@ -144,8 +148,8 @@ if [ "$1" = "update-config" ]; then
     fi
     sed -i "s/^BAPI_NETWORK=.*/BAPI_NETWORK=${chain}net/g" "$output"
     sed -i "s/^BAPI_BITCOIND_ADDRESS=.*/BAPI_BITCOIND_ADDRESS=127.0.0.1/g" "$output"
-    sed -i "s/^BAPI_BITCOIND_USER=.*/BAPI_BITCOIND_USER=${RPCUSER}/g" "$output"
-    sed -i "s/^BAPI_BITCOIND_RPC_PW=.*/BAPI_BITCOIND_RPC_PW=${RPCPASS}/g" "$output"
+    sed -i '/^BAPI_BITCOIND_USER=/d; /^BAPI_BITCOIND_RPC_PW=/d' "$output"
+    printf 'BAPI_BITCOIND_USER=%s\nBAPI_BITCOIND_RPC_PW=%s\n' "$RPCUSER" "$RPCPASS" >>"$output"
 
     # configure LND
     if [ "${lightning}" == "lnd" ]; then
