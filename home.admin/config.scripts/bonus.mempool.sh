@@ -223,6 +223,10 @@ if [ "$1" = "1" ] || [ "$1" = "on" ]; then
 
   echo "# *** Activate MEMPOOL ***"
 
+  # Resolve the optional donation endpoint on demand using the node's own DNS.
+  # With no configured resolver nginx can still serve local sites.
+  sudo python3 /home/admin/config.scripts/mempool.nginx-config.py || exit 1
+
   # make sure mariadb is running
   sudo systemctl enable mariadb 2>/dev/null
   sudo systemctl start mariadb 2>/dev/null
@@ -306,7 +310,6 @@ EOF
     # NGINX
     ##################
     # setup nginx symlinks
-    sudo cp /home/admin/assets/nginx/snippets/mempool.conf /etc/nginx/snippets/mempool.conf
     sudo cp /home/admin/assets/nginx/snippets/mempool-http.conf /etc/nginx/snippets/mempool-http.conf
     sudo cp /home/admin/assets/nginx/sites-available/mempool_.conf /etc/nginx/sites-available/mempool_.conf
     sudo cp /home/admin/assets/nginx/sites-available/mempool_ssl.conf /etc/nginx/sites-available/mempool_ssl.conf

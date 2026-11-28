@@ -78,7 +78,10 @@ EOF
   sudo chown -R admin:www-data /var/www/letsencrypt
   sudo cp -a /home/admin/assets/nginx/www_public/ /var/www/public
   sudo chown -R www-data:www-data /var/www/public
-  sudo cp /home/admin/assets/nginx/snippets/* /etc/nginx/snippets/
+  for snippet in /home/admin/assets/nginx/snippets/*; do
+    [ "${snippet##*/}" = "mempool.conf" ] || sudo cp "$snippet" /etc/nginx/snippets/ || exit 1
+  done
+  sudo python3 /home/admin/config.scripts/mempool.nginx-config.py || exit 1
 
   # enable public site & API redirect
   sudo cp /home/admin/assets/nginx/sites-available/public.httponly.conf /etc/nginx/sites-available/public.conf
